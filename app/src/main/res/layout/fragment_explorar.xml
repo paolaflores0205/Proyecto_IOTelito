@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- welcome-row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_saludo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:textFontWeight="800"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="20sp"
+                    tools:ignore="UnusedAttribute"
+                    tools:text="Hola, Carlos 👋" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="12sp"
+                    android:text="@string/subtitulo_inicio" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/io_teal"
+                android:text="IoT" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/io_text_primary"
+                android:text="elito" />
+        </LinearLayout>
+
+        <!-- search-panel -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Destino -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:text="@string/label_destino" />
+
+                <EditText
+                    android:id="@+id/et_destino"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_input_field"
+                    android:paddingHorizontal="14dp"
+                    android:hint="@string/hint_destino"
+                    android:textColorHint="@color/io_text_muted"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="14sp"
+                    android:singleLine="true"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch" />
+
+                <!-- Fechas -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/io_text_secondary"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:text="@string/label_fecha_entrada" />
+
+                        <LinearLayout
+                            android:id="@+id/row_fecha_entrada"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="6dp"
+                            android:background="@drawable/bg_input_field"
+                            android:paddingHorizontal="14dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?attr/selectableItemBackground">
+
+                            <TextView
+                                android:id="@+id/tv_fecha_entrada"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textColor="@color/io_text_primary"
+                                android:textSize="14sp"
+                                tools:text="15 ago" />
+
+                            <ImageView
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:src="@drawable/ic_calendar"
+                                android:tint="@color/io_teal"
+                                android:contentDescription="@string/cd_elegir_fecha" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="12dp"
+                        android:layout_height="1dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/io_text_secondary"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:text="@string/label_fecha_salida" />
+
+                        <LinearLayout
+                            android:id="@+id/row_fecha_salida"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="6dp"
+                            android:background="@drawable/bg_input_field"
+                            android:paddingHorizontal="14dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?attr/selectableItemBackground">
+
+                            <TextView
+                                android:id="@+id/tv_fecha_salida"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textColor="@color/io_text_primary"
+                                android:textSize="14sp"
+                                tools:text="18 ago" />
+
+                            <ImageView
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:src="@drawable/ic_calendar"
+                                android:tint="@color/io_teal"
+                                android:contentDescription="@string/cd_elegir_fecha" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Huéspedes -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:text="@string/label_huespedes" />
+
+                <LinearLayout
+                    android:id="@+id/row_huespedes"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_input_field"
+                    android:paddingHorizontal="14dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:id="@+id/tv_huespedes"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14sp"
+                        tools:text="2 adultos, 1 niño" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_group"
+                        android:tint="@color/io_teal"
+                        android:contentDescription="@string/cd_huespedes" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_buscar_hoteles"
+                    style="@style/Widget.IoTelito.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/btn_buscar_hoteles" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Hoteles recomendados -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:text="@string/hoteles_recomendados" />
+
+                <TextView
+                    android:id="@+id/tv_ver_todos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:textColor="@color/io_teal"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="@string/ver_todos" />
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:scrollbars="none"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <include
+                        android:id="@+id/card_hotel_0"
+                        layout="@layout/item_hotel_card_horizontal" />
+
+                    <View
+                        android:layout_width="12dp"
+                        android:layout_height="1dp" />
+
+                    <include
+                        android:id="@+id/card_hotel_1"
+                        layout="@layout/item_hotel_card_horizontal" />
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

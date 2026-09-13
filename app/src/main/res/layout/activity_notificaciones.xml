@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/sub_header"
+        layout="@layout/item_sub_header" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <include android:id="@+id/row_confirmaciones" layout="@layout/item_notificacion_row" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginStart="16dp" android:background="@color/io_border" />
+
+                    <include android:id="@+id/row_mensajes" layout="@layout/item_notificacion_row" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginStart="16dp" android:background="@color/io_border" />
+
+                    <include android:id="@+id/row_promociones" layout="@layout/item_notificacion_row" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginStart="16dp" android:background="@color/io_border" />
+
+                    <include android:id="@+id/row_checkin" layout="@layout/item_notificacion_row" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

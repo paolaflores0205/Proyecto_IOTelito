@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <ImageView
+        android:id="@+id/iv_placeholder_icon"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/bg_icon_active_pill"
+        android:padding="14dp"
+        android:tint="@color/io_teal"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/tv_placeholder_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textColor="@color/io_text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tv_placeholder_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:textColor="@color/io_text_secondary"
+        android:textSize="13sp" />
+
+</LinearLayout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Paleta IoTelito (extraída de los mockups de Figma) -->
+    <color name="io_background">#F8FAFC</color>
+    <color name="io_text_primary">#071A33</color>
+    <color name="io_text_secondary">#4A5D74</color>
+    <color name="io_text_muted">#94A3B8</color>
+    <color name="io_border">#E2E8F0</color>
+    <color name="io_teal">#00C2A8</color>
+    <color name="io_teal_light">#1F00C2A8</color>
+    <color name="io_tag_bg">#E2E8F0</color>
+    <color name="io_warning_bg">#FEF3C7</color>
+    <color name="io_warning_text">#B45309</color>
+    <color name="io_star">#FBBF24</color>
+    <color name="io_card_shadow">#0D000000</color>
+    <color name="io_danger_bg">#FEE2E2</color>
+    <color name="io_danger_text">#B91C1C</color>
+</resources>

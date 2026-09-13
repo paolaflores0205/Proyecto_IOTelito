@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical">
+
+    <!-- results-header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/io_text_primary"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_back"
+            android:tint="@color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_regresar" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_destino"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="Lima, Perú" />
+
+            <TextView
+                android:id="@+id/tv_resumen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/io_teal"
+                android:textSize="12sp"
+                android:text="@string/resumen_busqueda_valor" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- filter-chips -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_precio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            android:checked="true"
+            android:text="@string/chip_precio"
+            android:textSize="12sp"
+            app:chipBackgroundColor="@color/chip_bg_color"
+            app:chipStrokeColor="@color/chip_stroke_color"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconVisible="false"
+            android:textColor="@color/chip_text_color"
+            app:closeIcon="@drawable/ic_chevron_down"
+            app:closeIconEnabled="true"
+            app:closeIconTint="@color/chip_text_color" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_valoracion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:checkable="true"
+            android:text="@string/chip_valoracion"
+            android:textSize="12sp"
+            app:chipBackgroundColor="@color/chip_bg_color"
+            app:chipStrokeColor="@color/chip_stroke_color"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconVisible="false"
+            android:textColor="@color/chip_text_color" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_servicios"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:checkable="true"
+            android:text="@string/chip_servicios"
+            android:textSize="12sp"
+            app:chipBackgroundColor="@color/chip_bg_color"
+            app:chipStrokeColor="@color/chip_stroke_color"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconVisible="false"
+            android:textColor="@color/chip_text_color" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/hotel_list_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp" />
+    </ScrollView>
+
+</LinearLayout>

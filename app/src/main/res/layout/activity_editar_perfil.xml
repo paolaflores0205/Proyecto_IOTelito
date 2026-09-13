@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/sub_header"
+        layout="@layout/item_sub_header" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/bg_avatar_circle">
+
+                <TextView
+                    android:id="@+id/tv_avatar_inicial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    tools:ignore="TextContrastCheck"
+                    tools:text="CM" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="13sp"
+                android:layout_marginTop="16dp"
+                android:text="@string/label_nombre" />
+
+            <EditText
+                android:id="@+id/et_nombre"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="14sp"
+                android:inputType="textCapWords"
+                android:singleLine="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="13sp"
+                android:layout_marginTop="16dp"
+                android:text="@string/label_email" />
+
+            <EditText
+                android:id="@+id/et_email"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="14sp"
+                android:inputType="textEmailAddress"
+                android:singleLine="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="13sp"
+                android:layout_marginTop="16dp"
+                android:text="@string/label_telefono" />
+
+            <EditText
+                android:id="@+id/et_telefono"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="14sp"
+                android:inputType="phone"
+                android:singleLine="true" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_guardar_cambios"
+                style="@style/Widget.IoTelito.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="24dp"
+                android:text="@string/btn_guardar_cambios" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

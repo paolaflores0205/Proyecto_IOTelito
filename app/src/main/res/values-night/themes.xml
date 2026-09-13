@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- El diseño de IoTelito es fijo en modo claro; se fuerza la misma
+         apariencia aunque el sistema esté en modo oscuro. -->
+    <style name="Base.Theme.Proyecto_IOTelito" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/io_teal</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/io_text_primary</item>
+        <item name="android:windowBackground">@color/io_background</item>
+        <item name="android:statusBarColor">@color/io_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/white</item>
+    </style>
+</resources>

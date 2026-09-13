@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/sub_header"
+        layout="@layout/item_sub_header" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- banner de estado -->
+            <LinearLayout
+                android:id="@+id/banner_estado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_warning_box"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/tv_estado_pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pill"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    tools:text="Confirmada" />
+
+                <TextView
+                    android:id="@+id/tv_mensaje_estado"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="12sp"
+                    tools:text="Tu reserva está confirmada. ¡Te esperamos!" />
+            </LinearLayout>
+
+            <!-- summary-card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_hotel_nombre"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        tools:text="Hotel Miraflores Park" />
+
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_habitacion" android:layout_marginTop="12dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_fechas" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_noches" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_huespedes" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_codigo" android:layout_marginTop="6dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@color/io_border" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:text="@string/label_monto_total" />
+
+                        <TextView
+                            android:id="@+id/tv_monto_total"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/io_teal"
+                            android:textSize="20sp"
+                            android:textFontWeight="900"
+                            tools:ignore="UnusedAttribute"
+                            tools:text="S/ 1,350" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_pagar_ahora"
+                style="@style/Widget.IoTelito.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/btn_pagar_ahora" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_chatear"
+                style="@style/Widget.IoTelito.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                app:icon="@drawable/ic_chat"
+                app:iconGravity="textStart"
+                android:text="@string/btn_chatear_hotel" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_ver_hotel"
+                style="@style/Widget.IoTelito.Button.Outline"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/btn_ver_hotel" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

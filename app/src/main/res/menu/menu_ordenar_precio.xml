@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/orden_menor_a_mayor"
+        android:title="@string/orden_menor_a_mayor" />
+    <item
+        android:id="@+id/orden_mayor_a_menor"
+        android:title="@string/orden_mayor_a_menor" />
+</menu>

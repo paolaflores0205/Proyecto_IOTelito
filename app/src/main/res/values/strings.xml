@@ -1,0 +1,206 @@
+<resources>
+    <string name="app_name">IoTelito</string>
+
+    <!-- Navegación inferior -->
+    <string name="nav_explorar">Explorar</string>
+    <string name="nav_reservas">Reservas</string>
+    <string name="nav_mensajes">Mensajes</string>
+    <string name="nav_perfil">Perfil</string>
+
+    <!-- Explorar / inicio -->
+    <string name="saludo">Hola, %1$s 👋</string>
+    <string name="subtitulo_inicio">¿Listo para tu estadía conectada?</string>
+    <string name="label_destino">Destino</string>
+    <string name="hint_destino">Buscar ciudad, hotel o zona</string>
+    <string name="label_fecha_entrada">Fecha de entrada</string>
+    <string name="label_fecha_salida">Fecha de salida</string>
+    <string name="label_huespedes">Huéspedes</string>
+    <string name="cd_elegir_fecha">Elegir fecha</string>
+    <string name="titulo_selector_fecha_entrada">Fecha de entrada</string>
+    <string name="titulo_selector_fecha_salida">Fecha de salida</string>
+    <string name="error_fecha_entrada_mayor">La fecha de entrada no puede ser posterior a la de salida</string>
+    <string name="error_fecha_salida_menor">La fecha de salida no puede ser anterior a la de entrada</string>
+    <string name="titulo_selector_huespedes">Huéspedes</string>
+    <string name="label_adultos">Adultos</string>
+    <string name="subtitulo_adultos">13 años o más</string>
+    <string name="label_ninos">Niños</string>
+    <string name="subtitulo_ninos">0 – 12 años</string>
+    <string name="btn_aplicar">Aplicar</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="cd_restar">Restar</string>
+    <string name="cd_sumar">Sumar</string>
+    <string name="btn_buscar_hoteles">Buscar hoteles</string>
+    <string name="hoteles_recomendados">Hoteles recomendados</string>
+    <string name="ver_todos">Ver todos</string>
+    <string name="precio_por_noche">%1$s x noche</string>
+
+    <!-- Lista completa de hoteles -->
+    <string name="titulo_lista_hoteles">Todos los hoteles</string>
+    <string name="hint_buscar_hotel">Buscar por nombre o ciudad</string>
+    <string name="btn_filtros">Filtros</string>
+    <string name="btn_filtros_activos">Filtros (%1$d)</string>
+    <string name="btn_limpiar_filtros">Limpiar</string>
+    <string name="sin_resultados_hoteles">No se encontraron hoteles con estos filtros.</string>
+    <string name="cd_cerrar">Cerrar</string>
+
+    <!-- Panel de filtros (bottom sheet) -->
+    <string name="titulo_filtros">Filtros de búsqueda</string>
+    <string name="label_ciudad">Ciudad</string>
+    <string name="opcion_todas_ciudades">Todas</string>
+    <string name="label_calificacion_minima">Calificación mínima</string>
+    <string name="texto_calificacion_cualquiera">Cualquiera</string>
+    <string name="texto_calificacion_minima">%1$d o más ⭐</string>
+    <string name="cd_calificacion_estrella">Calificar con %1$d estrellas</string>
+    <string name="label_rango_precio">Rango de precio por noche</string>
+    <string name="texto_rango_precio">S/ %1$.0f – S/ %2$.0f</string>
+    <string name="label_servicios">Servicios</string>
+    <string name="label_ordenar">Ordenar por</string>
+    <string name="opcion_orden_recomendado">Recomendado</string>
+    <string name="btn_aplicar_filtros">Aplicar filtros</string>
+
+    <plurals name="hoteles_encontrados_plural">
+        <item quantity="one">%d hotel encontrado</item>
+        <item quantity="other">%d hoteles encontrados</item>
+    </plurals>
+
+    <!-- Resultados -->
+    <string name="chip_precio">Precio</string>
+    <string name="chip_valoracion">Valoración</string>
+    <string name="chip_servicios">Servicios</string>
+    <string name="btn_ver_detalle">Ver detalle</string>
+    <string name="desde_precio">Desde %1$s</string>
+    <string name="por_noche">por noche</string>
+    <string name="orden_menor_a_mayor">Menor a mayor</string>
+    <string name="orden_mayor_a_menor">Mayor a menor</string>
+    <string name="resumen_busqueda_valor">15–18 ago · 3 huéspedes</string>
+    <string name="toast_orden_aplicado">Orden aplicado: %1$s</string>
+
+    <plurals name="adultos_plural">
+        <item quantity="one">%d adulto</item>
+        <item quantity="other">%d adultos</item>
+    </plurals>
+    <plurals name="ninos_plural">
+        <item quantity="one">%d niño</item>
+        <item quantity="other">%d niños</item>
+    </plurals>
+    <plurals name="huespedes_total_plural">
+        <item quantity="one">%d huésped</item>
+        <item quantity="other">%d huéspedes</item>
+    </plurals>
+
+    <!-- Detalle de hotel -->
+    <string name="servicios_conectados">Servicios conectados</string>
+    <string name="atracciones_cercanas">Atracciones cercanas</string>
+    <string name="btn_ver_habitaciones">Ver habitaciones</string>
+    <string name="opiniones">(%1$d opiniones)</string>
+    <string name="texto_ver_mapa">Ver ubicación en Google Maps</string>
+    <string name="cd_ver_mapa">Abrir ubicación en Google Maps</string>
+    <string name="cd_ubicacion">Ubicación</string>
+
+    <!-- Detalle de habitación -->
+    <string name="caracteristicas_habitacion">Características de la habitación</string>
+    <string name="estadia_seleccionada">Estadía seleccionada: %1$s</string>
+    <string name="btn_reservar">Reservar</string>
+    <string name="precio_noche_suffix">/ noche</string>
+
+    <!-- Confirmación de reserva -->
+    <string name="titulo_confirmacion">Confirmación de reserva</string>
+    <string name="label_habitacion">Habitación:</string>
+    <string name="label_fechas">Fechas:</string>
+    <string name="label_huespedes_dp">Huéspedes:</string>
+    <string name="label_precio_noche">Precio por noche:</string>
+    <string name="label_monto_total">Monto Total:</string>
+    <string name="datos_pago">Datos de Pago</string>
+    <string name="numero_tarjeta">Número de tarjeta</string>
+    <string name="hint_numero_tarjeta">0000 0000 0000 0000</string>
+    <string name="vencimiento">Vencimiento</string>
+    <string name="cvv">CVV</string>
+    <string name="aviso_pago_simulado">Este es un pago simulado con fines académicos.</string>
+    <string name="btn_confirmar_reserva">Confirmar reserva</string>
+    <string name="error_campo_obligatorio">Campo obligatorio</string>
+
+    <!-- Reserva confirmada -->
+    <string name="reserva_confirmada_titulo">¡Reserva confirmada!</string>
+    <string name="codigo_reserva">CÓDIGO: %1$s</string>
+    <string name="resumen_compra">Resumen de tu compra</string>
+    <string name="label_hotel">Hotel:</string>
+    <string name="pagado_con_tarjeta">Pagado con Tarjeta:</string>
+    <string name="btn_ver_mi_reserva">Ver mi reserva</string>
+    <string name="btn_volver_inicio">Volver al inicio</string>
+
+    <string name="reservas_titulo">Mis reservas</string>
+    <string name="perfil_titulo">Mi perfil</string>
+
+    <!-- Placeholder de Mensajes (próximo incremento) -->
+    <string name="mensajes_titulo">Mensajes</string>
+    <string name="mensajes_placeholder">Chatea con el hotel durante una reserva activa.</string>
+
+    <!-- Mis reservas -->
+    <string name="tab_activas">Activas</string>
+    <string name="tab_historial">Historial</string>
+    <string name="sin_reservas_activas">No tienes reservas activas por ahora.</string>
+    <string name="sin_reservas_historial">Aún no tienes reservas en tu historial.</string>
+    <string name="estado_confirmada">Confirmada</string>
+    <string name="estado_pendiente_pago">Pago pendiente</string>
+    <string name="estado_completada">Completada</string>
+    <string name="estado_cancelada">Cancelada</string>
+    <plurals name="noches_plural">
+        <item quantity="one">%d noche</item>
+        <item quantity="other">%d noches</item>
+    </plurals>
+
+    <!-- Detalle de reserva -->
+    <string name="mensaje_estado_confirmada">Tu reserva está confirmada. ¡Te esperamos!</string>
+    <string name="mensaje_estado_pendiente">Tu reserva está creada, pero el pago sigue pendiente.</string>
+    <string name="mensaje_estado_completada">Esta estadía ya finalizó. ¡Gracias por elegirnos!</string>
+    <string name="mensaje_estado_cancelada">Esta reserva fue cancelada.</string>
+    <string name="btn_pagar_ahora">Pagar ahora</string>
+    <string name="btn_chatear_hotel">Chatear con el hotel</string>
+    <string name="btn_ver_hotel">Ver hotel</string>
+    <string name="label_noches">Noches:</string>
+    <string name="label_codigo">Código:</string>
+
+    <!-- Chat con el hotel -->
+    <string name="hint_mensaje">Escribe un mensaje…</string>
+    <string name="cd_enviar">Enviar</string>
+    <string name="estado_en_linea">En línea</string>
+    <string name="respuesta_automatica">Gracias por tu mensaje. Un miembro del equipo te responderá en breve.</string>
+
+    <!-- Checkout / pago de reserva pendiente -->
+    <string name="titulo_checkout">Pagar reserva</string>
+    <string name="btn_confirmar_pago">Confirmar pago</string>
+
+    <!-- Cobro confirmado -->
+    <string name="pago_confirmado_titulo">¡Pago confirmado!</string>
+    <string name="resumen_pago">Resumen del pago</string>
+    <string name="btn_ver_mis_reservas">Ver mis reservas</string>
+
+    <!-- Perfil -->
+    <string name="menu_editar_perfil">Editar perfil</string>
+    <string name="menu_notificaciones">Notificaciones</string>
+    <string name="app_version_footer">IoTelito v1.0</string>
+
+    <!-- Editar perfil -->
+    <string name="titulo_editar_perfil">Editar perfil</string>
+    <string name="label_nombre">Nombre completo</string>
+    <string name="label_email">Correo electrónico</string>
+    <string name="label_telefono">Teléfono</string>
+    <string name="btn_guardar_cambios">Guardar cambios</string>
+    <string name="toast_perfil_actualizado">Perfil actualizado correctamente</string>
+
+    <!-- Notificaciones -->
+    <string name="titulo_notificaciones">Notificaciones</string>
+    <string name="notif_confirmaciones">Confirmaciones de reserva</string>
+    <string name="notif_confirmaciones_desc">Aviso cuando se confirme o modifique una reserva</string>
+    <string name="notif_mensajes">Mensajes del hotel</string>
+    <string name="notif_mensajes_desc">Alertas de nuevos mensajes en el chat</string>
+    <string name="notif_promociones">Promociones y ofertas</string>
+    <string name="notif_promociones_desc">Descuentos y ofertas especiales de IoTelito</string>
+    <string name="notif_checkin">Recordatorios de check-in</string>
+    <string name="notif_checkin_desc">Aviso un día antes de tu llegada</string>
+
+    <!-- Descripciones de accesibilidad -->
+    <string name="cd_regresar">Regresar</string>
+    <string name="cd_favorito">Favorito</string>
+    <string name="cd_huespedes">Huéspedes</string>
+</resources>

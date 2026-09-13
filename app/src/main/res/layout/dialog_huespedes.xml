@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="4dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:textColor="@color/io_text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:text="@string/titulo_selector_huespedes" />
+
+    <!-- Adultos -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/io_text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:text="@string/label_adultos" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/io_text_muted"
+                android:textSize="11sp"
+                android:text="@string/subtitulo_adultos" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btn_menos_adultos"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_stepper_button"
+            android:padding="7dp"
+            android:src="@drawable/ic_remove"
+            android:tint="@color/io_teal"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/cd_restar" />
+
+        <TextView
+            android:id="@+id/tv_adultos"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:gravity="center"
+            android:textColor="@color/io_text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="2" />
+
+        <ImageView
+            android:id="@+id/btn_mas_adultos"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_stepper_button"
+            android:padding="7dp"
+            android:src="@drawable/ic_add"
+            android:tint="@color/io_teal"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/cd_sumar" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="16dp"
+        android:background="@color/io_border" />
+
+    <!-- Niños -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/io_text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:text="@string/label_ninos" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/io_text_muted"
+                android:textSize="11sp"
+                android:text="@string/subtitulo_ninos" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btn_menos_ninos"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_stepper_button"
+            android:padding="7dp"
+            android:src="@drawable/ic_remove"
+            android:tint="@color/io_teal"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/cd_restar" />
+
+        <TextView
+            android:id="@+id/tv_ninos"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:gravity="center"
+            android:textColor="@color/io_text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="1" />
+
+        <ImageView
+            android:id="@+id/btn_mas_ninos"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_stepper_button"
+            android:padding="7dp"
+            android:src="@drawable/ic_add"
+            android:tint="@color/io_teal"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/cd_sumar" />
+    </LinearLayout>
+
+</LinearLayout>

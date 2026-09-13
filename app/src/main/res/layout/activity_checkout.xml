@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/sub_header"
+        layout="@layout/item_sub_header" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- summary-card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_hotel_nombre"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        tools:text="Palacio del Inka" />
+
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_habitacion" android:layout_marginTop="12dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_fechas" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_huespedes" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_codigo" android:layout_marginTop="6dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@color/io_border" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:text="@string/label_monto_total" />
+
+                        <TextView
+                            android:id="@+id/tv_monto_total"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/io_teal"
+                            android:textSize="20sp"
+                            android:textFontWeight="900"
+                            tools:ignore="UnusedAttribute"
+                            tools:text="S/ 1,040" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- payment-card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:text="@string/datos_pago" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:textColor="@color/io_text_secondary"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:text="@string/numero_tarjeta" />
+
+                    <EditText
+                        android:id="@+id/et_numero_tarjeta"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_input_field"
+                        android:paddingHorizontal="14dp"
+                        android:hint="@string/hint_numero_tarjeta"
+                        android:textColorHint="@color/io_text_muted"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14sp"
+                        android:inputType="number"
+                        android:maxLength="19"
+                        android:singleLine="true" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/io_text_secondary"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:text="@string/vencimiento" />
+
+                            <EditText
+                                android:id="@+id/et_vencimiento"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_marginTop="6dp"
+                                android:background="@drawable/bg_input_field"
+                                android:paddingHorizontal="14dp"
+                                android:hint="MM/AA"
+                                android:textColorHint="@color/io_text_muted"
+                                android:textColor="@color/io_text_primary"
+                                android:textSize="14sp"
+                                android:inputType="date"
+                                android:maxLength="5"
+                                android:singleLine="true" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/io_text_secondary"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:text="@string/cvv" />
+
+                            <EditText
+                                android:id="@+id/et_cvv"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_marginTop="6dp"
+                                android:background="@drawable/bg_input_field"
+                                android:paddingHorizontal="14dp"
+                                android:hint="•••"
+                                android:textColorHint="@color/io_text_muted"
+                                android:textColor="@color/io_text_primary"
+                                android:textSize="14sp"
+                                android:inputType="numberPassword"
+                                android:maxLength="3"
+                                android:singleLine="true" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_warning_box"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_warning"
+                            android:tint="@color/io_warning_text"
+                            android:contentDescription="@null" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            android:textColor="@color/io_warning_text"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:text="@string/aviso_pago_simulado" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_confirmar_pago"
+                style="@style/Widget.IoTelito.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/btn_confirmar_pago" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

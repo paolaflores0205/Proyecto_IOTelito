@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_sheet_top"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="36dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_drag_handle" />
+
+    <!-- header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/io_text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="@string/titulo_filtros" />
+
+        <ImageView
+            android:id="@+id/iv_cerrar_filtros"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_cancel"
+            android:tint="@color/io_text_secondary"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_cerrar" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="420dp"
+        tools:ignore="Suspicious0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="8dp">
+
+            <!-- Ciudad -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="@string/label_ciudad" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipgroup_ciudad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:chipSpacingHorizontal="8dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="18dp"
+                android:background="@color/io_border" />
+
+            <!-- Calificación -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="@string/label_calificacion_minima" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/iv_star_1"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_star_border"
+                    android:tint="@color/io_star"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_calificacion_estrella" />
+
+                <ImageView
+                    android:id="@+id/iv_star_2"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_star_border"
+                    android:tint="@color/io_star"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_calificacion_estrella" />
+
+                <ImageView
+                    android:id="@+id/iv_star_3"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_star_border"
+                    android:tint="@color/io_star"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_calificacion_estrella" />
+
+                <ImageView
+                    android:id="@+id/iv_star_4"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_star_border"
+                    android:tint="@color/io_star"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_calificacion_estrella" />
+
+                <ImageView
+                    android:id="@+id/iv_star_5"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_star_border"
+                    android:tint="@color/io_star"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_calificacion_estrella" />
+
+                <TextView
+                    android:id="@+id/tv_calificacion_valor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="13sp"
+                    tools:text="Cualquiera" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="18dp"
+                android:background="@color/io_border" />
+
+            <!-- Precio -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:text="@string/label_rango_precio" />
+
+                <TextView
+                    android:id="@+id/tv_precio_valor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/io_teal"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="S/ 300 – S/ 550" />
+            </LinearLayout>
+
+            <com.google.android.material.slider.RangeSlider
+                android:id="@+id/slider_precio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:stepSize="10"
+                app:thumbColor="@color/io_teal"
+                app:trackColorActive="@color/io_teal"
+                app:trackColorInactive="@color/io_border"
+                app:haloColor="@color/io_teal_light"
+                app:labelBehavior="floating" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/io_border" />
+
+            <!-- Servicios -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="@string/label_servicios" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipgroup_servicios"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:singleSelection="false"
+                app:chipSpacingHorizontal="8dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="18dp"
+                android:background="@color/io_border" />
+
+            <!-- Ordenar -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="@string/label_ordenar" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipgroup_orden"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:chipSpacingHorizontal="8dp">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_orden_recomendado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/opcion_orden_recomendado"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/chip_bg_color"
+                    app:chipStrokeColor="@color/chip_stroke_color"
+                    app:chipStrokeWidth="1dp"
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/chip_text_color" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_orden_menor_mayor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/orden_menor_a_mayor"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/chip_bg_color"
+                    app:chipStrokeColor="@color/chip_stroke_color"
+                    app:chipStrokeWidth="1dp"
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/chip_text_color" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_orden_mayor_menor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/orden_mayor_a_menor"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/chip_bg_color"
+                    app:chipStrokeColor="@color/chip_stroke_color"
+                    app:chipStrokeWidth="1dp"
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/chip_text_color" />
+            </com.google.android.material.chip.ChipGroup>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- acciones -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_limpiar_sheet"
+            style="@style/Widget.IoTelito.Button.Outline"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="@string/btn_limpiar_filtros" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_aplicar_sheet"
+            style="@style/Widget.IoTelito.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="@string/btn_aplicar_filtros" />
+    </LinearLayout>
+
+</LinearLayout>
