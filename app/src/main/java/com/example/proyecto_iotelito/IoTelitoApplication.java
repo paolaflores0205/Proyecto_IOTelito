@@ -30,9 +30,11 @@ public class IoTelitoApplication extends Application implements Application.Acti
         int initialTop = content.getPaddingTop();
         int initialRight = content.getPaddingRight();
         int initialBottom = content.getPaddingBottom();
-        View bottomNavigation = activity.findViewById(R.id.bottom_nav);
+        View clientBottomNavigation = activity.findViewById(R.id.bottom_nav);
+        View superadminBottomNavigation = activity.findViewById(R.id.superadmin_bottom_nav);
+        View bottomNavigation = clientBottomNavigation;
         if (bottomNavigation == null) {
-            bottomNavigation = activity.findViewById(R.id.superadmin_bottom_nav);
+            bottomNavigation = superadminBottomNavigation;
         }
         boolean hasBottomNavigation = bottomNavigation != null;
         int maximumBottomNavigationInset = getResources()
@@ -79,8 +81,14 @@ public class IoTelitoApplication extends Application implements Application.Acti
 
         WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView())
                 .setAppearanceLightStatusBars(true);
+
+        boolean usesDarkBottomNavigation = superadminBottomNavigation != null;
+        activity.getWindow().setNavigationBarColor(activity.getColor(
+                usesDarkBottomNavigation ? R.color.io_navy : R.color.white
+        ));
+        activity.getWindow().setNavigationBarContrastEnforced(false);
         WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView())
-                .setAppearanceLightNavigationBars(true);
+                .setAppearanceLightNavigationBars(!usesDarkBottomNavigation);
         ViewCompat.requestApplyInsets(content);
     }
 
