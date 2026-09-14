@@ -85,6 +85,37 @@
             android:name=".ui.perfil.NotificacionesActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".ui.superadmin.SuperadminMainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.superadmin.usuarios.DetalleUsuarioActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <activity
+            android:name=".ui.superadmin.hoteles.FormularioHotelActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <activity
+            android:name=".ui.superadmin.hoteles.DetalleHotelAdminActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <activity
+            android:name=".ui.superadmin.hoteles.AsignarAdministradorActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.superadmin.hoteles.DetalleHotelAdminActivity" />
+
+        <activity
+            android:name=".ui.superadmin.logs.RegistroLogsActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
     </application>
 
 </manifest>
