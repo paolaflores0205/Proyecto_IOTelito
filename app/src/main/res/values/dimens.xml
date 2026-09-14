@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mantiene libre el área táctil de los botones del sistema sin dejar
+         que barras de navegación especialmente altas alejen demasiado el menú. -->
+    <dimen name="bottom_navigation_safe_space">64dp</dimen>
+</resources>

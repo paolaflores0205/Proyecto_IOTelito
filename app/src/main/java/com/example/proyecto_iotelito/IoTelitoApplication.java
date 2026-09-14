@@ -30,17 +30,24 @@ public class IoTelitoApplication extends Application implements Application.Acti
         int initialTop = content.getPaddingTop();
         int initialRight = content.getPaddingRight();
         int initialBottom = content.getPaddingBottom();
+        boolean hasBottomNavigation = activity.findViewById(R.id.bottom_nav) != null
+                || activity.findViewById(R.id.superadmin_bottom_nav) != null;
+        int maximumBottomNavigationInset = getResources()
+                .getDimensionPixelSize(R.dimen.bottom_navigation_safe_space);
 
         ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
             Insets safeInsets = windowInsets.getInsets(
                     WindowInsetsCompat.Type.systemBars()
                             | WindowInsetsCompat.Type.displayCutout()
             );
+            int bottomInset = hasBottomNavigation
+                    ? Math.min(safeInsets.bottom, maximumBottomNavigationInset)
+                    : safeInsets.bottom;
             view.setPadding(
                     initialLeft + safeInsets.left,
                     initialTop + safeInsets.top,
                     initialRight + safeInsets.right,
-                    initialBottom + safeInsets.bottom
+                    initialBottom + bottomInset
             );
             return windowInsets;
         });

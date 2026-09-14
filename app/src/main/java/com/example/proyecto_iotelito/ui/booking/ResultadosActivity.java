@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.HotelMedia;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.google.android.material.button.MaterialButton;
@@ -94,6 +96,7 @@ public class ResultadosActivity extends AppCompatActivity {
     }
 
     private void bindHotelCard(View card, Hotel hotel) {
+        ((ImageView) card.findViewById(R.id.iv_photo)).setImageResource(HotelMedia.hotelImage(hotel.id));
         ((TextView) card.findViewById(R.id.tv_location)).setText(hotel.address);
         ((TextView) card.findViewById(R.id.tv_rating)).setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
         ((TextView) card.findViewById(R.id.tv_name)).setText(hotel.name);

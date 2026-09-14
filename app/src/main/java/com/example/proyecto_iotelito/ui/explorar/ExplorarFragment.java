@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.HotelMedia;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity;
@@ -266,11 +267,13 @@ public class ExplorarFragment extends Fragment {
     }
 
     private void bindHotelCard(View cardRoot, Hotel hotel) {
+        ImageView ivPhoto = cardRoot.findViewById(R.id.iv_photo);
         TextView tvCity = cardRoot.findViewById(R.id.tv_city);
         TextView tvRating = cardRoot.findViewById(R.id.tv_rating);
         TextView tvName = cardRoot.findViewById(R.id.tv_name);
         TextView tvPrice = cardRoot.findViewById(R.id.tv_price);
 
+        ivPhoto.setImageResource(HotelMedia.hotelImage(hotel.id));
         tvCity.setText(hotel.city);
         tvRating.setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
         tvName.setText(hotel.name);

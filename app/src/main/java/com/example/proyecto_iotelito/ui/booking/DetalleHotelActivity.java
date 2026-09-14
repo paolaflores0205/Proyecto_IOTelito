@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.HotelMedia;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Attraction;
 import com.example.proyecto_iotelito.model.Hotel;
@@ -34,10 +35,6 @@ public class DetalleHotelActivity extends AppCompatActivity {
 
     private static final int[] SERVICE_ICONS = {
             R.drawable.ic_wifi, R.drawable.ic_local_cafe, R.drawable.ic_cancel
-    };
-
-    private static final int[] ATTRACTION_BACKGROUNDS = {
-            R.drawable.bg_photo_placeholder, R.drawable.bg_photo_placeholder_2, R.drawable.bg_photo_placeholder_3
     };
 
     @Override
@@ -61,7 +58,7 @@ public class DetalleHotelActivity extends AppCompatActivity {
 
         findViewById(R.id.card_mapa).setOnClickListener(v -> abrirUbicacionEnMapa(hotel));
 
-        poblarGaleria();
+        poblarGaleria(hotel);
         poblarServicios(hotel);
         poblarAtracciones(hotel);
 
@@ -72,11 +69,14 @@ public class DetalleHotelActivity extends AppCompatActivity {
         });
     }
 
-    private void poblarGaleria() {
+    private void poblarGaleria(Hotel hotel) {
         LinearLayout galleryRow = findViewById(R.id.gallery_row);
         LayoutInflater inflater = LayoutInflater.from(this);
         for (int i = 0; i < 4; i++) {
-            galleryRow.addView(inflater.inflate(R.layout.item_gallery_photo, galleryRow, false));
+            View photo = inflater.inflate(R.layout.item_gallery_photo, galleryRow, false);
+            ((ImageView) photo.findViewById(R.id.iv_gallery_photo))
+                    .setImageResource(HotelMedia.galleryImage(hotel.id, i));
+            galleryRow.addView(photo);
         }
     }
 
@@ -117,7 +117,7 @@ public class DetalleHotelActivity extends AppCompatActivity {
             Attraction attraction = hotel.attractions[i];
             View card = inflater.inflate(R.layout.item_atraccion_card, container, false);
             ((ImageView) card.findViewById(R.id.iv_foto_atraccion))
-                    .setImageResource(ATTRACTION_BACKGROUNDS[i % ATTRACTION_BACKGROUNDS.length]);
+                    .setImageResource(HotelMedia.galleryImage(hotel.id, i + 1));
             ((TextView) card.findViewById(R.id.tv_distancia_atraccion)).setText(attraction.distance);
             ((TextView) card.findViewById(R.id.tv_nombre_atraccion)).setText(attraction.name);
             container.addView(card);
