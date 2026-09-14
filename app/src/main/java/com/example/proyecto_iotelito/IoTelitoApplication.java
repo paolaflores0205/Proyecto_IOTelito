@@ -30,10 +30,35 @@ public class IoTelitoApplication extends Application implements Application.Acti
         int initialTop = content.getPaddingTop();
         int initialRight = content.getPaddingRight();
         int initialBottom = content.getPaddingBottom();
-        boolean hasBottomNavigation = activity.findViewById(R.id.bottom_nav) != null
-                || activity.findViewById(R.id.superadmin_bottom_nav) != null;
+        View bottomNavigation = activity.findViewById(R.id.bottom_nav);
+        if (bottomNavigation == null) {
+            bottomNavigation = activity.findViewById(R.id.superadmin_bottom_nav);
+        }
+        boolean hasBottomNavigation = bottomNavigation != null;
         int maximumBottomNavigationInset = getResources()
                 .getDimensionPixelSize(R.dimen.bottom_navigation_safe_space);
+
+        if (bottomNavigation != null) {
+            View navigationView = bottomNavigation;
+            int navigationLeft = navigationView.getPaddingLeft();
+            int navigationTop = navigationView.getPaddingTop();
+            int navigationRight = navigationView.getPaddingRight();
+            int navigationBottom = navigationView.getPaddingBottom();
+
+            // Material agrega automáticamente el inset inferior al BottomNavigationView.
+            // En Samsung esto duplicaba el espacio porque la barra del sistema ya ocupa
+            // su propia franja. Sustituimos ese listener para conservar solo el padding
+            // original del componente.
+            ViewCompat.setOnApplyWindowInsetsListener(navigationView, (view, windowInsets) -> {
+                view.setPadding(
+                        navigationLeft,
+                        navigationTop,
+                        navigationRight,
+                        navigationBottom
+                );
+                return windowInsets;
+            });
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
             Insets safeInsets = windowInsets.getInsets(
