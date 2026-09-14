@@ -2,5 +2,5 @@
 <resources>
     <!-- Mantiene libre el área táctil de los botones del sistema sin dejar
          que barras de navegación especialmente altas alejen demasiado el menú. -->
-    <dimen name="bottom_navigation_safe_space">64dp</dimen>
+    <dimen name="bottom_navigation_safe_space">48dp</dimen>
 </resources>

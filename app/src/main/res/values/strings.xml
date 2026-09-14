@@ -323,5 +323,39 @@
     <string name="superadmin_cd_add_hotel">Registrar un nuevo hotel</string>
     <string name="superadmin_cd_hotel_photo">Fotografía del hotel</string>
     <string name="superadmin_cd_map_preview">Vista previa de ubicación</string>
-    <string name="superadmin_demo_entry_note">El acceso por rol se conectará al implementar el inicio de sesión.</string>
+    <string name="superadmin_demo_entry_note">El acceso se validó localmente según el rol de la cuenta.</string>
+
+    <!-- Inicio de sesión local por roles -->
+    <string name="login_brand">IoTelito</string>
+    <string name="login_slogan">Tu estadía, conectada.</string>
+    <string name="login_welcome">Bienvenido de nuevo</string>
+    <string name="login_subtitle">Ingresa con tu cuenta para continuar</string>
+    <string name="login_demo_label">Cuenta de demostración</string>
+    <string name="login_demo_helper">Elige una cuenta para completar su correo</string>
+    <string name="login_email">Correo electrónico</string>
+    <string name="login_password">Contraseña</string>
+    <string name="login_button">Iniciar sesión</string>
+    <string name="login_forgot">Olvidé mi contraseña</string>
+    <string name="login_create_account">Crear cuenta de cliente</string>
+    <string name="login_local_notice">Modo local: todavía no se utiliza una base de datos.</string>
+    <string name="login_error_required">Completa este campo</string>
+    <string name="login_error_credentials">El correo o la contraseña son incorrectos</string>
+    <string name="login_recovery_pending">La recuperación estará disponible al conectar Firebase Authentication.</string>
+    <string name="login_registration_pending">El registro se conectará en un siguiente incremento.</string>
+    <string name="login_demo_client">Cliente — cliente@iotelito.pe</string>
+    <string name="login_demo_admin">Administrador de hotel — admin@iotelito.pe</string>
+    <string name="login_demo_driver">Taxista — taxista@iotelito.pe</string>
+    <string name="login_demo_superadmin">Superadmin — superadmin@iotelito.pe</string>
+
+    <!-- Resumen temporal para roles cuyos módulos aún no están integrados -->
+    <string name="role_session_started">Sesión local iniciada correctamente</string>
+    <string name="role_available_features">Funciones correspondientes al rol</string>
+    <string name="role_change_account">Cambiar de cuenta</string>
+    <string name="role_local_explanation">Esta pantalla confirma la autenticación y el enrutamiento. El módulo visual completo se integrará después.</string>
+    <string name="role_admin_name">Administrador de hotel</string>
+    <string name="role_admin_initials">AH</string>
+    <string name="role_admin_features">• Gestionar los datos del hotel y sus habitaciones\n• Administrar reservas, cobros y checkout\n• Atender chats y solicitudes de taxi\n• Consultar reportes del hotel</string>
+    <string name="role_driver_name">Taxista</string>
+    <string name="role_driver_initials">TX</string>
+    <string name="role_driver_features">• Revisar y aceptar solicitudes de traslado\n• Actualizar el estado del servicio\n• Compartir ubicación durante el viaje\n• Escanear QR y consultar el historial</string>
 </resources>
