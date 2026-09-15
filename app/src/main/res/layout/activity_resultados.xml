@@ -53,58 +53,43 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- filter-chips -->
+    <!-- filtros -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp">
+        android:paddingVertical="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_precio"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_filtros"
+            style="@style/Widget.IoTelito.Button.Outline"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:paddingHorizontal="16dp"
+            android:text="@string/btn_filtros"
+            android:textSize="13sp"
+            app:icon="@drawable/ic_tune"
+            app:iconTint="@color/io_teal"
+            app:iconGravity="textStart"
+            app:iconPadding="6dp" />
+
+        <TextView
+            android:id="@+id/tv_limpiar_filtros"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checkable="true"
-            android:checked="true"
-            android:text="@string/chip_precio"
+            android:layout_marginStart="12dp"
+            android:padding="4dp"
+            android:text="@string/btn_limpiar_filtros"
+            android:textColor="@color/io_text_secondary"
             android:textSize="12sp"
-            app:chipBackgroundColor="@color/chip_bg_color"
-            app:chipStrokeColor="@color/chip_stroke_color"
-            app:chipStrokeWidth="1dp"
-            app:checkedIconVisible="false"
-            android:textColor="@color/chip_text_color"
-            app:closeIcon="@drawable/ic_chevron_down"
-            app:closeIconEnabled="true"
-            app:closeIconTint="@color/chip_text_color" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_valoracion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:checkable="true"
-            android:text="@string/chip_valoracion"
-            android:textSize="12sp"
-            app:chipBackgroundColor="@color/chip_bg_color"
-            app:chipStrokeColor="@color/chip_stroke_color"
-            app:chipStrokeWidth="1dp"
-            app:checkedIconVisible="false"
-            android:textColor="@color/chip_text_color" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_servicios"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:checkable="true"
-            android:text="@string/chip_servicios"
-            android:textSize="12sp"
-            app:chipBackgroundColor="@color/chip_bg_color"
-            app:chipStrokeColor="@color/chip_stroke_color"
-            app:chipStrokeWidth="1dp"
-            app:checkedIconVisible="false"
-            android:textColor="@color/chip_text_color" />
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:visibility="gone"
+            tools:visibility="visible" />
     </LinearLayout>
 
     <ScrollView

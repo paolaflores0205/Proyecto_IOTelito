@@ -2,7 +2,10 @@ package com.example.proyecto_iotelito.ui.booking;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -56,7 +59,85 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.tv_monto_total)).setText(formatMoney(total));
 
+        configurarFormatoTarjeta(findViewById(R.id.et_numero_tarjeta));
+        configurarFormatoVencimiento(findViewById(R.id.et_vencimiento));
+
         findViewById(R.id.btn_confirmar_reserva).setOnClickListener(v -> onConfirmar());
+    }
+
+    /** Agrupa el número de tarjeta de 4 en 4 dígitos mientras el usuario escribe (ej. 1234 5678 9012 3456). */
+    private void configurarFormatoTarjeta(EditText et) {
+        // inputType="number" adjunta un DigitsKeyListener que solo deja pasar dígitos;
+        // hay que ampliarlo para que también acepte el espacio que insertamos nosotros.
+        et.setKeyListener(DigitsKeyListener.getInstance("0123456789 "));
+        et.addTextChangedListener(new TextWatcher() {
+            private boolean actualizando = false;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (actualizando) {
+                    return;
+                }
+                actualizando = true;
+
+                String soloDigitos = editable.toString().replaceAll("[^0-9]", "");
+                if (soloDigitos.length() > 16) {
+                    soloDigitos = soloDigitos.substring(0, 16);
+                }
+
+                StringBuilder formateado = new StringBuilder();
+                for (int i = 0; i < soloDigitos.length(); i++) {
+                    if (i > 0 && i % 4 == 0) {
+                        formateado.append(' ');
+                    }
+                    formateado.append(soloDigitos.charAt(i));
+                }
+
+                editable.replace(0, editable.length(), formateado.toString());
+                actualizando = false;
+            }
+        });
+    }
+
+    /** Inserta el "/" apenas se completan los 2 dígitos del mes (ej. 12/25). */
+    private void configurarFormatoVencimiento(EditText et) {
+        // mismo motivo que en configurarFormatoTarjeta: hay que permitir el "/" en el filtro.
+        et.setKeyListener(DigitsKeyListener.getInstance("0123456789/"));
+        et.addTextChangedListener(new TextWatcher() {
+            private boolean actualizando = false;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (actualizando) {
+                    return;
+                }
+                actualizando = true;
+
+                String soloDigitos = editable.toString().replaceAll("[^0-9]", "");
+                if (soloDigitos.length() > 4) {
+                    soloDigitos = soloDigitos.substring(0, 4);
+                }
+
+                String formateado = soloDigitos.length() >= 2
+                        ? soloDigitos.substring(0, 2) + "/" + soloDigitos.substring(2)
+                        : soloDigitos;
+
+                editable.replace(0, editable.length(), formateado);
+                actualizando = false;
+            }
+        });
     }
 
     private void bindRow(int rowId, int labelRes, String value, boolean tealValue) {

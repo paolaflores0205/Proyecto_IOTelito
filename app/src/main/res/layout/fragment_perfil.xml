@@ -12,98 +12,103 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:textColor="@color/io_text_primary"
-            android:textSize="20sp"
-            android:textFontWeight="800"
-            tools:ignore="UnusedAttribute"
-            android:text="@string/perfil_titulo" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="12dp">
 
-        <!-- header-card -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif"
+                android:text="@string/perfil_titulo"
+                android:textColor="@color/io_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <!-- Logo IoT elito -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IoT"
+                    android:textColor="@color/io_teal"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="elito"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Avatar e Info Principal -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="12dp">
+
+            <FrameLayout
+                android:layout_width="76dp"
+                android:layout_height="76dp"
+                android:background="@drawable/bg_avatar_circle">
+
+                <TextView
+                    android:id="@+id/tv_avatar_inicial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    tools:text="CB" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_nombre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="Carlos Benítez" />
+
+            <TextView
+                android:id="@+id/tv_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="13sp"
+                tools:text="carlos.benitez@email.com" />
+        </LinearLayout>
+
+        <!-- Tarjeta Datos Personales -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
             app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp"
-            app:strokeWidth="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="16dp">
-
-                <FrameLayout
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:background="@drawable/bg_avatar_circle">
-
-                    <TextView
-                        android:id="@+id/tv_avatar_inicial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:textColor="@color/white"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        tools:text="CM" />
-                </FrameLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="14dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tv_nombre"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:textColor="@color/io_text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="Carlos Mendoza" />
-
-                    <TextView
-                        android:id="@+id/tv_email"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:textColor="@color/io_text_secondary"
-                        android:textSize="12sp"
-                        tools:text="carlos.mendoza@gmail.com" />
-
-                    <TextView
-                        android:id="@+id/tv_telefono"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:textColor="@color/io_text_muted"
-                        android:textSize="12sp"
-                        tools:text="+51 987 654 321" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- menu-card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
             app:strokeWidth="0dp">
 
             <LinearLayout
@@ -111,30 +116,342 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <include
-                    android:id="@+id/row_editar_perfil"
-                    layout="@layout/item_perfil_menu_row" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="18dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="12dp"
+                    android:text="Datos personales"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginStart="50dp"
                     android:background="@color/io_border" />
 
-                <include
-                    android:id="@+id/row_notificaciones"
-                    layout="@layout/item_perfil_menu_row" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="18dp"
+                    android:paddingVertical="14dp">
+
+                    <!-- Campo 1: Nombres y Apellidos -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="NOMBRES Y APELLIDOS"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_datos_nombre"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        tools:text="Carlos Benítez" />
+
+                    <!-- Campo 2: Tipo de Documento -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="TIPO DE DOCUMENTO"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_datos_tipo_doc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        tools:text="DNI" />
+
+                    <!-- Campo 3: Número de Documento -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="NÚMERO DE DOCUMENTO"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_datos_num_doc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        tools:text="45678912" />
+
+                    <!-- Campo 4: Fecha de Nacimiento -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="FECHA DE NACIMIENTO"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_datos_fecha_nac"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        tools:text="15/03/1990" />
+
+                    <!-- Campo 5: Correo Electrónico -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="CORREO ELECTRÓNICO"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_datos_email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        tools:text="carlos.benitez@email.com" />
+
+                    <!-- Campo 6: Teléfono -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="TELÉFONO"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_datos_telefono"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        tools:text="+51 987 654 321" />
+
+                    <!-- Campo 7: Domicilio -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="DOMICILIO"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_datos_domicilio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        tools:text="Av. Larco 456, Miraflores, Lima" />
+
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <TextView
+        <!-- Botón Editar Perfil -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_editar_perfil"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Editar perfil"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/io_teal"
+            app:cornerRadius="24dp" />
+
+        <!-- Tarjeta Opciones de Menú -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="24dp"
-            android:gravity="center"
-            android:textColor="@color/io_text_muted"
-            android:textSize="11sp"
-            android:text="@string/app_version_footer" />
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Row Notificaciones -->
+                <LinearLayout
+                    android:id="@+id/row_notificaciones"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <FrameLayout
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_icon_circle_slate">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_notifications"
+                            app:tint="@color/io_text_secondary" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="Notificaciones"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/io_text_muted" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/io_border" />
+
+                <!-- Row Ayuda y Soporte -->
+                <LinearLayout
+                    android:id="@+id/row_ayuda_soporte"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <FrameLayout
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_icon_circle_slate">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_help"
+                            app:tint="@color/io_text_secondary" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="Ayuda y soporte"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/io_text_muted" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/io_border" />
+
+                <!-- Row Cerrar Sesión -->
+                <LinearLayout
+                    android:id="@+id/row_cerrar_sesion"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <FrameLayout
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_icon_circle_red">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_logout"
+                            app:tint="@color/io_danger_text" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="Cerrar sesión"
+                        android:textColor="@color/io_danger_text"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </ScrollView>

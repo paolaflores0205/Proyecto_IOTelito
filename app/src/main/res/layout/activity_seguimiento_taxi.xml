@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical">
+
+    <!-- Map area with overlays -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:background="@drawable/bg_map_placeholder">
+
+        <!-- Map grid lines (visual) -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="center_vertical"
+            android:background="#20000000" />
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:background="#20000000" />
+
+        <!-- Taxi icon on map -->
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="40dp"
+            android:src="@drawable/ic_taxi"
+            android:tint="@color/io_teal"
+            android:contentDescription="@null" />
+
+        <!-- Destination pin -->
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="30dp"
+            android:src="@drawable/ic_location_pin"
+            android:tint="@color/io_warning_text"
+            android:contentDescription="@null" />
+
+        <!-- Back button overlay (top-left) -->
+        <FrameLayout
+            android:id="@+id/btn_back_map"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="16dp"
+            android:background="@drawable/bg_back_circle_dark"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_arrow_back"
+                android:tint="@color/white"
+                android:contentDescription="@string/cd_regresar" />
+        </FrameLayout>
+
+        <!-- ETA pill (centered, top) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_eta_pill_dark"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="7dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/etiqueta_llegada"
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Tracking info below map -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Progress pipeline -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Step labels -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/paso_solicitado"
+                        android:textColor="@color/io_teal" android:textSize="9sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/paso_asignado"
+                        android:textColor="@color/io_teal" android:textSize="9sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/paso_en_camino"
+                        android:textColor="@color/io_teal" android:textSize="9sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/paso_traslado"
+                        android:textColor="@color/io_text_muted" android:textSize="9sp" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/paso_fin"
+                        android:textColor="@color/io_text_muted" android:textSize="9sp" />
+                </LinearLayout>
+
+                <!-- Progress bar -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@color/io_border">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="3"
+                        android:background="@color/io_teal" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Current status box -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_info_box_teal"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/bg_stepper_plus" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/estado_en_camino_desc"
+                    android:textColor="@color/io_teal"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Driver small card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
+
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/bg_avatar_circle">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="GL"
+                            android:textColor="@color/white"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/nombre_conductor"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/vehiculo_placa"
+                            android:textColor="@color/io_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_call_circle"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_phone"
+                            android:tint="@color/io_teal"
+                            android:contentDescription="@null" />
+                    </FrameLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Chat button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_abrir_chat_conductor"
+                style="@style/Widget.IoTelito.Button.Outline"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/btn_abrir_chat_conductor" />
+
+            <!-- QR button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_ver_qr"
+                style="@style/Widget.IoTelito.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/btn_ver_codigo_qr" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

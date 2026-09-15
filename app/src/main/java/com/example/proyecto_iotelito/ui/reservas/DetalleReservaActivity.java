@@ -14,12 +14,13 @@ import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity;
+import com.example.proyecto_iotelito.ui.pago.CheckoutActivity;
 
 import java.util.Locale;
 
 /**
- * Detalle de una reserva: estado, resumen y acciones (pagar si está
- * pendiente, chatear con el hotel, ver el hotel).
+ * Detalle de una reserva: estado, resumen y acciones (chatear, ver hotel
+ * y, solo el último día de una estadía en curso, realizar el checkout).
  */
 public class DetalleReservaActivity extends AppCompatActivity {
 
@@ -38,29 +39,32 @@ public class DetalleReservaActivity extends AppCompatActivity {
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         ((TextView) subHeader.findViewById(R.id.tv_title)).setText(hotel.name);
 
+        boolean enCurso = reserva.esActiva() && reserva.estaEnCurso();
         TextView tvEstadoPill = findViewById(R.id.tv_estado_pill);
-        tvEstadoPill.setText(EstadoUi.texto(this, reserva.estado));
-        tvEstadoPill.setBackgroundTintList(ColorStateList.valueOf(
-                ContextCompat.getColor(this, EstadoUi.colorFondo(reserva.estado))));
-        tvEstadoPill.setTextColor(ContextCompat.getColor(this, EstadoUi.colorTexto(reserva.estado)));
-        ((TextView) findViewById(R.id.tv_mensaje_estado)).setText(EstadoUi.mensaje(reserva.estado));
+        int colorFondo = enCurso ? R.color.io_teal : EstadoUi.colorFondo(reserva.estado);
+        int colorTexto = enCurso ? R.color.white : EstadoUi.colorTexto(reserva.estado);
+        tvEstadoPill.setText(enCurso ? getString(R.string.estado_en_curso) : EstadoUi.texto(this, reserva.estado));
+        tvEstadoPill.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, colorFondo)));
+        tvEstadoPill.setTextColor(ContextCompat.getColor(this, colorTexto));
+        ((TextView) findViewById(R.id.tv_mensaje_estado)).setText(mensajeEstado(reserva));
 
         ((TextView) findViewById(R.id.tv_hotel_nombre)).setText(hotel.name);
-        bindRow(R.id.row_habitacion, R.string.label_habitacion, reserva.roomName);
-        bindRow(R.id.row_fechas, R.string.label_fechas, reserva.rangoFechas);
+        bindRow(R.id.row_habitacion, R.string.label_habitacion,
+                getString(R.string.habitacion_con_numero, reserva.roomName, reserva.roomNumber));
+        bindRow(R.id.row_fechas, R.string.label_fechas, reserva.rangoFechasTexto());
         bindRow(R.id.row_noches, R.string.label_noches,
                 getResources().getQuantityString(R.plurals.noches_plural, reserva.noches, reserva.noches));
         bindRow(R.id.row_huespedes, R.string.label_huespedes_dp, reserva.huespedes);
         bindRow(R.id.row_codigo, R.string.label_codigo, reserva.codigo);
         ((TextView) findViewById(R.id.tv_monto_total)).setText(formatMoney(reserva.precioTotal));
 
-        View btnPagar = findViewById(R.id.btn_pagar_ahora);
+        View btnCheckout = findViewById(R.id.btn_realizar_checkout);
         View btnVerHotel = findViewById(R.id.btn_ver_hotel);
 
-        btnPagar.setVisibility(reserva.estado == Reserva.Estado.PENDIENTE_PAGO ? View.VISIBLE : View.GONE);
-        btnPagar.setOnClickListener(v -> {
-            Intent intent = new Intent(this, com.example.proyecto_iotelito.ui.pago.CheckoutActivity.class);
-            intent.putExtra(com.example.proyecto_iotelito.ui.pago.CheckoutActivity.EXTRA_RESERVA_ID, reserva.id);
+        btnCheckout.setVisibility(reserva.puedeHacerCheckout() ? View.VISIBLE : View.GONE);
+        btnCheckout.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CheckoutActivity.class);
+            intent.putExtra(CheckoutActivity.EXTRA_RESERVA_ID, reserva.id);
             startActivity(intent);
         });
 
@@ -76,6 +80,16 @@ public class DetalleReservaActivity extends AppCompatActivity {
             intent.putExtra(DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
             startActivity(intent);
         });
+    }
+
+    private String mensajeEstado(Reserva reserva) {
+        if (reserva.esActiva() && reserva.puedeHacerCheckout()) {
+            return getString(R.string.mensaje_puede_checkout);
+        }
+        if (reserva.esActiva() && reserva.estaEnCurso()) {
+            return getString(R.string.mensaje_estado_en_curso);
+        }
+        return getString(EstadoUi.mensaje(reserva.estado));
     }
 
     private void bindRow(int rowId, int labelRes, String value) {

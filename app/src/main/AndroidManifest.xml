@@ -85,6 +85,31 @@
             android:name=".ui.perfil.NotificacionesActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".ui.taxi.BeneficioTaxiActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.taxi.SolicitudTaxiActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.taxi.TaxistaAsignadoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.taxi.SeguimientoTaxiActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.taxi.CodigoQrTaxiActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.taxi.CalificarTaxiActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

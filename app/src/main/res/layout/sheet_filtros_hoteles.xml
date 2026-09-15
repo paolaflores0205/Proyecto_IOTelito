@@ -260,26 +260,14 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="4dp"
                 app:singleSelection="true"
-                app:selectionRequired="true"
+                app:selectionRequired="false"
                 app:chipSpacingHorizontal="8dp">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_orden_recomendado"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="@string/opcion_orden_recomendado"
-                    android:textSize="12sp"
-                    app:chipBackgroundColor="@color/chip_bg_color"
-                    app:chipStrokeColor="@color/chip_stroke_color"
-                    app:chipStrokeWidth="1dp"
-                    app:checkedIconVisible="false"
-                    android:textColor="@color/chip_text_color" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_orden_menor_mayor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checkable="true"
                     android:text="@string/orden_menor_a_mayor"
                     android:textSize="12sp"
                     app:chipBackgroundColor="@color/chip_bg_color"
@@ -292,6 +280,7 @@
                     android:id="@+id/chip_orden_mayor_menor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checkable="true"
                     android:text="@string/orden_mayor_a_menor"
                     android:textSize="12sp"
                     app:chipBackgroundColor="@color/chip_bg_color"

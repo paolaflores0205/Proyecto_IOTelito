@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,8 +17,8 @@ import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.UserProfile;
 
 /**
- * Pestaña "Perfil": datos del cliente (estáticos, en memoria) y accesos a
- * Editar perfil / Notificaciones.
+ * Pestaña "Perfil": datos del cliente (estáticos en memoria) y accesos a
+ * Editar perfil, Notificaciones, Ayuda y Soporte y Cerrar Sesión.
  */
 public class PerfilFragment extends Fragment {
 
@@ -34,31 +34,46 @@ public class PerfilFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         pintarDatosPerfil(view);
 
-        View rowEditar = view.findViewById(R.id.row_editar_perfil);
-        ((ImageView) rowEditar.findViewById(R.id.iv_icono)).setImageResource(R.drawable.ic_edit);
-        ((TextView) rowEditar.findViewById(R.id.tv_label)).setText(R.string.menu_editar_perfil);
-        rowEditar.setOnClickListener(v ->
+        // Botón Editar Perfil
+        view.findViewById(R.id.btn_editar_perfil).setOnClickListener(v ->
                 startActivity(new Intent(getActivity(), EditarPerfilActivity.class)));
 
-        View rowNotificaciones = view.findViewById(R.id.row_notificaciones);
-        ((ImageView) rowNotificaciones.findViewById(R.id.iv_icono)).setImageResource(R.drawable.ic_notifications);
-        ((TextView) rowNotificaciones.findViewById(R.id.tv_label)).setText(R.string.menu_notificaciones);
-        rowNotificaciones.setOnClickListener(v ->
+        // Opción Notificaciones
+        view.findViewById(R.id.row_notificaciones).setOnClickListener(v ->
                 startActivity(new Intent(getActivity(), NotificacionesActivity.class)));
+
+        // Opción Ayuda y Soporte
+        view.findViewById(R.id.row_ayuda_soporte).setOnClickListener(v ->
+                Toast.makeText(requireContext(), "Centro de Ayuda y Soporte IoTelito", Toast.LENGTH_SHORT).show());
+
+        // Opción Cerrar Sesión
+        view.findViewById(R.id.row_cerrar_sesion).setOnClickListener(v ->
+                Toast.makeText(requireContext(), "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // refresca por si el usuario acaba de editar su perfil
-        pintarDatosPerfil(requireView());
+        // Refresca por si el usuario acaba de editar sus datos
+        if (getView() != null) {
+            pintarDatosPerfil(getView());
+        }
     }
 
     private void pintarDatosPerfil(View view) {
         UserProfile perfil = SampleData.PERFIL;
+
         ((TextView) view.findViewById(R.id.tv_avatar_inicial)).setText(perfil.initials());
         ((TextView) view.findViewById(R.id.tv_nombre)).setText(perfil.name);
         ((TextView) view.findViewById(R.id.tv_email)).setText(perfil.email);
-        ((TextView) view.findViewById(R.id.tv_telefono)).setText(perfil.phone);
+
+        // Card Datos Personales
+        ((TextView) view.findViewById(R.id.tv_datos_nombre)).setText(perfil.name);
+        ((TextView) view.findViewById(R.id.tv_datos_tipo_doc)).setText(perfil.tipoDocumento);
+        ((TextView) view.findViewById(R.id.tv_datos_num_doc)).setText(perfil.numeroDocumento);
+        ((TextView) view.findViewById(R.id.tv_datos_fecha_nac)).setText(perfil.fechaNacimiento);
+        ((TextView) view.findViewById(R.id.tv_datos_email)).setText(perfil.email);
+        ((TextView) view.findViewById(R.id.tv_datos_telefono)).setText(perfil.phone);
+        ((TextView) view.findViewById(R.id.tv_datos_domicilio)).setText(perfil.domicilio);
     }
 }

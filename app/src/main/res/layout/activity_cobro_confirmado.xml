@@ -18,7 +18,8 @@
             android:orientation="vertical"
             android:gravity="center"
             android:paddingTop="32dp"
-            android:paddingBottom="20dp">
+            android:paddingBottom="20dp"
+            android:paddingHorizontal="32dp">
 
             <FrameLayout
                 android:layout_width="64dp"
@@ -42,20 +43,16 @@
                 android:textSize="22sp"
                 android:textFontWeight="900"
                 tools:ignore="UnusedAttribute"
-                android:text="@string/pago_confirmado_titulo" />
+                android:text="@string/checkout_realizado_titulo" />
 
             <TextView
-                android:id="@+id/tv_codigo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_badge_dark"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:textColor="@color/white"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:textColor="@color/io_text_secondary"
                 android:textSize="13sp"
-                android:textStyle="bold"
-                tools:text="CÓDIGO: IOT-2078-5521" />
+                android:text="@string/checkout_realizado_subtitulo" />
         </LinearLayout>
 
         <LinearLayout
@@ -82,14 +79,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/io_text_primary"
-                        android:textSize="15sp"
+                        android:textSize="13sp"
                         android:textStyle="bold"
-                        android:text="@string/resumen_pago" />
+                        android:letterSpacing="0.03"
+                        android:text="@string/resumen_cobro_final" />
 
                     <include layout="@layout/item_summary_row" android:id="@+id/row_hotel" android:layout_marginTop="10dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_habitacion" android:layout_marginTop="6dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_fechas" android:layout_marginTop="6dp" />
-                    <include layout="@layout/item_summary_row" android:id="@+id/row_huespedes" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_tarjeta" android:layout_marginTop="6dp" />
 
                     <View
                         android:layout_width="match_parent"
@@ -110,7 +108,7 @@
                             android:textColor="@color/io_text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:text="@string/pagado_con_tarjeta" />
+                            android:text="@string/label_monto_total_cobrado" />
 
                         <TextView
                             android:id="@+id/tv_monto_total"
@@ -120,26 +118,101 @@
                             android:textSize="18sp"
                             android:textFontWeight="900"
                             tools:ignore="UnusedAttribute"
-                            tools:text="S/ 1,040" />
+                            tools:text="S/ 1,350" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:text="@string/titulo_cargos_adicionales" />
+
+                        <TextView
+                            android:id="@+id/tv_cargos_adicionales"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/io_text_secondary"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            tools:text="S/ 0" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:text="@string/desc_sin_cargos_adicionales" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_info_box_teal"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="10dp">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_check_circle"
+                    android:tint="@color/io_teal"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="11sp"
+                    android:text="@string/aviso_factura_enviada" />
+            </LinearLayout>
+
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_ver_reservas"
+                android:id="@+id/btn_continuar"
                 style="@style/Widget.IoTelito.Button.Primary"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/btn_ver_mis_reservas" />
+                android:text="@string/btn_continuar" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_volver_inicio"
+                android:id="@+id/btn_ver_historial"
                 style="@style/Widget.IoTelito.Button.Outline"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="10dp"
-                android:text="@string/btn_volver_inicio" />
+                android:text="@string/btn_ver_historial" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

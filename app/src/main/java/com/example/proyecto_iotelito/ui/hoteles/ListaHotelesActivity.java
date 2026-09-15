@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
+import com.example.proyecto_iotelito.util.ServicioIconos;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -217,6 +218,9 @@ public class ListaHotelesActivity extends AppCompatActivity {
         for (String servicio : todosLosServicios) {
             Chip chip = crearChipFiltro(servicio);
             chip.setChecked(serviciosSeleccionados.contains(servicio));
+            chip.setChipIconResource(ServicioIconos.iconoPara(servicio));
+            chip.setChipIconTint(ContextCompat.getColorStateList(this, R.color.io_teal));
+            chip.setChipIconVisible(true);
             chip.setOnCheckedChangeListener((boton, marcado) -> {
                 if (marcado) {
                     serviciosTemp.add(servicio);
@@ -233,21 +237,13 @@ public class ListaHotelesActivity extends AppCompatActivity {
             chipGroupOrden.check(R.id.chip_orden_menor_mayor);
         } else if (modoOrden == ORDEN_MAYOR_A_MENOR) {
             chipGroupOrden.check(R.id.chip_orden_mayor_menor);
-        } else {
-            chipGroupOrden.check(R.id.chip_orden_recomendado);
         }
         chipGroupOrden.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (checkedIds.isEmpty()) {
+                ordenTemp[0] = SIN_ORDEN;
                 return;
             }
-            int id = checkedIds.get(0);
-            if (id == R.id.chip_orden_menor_mayor) {
-                ordenTemp[0] = ORDEN_MENOR_A_MAYOR;
-            } else if (id == R.id.chip_orden_mayor_menor) {
-                ordenTemp[0] = ORDEN_MAYOR_A_MENOR;
-            } else {
-                ordenTemp[0] = SIN_ORDEN;
-            }
+            ordenTemp[0] = checkedIds.get(0) == R.id.chip_orden_menor_mayor ? ORDEN_MENOR_A_MAYOR : ORDEN_MAYOR_A_MENOR;
         });
 
         sheetView.findViewById(R.id.btn_limpiar_sheet).setOnClickListener(v -> {
@@ -268,7 +264,7 @@ public class ListaHotelesActivity extends AppCompatActivity {
             }
 
             ordenTemp[0] = SIN_ORDEN;
-            chipGroupOrden.check(R.id.chip_orden_recomendado);
+            chipGroupOrden.clearCheck();
         });
 
         sheetView.findViewById(R.id.btn_aplicar_sheet).setOnClickListener(v -> {

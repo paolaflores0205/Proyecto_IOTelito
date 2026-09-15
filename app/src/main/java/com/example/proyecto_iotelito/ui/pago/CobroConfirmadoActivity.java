@@ -15,11 +15,6 @@ import com.example.proyecto_iotelito.model.Reserva;
 
 import java.util.Locale;
 
-/**
- * Confirmación del pago de una reserva pendiente. Desde aquí se vuelve al
- * shell principal (pestaña Reservas o Explorar), limpiando el stack del
- * flujo de pago igual que {@link com.example.proyecto_iotelito.ui.booking.ReservaConfirmadaActivity}.
- */
 public class CobroConfirmadoActivity extends AppCompatActivity {
 
     public static final String EXTRA_RESERVA_ID = "extra_reserva_id";
@@ -33,18 +28,17 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
         Reserva reserva = SampleData.findReservaById(reservaId);
         Hotel hotel = SampleData.findById(reserva.hotelId);
 
-        ((TextView) findViewById(R.id.tv_codigo)).setText(getString(R.string.codigo_reserva, reserva.codigo));
-
         bindRow(R.id.row_hotel, R.string.label_hotel, hotel.name);
-        bindRow(R.id.row_habitacion, R.string.label_habitacion, reserva.roomName);
-        bindRow(R.id.row_fechas, R.string.label_fechas, reserva.rangoFechas);
-        bindRow(R.id.row_huespedes, R.string.label_huespedes_dp, reserva.huespedes);
+        bindRow(R.id.row_habitacion, R.string.label_habitacion,
+                getString(R.string.habitacion_con_numero, reserva.roomName, reserva.roomNumber));
+        bindRow(R.id.row_fechas, R.string.label_fechas, reserva.rangoFechasTexto());
+        bindRow(R.id.row_tarjeta, R.string.label_tarjeta_cargo, getString(R.string.tarjeta_simulada_valor));
 
-        ((TextView) findViewById(R.id.tv_monto_total)).setText(
-                "S/ " + String.format(Locale.US, "%,.0f", reserva.precioTotal));
+        ((TextView) findViewById(R.id.tv_monto_total)).setText(formatMoney(reserva.precioTotal));
+        ((TextView) findViewById(R.id.tv_cargos_adicionales)).setText(formatMoney(0));
 
-        findViewById(R.id.btn_ver_reservas).setOnClickListener(v -> irAlShell(R.id.nav_reservas));
-        findViewById(R.id.btn_volver_inicio).setOnClickListener(v -> irAlShell(R.id.nav_explorar));
+        findViewById(R.id.btn_continuar).setOnClickListener(v -> irAlShell());
+        findViewById(R.id.btn_ver_historial).setOnClickListener(v -> irAlShell());
     }
 
     private void bindRow(int rowId, int labelRes, String value) {
@@ -53,11 +47,15 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
         ((TextView) row.findViewById(R.id.tv_value)).setText(value);
     }
 
-    private void irAlShell(int tabMenuItemId) {
+    private void irAlShell() {
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(MainActivity.EXTRA_OPEN_TAB, tabMenuItemId);
+        intent.putExtra(MainActivity.EXTRA_OPEN_TAB, R.id.nav_reservas);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
+    }
+
+    private String formatMoney(double amount) {
+        return "S/ " + String.format(Locale.US, "%,.0f", amount);
     }
 }

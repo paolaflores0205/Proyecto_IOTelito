@@ -55,7 +55,6 @@
     <string name="texto_rango_precio">S/ %1$.0f – S/ %2$.0f</string>
     <string name="label_servicios">Servicios</string>
     <string name="label_ordenar">Ordenar por</string>
-    <string name="opcion_orden_recomendado">Recomendado</string>
     <string name="btn_aplicar_filtros">Aplicar filtros</string>
 
     <plurals name="hoteles_encontrados_plural">
@@ -64,16 +63,12 @@
     </plurals>
 
     <!-- Resultados -->
-    <string name="chip_precio">Precio</string>
-    <string name="chip_valoracion">Valoración</string>
-    <string name="chip_servicios">Servicios</string>
     <string name="btn_ver_detalle">Ver detalle</string>
     <string name="desde_precio">Desde %1$s</string>
     <string name="por_noche">por noche</string>
     <string name="orden_menor_a_mayor">Menor a mayor</string>
     <string name="orden_mayor_a_menor">Mayor a menor</string>
     <string name="resumen_busqueda_valor">15–18 ago · 3 huéspedes</string>
-    <string name="toast_orden_aplicado">Orden aplicado: %1$s</string>
 
     <plurals name="adultos_plural">
         <item quantity="one">%d adulto</item>
@@ -115,7 +110,7 @@
     <string name="hint_numero_tarjeta">0000 0000 0000 0000</string>
     <string name="vencimiento">Vencimiento</string>
     <string name="cvv">CVV</string>
-    <string name="aviso_pago_simulado">Este es un pago simulado con fines académicos.</string>
+    <string name="aviso_registro_tarjeta">No se te cobrará ahora. Esto solo registra tu tarjeta para confirmar la reserva; el cobro se realizará automáticamente al hacer el checkout al finalizar tu estadía, donde también se sumará cualquier cargo adicional.</string>
     <string name="btn_confirmar_reserva">Confirmar reserva</string>
     <string name="error_campo_obligatorio">Campo obligatorio</string>
 
@@ -136,14 +131,18 @@
     <string name="mensajes_placeholder">Chatea con el hotel durante una reserva activa.</string>
 
     <!-- Mis reservas -->
-    <string name="tab_activas">Activas</string>
-    <string name="tab_historial">Historial</string>
+    <string name="tab_activas_conteo">Activas (%1$d)</string>
+    <string name="tab_finalizadas_conteo">Finalizadas (%1$d)</string>
     <string name="sin_reservas_activas">No tienes reservas activas por ahora.</string>
-    <string name="sin_reservas_historial">Aún no tienes reservas en tu historial.</string>
+    <string name="sin_reservas_historial">Aún no tienes reservas finalizadas.</string>
     <string name="estado_confirmada">Confirmada</string>
+    <string name="estado_en_curso">En curso</string>
     <string name="estado_pendiente_pago">Pago pendiente</string>
-    <string name="estado_completada">Completada</string>
+    <string name="estado_completada">Finalizada</string>
     <string name="estado_cancelada">Cancelada</string>
+    <string name="seccion_proximas_estadias">Próximas estadías</string>
+    <string name="seccion_en_curso">En curso</string>
+    <string name="seccion_pasadas">Pasadas</string>
     <plurals name="noches_plural">
         <item quantity="one">%d noche</item>
         <item quantity="other">%d noches</item>
@@ -151,14 +150,17 @@
 
     <!-- Detalle de reserva -->
     <string name="mensaje_estado_confirmada">Tu reserva está confirmada. ¡Te esperamos!</string>
+    <string name="mensaje_estado_en_curso">Tu estadía está en curso. ¡Disfrútala!</string>
+    <string name="mensaje_puede_checkout">Hoy es tu último día. Realiza el checkout para finalizar tu estadía.</string>
     <string name="mensaje_estado_pendiente">Tu reserva está creada, pero el pago sigue pendiente.</string>
     <string name="mensaje_estado_completada">Esta estadía ya finalizó. ¡Gracias por elegirnos!</string>
     <string name="mensaje_estado_cancelada">Esta reserva fue cancelada.</string>
-    <string name="btn_pagar_ahora">Pagar ahora</string>
+    <string name="btn_realizar_checkout">Realizar checkout</string>
     <string name="btn_chatear_hotel">Chatear con el hotel</string>
     <string name="btn_ver_hotel">Ver hotel</string>
     <string name="label_noches">Noches:</string>
     <string name="label_codigo">Código:</string>
+    <string name="habitacion_con_numero">%1$s (Hab. %2$s)</string>
 
     <!-- Chat con el hotel -->
     <string name="hint_mensaje">Escribe un mensaje…</string>
@@ -166,14 +168,33 @@
     <string name="estado_en_linea">En línea</string>
     <string name="respuesta_automatica">Gracias por tu mensaje. Un miembro del equipo te responderá en breve.</string>
 
-    <!-- Checkout / pago de reserva pendiente -->
-    <string name="titulo_checkout">Pagar reserva</string>
-    <string name="btn_confirmar_pago">Confirmar pago</string>
+    <!-- Realizar checkout -->
+    <string name="titulo_checkout">Realizar checkout</string>
+    <string name="label_valoracion_estadia">Valoración de tu estadía</string>
+    <string name="pregunta_valoracion">¿Cómo calificarías tu experiencia general y la conectividad IoT?</string>
+    <string name="hint_comentarios_checkout">Comentarios y sugerencias (Opcional)</string>
+    <string name="cd_estrella_valoracion">Calificar con %1$d estrellas</string>
+    <string name="label_monto_preautorizado">Monto pre-autorizado</string>
+    <string name="label_consumos_adicionales">Consumos adicionales</string>
+    <string name="label_total_liquidar">Total a liquidar</string>
+    <string name="label_taxi_cortesia">¿Deseas taxi de cortesía al aeropuerto?</string>
+    <string name="desc_taxi_cortesia">Beneficio gratis para reservas de 3+ noches</string>
+    <string name="aviso_cargos_adicionales">Cualquier daño a la propiedad o domótica puede aplicar cargos adicionales. Liquidación académica ficticia.</string>
+    <string name="btn_confirmar_checkout">Confirmar checkout</string>
+    <string name="toast_calificacion_requerida">Por favor califica tu estadía antes de continuar</string>
 
-    <!-- Cobro confirmado -->
-    <string name="pago_confirmado_titulo">¡Pago confirmado!</string>
-    <string name="resumen_pago">Resumen del pago</string>
-    <string name="btn_ver_mis_reservas">Ver mis reservas</string>
+    <!-- Checkout realizado -->
+    <string name="checkout_realizado_titulo">Checkout realizado</string>
+    <string name="checkout_realizado_subtitulo">Se ha debitado el cobro con éxito a tu tarjeta registrada.</string>
+    <string name="resumen_cobro_final">Resumen de cobro final</string>
+    <string name="label_tarjeta_cargo">Tarjeta de cargo:</string>
+    <string name="tarjeta_simulada_valor">Visa terminada en 4557</string>
+    <string name="label_monto_total_cobrado">Monto total cobrado:</string>
+    <string name="titulo_cargos_adicionales">Cargos adicionales</string>
+    <string name="desc_sin_cargos_adicionales">No se encontraron consumos extra en frigobar, telefonía o Room Service.</string>
+    <string name="aviso_factura_enviada">Hemos enviado la factura digital y resumen a tu correo registrado.</string>
+    <string name="btn_continuar">Continuar</string>
+    <string name="btn_ver_historial">Ver historial</string>
 
     <!-- Perfil -->
     <string name="menu_editar_perfil">Editar perfil</string>
@@ -203,4 +224,77 @@
     <string name="cd_regresar">Regresar</string>
     <string name="cd_favorito">Favorito</string>
     <string name="cd_huespedes">Huéspedes</string>
+
+    <!-- Beneficio de taxi -->
+    <string name="titulo_beneficios">Beneficios</string>
+    <string name="badge_beneficio_exclusivo">BENEFICIO EXCLUSIVO</string>
+    <string name="titulo_taxi_gratuito">Taxi gratuito al aeropuerto</string>
+    <string name="desc_taxi_gratuito">¡Felicitaciones! Tu reserva de estadía en el <b>Hotel Miraflores Park</b> superó el monto mínimo de consumo acumulado y has desbloqueado un traslado privado 100% cubierto.</string>
+    <string name="item_valido_aeropuerto">Válido para salidas al Aeropuerto Jorge Chávez</string>
+    <string name="item_monitoreo_satelital">Monitoreo satelital y domótica vinculada</string>
+    <string name="btn_solicitar_taxi_gratuito">Solicitar taxi gratuito</string>
+    <string name="btn_no_gracias">No, gracias</string>
+
+    <!-- Solicitud de taxi -->
+    <string name="titulo_solicitar_taxi">Solicitar taxi</string>
+    <string name="label_aeropuerto_destino">Aeropuerto de destino</string>
+    <string name="valor_aeropuerto">Aeropuerto Internacional Jorge Chávez (LIM)</string>
+    <string name="label_hora_salida">Hora estimada de salida</string>
+    <string name="valor_hora_salida">15:30 PM</string>
+    <string name="label_pasajeros">Pasajeros</string>
+    <string name="label_maletas">Maletas grandes</string>
+    <string name="label_direccion_recojo">Dirección de recojo (Hotel)</string>
+    <string name="label_servicio_privado">Servicio privado</string>
+    <string name="valor_cubierto">100% Cubierto</string>
+    <string name="label_costo_trayecto">Costo del trayecto</string>
+    <string name="valor_gratis">Gratis (S/ 0.00)</string>
+    <string name="btn_confirmar_solicitud">Confirmar solicitud</string>
+
+    <!-- Taxista asignado -->
+    <string name="titulo_taxi_asignado">Taxi asignado</string>
+    <string name="banner_asignado">ASIGNADO · Conductor en camino</string>
+    <string name="nombre_conductor">Gabriel Linares R.</string>
+    <string name="rating_conductor">4.9</string>
+    <string name="viajes_conductor">Más de 500 viajes completados</string>
+    <string name="modelo_vehiculo">Toyota Camry Híbrido</string>
+    <string name="placa_vehiculo">BYA-482</string>
+    <string name="color_vehiculo">Color: Blanco Perla · Aire Acondicionado</string>
+    <string name="label_tiempo_llegada">Tiempo de llegada estimado</string>
+    <string name="valor_tiempo_llegada">8 minutos</string>
+    <string name="btn_ver_ubicacion">Ver ubicación en tiempo real</string>
+    <string name="link_cancelar_solicitud">Cancelar solicitud</string>
+
+    <!-- Seguimiento de taxi -->
+    <string name="etiqueta_llegada">Llegada en 5 min · 1.8 km</string>
+    <string name="paso_solicitado">SOLICITADO</string>
+    <string name="paso_asignado">ASIGNADO</string>
+    <string name="paso_en_camino">EN CAMINO</string>
+    <string name="paso_traslado">TRASLADO</string>
+    <string name="paso_fin">FIN</string>
+    <string name="estado_en_camino_desc">El vehículo está doblando la esquina en Av. Larco</string>
+    <string name="vehiculo_placa">Toyota Camry · BYA-482</string>
+    <string name="btn_abrir_chat_conductor">Abrir chat con conductor</string>
+    <string name="btn_ver_codigo_qr">Ver código QR del viaje</string>
+
+    <!-- Código QR -->
+    <string name="titulo_codigo_viaje">Código de viaje</string>
+    <string name="badge_en_traslado">EN TRASLADO</string>
+    <string name="instrucciones_qr">Muestra este código QR al personal al llegar o al taxista durante el abordaje.</string>
+    <string name="label_conductor_qr">Conductor</string>
+    <string name="nombre_conductor_qr">Eduardo Gómez</string>
+    <string name="label_vehiculo_qr">Vehículo</string>
+    <string name="valor_vehiculo_qr">Toyota Camry (BYA-482)</string>
+    <string name="label_destino_qr">Destino</string>
+    <string name="valor_destino_qr">Aeropuerto Jorge Chávez</string>
+    <string name="aviso_qr_seguridad">⚠ No compartas este código con extraños antes de haber abordado y confirmado la identidad de tu conductor.</string>
+    <string name="btn_finalizar_viaje">Finalizar viaje →</string>
+
+    <!-- Calificar taxista -->
+    <string name="titulo_calificar_servicio">Calificar servicio</string>
+    <string name="pregunta_viaje">¿Cómo calificarías tu viaje?</string>
+    <string name="hint_comentarios_taxi">Ej: Excelente servicio, conductor amable y puntual…</string>
+    <string name="btn_enviar_calificacion">Enviar calificación</string>
+    <string name="link_volver_inicio">Volver al inicio</string>
+    <string name="footer_gracias_iot">¡Gracias por ayudarnos a mejorar el servicio domótico e IoT de IoTelito!</string>
+    <string name="label_comentarios_taxi">Comentarios y sugerencias (Opcional)</string>
 </resources>

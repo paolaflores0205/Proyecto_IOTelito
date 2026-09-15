@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/sub_header"
+        layout="@layout/item_sub_header" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Aeropuerto de destino -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_aeropuerto_destino"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/valor_aeropuerto"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="13sp" />
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_down"
+                    android:tint="@color/io_text_muted"
+                    android:contentDescription="@null" />
+            </LinearLayout>
+
+            <!-- Hora estimada de salida -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/label_hora_salida"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/valor_hora_salida"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="14sp" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_clock"
+                    android:contentDescription="@null" />
+            </LinearLayout>
+
+            <!-- Pasajeros + Maletas -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <!-- Pasajeros -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_pasajeros"
+                        android:textColor="@color/io_text_secondary"
+                        android:textSize="12sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_input_field"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="6dp">
+
+                        <FrameLayout
+                            android:id="@+id/btn_menos_pasajeros"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_stepper_button"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_remove"
+                                android:tint="@color/io_teal"
+                                android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tv_pasajeros"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="2"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <FrameLayout
+                            android:id="@+id/btn_mas_pasajeros"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_stepper_plus"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_add"
+                                android:tint="@color/white"
+                                android:contentDescription="@null" />
+                        </FrameLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View android:layout_width="12dp" android:layout_height="1dp" />
+
+                <!-- Maletas -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_maletas"
+                        android:textColor="@color/io_text_secondary"
+                        android:textSize="12sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_input_field"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="6dp">
+
+                        <FrameLayout
+                            android:id="@+id/btn_menos_maletas"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_stepper_button"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_remove"
+                                android:tint="@color/io_teal"
+                                android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tv_maletas"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="3"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <FrameLayout
+                            android:id="@+id/btn_mas_maletas"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_stepper_plus"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_add"
+                                android:tint="@color/white"
+                                android:contentDescription="@null" />
+                        </FrameLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Dirección de recojo -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/label_direccion_recojo"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/container_direccion"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp">
+
+                <TextView
+                    android:id="@+id/tv_direccion_hotel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Summary card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_servicio_privado"
+                            android:textColor="@color/io_text_secondary"
+                            android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/valor_cubierto"
+                            android:textColor="@color/io_teal"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="@color/io_border" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_costo_trayecto"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/valor_gratis"
+                            android:textColor="@color/io_teal"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Confirm button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_confirmar_solicitud"
+                style="@style/Widget.IoTelito.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:text="@string/btn_confirmar_solicitud" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

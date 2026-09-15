@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="32dp">
+
+    <!-- drag handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_drag_handle" />
+
+    <!-- illustration strip -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:background="@drawable/bg_taxi_illustration">
+
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_taxi"
+            android:tint="@color/white"
+            android:contentDescription="@null" />
+    </FrameLayout>
+
+    <!-- badge -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_badge_teal_pill"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:text="BENEFICIO EXCLUSIVO"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="10sp"
+        android:textStyle="bold" />
+
+    <!-- title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="24dp"
+        android:gravity="center"
+        android:text="¡Tu reserva califica para taxi gratis al aeropuerto!"
+        android:textColor="@color/io_text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:lineSpacingMultiplier="1.2" />
+
+    <!-- subtitle -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="24dp"
+        android:gravity="center"
+        android:text="Tu estadía superó el monto mínimo. Te ofrecemos un traslado privado al Aeropuerto Jorge Chávez completamente cubierto."
+        android:textColor="@color/io_text_secondary"
+        android:textSize="13sp"
+        android:lineSpacingMultiplier="1.4" />
+
+    <!-- divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="16dp"
+        android:background="@color/io_border" />
+
+    <!-- buttons -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_aceptar_taxi"
+        style="@style/Widget.IoTelito.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:text="Solicitar taxi gratuito" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_rechazar_taxi"
+        style="@style/Widget.IoTelito.Button.Outline"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="16dp"
+        android:text="No, gracias" />
+
+</LinearLayout>

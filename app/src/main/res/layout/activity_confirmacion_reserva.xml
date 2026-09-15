@@ -164,7 +164,7 @@
                                 android:textColorHint="@color/io_text_muted"
                                 android:textColor="@color/io_text_primary"
                                 android:textSize="14sp"
-                                android:inputType="date"
+                                android:inputType="number"
                                 android:maxLength="5"
                                 android:singleLine="true" />
                         </LinearLayout>
@@ -225,7 +225,7 @@
                             android:textColor="@color/io_warning_text"
                             android:textSize="10sp"
                             android:textStyle="bold"
-                            android:text="@string/aviso_pago_simulado" />
+                            android:text="@string/aviso_registro_tarjeta" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

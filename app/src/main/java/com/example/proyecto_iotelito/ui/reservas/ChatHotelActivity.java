@@ -30,6 +30,7 @@ import java.util.List;
 public class ChatHotelActivity extends AppCompatActivity {
 
     public static final String EXTRA_HOTEL_ID = "extra_hotel_id";
+    public static final String EXTRA_CONVERSACION_ID = "extra_conversacion_id";
 
     private LinearLayout mensajesContainer;
     private ScrollView scrollMensajes;
@@ -41,6 +42,7 @@ public class ChatHotelActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat_hotel);
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
+        int conversacionId = getIntent().getIntExtra(EXTRA_CONVERSACION_ID, 0);
         Hotel hotel = SampleData.findById(hotelId);
 
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
@@ -50,7 +52,7 @@ public class ChatHotelActivity extends AppCompatActivity {
         mensajesContainer = findViewById(R.id.mensajes_container);
         scrollMensajes = findViewById(R.id.scroll_mensajes);
 
-        List<Mensaje> historial = SampleData.chatDeReserva(hotel.name);
+        List<Mensaje> historial = SampleData.chatDeConversacion(conversacionId, hotel.name);
         for (Mensaje mensaje : historial) {
             agregarBurbuja(mensaje);
         }

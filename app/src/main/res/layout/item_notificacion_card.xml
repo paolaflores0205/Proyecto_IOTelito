@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_notificacion_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_notif_read_card"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="14dp">
+
+    <!-- Ícono con fondo cuadrado redondeado cian -->
+    <FrameLayout
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:background="@drawable/bg_icon_square_teal">
+
+        <ImageView
+            android:id="@+id/iv_icono_notif"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_calendar"
+            app:tint="@color/white" />
+    </FrameLayout>
+
+    <!-- Texto de la Notificación -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_titulo_notif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/io_text_primary"
+            android:textSize="14.5sp"
+            android:textStyle="bold"
+            tools:text="Tu reserva en Hotel Miraflores Park fue confirmada" />
+
+        <TextView
+            android:id="@+id/tv_tiempo_notif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/io_text_muted"
+            android:textSize="12sp"
+            tools:text="Hoy, 10:30 a.m." />
+    </LinearLayout>
+
+    <!-- Indicador punto cian para no leídas -->
+    <View
+        android:id="@+id/view_dot_sin_leer"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="@drawable/bg_unread_dot"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+</LinearLayout>

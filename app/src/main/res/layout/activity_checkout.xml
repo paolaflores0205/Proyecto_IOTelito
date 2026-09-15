@@ -22,13 +22,73 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- summary-card -->
+            <!-- hotel-mini-card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="3dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_photo_placeholder" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_hotel_nombre"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            tools:text="Hotel Miraflores Park" />
+
+                        <TextView
+                            android:id="@+id/tv_habitacion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/io_text_secondary"
+                            android:textSize="12sp"
+                            tools:text="Suite Deluxe · Hab. 804" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- valoracion-card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -38,18 +98,130 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/tv_hotel_nombre"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/io_text_primary"
-                        android:textSize="16sp"
+                        android:textSize="13sp"
                         android:textStyle="bold"
-                        tools:text="Palacio del Inka" />
+                        android:letterSpacing="0.03"
+                        android:text="@string/label_valoracion_estadia" />
 
-                    <include layout="@layout/item_summary_row" android:id="@+id/row_habitacion" android:layout_marginTop="12dp" />
-                    <include layout="@layout/item_summary_row" android:id="@+id/row_fechas" android:layout_marginTop="6dp" />
-                    <include layout="@layout/item_summary_row" android:id="@+id/row_huespedes" android:layout_marginTop="6dp" />
-                    <include layout="@layout/item_summary_row" android:id="@+id/row_codigo" android:layout_marginTop="6dp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/io_text_secondary"
+                        android:textSize="13sp"
+                        android:text="@string/pregunta_valoracion" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/iv_star_1"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:padding="3dp"
+                            android:src="@drawable/ic_star_border"
+                            android:tint="@color/io_star"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/cd_estrella_valoracion" />
+
+                        <ImageView
+                            android:id="@+id/iv_star_2"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:padding="3dp"
+                            android:src="@drawable/ic_star_border"
+                            android:tint="@color/io_star"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/cd_estrella_valoracion" />
+
+                        <ImageView
+                            android:id="@+id/iv_star_3"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:padding="3dp"
+                            android:src="@drawable/ic_star_border"
+                            android:tint="@color/io_star"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/cd_estrella_valoracion" />
+
+                        <ImageView
+                            android:id="@+id/iv_star_4"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:padding="3dp"
+                            android:src="@drawable/ic_star_border"
+                            android:tint="@color/io_star"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/cd_estrella_valoracion" />
+
+                        <ImageView
+                            android:id="@+id/iv_star_5"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:padding="3dp"
+                            android:src="@drawable/ic_star_border"
+                            android:tint="@color/io_star"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/cd_estrella_valoracion" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textColor="@color/io_text_secondary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:text="@string/hint_comentarios_checkout" />
+
+                    <EditText
+                        android:id="@+id/et_comentarios"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_input_field"
+                        android:padding="12dp"
+                        android:gravity="top|start"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="13sp"
+                        android:inputType="textMultiLine|textCapSentences" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- monto-card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_monto_preautorizado" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_consumos_adicionales" android:layout_marginTop="8dp" />
 
                     <View
                         android:layout_width="match_parent"
@@ -68,175 +240,117 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:textColor="@color/io_text_primary"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
-                            android:text="@string/label_monto_total" />
+                            android:text="@string/label_total_liquidar" />
 
                         <TextView
-                            android:id="@+id/tv_monto_total"
+                            android:id="@+id/tv_total_liquidar"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@color/io_teal"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textFontWeight="900"
                             tools:ignore="UnusedAttribute"
-                            tools:text="S/ 1,040" />
+                            tools:text="S/ 1,350" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- payment-card -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- taxi-cortesia -->
+            <LinearLayout
+                android:id="@+id/row_taxi_cortesia"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="3dp"
-                app:strokeWidth="0dp">
+                android:background="@drawable/bg_info_box_teal"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_taxi"
+                    android:tint="@color/io_teal"
+                    android:contentDescription="@null" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/io_text_primary"
-                        android:textSize="14sp"
+                        android:textSize="12sp"
                         android:textStyle="bold"
-                        android:text="@string/datos_pago" />
+                        android:text="@string/label_taxi_cortesia" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="2dp"
                         android:textColor="@color/io_text_secondary"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:text="@string/numero_tarjeta" />
-
-                    <EditText
-                        android:id="@+id/et_numero_tarjeta"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="6dp"
-                        android:background="@drawable/bg_input_field"
-                        android:paddingHorizontal="14dp"
-                        android:hint="@string/hint_numero_tarjeta"
-                        android:textColorHint="@color/io_text_muted"
-                        android:textColor="@color/io_text_primary"
-                        android:textSize="14sp"
-                        android:inputType="number"
-                        android:maxLength="19"
-                        android:singleLine="true" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/io_text_secondary"
-                                android:textSize="13sp"
-                                android:textStyle="bold"
-                                android:text="@string/vencimiento" />
-
-                            <EditText
-                                android:id="@+id/et_vencimiento"
-                                android:layout_width="match_parent"
-                                android:layout_height="48dp"
-                                android:layout_marginTop="6dp"
-                                android:background="@drawable/bg_input_field"
-                                android:paddingHorizontal="14dp"
-                                android:hint="MM/AA"
-                                android:textColorHint="@color/io_text_muted"
-                                android:textColor="@color/io_text_primary"
-                                android:textSize="14sp"
-                                android:inputType="date"
-                                android:maxLength="5"
-                                android:singleLine="true" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="12dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/io_text_secondary"
-                                android:textSize="13sp"
-                                android:textStyle="bold"
-                                android:text="@string/cvv" />
-
-                            <EditText
-                                android:id="@+id/et_cvv"
-                                android:layout_width="match_parent"
-                                android:layout_height="48dp"
-                                android:layout_marginTop="6dp"
-                                android:background="@drawable/bg_input_field"
-                                android:paddingHorizontal="14dp"
-                                android:hint="•••"
-                                android:textColorHint="@color/io_text_muted"
-                                android:textColor="@color/io_text_primary"
-                                android:textSize="14sp"
-                                android:inputType="numberPassword"
-                                android:maxLength="3"
-                                android:singleLine="true" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:background="@drawable/bg_warning_box"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="8dp">
-
-                        <ImageView
-                            android:layout_width="14dp"
-                            android:layout_height="14dp"
-                            android:src="@drawable/ic_warning"
-                            android:tint="@color/io_warning_text"
-                            android:contentDescription="@null" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="6dp"
-                            android:textColor="@color/io_warning_text"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:text="@string/aviso_pago_simulado" />
-                    </LinearLayout>
+                        android:textSize="11sp"
+                        android:text="@string/desc_taxi_cortesia" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/check_taxi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_warning_box"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="10dp">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_warning"
+                    android:tint="@color/io_warning_text"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/io_warning_text"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:text="@string/aviso_cargos_adicionales" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_confirmar_pago"
+                android:id="@+id/btn_confirmar_checkout"
                 style="@style/Widget.IoTelito.Button.Primary"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/btn_confirmar_pago" />
+                android:text="@string/btn_confirmar_checkout" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancelar_checkout"
+                style="@style/Widget.IoTelito.Button.Outline"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/btn_cancelar" />
 
         </LinearLayout>
     </ScrollView>

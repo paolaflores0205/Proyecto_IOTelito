@@ -120,12 +120,12 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_pagar_ahora"
+                android:id="@+id/btn_realizar_checkout"
                 style="@style/Widget.IoTelito.Button.Primary"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="20dp"
-                android:text="@string/btn_pagar_ahora" />
+                android:text="@string/btn_realizar_checkout" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_chatear"
