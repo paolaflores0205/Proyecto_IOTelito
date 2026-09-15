@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_surface_variant"
+    android:orientation="vertical"
+    tools:context=".ui.hoteladmin.mensajes.AdminMensajesFragment">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@color/io_navy" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="16dp" android:paddingVertical="16dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/hoteladmin_mensajes_titulo" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
+        <include layout="@layout/view_hoteladmin_logo" />
+    </LinearLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.IoTelito.Input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="14dp"
+        android:hint="@string/hoteladmin_buscar_conversaciones"
+        app:startIconDrawable="@drawable/ic_search">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_buscar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_filtro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+        <com.google.android.material.chip.Chip android:id="@+id/chip_todos" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_mensajes_todos" />
+        <com.google.android.material.chip.Chip android:id="@+id/chip_hospedados" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_filtro_hospedados" />
+    </com.google.android.material.chip.ChipGroup>
+
+    <TextView android:id="@+id/tv_sin_conversaciones" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:padding="32dp" android:text="@string/hoteladmin_sin_conversaciones" android:textColor="@color/io_text_secondary" android:visibility="gone" />
+
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:id="@+id/ll_conversaciones" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingTop="6dp" android:paddingBottom="16dp" />
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

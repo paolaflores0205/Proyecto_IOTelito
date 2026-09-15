@@ -1,9 +1,11 @@
 package com.example.proyecto_iotelito.model;
 
+import java.io.Serializable;
+
 /**
  * Mensaje del chat estático con el hotel (sin backend todavía).
  */
-public class Mensaje {
+public class Mensaje implements Serializable {
 
     public final String texto;
     public final boolean deHuesped;

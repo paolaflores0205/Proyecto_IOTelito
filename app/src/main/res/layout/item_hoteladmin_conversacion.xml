@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.IoTelito.Card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:strokeColor="@color/io_divider"
+    app:strokeWidth="1dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
+        <FrameLayout android:layout_width="48dp" android:layout_height="48dp" android:background="@drawable/bg_avatar_circle">
+            <TextView android:id="@+id/tv_inicial" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:textColor="@color/white" android:textSize="17sp" android:textStyle="bold" tools:text="M" />
+        </FrameLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:id="@+id/tv_nombre" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="@color/io_text_primary" android:textSize="15sp" android:textStyle="bold" tools:text="María López" />
+                <TextView android:id="@+id/tv_habitacion" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:textColor="@color/io_text_secondary" android:textSize="11sp" tools:text="Hab. 204" />
+            </LinearLayout>
+            <TextView android:id="@+id/tv_mensaje" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:ellipsize="end" android:maxLines="1" android:textColor="@color/io_text_secondary" android:textSize="13sp" tools:text="Perfecto, muchas gracias" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:gravity="end" android:orientation="vertical">
+            <TextView android:id="@+id/tv_hora" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/io_text_muted" android:textSize="10sp" tools:text="10:30" />
+            <TextView android:id="@+id/tv_no_leidos" android:layout_width="24dp" android:layout_height="24dp" android:layout_marginTop="5dp" android:background="@drawable/bg_avatar_circle" android:gravity="center" android:textColor="@color/white" android:textSize="11sp" android:textStyle="bold" tools:text="2" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

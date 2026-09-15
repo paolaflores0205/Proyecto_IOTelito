@@ -568,4 +568,17 @@
     <string name="hoteladmin_taxi_finalizado">Finalizado</string>
     <string name="hoteladmin_taxi_contactar">Contactar al huésped</string>
     <string name="hoteladmin_ver_reserva">Ver reserva</string>
+
+    <!-- Bandeja y chat del administrador (Hito 4) -->
+    <string name="hoteladmin_buscar_conversaciones">Buscar conversaciones</string>
+    <string name="hoteladmin_mensajes_todos">Todos</string>
+    <string name="hoteladmin_sin_conversaciones">No hay conversaciones que coincidan con la búsqueda.</string>
+    <string name="hoteladmin_escribe_mensaje">Escribe un mensaje…</string>
+    <string name="hoteladmin_escribe_mensaje_error">Escribe un mensaje antes de enviarlo</string>
+    <string name="hoteladmin_adjuntar">Adjuntar archivo</string>
+    <string name="hoteladmin_adjuntos_posterior">Los adjuntos se habilitarán con el almacenamiento del siguiente laboratorio.</string>
+    <string name="hoteladmin_hora_ahora">ahora</string>
+    <string name="hoteladmin_detalle_reserva_activa">Reserva activa</string>
+    <string name="hoteladmin_detalle_reserva_chat">Huésped: %1$s\nHabitación: %2$s\nEstado: Hospedado</string>
+    <string name="hoteladmin_entendido">Entendido</string>
 </resources>

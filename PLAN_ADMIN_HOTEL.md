@@ -108,7 +108,7 @@ POJO `Serializable`, campos `public final` (mutables solo donde se edita en memo
 - [x] **Hito 1 – Modelos y datos**: modelos `model/hoteladmin/*` + `HotelAdminSampleData` + `EstadoCheckoutUi`.
 - [x] **Hito 2 – Pestaña Hotel**: dashboard (1) → habitaciones (4) + formulario (5) → servicios (6) + formulario (7) → datos (2) → fotos (3, mín. 4).
 - [x] **Hito 3 – Pestaña Reservas**: lista con chips Próximas/Hospedados/Checkout (8) → cobro/checkout con cobro por daños (9) → estado de taxi (10).
-- [ ] **Hito 4 – Pestaña Mensajes**: bandeja (11) → chat (12).
+- [x] **Hito 4 – Pestaña Mensajes**: bandeja (11) → chat (12).
 - [ ] **Hito 5 – Pestaña Reportes**: KPIs + ingresos por servicio ordenados de menor a mayor + barras estáticas (13).
 - [ ] **Hito 6 – Pulido**: estados vacíos, validaciones, `contentDescription`, revisión contra Figma, sin texto hardcodeado.
 - [ ] **Lab 4 (posterior)**: migrar todas las listas a **RecyclerView** (coordinado con el equipo).

@@ -177,6 +177,12 @@
             android:name=".ui.hoteladmin.reservas.EstadoTaxiActivity"
             android:exported="false"
             android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.mensajes.AdminChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
     </application>
 
 </manifest>
