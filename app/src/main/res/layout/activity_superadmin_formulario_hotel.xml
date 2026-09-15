@@ -47,8 +47,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="@string/superadmin_hotel_name">
-                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/superadmin_hotel_name_hint" android:inputType="textCapWords" />
+                android:hint="@string/superadmin_hotel_name"
+                app:placeholderText="@string/superadmin_hotel_name_hint">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -68,7 +73,14 @@
                 android:layout_marginTop="12dp"
                 android:hint="@string/superadmin_district"
                 app:endIconMode="dropdown_menu">
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView android:id="@+id/actv_district" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="none" />
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actv_district"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -78,7 +90,14 @@
                 android:layout_marginTop="12dp"
                 android:hint="@string/superadmin_city"
                 app:endIconMode="dropdown_menu">
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView android:id="@+id/actv_city" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="none" />
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actv_city"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <ImageView
@@ -112,8 +131,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="@string/superadmin_brief_description">
-                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_description" android:layout_width="match_parent" android:layout_height="100dp" android:gravity="top" android:hint="@string/superadmin_description_hint" android:inputType="textCapSentences|textMultiLine" />
+                android:hint="@string/superadmin_brief_description"
+                app:placeholderText="@string/superadmin_description_hint">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:gravity="top"
+                    android:inputType="textCapSentences|textMultiLine" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.materialswitch.MaterialSwitch

@@ -34,6 +34,7 @@ public class HotelesAdminFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        updateSummary();
         binding.etHotelSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
@@ -42,6 +43,24 @@ public class HotelesAdminFragment extends Fragment {
         binding.chipGroupDistricts.setOnCheckedStateChangeListener((group, checkedIds) -> renderHotels());
         binding.fabAddHotel.setOnClickListener(v -> startActivity(new Intent(requireContext(), FormularioHotelActivity.class)));
         renderHotels();
+    }
+
+    private void updateSummary() {
+        int unassigned = 0;
+        for (ManagedHotel hotel : SuperadminSampleData.hotels()) {
+            if ("Sin asignar".equalsIgnoreCase(hotel.administrator)) unassigned++;
+        }
+        binding.tvHotelsTotal.setText(String.valueOf(SuperadminSampleData.hotels().size()));
+        binding.tvHotelsUnassigned.setText(String.valueOf(unassigned));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (binding != null) {
+            updateSummary();
+            renderHotels();
+        }
     }
 
     private void renderHotels() {
@@ -62,9 +81,7 @@ public class HotelesAdminFragment extends Fragment {
             item.tvHotelReservations.setText(getString(R.string.superadmin_month_reservations_format, hotel.reservations));
             item.tvHotelStatus.setText(hotel.active ? R.string.superadmin_filter_active : R.string.superadmin_filter_inactive);
             item.tvHotelStatus.setTextColor(ContextCompat.getColor(requireContext(), hotel.active ? R.color.io_success_text : R.color.io_danger_text));
-            View.OnClickListener open = v -> openDetail(hotel.id);
-            item.btnHotelDetail.setOnClickListener(open);
-            item.btnHotelManage.setOnClickListener(open);
+            item.btnHotelManage.setOnClickListener(v -> openDetail(hotel.id));
             binding.hotelListContainer.addView(item.getRoot());
         }
     }

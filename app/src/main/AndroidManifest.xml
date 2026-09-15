@@ -175,6 +175,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.superadmin.perfil.PerfilSuperadminActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <activity
             android:name=".ui.superadmin.usuarios.DetalleUsuarioActivity"
             android:exported="false"
             android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />

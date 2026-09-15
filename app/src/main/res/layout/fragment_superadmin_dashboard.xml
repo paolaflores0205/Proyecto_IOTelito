@@ -44,9 +44,13 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/btn_superadmin_profile"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/bg_avatar_circle"
+                android:clickable="true"
+                android:contentDescription="@string/superadmin_open_profile"
+                android:focusable="true"
                 android:gravity="center"
                 android:text="@string/superadmin_initials"
                 android:textColor="@color/white"

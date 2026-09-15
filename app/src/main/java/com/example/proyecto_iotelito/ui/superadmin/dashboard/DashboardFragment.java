@@ -14,6 +14,7 @@ import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.databinding.FragmentSuperadminDashboardBinding;
 import com.example.proyecto_iotelito.ui.superadmin.SuperadminMainActivity;
 import com.example.proyecto_iotelito.ui.superadmin.logs.RegistroLogsActivity;
+import com.example.proyecto_iotelito.ui.superadmin.perfil.PerfilSuperadminActivity;
 
 public class DashboardFragment extends Fragment {
     private FragmentSuperadminDashboardBinding binding;
@@ -33,6 +34,8 @@ public class DashboardFragment extends Fragment {
         binding.btnQuickHotels.setOnClickListener(v -> host.openTab(R.id.nav_superadmin_hotels));
         binding.btnQuickReports.setOnClickListener(v -> host.openTab(R.id.nav_superadmin_reports));
         binding.btnQuickLogs.setOnClickListener(v -> startActivity(new Intent(requireContext(), RegistroLogsActivity.class)));
+        binding.btnSuperadminProfile.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), PerfilSuperadminActivity.class)));
     }
 
     @Override

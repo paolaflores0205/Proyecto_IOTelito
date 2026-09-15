@@ -34,16 +34,31 @@ public class UsuariosFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        updateSummary();
         binding.etUserSearch.addTextChangedListener(new SimpleTextWatcher(this::renderUsers));
         binding.chipGroupRoles.setOnCheckedStateChangeListener((group, checkedIds) -> renderUsers());
         binding.chipGroupStatus.setOnCheckedStateChangeListener((group, checkedIds) -> renderUsers());
         renderUsers();
     }
 
+    private void updateSummary() {
+        int total = SuperadminSampleData.users().size();
+        int active = 0;
+        for (AdminUser user : SuperadminSampleData.users()) {
+            if (user.active) active++;
+        }
+        binding.tvUsersTotal.setText(String.valueOf(total));
+        binding.tvUsersStatusSummary.setText(
+                getString(R.string.superadmin_users_status_summary, active, total - active));
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        if (binding != null) renderUsers();
+        if (binding != null) {
+            updateSummary();
+            renderUsers();
+        }
     }
 
     private void renderUsers() {
