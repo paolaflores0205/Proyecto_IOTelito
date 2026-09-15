@@ -50,6 +50,14 @@
                 android:id="@+id/card_solicitud_2"
                 layout="@layout/item_solicitud_card" />
 
+            <include
+                android:id="@+id/card_solicitud_3"
+                layout="@layout/item_solicitud_card" />
+
+            <include
+                android:id="@+id/card_solicitud_4"
+                layout="@layout/item_solicitud_card" />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

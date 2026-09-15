@@ -135,6 +135,11 @@
             android:parentActivityName=".ui.taxista.TaxistaMainActivity" />
 
         <activity
+            android:name=".ui.taxista.EditarFotoTaxistaActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.taxista.TaxistaMainActivity" />
+
+        <activity
             android:name=".ui.taxista.ServicioAsignadoActivity"
             android:exported="false"
             android:parentActivityName=".ui.taxista.DetalleServicioActivity" />

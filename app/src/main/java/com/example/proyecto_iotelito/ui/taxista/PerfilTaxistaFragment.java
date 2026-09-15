@@ -1,5 +1,6 @@
 package com.example.proyecto_iotelito.ui.taxista;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +34,9 @@ public class PerfilTaxistaFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        ((TextView) view.findViewById(R.id.tv_avatar_inicial)).setText("MA");
+        ((TextView) view.findViewById(R.id.tv_rating)).setText("★ 4.8");
+
         bindRow(view, R.id.row_dni, R.string.taxi_label_dni, "68492135");
         bindRow(view, R.id.row_telefono, R.string.taxi_label_telefono, "+51 987 654 321");
         bindRow(view, R.id.row_correo, R.string.taxi_label_correo, "miguel.arispe@iotelito.com");
@@ -51,7 +55,8 @@ public class PerfilTaxistaFragment extends Fragment {
         View rowEditarFoto = view.findViewById(R.id.row_editar_foto);
         ((ImageView) rowEditarFoto.findViewById(R.id.iv_icono)).setImageResource(R.drawable.ic_edit);
         ((TextView) rowEditarFoto.findViewById(R.id.tv_label)).setText(R.string.taxi_menu_editar_foto);
-        rowEditarFoto.setOnClickListener(v -> mostrarProximamente());
+        rowEditarFoto.setOnClickListener(v ->
+                startActivity(new Intent(getActivity(), EditarFotoTaxistaActivity.class)));
 
         View rowSoporte = view.findViewById(R.id.row_soporte);
         ((ImageView) rowSoporte.findViewById(R.id.iv_icono)).setImageResource(R.drawable.ic_mail);

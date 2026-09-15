@@ -39,6 +39,14 @@ public class SolicitudesTaxistaFragment extends Fragment {
         bindSolicitud(view.findViewById(R.id.card_solicitud_2),
                 "20 min", "Palacio del Inka Cusco (Lima Branch)",
                 "Aeropuerto Internacional Jorge Chávez", "03 ago 2026, 15:30");
+
+        bindSolicitud(view.findViewById(R.id.card_solicitud_3),
+                "10 min", "Dazzler Miraflores",
+                "Aeropuerto Internacional Jorge Chávez", "04 ago 2026, 09:15");
+
+        bindSolicitud(view.findViewById(R.id.card_solicitud_4),
+                "35 min", "Barranco Art Boutique",
+                "Terminal Terrestre Javier Prado", "05 ago 2026, 11:00");
     }
 
     private void bindSolicitud(View card, String tiempo, String hotel, String destino, String fechaHora) {

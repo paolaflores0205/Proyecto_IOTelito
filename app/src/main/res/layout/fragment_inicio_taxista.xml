@@ -19,7 +19,7 @@
             android:background="@color/io_text_primary"
             android:orientation="vertical"
             android:padding="16dp"
-            android:paddingBottom="36dp">
+            android:paddingBottom="20dp">
 
             <TextView
                 android:id="@+id/tv_saludo"
@@ -39,12 +39,12 @@
                 android:text="@string/taxi_subtitulo_saludo" />
         </LinearLayout>
 
-        <!-- tarjeta de perfil, flota sobre el header oscuro -->
+        <!-- tarjeta de perfil, debajo del header oscuro -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="-24dp"
+            android:layout_marginTop="12dp"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
@@ -68,6 +68,7 @@
                         android:background="@drawable/bg_avatar_circle">
 
                         <TextView
+                            android:id="@+id/tv_avatar_inicial"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
@@ -85,6 +86,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tv_nombre_conductor"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
@@ -95,6 +97,7 @@
                             tools:text="Miguel Arispe S." />
 
                         <TextView
+                            android:id="@+id/tv_rating_vehiculo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -185,6 +188,7 @@
                     android:gravity="center">
 
                     <TextView
+                        android:id="@+id/tv_stat_servicios"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/io_text_primary"
@@ -214,6 +218,7 @@
                     android:gravity="center">
 
                     <TextView
+                        android:id="@+id/tv_stat_trasladados"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/io_text_primary"
@@ -243,6 +248,7 @@
                     android:gravity="center">
 
                     <TextView
+                        android:id="@+id/tv_stat_calificacion"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/io_star"

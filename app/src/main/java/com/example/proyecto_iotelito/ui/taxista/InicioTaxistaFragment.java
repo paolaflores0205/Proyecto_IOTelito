@@ -35,6 +35,14 @@ public class InicioTaxistaFragment extends Fragment {
         ((TextView) view.findViewById(R.id.tv_saludo))
                 .setText(getString(R.string.taxi_saludo, "Miguel"));
 
+        ((TextView) view.findViewById(R.id.tv_avatar_inicial)).setText("MA");
+        ((TextView) view.findViewById(R.id.tv_nombre_conductor)).setText("Miguel Arispe S.");
+        ((TextView) view.findViewById(R.id.tv_rating_vehiculo)).setText("★ 4.8 · Toyota Corolla (ABC-123)");
+
+        ((TextView) view.findViewById(R.id.tv_stat_servicios)).setText("5");
+        ((TextView) view.findViewById(R.id.tv_stat_trasladados)).setText("3");
+        ((TextView) view.findViewById(R.id.tv_stat_calificacion)).setText("4.8");
+
         TextView tvEstadoDisponibilidad = view.findViewById(R.id.tv_estado_disponibilidad);
         MaterialSwitch switchDisponibilidad = view.findViewById(R.id.switch_disponibilidad);
         switchDisponibilidad.setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -43,7 +51,7 @@ public class InicioTaxistaFragment extends Fragment {
                         : R.string.taxi_no_disponible_desc));
 
         MaterialButton btnVerSolicitudes = view.findViewById(R.id.btn_ver_solicitudes);
-        btnVerSolicitudes.setText(getString(R.string.taxi_btn_ver_solicitudes, 3));
+        btnVerSolicitudes.setText(getString(R.string.taxi_btn_ver_solicitudes, 4));
         btnVerSolicitudes.setOnClickListener(v -> irASolicitudes());
 
         view.findViewById(R.id.banner_nueva_solicitud).setOnClickListener(v -> irASolicitudes());

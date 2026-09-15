@@ -16,6 +16,7 @@ import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
 import com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminMainActivity;
 import com.example.proyecto_iotelito.ui.superadmin.SuperadminMainActivity;
 import com.google.android.material.snackbar.Snackbar;
+import com.example.proyecto_iotelito.ui.taxista.TaxistaMainActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -106,7 +107,7 @@ public class LoginActivity extends AppCompatActivity {
                 destination = new Intent(this, HotelAdminMainActivity.class);
                 break;
             case TAXISTA:
-                destination = RolePreviewActivity.createIntent(this, user.getRole());
+                destination = new Intent(this, TaxistaMainActivity.class);
                 break;
             default:
                 throw new IllegalStateException("Rol no soportado: " + user.getRole());

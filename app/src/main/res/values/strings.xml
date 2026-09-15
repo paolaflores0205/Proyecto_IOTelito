@@ -322,7 +322,7 @@
 
     <!-- Solicitudes disponibles -->
     <string name="taxi_solicitudes_titulo">Solicitudes disponibles</string>
-    <string name="taxi_solicitudes_subtitulo">3 solicitudes cerca de tu ubicación</string>
+    <string name="taxi_solicitudes_subtitulo">4 solicitudes cerca de tu ubicación</string>
     <string name="taxi_tag_taxi_incluido">TAXI INCLUIDO</string>
     <string name="taxi_tag_menos_5_min">Menos de 5 min</string>
     <string name="taxi_btn_ver_solicitud">Ver solicitud</string>
@@ -390,6 +390,11 @@
     <string name="taxi_label_color">Color</string>
     <string name="taxi_badge_verificado">Verificado</string>
     <string name="taxi_menu_editar_foto">Editar foto de perfil</string>
+    <string name="taxi_editar_foto_desc">Esta foto se muestra a los pasajeros y en tu perfil de conductor</string>
+    <string name="taxi_btn_cambiar_foto">Cambiar foto</string>
+    <string name="taxi_btn_quitar_foto">Quitar foto</string>
+    <string name="taxi_toast_foto_actualizada">Foto de perfil actualizada</string>
+    <string name="taxi_toast_foto_eliminada">Foto de perfil eliminada</string>
     <string name="taxi_menu_soporte">Soporte y Ayuda</string>
     <string name="taxi_menu_cerrar_sesion">Cerrar sesión</string>
     <string name="label_distancia">Distancia:</string>

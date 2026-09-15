@@ -45,6 +45,7 @@
                     android:background="@drawable/bg_avatar_circle">
 
                     <TextView
+                        android:id="@+id/tv_avatar_inicial"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -72,6 +73,7 @@
                         android:text="@string/taxi_perfil_titulo" />
 
                     <TextView
+                        android:id="@+id/tv_rating"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
