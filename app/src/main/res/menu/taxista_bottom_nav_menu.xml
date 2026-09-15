@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_taxi_inicio"
+        android:icon="@drawable/ic_home"
+        android:title="@string/taxi_nav_inicio" />
+    <item
+        android:id="@+id/nav_taxi_solicitudes"
+        android:icon="@drawable/ic_inbox"
+        android:title="@string/taxi_nav_solicitudes" />
+    <item
+        android:id="@+id/nav_taxi_historial"
+        android:icon="@drawable/ic_history"
+        android:title="@string/taxi_nav_historial" />
+    <item
+        android:id="@+id/nav_taxi_perfil"
+        android:icon="@drawable/ic_person"
+        android:title="@string/taxi_nav_perfil" />
+</menu>

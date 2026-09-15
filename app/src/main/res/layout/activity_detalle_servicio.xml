@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical"
+    tools:context=".ui.taxista.DetalleServicioActivity">
+
+    <include
+        android:id="@+id/sub_header"
+        layout="@layout/item_sub_header_estado" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <include
+                        android:id="@+id/row_pasajero"
+                        layout="@layout/item_pasajero_row" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:background="@color/io_border" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textAllCaps="true"
+                        android:text="@string/taxi_label_origen" />
+
+                    <TextView
+                        android:id="@+id/tv_origen"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="Hotel Miraflores Park" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:textColor="@color/io_text_muted"
+                        android:textSize="11sp"
+                        android:textAllCaps="true"
+                        android:text="@string/taxi_label_destino" />
+
+                    <TextView
+                        android:id="@+id/tv_destino"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="Av. Malecón de la Reserva 1035, Miraflores" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- placeholder de mapa -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_map_placeholder">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_location_pin"
+                    android:tint="@color/io_text_muted"
+                    android:contentDescription="@null" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_distancia_tiempo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="13sp"
+                tools:text="14 min · 6.2 km" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_info_box_teal"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="12sp"
+                    android:text="@string/taxi_nota_pago_asegurado" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="13sp"
+                android:text="@string/taxi_confirmar_aceptar" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_rechazar"
+                    style="@style/Widget.IoTelito.Button.Outline"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:strokeColor="@color/io_danger_text"
+                    android:textColor="@color/io_danger_text"
+                    android:text="@string/taxi_btn_rechazar" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_aceptar_servicio"
+                    style="@style/Widget.IoTelito.Button.Primary"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/taxi_btn_aceptar_servicio" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
