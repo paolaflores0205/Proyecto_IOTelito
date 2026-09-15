@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_hoteladmin_hotel"
+        android:icon="@drawable/ic_home"
+        android:title="@string/hoteladmin_nav_hotel" />
+    <item
+        android:id="@+id/nav_hoteladmin_reservas"
+        android:icon="@drawable/ic_calendar"
+        android:title="@string/hoteladmin_nav_reservas" />
+    <item
+        android:id="@+id/nav_hoteladmin_mensajes"
+        android:icon="@drawable/ic_chat"
+        android:title="@string/hoteladmin_nav_mensajes" />
+    <item
+        android:id="@+id/nav_hoteladmin_reportes"
+        android:icon="@drawable/ic_bar_chart"
+        android:title="@string/hoteladmin_nav_reportes" />
+</menu>

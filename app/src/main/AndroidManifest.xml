@@ -127,6 +127,12 @@
             android:name=".ui.superadmin.logs.RegistroLogsActivity"
             android:exported="false"
             android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <!-- Panel de Administrador de hotel (rol HOTEL_ADMIN). Se abre desde el login por rol. -->
+        <activity
+            android:name=".ui.hoteladmin.HotelAdminMainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

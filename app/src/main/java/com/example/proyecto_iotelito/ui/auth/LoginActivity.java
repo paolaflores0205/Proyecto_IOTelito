@@ -13,6 +13,7 @@ import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.LocalAuthRepository;
 import com.example.proyecto_iotelito.databinding.ActivityLoginBinding;
 import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
+import com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminMainActivity;
 import com.example.proyecto_iotelito.ui.superadmin.SuperadminMainActivity;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -102,6 +103,8 @@ public class LoginActivity extends AppCompatActivity {
                 destination = new Intent(this, SuperadminMainActivity.class);
                 break;
             case HOTEL_ADMIN:
+                destination = new Intent(this, HotelAdminMainActivity.class);
+                break;
             case TAXISTA:
                 destination = RolePreviewActivity.createIntent(this, user.getRole());
                 break;

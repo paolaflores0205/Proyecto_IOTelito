@@ -358,4 +358,21 @@
     <string name="role_driver_name">Taxista</string>
     <string name="role_driver_initials">TX</string>
     <string name="role_driver_features">• Revisar y aceptar solicitudes de traslado\n• Actualizar el estado del servicio\n• Compartir ubicación durante el viaje\n• Escanear QR y consultar el historial</string>
+
+    <!-- ==================== Administrador de hotel (rol HOTEL_ADMIN) ==================== -->
+    <!-- Navegación inferior -->
+    <string name="hoteladmin_nav_hotel">Hotel</string>
+    <string name="hoteladmin_nav_reservas">Reservas</string>
+    <string name="hoteladmin_nav_mensajes">Mensajes</string>
+    <string name="hoteladmin_nav_reportes">Reportes</string>
+
+    <!-- Placeholders de las pestañas (andamiaje; se reemplazan al implementar cada pantalla) -->
+    <string name="hoteladmin_hotel_titulo">Panel del hotel</string>
+    <string name="hoteladmin_hotel_placeholder">Aquí irá el dashboard: resumen del día, alertas y accesos a datos del hotel, fotos, habitaciones y servicios.</string>
+    <string name="hoteladmin_reservas_titulo">Reservas y checkout</string>
+    <string name="hoteladmin_reservas_placeholder">Aquí irá la lista de reservas con checkout, cobros y seguimiento de taxi.</string>
+    <string name="hoteladmin_mensajes_titulo">Mensajes</string>
+    <string name="hoteladmin_mensajes_placeholder">Aquí irá la bandeja de conversaciones con los huéspedes de reservas activas.</string>
+    <string name="hoteladmin_reportes_titulo">Reportes</string>
+    <string name="hoteladmin_reportes_placeholder">Aquí irán los ingresos por servicios adicionales, ordenados de menor a mayor.</string>
 </resources>
