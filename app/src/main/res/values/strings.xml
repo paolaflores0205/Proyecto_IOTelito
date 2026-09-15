@@ -375,4 +375,10 @@
     <string name="hoteladmin_mensajes_placeholder">Aquí irá la bandeja de conversaciones con los huéspedes de reservas activas.</string>
     <string name="hoteladmin_reportes_titulo">Reportes</string>
     <string name="hoteladmin_reportes_placeholder">Aquí irán los ingresos por servicios adicionales, ordenados de menor a mayor.</string>
+
+    <!-- Estados de checkout de una reserva (pills) -->
+    <string name="hoteladmin_estado_proxima">Próxima</string>
+    <string name="hoteladmin_estado_hospedado">Hospedado</string>
+    <string name="hoteladmin_estado_checkout">Checkout pendiente</string>
+    <string name="hoteladmin_estado_finalizada">Finalizada</string>
 </resources>

@@ -20,6 +20,31 @@ Copiadas del módulo **Superadmin** de referencia (`ui/superadmin/*`). No invent
 - **Recursos compartidos ya existentes**: colores `io_navy`, `io_divider`, `io_surface`, `io_success_*`, `io_warning_*`, `io_danger_*`; estilos `Widget.IoTelito.Card` / `.Button.Primary` / `.Button.Outline` / `.Input`; iconos `ic_home`, `ic_building`, `ic_bar_chart`, `ic_calendar`, `ic_chat`, `ic_person`, `ic_add`, `ic_edit`, etc. Reutilizar; crear solo lo que falte.
 - **Nombres**: paquete `ui.hoteladmin.*`; `activity_hoteladmin_main`, `fragment_hoteladmin_*`, `item_hoteladmin_*`, `hoteladmin_bottom_nav_menu`. Textos siempre en `strings.xml`.
 
+### 0.1 Técnicas del curso por pantalla (diapositivas 1TEL05)
+
+Elementos de UI enseñados (Clase 3.2) y cómo aplican:
+
+- **Tipo de habitación** → `Spinner` con `string-array`/`ArrayAdapter` (el curso lo recomienda para >3 opciones). Alternativa vista en el repo: `MaterialAutoCompleteTextView`.
+- **Capacidad adultos/niños** → `EditText` numérico o steppers (`bg_stepper_button`).
+- **Disponible / tiene costo / foto principal** → `Switch`/`RadioButton` con `setOnCheckedChangeListener`/`isChecked`.
+- **Agregar** (habitación, servicio, foto) → **FAB** (`FloatingActionButton` con `app:srcCompat` + `setOnClickListener`).
+- **Eliminar / confirmar cobro** → `MaterialAlertDialogBuilder` (positive/negative).
+- **Validación de formularios** → `editText.setError(...)` (Clase 3.2 / guía).
+- **Formularios que devuelven dato** (ej. editar → volver a la lista) → `ActivityResultLauncher` (Clase 2.2), o el patrón `onResume()` + refresco del superadmin. Preferir `onResume()` para mantener consistencia con el módulo superadmin.
+- **Gráficos de Reportes** → barras estáticas (`<View>` con alto fijo) + `LinearProgressIndicator`, **sin librería** (idéntico a `fragment_superadmin_reportes.xml`).
+- **Fotos del hotel** → cuadrícula (mín. 4) con indicador de foto principal; selección real opcional con `ActivityResultContracts.PickVisualMedia` (minSdk 34 lo soporta).
+- **Imágenes/íconos** → `Vector Asset` en `drawable`; `ImageView` con `scaleType` para fotos.
+
+### 0.2 Cronograma de labs (del sílabo/plan) — qué toca y cuándo
+
+- **Lab 3 (15 sep):** mockups con navigation, menús y elementos UI → **fase actual del módulo admin.**
+- **Lab 4 (29 sep):** **RecyclerView** y sensores → migrar aquí las listas (hoy inflado manual).
+- **Lab 5 (20 oct):** Storage local + **notificaciones** (ej. alerta de cobro).
+- **Lab 6 (3 nov):** **Firebase** (Auth + Firestore/Realtime) reemplaza los datos en memoria; **Retrofit 2 + Gson** para consumir la **API REST de taxistas** (base 10.0.2.2 en emulador; permiso `INTERNET`).
+- Componentes de arquitectura (ViewModel + LiveData/Observer, WorkManager, ExecutorService en `IoTelitoApplication`) se introducen para trabajo en background/estado (útil luego para el seguimiento de taxi en tiempo real).
+
+> **Declaración de IA (obligatoria):** el sílabo exige declarar y citar el uso de IA generativa y adjuntar los *prompts* como anexo (por eso existe la carpeta `Promts` del equipo). Guarda los prompts usados para tu módulo. Política de plagio = nota 0.
+
 ---
 
 ## 1. Requisitos del Administrador de hotel (del plan de proyecto oficial)
