@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/io_background">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/item_hoteladmin_toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Subir foto -->
+            <LinearLayout
+                android:id="@+id/box_foto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_dashed_upload"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingVertical="22dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_camera"
+                    android:tint="@color/io_teal"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/hoteladmin_subir_fotos_hab"
+                    android:textColor="@color/io_teal"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/hoteladmin_formato_imagen"
+                    android:textColor="@color/io_text_muted"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Tipo de habitación -->
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:layout_marginTop="18dp"
+                android:text="@string/hoteladmin_tipo_habitacion" />
+
+            <Spinner
+                android:id="@+id/sp_tipo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:minHeight="52dp"
+                android:paddingHorizontal="12dp" />
+
+            <!-- Número / Área -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.IoTelito.FieldLabel"
+                        android:text="@string/hoteladmin_numero_codigo" />
+
+                    <EditText
+                        android:id="@+id/et_codigo"
+                        style="@style/Widget.IoTelito.FieldInput"
+                        android:layout_marginTop="6dp"
+                        android:hint="@string/hoteladmin_numero_codigo_hint"
+                        android:inputType="textCapWords"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.IoTelito.FieldLabel"
+                        android:text="@string/hoteladmin_area" />
+
+                    <EditText
+                        android:id="@+id/et_area"
+                        style="@style/Widget.IoTelito.FieldInput"
+                        android:layout_marginTop="6dp"
+                        android:hint="45"
+                        android:inputType="number"
+                        android:maxLines="1" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Adultos / Niños -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.IoTelito.FieldLabel"
+                        android:text="@string/hoteladmin_adultos" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_input_field"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="12dp">
+
+                        <EditText
+                            android:id="@+id/et_adultos"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent"
+                            android:inputType="number"
+                            android:maxLines="1"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="15sp"
+                            tools:text="2" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_group"
+                            android:tint="@color/io_teal"
+                            android:contentDescription="@null" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.IoTelito.FieldLabel"
+                        android:text="@string/hoteladmin_ninos" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_input_field"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="12dp">
+
+                        <EditText
+                            android:id="@+id/et_ninos"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent"
+                            android:inputType="number"
+                            android:maxLines="1"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/io_text_primary"
+                            android:textSize="15sp"
+                            tools:text="1" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_group"
+                            android:tint="@color/io_teal"
+                            android:contentDescription="@null" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Precio -->
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:layout_marginTop="14dp"
+                android:text="@string/hoteladmin_precio_noche" />
+
+            <EditText
+                android:id="@+id/et_precio"
+                style="@style/Widget.IoTelito.FieldInput"
+                android:layout_marginTop="6dp"
+                android:hint="450"
+                android:inputType="numberDecimal"
+                android:maxLines="1" />
+
+            <!-- Descripción -->
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:layout_marginTop="14dp"
+                android:text="@string/hoteladmin_descripcion" />
+
+            <EditText
+                android:id="@+id/et_descripcion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:gravity="top"
+                android:hint="@string/hoteladmin_descripcion_hab_hint"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3"
+                android:padding="12dp"
+                android:textColor="@color/io_text_primary"
+                android:textColorHint="@color/io_text_muted"
+                android:textSize="15sp" />
+
+            <!-- Disponible de inmediato -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/hoteladmin_disponible_inmediato"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/hoteladmin_disponible_inmediato_sub"
+                        android:textColor="@color/io_text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_disponible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_guardar"
+                style="@style/Widget.IoTelito.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="@string/hoteladmin_guardar_habitacion" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

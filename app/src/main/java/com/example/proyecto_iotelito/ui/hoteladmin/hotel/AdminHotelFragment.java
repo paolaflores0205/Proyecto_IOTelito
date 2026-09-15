@@ -1,5 +1,6 @@
 package com.example.proyecto_iotelito.ui.hoteladmin.hotel;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,11 +49,12 @@ public class AdminHotelFragment extends Fragment {
         binding.tvSalidas.setText(String.valueOf(resumen.salidasHoy));
         binding.tvIngresos.setText("S/ " + String.format(Locale.US, "%,.0f", resumen.ingresosHoy));
 
-        // TODO Hito 2: enrutar a HabitacionesActivity / ServiciosActivity / DatosHotelActivity
-        // cuando esas pantallas existan. Por ahora un aviso temporal.
+        binding.cardHabitaciones.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), HabitacionesActivity.class)));
+
+        // TODO Hito 2: enrutar a ServiciosActivity / DatosHotelActivity cuando existan.
         View.OnClickListener proximamente = v ->
                 Toast.makeText(requireContext(), R.string.hoteladmin_proximamente, Toast.LENGTH_SHORT).show();
-        binding.cardHabitaciones.setOnClickListener(proximamente);
         binding.cardServicios.setOnClickListener(proximamente);
         binding.cardDatos.setOnClickListener(proximamente);
     }

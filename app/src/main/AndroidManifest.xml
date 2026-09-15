@@ -133,6 +133,17 @@
             android:name=".ui.hoteladmin.HotelAdminMainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.hoteladmin.hotel.HabitacionesActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.hotel.FormularioHabitacionActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.hoteladmin.hotel.HabitacionesActivity" />
     </application>
 
 </manifest>

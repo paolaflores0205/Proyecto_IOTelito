@@ -50,4 +50,30 @@
         <item name="boxCornerRadiusBottomEnd">8dp</item>
         <item name="boxStrokeColor">@color/io_teal</item>
     </style>
+
+    <!-- Imagen con esquinas redondeadas (fotos de habitaciones/servicios) -->
+    <style name="ShapeAppearanceOverlay.IoTelito.Rounded8" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <!-- Etiqueta de campo (encima del input) en formularios del admin -->
+    <style name="TextAppearance.IoTelito.FieldLabel" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/io_text_secondary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <!-- Campo de texto con borde redondeado (formularios del admin) -->
+    <style name="Widget.IoTelito.FieldInput" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/bg_input_field</item>
+        <item name="android:paddingHorizontal">12dp</item>
+        <item name="android:paddingVertical">12dp</item>
+        <item name="android:textColor">@color/io_text_primary</item>
+        <item name="android:textColorHint">@color/io_text_muted</item>
+        <item name="android:textSize">15sp</item>
+    </style>
 </resources>

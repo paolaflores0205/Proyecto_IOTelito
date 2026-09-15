@@ -408,4 +408,49 @@
     <string name="hoteladmin_acceso_servicios">Servicios</string>
     <string name="hoteladmin_acceso_datos">Datos hotel</string>
     <string name="hoteladmin_proximamente">Disponible próximamente</string>
+
+    <!-- Habitaciones (adm-habitaciones) -->
+    <string name="hoteladmin_titulo_habitaciones">Habitaciones</string>
+    <string name="hoteladmin_filtrar">Filtrar</string>
+    <string name="hoteladmin_editar">Editar</string>
+    <string name="hoteladmin_eliminar">Eliminar</string>
+    <string name="hoteladmin_por_noche">x noche</string>
+    <string name="hoteladmin_badge_disponible">Disponible</string>
+    <string name="hoteladmin_badge_ocupada">Ocupada</string>
+    <string name="hoteladmin_aforo_area">%1$s · %2$d m²</string>
+    <string name="hoteladmin_agregar_habitacion">Agregar habitación</string>
+    <string name="hoteladmin_habitacion_eliminada">Habitación eliminada</string>
+    <string name="hoteladmin_confirmar_eliminar_hab_msg">¿Seguro que deseas eliminar esta habitación?</string>
+    <plurals name="hoteladmin_listado_habitaciones">
+        <item quantity="one">Listado (%d habitación)</item>
+        <item quantity="other">Listado (%d habitaciones)</item>
+    </plurals>
+
+    <!-- Formulario de habitación (adm-formulario-habitacion) -->
+    <string name="hoteladmin_titulo_nueva_habitacion">Nueva habitación</string>
+    <string name="hoteladmin_titulo_editar_habitacion">Editar habitación</string>
+    <string name="hoteladmin_subir_fotos_hab">Sube fotos de la habitación</string>
+    <string name="hoteladmin_formato_imagen">PNG, JPG hasta 5MB</string>
+    <string name="hoteladmin_tipo_habitacion">Tipo de habitación</string>
+    <string name="hoteladmin_numero_codigo">Número / Código</string>
+    <string name="hoteladmin_numero_codigo_hint">Room 402</string>
+    <string name="hoteladmin_area">Área (m²)</string>
+    <string name="hoteladmin_adultos">Adultos</string>
+    <string name="hoteladmin_ninos">Niños</string>
+    <string name="hoteladmin_precio_noche">Precio por noche (S/.)</string>
+    <string name="hoteladmin_descripcion">Descripción</string>
+    <string name="hoteladmin_descripcion_hab_hint">Describe los atributos clave de la habitación…</string>
+    <string name="hoteladmin_disponible_inmediato">Disponible de inmediato</string>
+    <string name="hoteladmin_disponible_inmediato_sub">Habilitar para reservas en la app</string>
+    <string name="hoteladmin_guardar_habitacion">Guardar habitación</string>
+    <string name="hoteladmin_habitacion_guardada">Habitación guardada</string>
+
+    <string-array name="hoteladmin_tipos_habitacion">
+        <item>Suite Ejecutiva</item>
+        <item>Suite Deluxe</item>
+        <item>Habitación Doble</item>
+        <item>Habitación Superior</item>
+        <item>Habitación Simple</item>
+        <item>Económica</item>
+    </string-array>
 </resources>
