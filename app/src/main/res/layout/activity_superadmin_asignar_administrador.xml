@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/io_surface_variant" android:orientation="vertical"
+    tools:context=".ui.superadmin.hoteles.AsignarAdministradorActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+        android:background="@color/io_surface" app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="@string/superadmin_assign_admin_title" app:titleTextColor="@color/io_navy" />
+
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_selected_hotel" android:textColor="@color/io_text_secondary" android:textStyle="bold" />
+            <TextView android:id="@+id/tv_hotel_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/io_navy" android:textSize="20sp" android:textStyle="bold" tools:text="Hotel Sol de Miraflores" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/superadmin_current_admin" android:textColor="@color/io_navy" android:textStyle="bold" />
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
+                <TextView android:id="@+id/tv_current_admin" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_person" android:drawablePadding="12dp" android:padding="16dp" android:textColor="@color/io_text_primary" android:textStyle="bold" app:drawableTint="@color/io_teal" tools:text="Juan Carlos Huamán\njuan.huaman@iotelito.pe" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/superadmin_search_new_admin" android:textColor="@color/io_navy" android:textStyle="bold" />
+            <com.google.android.material.textfield.TextInputLayout style="@style/Widget.IoTelito.Input" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:hint="@string/superadmin_admin_search_hint" app:startIconDrawable="@drawable/ic_search">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_search" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <RadioGroup android:id="@+id/radio_group_admins" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
+                <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/radio_admin_one" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@color/io_surface" android:padding="12dp" android:text="Ana Torres Salazar\nana.torres@iotelito.pe · DNI 72845016" android:textColor="@color/io_text_primary" />
+                <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/radio_admin_two" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@color/io_surface" android:padding="12dp" android:text="Diego Flores Ríos\ndiego.flores@iotelito.pe · DNI 60481732" android:textColor="@color/io_text_primary" />
+                <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/radio_admin_three" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@color/io_surface" android:padding="12dp" android:text="Valeria Campos León\nvaleria.campos@iotelito.pe · DNI 71523904" android:textColor="@color/io_text_primary" />
+            </RadioGroup>
+
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_assign" style="@style/Widget.IoTelito.Button.Primary" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="24dp" android:text="@string/superadmin_assign_admin_button" android:enabled="false" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

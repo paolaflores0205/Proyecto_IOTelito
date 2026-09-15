@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_surface_variant"
+    android:orientation="vertical"
+    tools:context=".ui.hoteladmin.reportes.AdminReportesFragment">
+
+    <!-- Header navy -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/io_navy"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/hoteladmin_reportes_titulo"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <include layout="@layout/view_hoteladmin_logo" />
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Selector de periodo -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_periodo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip android:id="@+id/chip_diario" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_periodo_diario" />
+                <com.google.android.material.chip.Chip android:id="@+id/chip_mensual" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:checked="true" android:text="@string/hoteladmin_periodo_mensual" />
+                <com.google.android.material.chip.Chip android:id="@+id/chip_anual" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_periodo_anual" />
+            </com.google.android.material.chip.ChipGroup>
+
+            <!-- Navegador de mes -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/iv_mes_prev"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/hoteladmin_mes_anterior"
+                    android:rotation="180"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="@color/io_navy" />
+
+                <TextView
+                    android:id="@+id/tv_mes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/hoteladmin_reportes_mes"
+                    android:textColor="@color/io_navy"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/iv_mes_next"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/hoteladmin_mes_siguiente"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="@color/io_navy" />
+            </LinearLayout>
+
+            <!-- KPIs fila 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="104dp" android:layout_marginEnd="6dp" android:layout_weight="1">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/hoteladmin_kpi_ingresos" android:textColor="@color/io_text_secondary" android:textSize="12sp" />
+                            <ImageView android:layout_width="18dp" android:layout_height="18dp" android:contentDescription="@null" android:src="@drawable/ic_attach_money" app:tint="@color/io_teal" />
+                        </LinearLayout>
+                        <TextView android:id="@+id/tv_ingresos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/io_navy" android:textSize="22sp" android:textStyle="bold" tools:text="S/ 45,280" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/hoteladmin_kpi_ingresos_delta" android:textColor="@color/io_teal" android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="104dp" android:layout_marginStart="6dp" android:layout_weight="1">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/hoteladmin_kpi_reservas" android:textColor="@color/io_text_secondary" android:textSize="12sp" />
+                            <ImageView android:layout_width="18dp" android:layout_height="18dp" android:contentDescription="@null" android:src="@drawable/ic_calendar" app:tint="@color/io_teal" />
+                        </LinearLayout>
+                        <TextView android:id="@+id/tv_reservas" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/io_navy" android:textSize="22sp" android:textStyle="bold" tools:text="38" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/hoteladmin_kpi_reservas_delta" android:textColor="@color/io_teal" android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- KPIs fila 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="104dp" android:layout_marginEnd="6dp" android:layout_weight="1">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/hoteladmin_kpi_ocupacion" android:textColor="@color/io_text_secondary" android:textSize="12sp" />
+                            <ImageView android:layout_width="18dp" android:layout_height="18dp" android:contentDescription="@null" android:src="@drawable/ic_show_chart" app:tint="@color/io_teal" />
+                        </LinearLayout>
+                        <TextView android:id="@+id/tv_ocupacion" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/io_navy" android:textSize="22sp" android:textStyle="bold" tools:text="78%" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/hoteladmin_kpi_ocupacion_delta" android:textColor="@color/io_teal" android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="104dp" android:layout_marginStart="6dp" android:layout_weight="1">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/hoteladmin_kpi_servicios" android:textColor="@color/io_text_secondary" android:textSize="12sp" />
+                            <ImageView android:layout_width="18dp" android:layout_height="18dp" android:contentDescription="@null" android:src="@drawable/ic_shopping_cart" app:tint="@color/io_teal" />
+                        </LinearLayout>
+                        <TextView android:id="@+id/tv_servicios" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/io_navy" android:textSize="22sp" android:textStyle="bold" tools:text="124" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/hoteladmin_kpi_servicios_delta" android:textColor="@color/io_teal" android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- Gráfico de barras semanal -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.IoTelito.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/hoteladmin_reportes_semanal" android:textColor="@color/io_text_primary" android:textSize="15sp" android:textStyle="bold" />
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="120dp" android:layout_marginTop="12dp" android:orientation="horizontal">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="bottom|center_horizontal" android:orientation="vertical"><View android:id="@+id/bar_sem1" android:layout_width="26dp" android:layout_height="70dp" android:background="@drawable/bg_bar_teal" /></LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="bottom|center_horizontal" android:orientation="vertical"><View android:id="@+id/bar_sem2" android:layout_width="26dp" android:layout_height="90dp" android:background="@drawable/bg_bar_teal" /></LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="bottom|center_horizontal" android:orientation="vertical"><View android:id="@+id/bar_sem3" android:layout_width="26dp" android:layout_height="78dp" android:background="@drawable/bg_bar_teal" /></LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="bottom|center_horizontal" android:orientation="vertical"><View android:id="@+id/bar_sem4" android:layout_width="26dp" android:layout_height="96dp" android:background="@drawable/bg_bar_teal" /></LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:orientation="horizontal">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/hoteladmin_reportes_sem1" android:textColor="@color/io_text_secondary" android:textSize="11sp" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/hoteladmin_reportes_sem2" android:textColor="@color/io_text_secondary" android:textSize="11sp" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/hoteladmin_reportes_sem3" android:textColor="@color/io_text_secondary" android:textSize="11sp" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/hoteladmin_reportes_sem4" android:textColor="@color/io_text_secondary" android:textSize="11sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Ingresos por servicios adicionales -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.IoTelito.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/hoteladmin_reportes_por_servicio" android:textColor="@color/io_text_primary" android:textSize="15sp" android:textStyle="bold" />
+
+                    <LinearLayout android:id="@+id/ll_servicios" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:orientation="vertical" />
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="8dp" android:background="@color/io_divider" />
+
+                    <TextView android:id="@+id/tv_ver_detalle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:background="?attr/selectableItemBackground" android:gravity="center" android:paddingVertical="4dp" android:text="@string/hoteladmin_reportes_ver_detalle" android:textColor="@color/io_teal" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

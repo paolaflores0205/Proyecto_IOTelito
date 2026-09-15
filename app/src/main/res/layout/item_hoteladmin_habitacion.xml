@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.IoTelito.Card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:strokeColor="@color/io_divider"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_foto"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.IoTelito.Rounded8"
+            android:contentDescription="@null" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_tipo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/io_text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    tools:text="Suite Ejecutiva"
+                    xmlns:tools="http://schemas.android.com/tools" />
+
+                <TextView
+                    android:id="@+id/tv_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pill"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="3dp"
+                    android:textSize="11sp"
+                    tools:text="Disponible"
+                    xmlns:tools="http://schemas.android.com/tools" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_aforo_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="12sp"
+                tools:text="2 adultos, 1 niño · 45 m²"
+                xmlns:tools="http://schemas.android.com/tools" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_precio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/io_teal"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="S/ 450"
+                    xmlns:tools="http://schemas.android.com/tools" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/hoteladmin_por_noche"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_editar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="2dp"
+                    android:text="@string/hoteladmin_editar"
+                    android:textColor="@color/io_teal"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_eliminar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="18dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="2dp"
+                    android:text="@string/hoteladmin_eliminar"
+                    android:textColor="@color/io_danger_text"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

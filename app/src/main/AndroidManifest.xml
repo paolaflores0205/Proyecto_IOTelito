@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".IoTelitoApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,9 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Proyecto_IOTelito">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.auth.LoginActivity"
             android:exported="true"
-            android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,6 +22,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.auth.RolePreviewActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.auth.LoginActivity" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.booking.ResultadosActivity"
@@ -146,6 +157,94 @@
         <activity
             android:name=".ui.taxista.ServicioFinalizadoActivity"
             android:exported="false" />
+
+        <!-- Superadmin -->
+        <activity
+            android:name=".ui.superadmin.SuperadminMainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.superadmin.usuarios.DetalleUsuarioActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <activity
+            android:name=".ui.superadmin.hoteles.FormularioHotelActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <activity
+            android:name=".ui.superadmin.hoteles.DetalleHotelAdminActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <activity
+            android:name=".ui.superadmin.hoteles.AsignarAdministradorActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.superadmin.hoteles.DetalleHotelAdminActivity" />
+
+        <activity
+            android:name=".ui.superadmin.logs.RegistroLogsActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <!-- Panel de Administrador de hotel (rol HOTEL_ADMIN). Se abre desde el login por rol. -->
+        <activity
+            android:name=".ui.hoteladmin.HotelAdminMainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.hoteladmin.hotel.HabitacionesActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.hotel.FormularioHabitacionActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.hoteladmin.hotel.HabitacionesActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.hotel.ServiciosActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.hotel.FormularioServicioActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.hoteladmin.hotel.ServiciosActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.hotel.DatosHotelActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.hotel.FotosHotelActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.hoteladmin.hotel.DatosHotelActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.reservas.CobroCheckoutActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.reservas.EstadoTaxiActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.mensajes.AdminChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
     </application>
 
 </manifest>

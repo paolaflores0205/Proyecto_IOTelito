@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_surface_variant"
+    android:orientation="vertical"
+    tools:context=".ui.hoteladmin.reservas.AdminReservasFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/io_navy"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="16dp"
+        android:text="@string/hoteladmin_reservas_titulo_corto"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.IoTelito.Input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="12dp"
+        android:hint="@string/hoteladmin_buscar_reservas"
+        app:startIconDrawable="@drawable/ic_search">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_buscar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:scrollbars="none">
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_fecha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+            <com.google.android.material.chip.Chip android:id="@+id/chip_todas_fechas" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_fecha_todas" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_hoy" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_fecha_hoy" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_semana" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_fecha_semana" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:scrollbars="none">
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_estado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+            <com.google.android.material.chip.Chip android:id="@+id/chip_proximas" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_filtro_proximas" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_hospedados" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_filtro_hospedados" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_checkout" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_estado_checkout" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/tv_cantidad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="6dp"
+        android:textColor="@color/io_text_secondary"
+        android:textStyle="bold"
+        tools:text="1 reserva" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv_sin_resultados"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="32dp"
+                android:text="@string/hoteladmin_sin_reservas"
+                android:textColor="@color/io_text_secondary"
+                android:visibility="gone" />
+            <LinearLayout
+                android:id="@+id/ll_reservas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="16dp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

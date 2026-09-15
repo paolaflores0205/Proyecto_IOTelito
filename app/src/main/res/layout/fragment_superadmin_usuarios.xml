@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_surface_variant"
+    android:orientation="vertical"
+    tools:context=".ui.superadmin.usuarios.UsuariosFragment">
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.IoTelito.Input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="@string/superadmin_users_search_hint"
+        app:startIconDrawable="@drawable/ic_search">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_user_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:scrollbars="none">
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_roles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:selectionRequired="false"
+            app:singleSelection="true">
+            <com.google.android.material.chip.Chip android:id="@+id/chip_client" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_client" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_admin" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_admin" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_driver" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_driver" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_superadmin" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_superadmin" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        app:singleSelection="true">
+        <com.google.android.material.chip.Chip android:id="@+id/chip_active" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_active" />
+        <com.google.android.material.chip.Chip android:id="@+id/chip_inactive" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_inactive" />
+    </com.google.android.material.chip.ChipGroup>
+
+    <TextView
+        android:id="@+id/tv_user_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:textColor="@color/io_text_secondary"
+        android:textStyle="bold"
+        tools:text="Mostrando 4 usuarios" />
+
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:id="@+id/user_list_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingBottom="16dp" />
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

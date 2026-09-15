@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.HotelMedia;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.util.ServicioIconos;
@@ -376,6 +377,7 @@ public class ListaHotelesActivity extends AppCompatActivity {
     }
 
     private void bindHotelCard(View card, Hotel hotel) {
+        ((ImageView) card.findViewById(R.id.iv_photo)).setImageResource(HotelMedia.hotelImage(hotel.id));
         ((TextView) card.findViewById(R.id.tv_location)).setText(hotel.address);
         ((TextView) card.findViewById(R.id.tv_rating)).setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
         ((TextView) card.findViewById(R.id.tv_name)).setText(hotel.name);

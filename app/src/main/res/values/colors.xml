@@ -18,4 +18,14 @@
     <color name="io_card_shadow">#0D000000</color>
     <color name="io_danger_bg">#FEE2E2</color>
     <color name="io_danger_text">#B91C1C</color>
+    <color name="io_surface">#FFFFFFFF</color>
+    <color name="io_surface_variant">#FFF4F5F7</color>
+    <color name="io_navy">#FF071A33</color>
+    <color name="io_navy_soft">#FF102B4C</color>
+    <color name="io_success_bg">#FFD4EDDA</color>
+    <color name="io_success_text">#FF155724</color>
+    <color name="io_info_bg">#FFE0FAF5</color>
+    <color name="io_warning_surface">#FFFFF3CD</color>
+    <color name="io_warning_dark">#FF856404</color>
+    <color name="io_divider">#FFE2E8F0</color>
 </resources>

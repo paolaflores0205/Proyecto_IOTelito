@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_superadmin_home"
+        android:icon="@drawable/ic_home"
+        android:title="@string/superadmin_nav_home" />
+    <item
+        android:id="@+id/nav_superadmin_users"
+        android:icon="@drawable/ic_person"
+        android:title="@string/superadmin_nav_users" />
+    <item
+        android:id="@+id/nav_superadmin_hotels"
+        android:icon="@drawable/ic_building"
+        android:title="@string/superadmin_nav_hotels" />
+    <item
+        android:id="@+id/nav_superadmin_reports"
+        android:icon="@drawable/ic_bar_chart"
+        android:title="@string/superadmin_nav_reports" />
+</menu>

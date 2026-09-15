@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_surface_variant"
+    tools:context=".ui.superadmin.hoteles.HotelesAdminFragment">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.IoTelito.Input" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="16dp" android:hint="@string/superadmin_hotels_search_hint" app:startIconDrawable="@drawable/ic_search">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_hotel_search" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.chip.ChipGroup android:id="@+id/chip_group_districts" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" app:singleSelection="true">
+            <com.google.android.material.chip.Chip android:id="@+id/chip_miraflores" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_miraflores" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_san_isidro" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_san_isidro" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_barranco" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_barranco" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:clipToPadding="false">
+            <LinearLayout android:id="@+id/hotel_list_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingTop="8dp" android:paddingBottom="96dp" />
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_hotel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:contentDescription="@string/superadmin_cd_add_hotel"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="@color/io_teal"
+        app:tint="@color/io_navy" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

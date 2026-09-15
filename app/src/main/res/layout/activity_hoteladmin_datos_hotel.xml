@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/io_background"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/item_hoteladmin_toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:text="@string/hoteladmin_nombre_hotel" />
+
+            <EditText
+                android:id="@+id/et_nombre"
+                style="@style/Widget.IoTelito.FieldInput"
+                android:layout_marginTop="6dp"
+                android:inputType="textCapWords"
+                android:maxLines="1" />
+
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:layout_marginTop="14dp"
+                android:text="@string/hoteladmin_direccion" />
+
+            <EditText
+                android:id="@+id/et_direccion"
+                style="@style/Widget.IoTelito.FieldInput"
+                android:layout_marginTop="6dp"
+                android:inputType="textPostalAddress"
+                android:maxLines="2" />
+
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:layout_marginTop="14dp"
+                android:text="@string/hoteladmin_mapa_ubicacion" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="105dp"
+                android:layout_marginTop="6dp"
+                app:cardCornerRadius="9dp"
+                xmlns:app="http://schemas.android.com/apk/res-auto">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/hoteladmin_mapa_ubicacion"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/hoteladmin_map_miraflores" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:layout_marginTop="14dp"
+                android:text="@string/hoteladmin_descripcion" />
+
+            <EditText
+                android:id="@+id/et_descripcion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:gravity="top"
+                android:inputType="textCapSentences|textMultiLine"
+                android:minLines="3"
+                android:padding="12dp"
+                android:textColor="@color/io_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:layout_marginTop="14dp"
+                android:text="@string/hoteladmin_lugares_cercanos" />
+
+            <EditText
+                android:id="@+id/et_atracciones"
+                style="@style/Widget.IoTelito.FieldInput"
+                android:layout_marginTop="6dp"
+                android:inputType="textCapSentences"
+                android:maxLines="2" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.IoTelito.FieldLabel"
+                        android:text="@string/hoteladmin_telefono" />
+
+                    <EditText
+                        android:id="@+id/et_telefono"
+                        style="@style/Widget.IoTelito.FieldInput"
+                        android:layout_marginTop="6dp"
+                        android:inputType="phone"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.IoTelito.FieldLabel"
+                        android:text="@string/hoteladmin_email" />
+
+                    <EditText
+                        android:id="@+id/et_email"
+                        style="@style/Widget.IoTelito.FieldInput"
+                        android:layout_marginTop="6dp"
+                        android:inputType="textEmailAddress"
+                        android:maxLines="1" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_fotos"
+                style="@style/Widget.IoTelito.Button.Outline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="@string/hoteladmin_gestionar_fotos" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_guardar"
+                style="@style/Widget.IoTelito.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/hoteladmin_guardar_cambios" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

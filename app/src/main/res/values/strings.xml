@@ -398,4 +398,403 @@
     <string name="taxi_toast_proximamente">Disponible próximamente</string>
     <string name="taxi_toast_sesion_cerrada">Sesión cerrada</string>
 
+    <!-- Superadministrador -->
+    <string name="superadmin_app_name">IoTelito Superadmin</string>
+    <string name="superadmin_greeting">Hola, Superadmin</string>
+    <string name="superadmin_console_subtitle">IoTelito Perú · Consola de Control</string>
+    <string name="superadmin_initials">SA</string>
+    <string name="superadmin_nav_home">Inicio</string>
+    <string name="superadmin_nav_users">Usuarios</string>
+    <string name="superadmin_nav_hotels">Hoteles</string>
+    <string name="superadmin_nav_reports">Reportes</string>
+    <string name="superadmin_active_users">Usuarios activos</string>
+    <string name="superadmin_registered_hotels">Hoteles reg.</string>
+    <string name="superadmin_administrators">Administradores</string>
+    <string name="superadmin_month_bookings">Reservas del mes</string>
+    <string name="superadmin_pending_alerts">Alertas pendientes</string>
+    <string name="superadmin_inactive_users_alert">3 usuarios desactivados por inactividad</string>
+    <string name="superadmin_unassigned_hotels_alert">2 hoteles sin administrador asignado</string>
+    <string name="superadmin_quick_access">Acceso rápido</string>
+    <string name="superadmin_logs">Logs</string>
+    <string name="superadmin_recent_activity">Actividad reciente</string>
+    <string name="superadmin_users_search_hint">Buscar por nombre, correo o documento</string>
+    <string name="superadmin_filter_client">Cliente</string>
+    <string name="superadmin_filter_admin">Administrador</string>
+    <string name="superadmin_filter_driver">Taxista</string>
+    <string name="superadmin_filter_superadmin">Superadministrador</string>
+    <string name="superadmin_filter_active">Activo</string>
+    <string name="superadmin_filter_inactive">Inactivo</string>
+    <string name="superadmin_showing_users">Mostrando %1$d usuarios</string>
+    <string name="superadmin_view_detail">Ver detalle</string>
+    <string name="superadmin_role_format">Rol: %1$s</string>
+    <string name="superadmin_registered_format">Reg: %1$s</string>
+    <string name="superadmin_user_detail_title">Detalle de usuario</string>
+    <string name="superadmin_personal_data">Datos personales</string>
+    <string name="superadmin_document">Documento:</string>
+    <string name="superadmin_phone">Teléfono:</string>
+    <string name="superadmin_email">Correo:</string>
+    <string name="superadmin_role">Rol:</string>
+    <string name="superadmin_registration_date">Fecha de registro:</string>
+    <string name="superadmin_last_access">Último acceso:</string>
+    <string name="superadmin_deactivate_user">Desactivar usuario</string>
+    <string name="superadmin_activate_user">Activar usuario</string>
+    <string name="superadmin_deactivate_question">¿Desactivar usuario?</string>
+    <string name="superadmin_activate_question">¿Activar usuario?</string>
+    <string name="superadmin_deactivate_message">Esta acción restringirá el acceso de %1$s a la plataforma.</string>
+    <string name="superadmin_activate_message">Esta acción devolverá el acceso de %1$s a la plataforma.</string>
+    <string name="superadmin_reason_label">Motivo de desactivación</string>
+    <string name="superadmin_reason_hint">Incumplimiento de términos</string>
+    <string name="superadmin_confirm">Confirmar</string>
+    <string name="superadmin_cancel">Cancelar</string>
+    <string name="superadmin_user_status_updated">Estado del usuario actualizado</string>
+    <string name="superadmin_hotels_search_hint">Buscar hoteles</string>
+    <string name="superadmin_filter_miraflores">Miraflores</string>
+    <string name="superadmin_filter_san_isidro">San Isidro</string>
+    <string name="superadmin_filter_barranco">Barranco</string>
+    <string name="superadmin_rooms_format">%1$d Hab.</string>
+    <string name="superadmin_admin_format">Admin: %1$s</string>
+    <string name="superadmin_month_reservations_format">%1$d reservas del mes</string>
+    <string name="superadmin_detail">Detalle</string>
+    <string name="superadmin_manage">Gestionar</string>
+    <string name="superadmin_add_hotel">Registrar hotel</string>
+    <string name="superadmin_upload_logo">Subir foto o logo del hotel</string>
+    <string name="superadmin_upload_formats">Formatos recomendados: PNG, JPG (Max 5MB)</string>
+    <string name="superadmin_hotel_name">Nombre del hotel</string>
+    <string name="superadmin_hotel_name_hint">Escriba el nombre completo</string>
+    <string name="superadmin_address">Dirección</string>
+    <string name="superadmin_district">Distrito</string>
+    <string name="superadmin_city">Ciudad</string>
+    <string name="superadmin_gps_location">Ubicación GPS (Lat, Long)</string>
+    <string name="superadmin_set_on_map">Fijar en mapa</string>
+    <string name="superadmin_contact_phone">Teléfono de contacto</string>
+    <string name="superadmin_brief_description">Descripción breve</string>
+    <string name="superadmin_description_hint">Escriba servicios o detalles generales del hotel...</string>
+    <string name="superadmin_immediate_activation">Estado de alta inmediato</string>
+    <string name="superadmin_immediate_activation_subtitle">Habilitar operaciones IoT al guardar</string>
+    <string name="superadmin_save_hotel">Guardar hotel</string>
+    <string name="superadmin_required_field">Este campo es obligatorio</string>
+    <string name="superadmin_hotel_saved">Hotel guardado correctamente</string>
+    <string name="superadmin_assign_admin_title">Asignar administrador</string>
+    <string name="superadmin_selected_hotel">Hotel seleccionado</string>
+    <string name="superadmin_current_admin">Administrador actual</string>
+    <string name="superadmin_search_new_admin">Buscar nuevo administrador</string>
+    <string name="superadmin_admin_search_hint">Buscar por nombre, correo o DNI</string>
+    <string name="superadmin_assign_admin_button">Asignar administrador</string>
+    <string name="superadmin_assign_question">¿Asignar este administrador?</string>
+    <string name="superadmin_assign_message">El administrador recibirá acceso completo para gestionar las habitaciones, tarifas y reservas del hotel.</string>
+    <string name="superadmin_admin_assigned">Administrador asignado correctamente</string>
+    <string name="superadmin_hotel_detail_title">Detalle del hotel</string>
+    <string name="superadmin_contact_information">Información de contacto</string>
+    <string name="superadmin_assigned_admin">Administrador asignado</string>
+    <string name="superadmin_rooms">Habitaciones</string>
+    <string name="superadmin_month_income">Ingresos mes</string>
+    <string name="superadmin_average_occupancy">Ocupación prom.</string>
+    <string name="superadmin_iot_operations">Habilitar operaciones IoT</string>
+    <string name="superadmin_iot_operations_subtitle">Apagar deshabilita accesos remotos y sensores</string>
+    <string name="superadmin_edit_hotel">Editar hotel</string>
+    <string name="superadmin_change_admin">Cambiar administrador</string>
+    <string name="superadmin_change_hotel_status">¿Cambiar estado del hotel?</string>
+    <string name="superadmin_change_hotel_status_message">Habilitar o deshabilitar las operaciones IoT afectará directamente a los huéspedes activos y al staff.</string>
+    <string name="superadmin_hotel_status_updated">Estado del hotel actualizado</string>
+    <string name="superadmin_reports_title">Reportes operativos</string>
+    <string name="superadmin_all_hotels">Todos los hoteles</string>
+    <string name="superadmin_daily">Diario</string>
+    <string name="superadmin_monthly">Mensual</string>
+    <string name="superadmin_yearly">Anual</string>
+    <string name="superadmin_selected_range">Rango seleccionado: %1$s</string>
+    <string name="superadmin_total_bookings">Total reservas</string>
+    <string name="superadmin_cancellations">Cancelaciones</string>
+    <string name="superadmin_total_income">Ingresos totales</string>
+    <string name="superadmin_weekly_bookings">Reservas semanales</string>
+    <string name="superadmin_occupancy_ranking">Ranking de ocupación</string>
+    <string name="superadmin_logs_title">Registro de actividad</string>
+    <string name="superadmin_logs_search_hint">Filtrar logs por palabra clave...</string>
+    <string name="superadmin_all">Todos</string>
+    <string name="superadmin_alerts">Alertas (R/A)</string>
+    <string name="superadmin_systems">Sistemas</string>
+    <string name="superadmin_no_results">No se encontraron resultados.</string>
+    <string name="superadmin_cd_open_logs">Abrir registro de actividad</string>
+    <string name="superadmin_cd_add_hotel">Registrar un nuevo hotel</string>
+    <string name="superadmin_cd_hotel_photo">Fotografía del hotel</string>
+    <string name="superadmin_cd_map_preview">Vista previa de ubicación</string>
+    <string name="superadmin_demo_entry_note">El acceso se validó localmente según el rol de la cuenta.</string>
+
+    <!-- Inicio de sesión local por roles -->
+    <string name="login_brand">IoTelito</string>
+    <string name="login_slogan">Tu estadía, conectada.</string>
+    <string name="login_welcome">Bienvenido de nuevo</string>
+    <string name="login_subtitle">Ingresa con tu cuenta para continuar</string>
+    <string name="login_demo_label">Cuenta de demostración</string>
+    <string name="login_demo_helper">Elige una cuenta para completar su correo</string>
+    <string name="login_email">Correo electrónico</string>
+    <string name="login_password">Contraseña</string>
+    <string name="login_button">Iniciar sesión</string>
+    <string name="login_forgot">Olvidé mi contraseña</string>
+    <string name="login_create_account">Crear cuenta de cliente</string>
+    <string name="login_local_notice">Modo local: todavía no se utiliza una base de datos.</string>
+    <string name="login_error_required">Completa este campo</string>
+    <string name="login_error_credentials">El correo o la contraseña son incorrectos</string>
+    <string name="login_recovery_pending">La recuperación estará disponible al conectar Firebase Authentication.</string>
+    <string name="login_registration_pending">El registro se conectará en un siguiente incremento.</string>
+    <string name="login_demo_client">Cliente — cliente@iotelito.pe</string>
+    <string name="login_demo_admin">Administrador de hotel — admin@iotelito.pe</string>
+    <string name="login_demo_driver">Taxista — taxista@iotelito.pe</string>
+    <string name="login_demo_superadmin">Superadmin — superadmin@iotelito.pe</string>
+
+    <!-- Resumen temporal para roles cuyos módulos aún no están integrados -->
+    <string name="role_session_started">Sesión local iniciada correctamente</string>
+    <string name="role_available_features">Funciones correspondientes al rol</string>
+    <string name="role_change_account">Cambiar de cuenta</string>
+    <string name="role_local_explanation">Esta pantalla confirma la autenticación y el enrutamiento. El módulo visual completo se integrará después.</string>
+    <string name="role_admin_name">Administrador de hotel</string>
+    <string name="role_admin_initials">AH</string>
+    <string name="role_admin_features">• Gestionar los datos del hotel y sus habitaciones\n• Administrar reservas, cobros y checkout\n• Atender chats y solicitudes de taxi\n• Consultar reportes del hotel</string>
+    <string name="role_driver_name">Taxista</string>
+    <string name="role_driver_initials">TX</string>
+    <string name="role_driver_features">• Revisar y aceptar solicitudes de traslado\n• Actualizar el estado del servicio\n• Compartir ubicación durante el viaje\n• Escanear QR y consultar el historial</string>
+
+    <!-- ==================== Administrador de hotel (rol HOTEL_ADMIN) ==================== -->
+    <!-- Navegación inferior -->
+    <string name="hoteladmin_nav_hotel">Hotel</string>
+    <string name="hoteladmin_nav_reservas">Reservas</string>
+    <string name="hoteladmin_nav_mensajes">Mensajes</string>
+    <string name="hoteladmin_nav_reportes">Reportes</string>
+
+    <!-- Títulos de las pestañas del panel de administrador -->
+    <string name="hoteladmin_mensajes_titulo">Mensajes</string>
+    <string name="hoteladmin_reportes_titulo">Reportes</string>
+    <string name="hoteladmin_periodo_diario">Diario</string>
+    <string name="hoteladmin_periodo_mensual">Mensual</string>
+    <string name="hoteladmin_periodo_anual">Anual</string>
+    <string name="hoteladmin_reportes_mes">Julio 2025</string>
+    <string name="hoteladmin_mes_anterior">Mes anterior</string>
+    <string name="hoteladmin_mes_siguiente">Mes siguiente</string>
+    <string name="hoteladmin_kpi_ingresos">Ingresos</string>
+    <string name="hoteladmin_kpi_reservas">Reservas</string>
+    <string name="hoteladmin_kpi_ocupacion">Ocupación</string>
+    <string name="hoteladmin_kpi_servicios">Servicios vendidos</string>
+    <string name="hoteladmin_kpi_ingresos_delta" formatted="false">↑ +12.4% vs Jun</string>
+    <string name="hoteladmin_kpi_reservas_delta" formatted="false">↑ +4.2% vs Jun</string>
+    <string name="hoteladmin_kpi_ocupacion_delta" formatted="false">↑ +8.5% vs Jun</string>
+    <string name="hoteladmin_kpi_servicios_delta" formatted="false">↑ +15.3% vs Jun</string>
+    <string name="hoteladmin_reportes_semanal">Ingresos por reservas (semanal)</string>
+    <string name="hoteladmin_reportes_sem1">Sem 1</string>
+    <string name="hoteladmin_reportes_sem2">Sem 2</string>
+    <string name="hoteladmin_reportes_sem3">Sem 3</string>
+    <string name="hoteladmin_reportes_sem4">Sem 4</string>
+    <string name="hoteladmin_reportes_por_servicio">Ingresos por servicios adicionales</string>
+    <string name="hoteladmin_reportes_servicio_rank">%1$d. %2$s</string>
+    <string name="hoteladmin_reportes_ver_detalle">Ver detalle del reporte completo</string>
+    <string name="hoteladmin_reportes_demo">Esta demo solo incluye datos de julio 2025.</string>
+    <!-- Valores de ejemplo (placeholder) de los formularios -->
+    <string name="hoteladmin_hint_area">45</string>
+    <string name="hoteladmin_hint_precio">450</string>
+    <string name="hoteladmin_hint_precio_servicio">120</string>
+
+    <!-- Estados de checkout de una reserva (pills) -->
+    <string name="hoteladmin_estado_proxima">Próxima</string>
+    <string name="hoteladmin_estado_hospedado">Hospedado</string>
+    <string name="hoteladmin_estado_checkout">Checkout pendiente</string>
+    <string name="hoteladmin_estado_finalizada">Finalizada</string>
+
+    <!-- Logo -->
+    <string name="hoteladmin_logo_iot">IoT</string>
+    <string name="hoteladmin_logo_elito">elito</string>
+
+    <!-- Dashboard (adm-dashboard) -->
+    <string name="hoteladmin_saludo">Hola, %1$s 👋</string>
+    <string name="hoteladmin_panel_control">%1$s · Panel de Control</string>
+    <string name="hoteladmin_resumen_hoy">Resumen de hoy</string>
+    <string name="hoteladmin_stat_ocupadas">Hab. Ocupadas</string>
+    <string name="hoteladmin_stat_disponibles">Hab. Disponibles</string>
+    <string name="hoteladmin_stat_salidas">Salidas de hoy</string>
+    <string name="hoteladmin_stat_ingresos">Ingresos hoy</string>
+    <string name="hoteladmin_stat_ocupacion">%1$d%% de ocupación</string>
+    <string name="hoteladmin_stat_listas">Listas para check-in</string>
+    <string name="hoteladmin_stat_pendientes">Pendientes por revisar</string>
+    <string name="hoteladmin_stat_vs_ayer" formatted="false">+15% vs ayer</string>
+    <string name="hoteladmin_alertas">Alertas pendientes (2)</string>
+    <string name="hoteladmin_alerta_checkout_titulo">Check-out retrasado: Hab 402</string>
+    <string name="hoteladmin_alerta_checkout_desc">Debió salir hace 45 minutos. Huésped no responde.</string>
+    <string name="hoteladmin_alerta_taxi_titulo">Taxi activo solicitado</string>
+    <string name="hoteladmin_alerta_taxi_desc">Traslado al aeropuerto solicitado para las 14:00.</string>
+    <string name="hoteladmin_accesos_rapidos">Accesos rápidos</string>
+    <string name="hoteladmin_acceso_habitaciones">Habitaciones</string>
+    <string name="hoteladmin_acceso_servicios">Servicios</string>
+    <string name="hoteladmin_acceso_datos">Datos hotel</string>
+    <string name="hoteladmin_proximamente">Disponible próximamente</string>
+
+    <!-- Habitaciones (adm-habitaciones) -->
+    <string name="hoteladmin_titulo_habitaciones">Habitaciones</string>
+    <string name="hoteladmin_filtrar">Filtrar</string>
+    <string name="hoteladmin_editar">Editar</string>
+    <string name="hoteladmin_eliminar">Eliminar</string>
+    <string name="hoteladmin_por_noche">x noche</string>
+    <string name="hoteladmin_badge_disponible">Disponible</string>
+    <string name="hoteladmin_badge_ocupada">Ocupada</string>
+    <string name="hoteladmin_aforo_area">%1$s · %2$d m²</string>
+    <string name="hoteladmin_agregar_habitacion">Agregar habitación</string>
+    <string name="hoteladmin_habitacion_eliminada">Habitación eliminada</string>
+    <string name="hoteladmin_confirmar_eliminar_hab_msg">¿Seguro que deseas eliminar esta habitación?</string>
+    <plurals name="hoteladmin_listado_habitaciones">
+        <item quantity="one">Listado (%d habitación)</item>
+        <item quantity="other">Listado (%d habitaciones)</item>
+    </plurals>
+
+    <!-- Formulario de habitación (adm-formulario-habitacion) -->
+    <string name="hoteladmin_titulo_nueva_habitacion">Nueva habitación</string>
+    <string name="hoteladmin_titulo_editar_habitacion">Editar habitación</string>
+    <string name="hoteladmin_subir_fotos_hab">Sube fotos de la habitación</string>
+    <string name="hoteladmin_formato_imagen">PNG, JPG hasta 5MB</string>
+    <string name="hoteladmin_tipo_habitacion">Tipo de habitación</string>
+    <string name="hoteladmin_numero_codigo">Número / Código</string>
+    <string name="hoteladmin_numero_codigo_hint">Room 402</string>
+    <string name="hoteladmin_area">Área (m²)</string>
+    <string name="hoteladmin_adultos">Adultos</string>
+    <string name="hoteladmin_ninos">Niños</string>
+    <string name="hoteladmin_precio_noche">Precio por noche (S/.)</string>
+    <string name="hoteladmin_descripcion">Descripción</string>
+    <string name="hoteladmin_descripcion_hab_hint">Describe los atributos clave de la habitación…</string>
+    <string name="hoteladmin_disponible_inmediato">Disponible de inmediato</string>
+    <string name="hoteladmin_disponible_inmediato_sub">Habilitar para reservas en la app</string>
+    <string name="hoteladmin_guardar_habitacion">Guardar habitación</string>
+    <string name="hoteladmin_habitacion_guardada">Habitación guardada</string>
+
+    <string-array name="hoteladmin_tipos_habitacion">
+        <item>Suite Ejecutiva</item>
+        <item>Suite Deluxe</item>
+        <item>Habitación Doble</item>
+        <item>Habitación Superior</item>
+        <item>Habitación Simple</item>
+        <item>Económica</item>
+    </string-array>
+
+    <!-- Servicios (adm-servicios) -->
+    <string name="hoteladmin_titulo_servicios">Servicios del hotel</string>
+    <string name="hoteladmin_badge_activo">Activo</string>
+    <string name="hoteladmin_badge_inactivo">Inactivo</string>
+    <string name="hoteladmin_precio_unidad">x %1$s</string>
+    <string name="hoteladmin_agregar_servicio">Agregar servicio</string>
+    <string name="hoteladmin_servicio_eliminado">Servicio eliminado</string>
+    <string name="hoteladmin_confirmar_eliminar_serv_msg">¿Seguro que deseas eliminar este servicio?</string>
+    <plurals name="hoteladmin_servicios_activos">
+        <item quantity="one">Servicios activos (%d)</item>
+        <item quantity="other">Servicios activos (%d)</item>
+    </plurals>
+
+    <!-- Formulario de servicio (adm-formulario-servicio) -->
+    <string name="hoteladmin_titulo_nuevo_servicio">Nuevo servicio</string>
+    <string name="hoteladmin_titulo_editar_servicio">Editar servicio</string>
+    <string name="hoteladmin_subir_foto_serv">Sube foto referencial del servicio</string>
+    <string name="hoteladmin_nombre_servicio">Nombre del servicio</string>
+    <string name="hoteladmin_nombre_servicio_hint">Spa &amp; Masajes</string>
+    <string name="hoteladmin_descripcion_serv_hint">Describe el servicio…</string>
+    <string name="hoteladmin_precio_servicio">Precio (S/.)</string>
+    <string name="hoteladmin_disponible_actualmente">Disponible actualmente</string>
+    <string name="hoteladmin_disponible_actualmente_sub">Habilitar reserva inmediata en catálogo</string>
+    <string name="hoteladmin_guardar_servicio">Guardar servicio</string>
+    <string name="hoteladmin_servicio_guardado">Servicio guardado</string>
+
+    <!-- Administrador de hotel: datos y fotografías -->
+    <string name="hoteladmin_titulo_datos_hotel">Datos del hotel</string>
+    <string name="hoteladmin_nombre_hotel">Nombre del hotel</string>
+    <string name="hoteladmin_direccion">Dirección</string>
+    <string name="hoteladmin_mapa_ubicacion">Mapa de ubicación</string>
+    <string name="hoteladmin_lugares_cercanos">Lugares de interés cercanos</string>
+    <string name="hoteladmin_telefono">Teléfono</string>
+    <string name="hoteladmin_email">Email</string>
+    <string name="hoteladmin_email_invalido">Ingresa un correo válido</string>
+    <string name="hoteladmin_guardar_cambios">Guardar cambios</string>
+    <string name="hoteladmin_datos_guardados">Datos del hotel actualizados</string>
+    <string name="hoteladmin_gestionar_fotos">Gestionar fotografías</string>
+    <string name="hoteladmin_titulo_fotos_hotel">Fotos del hotel</string>
+    <string name="hoteladmin_fotografias_subidas">Fotografías subidas</string>
+    <string name="hoteladmin_fotos_total">%1$d fotos en total</string>
+    <string name="hoteladmin_agregar_foto">Agregar nueva foto</string>
+    <string name="hoteladmin_principal">Principal ★</string>
+    <string name="hoteladmin_reemplazar">Reemplazar</string>
+    <string name="hoteladmin_guardar_fotografias">Guardar fotografías</string>
+    <string name="hoteladmin_fotografias_guardadas">Fotografías guardadas</string>
+    <string name="hoteladmin_foto_agregada">Fotografía agregada</string>
+    <string name="hoteladmin_foto_reemplazada">Fotografía reemplazada</string>
+    <string name="hoteladmin_minimo_fotos">El hotel debe conservar al menos 4 fotografías</string>
+    <string name="hoteladmin_confirmar_eliminar_foto">¿Eliminar esta fotografía?</string>
+    <string name="hoteladmin_foto_principal_info">La primera fotografía se usa como imagen principal.</string>
+
+    <!-- Reservas, checkout y taxi (Hito 3) -->
+    <string name="hoteladmin_reservas_titulo_corto">Reservas</string>
+    <string name="hoteladmin_buscar_reservas">Buscar huésped, habitación o DNI</string>
+    <string name="hoteladmin_fecha_todas">Todas las fechas</string>
+    <string name="hoteladmin_fecha_hoy">Hoy</string>
+    <string name="hoteladmin_fecha_semana">Esta semana</string>
+    <string name="hoteladmin_filtro_proximas">Próximas</string>
+    <string name="hoteladmin_filtro_hospedados">Hospedados</string>
+    <string name="hoteladmin_reserva_fechas">%1$s · %2$d noches</string>
+    <string name="hoteladmin_alerta_checkout">Checkout pendiente: revisa los consumos y realiza el cobro.</string>
+    <string name="hoteladmin_ver_taxi">Ver taxi</string>
+    <string name="hoteladmin_ver_detalle">Ver detalle</string>
+    <string name="hoteladmin_realizar_checkout">Checkout</string>
+    <string name="hoteladmin_sin_reservas">No hay reservas que coincidan con los filtros.</string>
+    <plurals name="hoteladmin_reservas_encontradas">
+        <item quantity="one">%d reserva</item>
+        <item quantity="other">%d reservas</item>
+    </plurals>
+
+    <string name="hoteladmin_checkout_titulo">Checkout y cobro</string>
+    <string name="hoteladmin_datos_reserva">Datos de la reserva</string>
+    <string name="hoteladmin_checkout_fechas">%1$s · %2$d noches</string>
+    <string name="hoteladmin_detalle_cobro">Detalle del cobro</string>
+    <string name="hoteladmin_alojamiento">Alojamiento</string>
+    <string name="hoteladmin_servicios_consumidos">Servicios adicionales consumidos</string>
+    <string name="hoteladmin_sin_consumos">Sin servicios adicionales.</string>
+    <string name="hoteladmin_subtotal">Subtotal</string>
+    <string name="hoteladmin_agregar_cobro_danos">Agregar cobro por daños</string>
+    <string name="hoteladmin_monto_dano">Monto (S/)</string>
+    <string name="hoteladmin_monto_dano_hint">0.00</string>
+    <string name="hoteladmin_motivo_dano">Motivo</string>
+    <string name="hoteladmin_motivo_dano_hint">Ej. Daño de control remoto</string>
+    <string name="hoteladmin_observacion_dano">Observación</string>
+    <string name="hoteladmin_observacion_dano_hint">Describe el daño encontrado</string>
+    <string name="hoteladmin_total_final">Total final</string>
+    <string name="hoteladmin_aviso_notificacion_cobro">El cliente recibirá una notificación con el detalle del cobro.</string>
+    <string name="hoteladmin_checkout_solo_lectura">Esta reserva todavía no tiene un checkout pendiente.</string>
+    <string name="hoteladmin_confirmar_checkout">Confirmar checkout y cobro</string>
+    <string name="hoteladmin_confirmar_checkout_titulo">¿Confirmar checkout y cobro?</string>
+    <string name="hoteladmin_confirmar_checkout_mensaje">Se cobrará %1$s a la tarjeta registrada del cliente.</string>
+    <string name="hoteladmin_confirmar">Confirmar</string>
+    <string name="hoteladmin_checkout_confirmado">Checkout y cobro confirmados</string>
+    <string name="hoteladmin_error_monto_dano">Ingresa un monto mayor que cero</string>
+    <string name="hoteladmin_campo_obligatorio">Este campo es obligatorio</string>
+    <string name="hoteladmin_cobro_dano_concepto">Cobro por daños</string>
+    <string name="hoteladmin_moneda">S/ %1$s</string>
+
+    <string name="hoteladmin_taxi_titulo">Estado del taxi</string>
+    <string name="hoteladmin_taxi_traslado">Traslado solicitado por el huésped</string>
+    <string name="hoteladmin_taxi_destino">Destino</string>
+    <string name="hoteladmin_taxi_conductor">Conductor asignado</string>
+    <string name="hoteladmin_taxi_rating">★ %1$.1f</string>
+    <string name="hoteladmin_taxi_foto_conductor">Fotografía del conductor</string>
+    <string name="hoteladmin_taxi_mapa">Mapa de ubicación del taxi</string>
+    <string name="hoteladmin_taxi_estado_actual">Estado actual: %1$s</string>
+    <string name="hoteladmin_taxi_solicitado">Solicitado</string>
+    <string name="hoteladmin_taxi_asignado">Asignado</string>
+    <string name="hoteladmin_taxi_en_camino">En camino</string>
+    <string name="hoteladmin_taxi_en_traslado">En traslado</string>
+    <string name="hoteladmin_taxi_finalizado">Finalizado</string>
+    <string name="hoteladmin_taxi_contactar">Contactar al huésped</string>
+    <string name="hoteladmin_taxi_llamar_conductor">Llamar al conductor</string>
+    <string name="hoteladmin_ver_reserva">Ver reserva</string>
+
+    <!-- Bandeja y chat del administrador (Hito 4) -->
+    <string name="hoteladmin_buscar_conversaciones">Buscar conversaciones</string>
+    <string name="hoteladmin_mensajes_todos">Todos</string>
+    <string name="hoteladmin_sin_conversaciones">No hay conversaciones que coincidan con la búsqueda.</string>
+    <string name="hoteladmin_escribe_mensaje">Escribe un mensaje…</string>
+    <string name="hoteladmin_escribe_mensaje_error">Escribe un mensaje antes de enviarlo</string>
+    <string name="hoteladmin_adjuntar">Adjuntar archivo</string>
+    <string name="hoteladmin_adjuntos_posterior">Los adjuntos se habilitarán con el almacenamiento del siguiente laboratorio.</string>
+    <string name="hoteladmin_hora_ahora">ahora</string>
+    <string name="hoteladmin_detalle_reserva_activa">Reserva activa</string>
+    <string name="hoteladmin_detalle_reserva_chat">Huésped: %1$s\nHabitación: %2$s\nEstado: Hospedado</string>
+    <string name="hoteladmin_entendido">Entendido</string>
 </resources>
