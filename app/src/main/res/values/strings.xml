@@ -505,4 +505,67 @@
     <string name="hoteladmin_minimo_fotos">El hotel debe conservar al menos 4 fotografías</string>
     <string name="hoteladmin_confirmar_eliminar_foto">¿Eliminar esta fotografía?</string>
     <string name="hoteladmin_foto_principal_info">La primera fotografía se usa como imagen principal.</string>
+
+    <!-- Reservas, checkout y taxi (Hito 3) -->
+    <string name="hoteladmin_reservas_titulo_corto">Reservas</string>
+    <string name="hoteladmin_buscar_reservas">Buscar huésped, habitación o DNI</string>
+    <string name="hoteladmin_fecha_todas">Todas las fechas</string>
+    <string name="hoteladmin_fecha_hoy">Hoy</string>
+    <string name="hoteladmin_fecha_semana">Esta semana</string>
+    <string name="hoteladmin_filtro_proximas">Próximas</string>
+    <string name="hoteladmin_filtro_hospedados">Hospedados</string>
+    <string name="hoteladmin_reserva_fechas">%1$s · %2$d noches</string>
+    <string name="hoteladmin_alerta_checkout">Checkout pendiente: revisa los consumos y realiza el cobro.</string>
+    <string name="hoteladmin_ver_taxi">Ver taxi</string>
+    <string name="hoteladmin_ver_detalle">Ver detalle</string>
+    <string name="hoteladmin_realizar_checkout">Realizar checkout</string>
+    <string name="hoteladmin_sin_reservas">No hay reservas que coincidan con los filtros.</string>
+    <plurals name="hoteladmin_reservas_encontradas">
+        <item quantity="one">%d reserva</item>
+        <item quantity="other">%d reservas</item>
+    </plurals>
+
+    <string name="hoteladmin_checkout_titulo">Checkout y cobro</string>
+    <string name="hoteladmin_datos_reserva">Datos de la reserva</string>
+    <string name="hoteladmin_checkout_fechas">%1$s · %2$d noches</string>
+    <string name="hoteladmin_detalle_cobro">Detalle del cobro</string>
+    <string name="hoteladmin_alojamiento">Alojamiento</string>
+    <string name="hoteladmin_servicios_consumidos">Servicios adicionales consumidos</string>
+    <string name="hoteladmin_sin_consumos">Sin servicios adicionales.</string>
+    <string name="hoteladmin_subtotal">Subtotal</string>
+    <string name="hoteladmin_agregar_cobro_danos">Agregar cobro por daños</string>
+    <string name="hoteladmin_monto_dano">Monto (S/)</string>
+    <string name="hoteladmin_monto_dano_hint">0.00</string>
+    <string name="hoteladmin_motivo_dano">Motivo</string>
+    <string name="hoteladmin_motivo_dano_hint">Ej. Daño de control remoto</string>
+    <string name="hoteladmin_observacion_dano">Observación</string>
+    <string name="hoteladmin_observacion_dano_hint">Describe el daño encontrado</string>
+    <string name="hoteladmin_total_final">Total final</string>
+    <string name="hoteladmin_aviso_notificacion_cobro">El cliente recibirá una notificación con el detalle del cobro.</string>
+    <string name="hoteladmin_checkout_solo_lectura">Esta reserva todavía no tiene un checkout pendiente.</string>
+    <string name="hoteladmin_confirmar_checkout">Confirmar checkout y cobro</string>
+    <string name="hoteladmin_confirmar_checkout_titulo">¿Confirmar checkout y cobro?</string>
+    <string name="hoteladmin_confirmar_checkout_mensaje">Se cobrará %1$s a la tarjeta registrada del cliente.</string>
+    <string name="hoteladmin_confirmar">Confirmar</string>
+    <string name="hoteladmin_checkout_confirmado">Checkout y cobro confirmados</string>
+    <string name="hoteladmin_error_monto_dano">Ingresa un monto mayor que cero</string>
+    <string name="hoteladmin_campo_obligatorio">Este campo es obligatorio</string>
+    <string name="hoteladmin_cobro_dano_concepto">Cobro por daños</string>
+    <string name="hoteladmin_moneda">S/ %1$s</string>
+
+    <string name="hoteladmin_taxi_titulo">Estado del taxi</string>
+    <string name="hoteladmin_taxi_traslado">Traslado solicitado por el huésped</string>
+    <string name="hoteladmin_taxi_destino">Destino</string>
+    <string name="hoteladmin_taxi_conductor">Conductor asignado</string>
+    <string name="hoteladmin_taxi_rating">★ %1$.1f</string>
+    <string name="hoteladmin_taxi_foto_conductor">Fotografía del conductor</string>
+    <string name="hoteladmin_taxi_mapa">Mapa de ubicación del taxi</string>
+    <string name="hoteladmin_taxi_estado_actual">Estado actual: %1$s</string>
+    <string name="hoteladmin_taxi_solicitado">Solicitado</string>
+    <string name="hoteladmin_taxi_asignado">Asignado</string>
+    <string name="hoteladmin_taxi_en_camino">En camino</string>
+    <string name="hoteladmin_taxi_en_traslado">En traslado</string>
+    <string name="hoteladmin_taxi_finalizado">Finalizado</string>
+    <string name="hoteladmin_taxi_contactar">Contactar al huésped</string>
+    <string name="hoteladmin_ver_reserva">Ver reserva</string>
 </resources>

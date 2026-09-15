@@ -10,9 +10,17 @@ public class ItemConsumo implements Serializable {
 
     public final String concepto;
     public final double monto;
+    public final String motivo;
+    public final String observacion;
 
     public ItemConsumo(String concepto, double monto) {
+        this(concepto, monto, "", "");
+    }
+
+    public ItemConsumo(String concepto, double monto, String motivo, String observacion) {
         this.concepto = concepto;
         this.monto = monto;
+        this.motivo = motivo;
+        this.observacion = observacion;
     }
 }

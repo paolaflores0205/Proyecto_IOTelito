@@ -166,6 +166,17 @@
             android:name=".ui.hoteladmin.hotel.FotosHotelActivity"
             android:exported="false"
             android:parentActivityName=".ui.hoteladmin.hotel.DatosHotelActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.reservas.CobroCheckoutActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
+
+        <activity
+            android:name=".ui.hoteladmin.reservas.EstadoTaxiActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.hoteladmin.HotelAdminMainActivity" />
     </application>
 
 </manifest>

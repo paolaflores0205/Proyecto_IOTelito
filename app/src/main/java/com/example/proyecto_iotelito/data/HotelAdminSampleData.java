@@ -92,23 +92,19 @@ public final class HotelAdminSampleData {
             new ReservaAdmin(101, HOTEL_ID, "Alejandro Quispe Mendoza", "DNI 45678910",
                     "Suite Ejecutiva · Hab. 402", "15 – 18 set", 3, 1350.0, true,
                     ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE, new ArrayList<>(Arrays.asList(
-                    new ItemConsumo("Alojamiento (3 noches)", 1350.0),
                     new ItemConsumo("Desayuno Buffet x3", 135.0),
                     new ItemConsumo("Lavandería Express", 35.0),
                     new ItemConsumo("Traslado Aeropuerto", 80.0)))),
             new ReservaAdmin(102, HOTEL_ID, "Sofía Alva Rodríguez", "DNI 70854123",
                     "Habitación Doble · Hab. 305", "14 – 17 set", 3, 960.0, false,
-                    ReservaAdmin.EstadoCheckout.HOSPEDADO, new ArrayList<>(Arrays.asList(
-                    new ItemConsumo("Alojamiento (3 noches)", 960.0),
+                    ReservaAdmin.EstadoCheckout.HOSPEDADO, new ArrayList<>(Collections.singletonList(
                     new ItemConsumo("Desayuno Buffet x2", 90.0)))),
             new ReservaAdmin(103, HOTEL_ID, "Carlos Ruiz Ramos", "DNI 41235876",
-                    "Suite Deluxe · Hab. 501", "20 – 23 set", 3, 1860.0, true,
-                    ReservaAdmin.EstadoCheckout.PROXIMA, new ArrayList<>(Collections.singletonList(
-                    new ItemConsumo("Alojamiento (3 noches)", 1860.0)))),
+                    "Suite Deluxe · Hab. 501", "20 – 23 set", 3, 1860.0, false,
+                    ReservaAdmin.EstadoCheckout.PROXIMA, new ArrayList<>()),
             new ReservaAdmin(104, HOTEL_ID, "Mariana Huertas Díaz", "DNI 09876543",
                     "Habitación Superior · Hab. 308", "10 – 12 set", 2, 760.0, false,
-                    ReservaAdmin.EstadoCheckout.FINALIZADA, new ArrayList<>(Arrays.asList(
-                    new ItemConsumo("Alojamiento (2 noches)", 760.0),
+                    ReservaAdmin.EstadoCheckout.FINALIZADA, new ArrayList<>(Collections.singletonList(
                     new ItemConsumo("Spa & Masajes", 120.0))))
     ));
 

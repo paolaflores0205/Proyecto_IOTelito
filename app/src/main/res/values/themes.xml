@@ -57,6 +57,11 @@
         <item name="cornerSize">8dp</item>
     </style>
 
+    <style name="ShapeAppearanceOverlay.IoTelito.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
     <!-- Etiqueta de campo (encima del input) en formularios del admin -->
     <style name="TextAppearance.IoTelito.FieldLabel" parent="">
         <item name="android:layout_width">wrap_content</item>
@@ -75,5 +80,19 @@
         <item name="android:textColor">@color/io_text_primary</item>
         <item name="android:textColorHint">@color/io_text_muted</item>
         <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="HotelAdminTaxiStep" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginHorizontal">2dp</item>
+        <item name="android:background">@drawable/bg_pill</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">@color/io_text_muted</item>
+        <item name="android:textSize">9sp</item>
     </style>
 </resources>
