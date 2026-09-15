@@ -112,7 +112,7 @@ public final class HotelAdminSampleData {
     private static final ServicioTaxi TAXI_ACTIVO = new ServicioTaxi(
             "Alejandro Quispe Mendoza", "Suite Ejecutiva · Hab. 402",
             "Aeropuerto Internacional Jorge Chávez", "Mateo Quispe Huamán",
-            "Toyota Corolla · Gris", "ABC-123", "+51 987 112 334", 4.8,
+            "Toyota Corolla · Gris", "ABC-123", "+51 987 112 334", "+51 991 222 333", 4.8,
             ServicioTaxi.Estado.EN_CAMINO);
 
     // ---- Conversaciones ----

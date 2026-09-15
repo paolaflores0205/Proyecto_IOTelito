@@ -103,7 +103,7 @@
                 android:id="@+id/et_precio"
                 style="@style/Widget.IoTelito.FieldInput"
                 android:layout_marginTop="6dp"
-                android:hint="120"
+                android:hint="@string/hoteladmin_hint_precio_servicio"
                 android:inputType="numberDecimal"
                 android:maxLines="1" />
 

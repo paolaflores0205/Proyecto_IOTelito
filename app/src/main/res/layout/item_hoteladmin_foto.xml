@@ -34,7 +34,7 @@
                 android:paddingVertical="3dp"
                 android:text="@string/hoteladmin_principal"
                 android:textColor="@color/white"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </FrameLayout>
     </com.google.android.material.card.MaterialCardView>

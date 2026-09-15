@@ -23,7 +23,7 @@
             <TextView android:id="@+id/tv_mensaje" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:ellipsize="end" android:maxLines="1" android:textColor="@color/io_text_secondary" android:textSize="13sp" tools:text="Perfecto, muchas gracias" />
         </LinearLayout>
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:gravity="end" android:orientation="vertical">
-            <TextView android:id="@+id/tv_hora" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/io_text_muted" android:textSize="10sp" tools:text="10:30" />
+            <TextView android:id="@+id/tv_hora" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/io_text_muted" android:textSize="11sp" tools:text="10:30" />
             <TextView android:id="@+id/tv_no_leidos" android:layout_width="24dp" android:layout_height="24dp" android:layout_marginTop="5dp" android:background="@drawable/bg_avatar_circle" android:gravity="center" android:textColor="@color/white" android:textSize="11sp" android:textStyle="bold" tools:text="2" />
         </LinearLayout>
     </LinearLayout>

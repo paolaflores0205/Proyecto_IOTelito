@@ -366,13 +366,8 @@
     <string name="hoteladmin_nav_mensajes">Mensajes</string>
     <string name="hoteladmin_nav_reportes">Reportes</string>
 
-    <!-- Placeholders de las pestañas (andamiaje; se reemplazan al implementar cada pantalla) -->
-    <string name="hoteladmin_hotel_titulo">Panel del hotel</string>
-    <string name="hoteladmin_hotel_placeholder">Aquí irá el dashboard: resumen del día, alertas y accesos a datos del hotel, fotos, habitaciones y servicios.</string>
-    <string name="hoteladmin_reservas_titulo">Reservas y checkout</string>
-    <string name="hoteladmin_reservas_placeholder">Aquí irá la lista de reservas con checkout, cobros y seguimiento de taxi.</string>
+    <!-- Títulos de las pestañas del panel de administrador -->
     <string name="hoteladmin_mensajes_titulo">Mensajes</string>
-    <string name="hoteladmin_mensajes_placeholder">Aquí irá la bandeja de conversaciones con los huéspedes de reservas activas.</string>
     <string name="hoteladmin_reportes_titulo">Reportes</string>
     <string name="hoteladmin_periodo_diario">Diario</string>
     <string name="hoteladmin_periodo_mensual">Mensual</string>
@@ -397,6 +392,10 @@
     <string name="hoteladmin_reportes_servicio_rank">%1$d. %2$s</string>
     <string name="hoteladmin_reportes_ver_detalle">Ver detalle del reporte completo</string>
     <string name="hoteladmin_reportes_demo">Esta demo solo incluye datos de julio 2025.</string>
+    <!-- Valores de ejemplo (placeholder) de los formularios -->
+    <string name="hoteladmin_hint_area">45</string>
+    <string name="hoteladmin_hint_precio">450</string>
+    <string name="hoteladmin_hint_precio_servicio">120</string>
 
     <!-- Estados de checkout de una reserva (pills) -->
     <string name="hoteladmin_estado_proxima">Próxima</string>
@@ -540,7 +539,7 @@
     <string name="hoteladmin_alerta_checkout">Checkout pendiente: revisa los consumos y realiza el cobro.</string>
     <string name="hoteladmin_ver_taxi">Ver taxi</string>
     <string name="hoteladmin_ver_detalle">Ver detalle</string>
-    <string name="hoteladmin_realizar_checkout">Realizar checkout</string>
+    <string name="hoteladmin_realizar_checkout">Checkout</string>
     <string name="hoteladmin_sin_reservas">No hay reservas que coincidan con los filtros.</string>
     <plurals name="hoteladmin_reservas_encontradas">
         <item quantity="one">%d reserva</item>
@@ -589,6 +588,7 @@
     <string name="hoteladmin_taxi_en_traslado">En traslado</string>
     <string name="hoteladmin_taxi_finalizado">Finalizado</string>
     <string name="hoteladmin_taxi_contactar">Contactar al huésped</string>
+    <string name="hoteladmin_taxi_llamar_conductor">Llamar al conductor</string>
     <string name="hoteladmin_ver_reserva">Ver reserva</string>
 
     <!-- Bandeja y chat del administrador (Hito 4) -->

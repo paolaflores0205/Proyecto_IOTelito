@@ -116,7 +116,7 @@
                         android:id="@+id/et_area"
                         style="@style/Widget.IoTelito.FieldInput"
                         android:layout_marginTop="6dp"
-                        android:hint="45"
+                        android:hint="@string/hoteladmin_hint_area"
                         android:inputType="number"
                         android:maxLines="1" />
                 </LinearLayout>
@@ -224,7 +224,7 @@
                 android:id="@+id/et_precio"
                 style="@style/Widget.IoTelito.FieldInput"
                 android:layout_marginTop="6dp"
-                android:hint="450"
+                android:hint="@string/hoteladmin_hint_precio"
                 android:inputType="numberDecimal"
                 android:maxLines="1" />
 

@@ -32,6 +32,18 @@
                         <TextView android:id="@+id/tv_placa" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/io_text_secondary" android:textSize="13sp" tools:text="ABC-123" />
                         <TextView android:id="@+id/tv_telefono" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/io_text_secondary" android:textSize="13sp" tools:text="+51 987 112 334" />
                     </LinearLayout>
+                    <ImageView
+                        android:id="@+id/btn_llamar_conductor"
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/bg_circle_teal_light"
+                        android:clickable="true"
+                        android:contentDescription="@string/hoteladmin_taxi_llamar_conductor"
+                        android:focusable="true"
+                        android:padding="12dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_phone"
+                        android:tint="@color/io_teal" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

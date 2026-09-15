@@ -52,12 +52,18 @@ public class EstadoTaxiActivity extends AppCompatActivity {
         }
         binding.tvEstadoActual.setText(getString(R.string.hoteladmin_taxi_estado_actual,
                 estados[actual].getText()));
-        binding.btnContactar.setOnClickListener(v -> startActivity(
-                new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + taxi.telefono.replace(" ", "")))));
+        binding.btnContactar.setOnClickListener(v -> llamar(taxi.huespedTelefono));
+        binding.btnLlamarConductor.setOnClickListener(v -> llamar(taxi.telefono));
         binding.btnVerReserva.setOnClickListener(v -> {
             Intent intent = new Intent(this, CobroCheckoutActivity.class);
             intent.putExtra(CobroCheckoutActivity.EXTRA_RESERVA_ID, 101);
             startActivity(intent);
         });
+    }
+
+    /** Abre el marcador del teléfono (huésped o conductor). */
+    private void llamar(String telefono) {
+        startActivity(new Intent(Intent.ACTION_DIAL,
+                Uri.parse("tel:" + telefono.replace(" ", ""))));
     }
 }

@@ -19,13 +19,16 @@ public class ServicioTaxi implements Serializable {
     public final String conductor;
     public final String vehiculo;
     public final String placa;
+    /** Teléfono del conductor del taxi. */
     public final String telefono;
+    /** Teléfono del huésped que solicitó el traslado. */
+    public final String huespedTelefono;
     public final double rating;
     public Estado estado;
 
     public ServicioTaxi(String huespedNombre, String habitacion, String destino,
                         String conductor, String vehiculo, String placa, String telefono,
-                        double rating, Estado estado) {
+                        String huespedTelefono, double rating, Estado estado) {
         this.huespedNombre = huespedNombre;
         this.habitacion = habitacion;
         this.destino = destino;
@@ -33,6 +36,7 @@ public class ServicioTaxi implements Serializable {
         this.vehiculo = vehiculo;
         this.placa = placa;
         this.telefono = telefono;
+        this.huespedTelefono = huespedTelefono;
         this.rating = rating;
         this.estado = estado;
     }
