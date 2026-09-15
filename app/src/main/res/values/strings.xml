@@ -381,4 +381,31 @@
     <string name="hoteladmin_estado_hospedado">Hospedado</string>
     <string name="hoteladmin_estado_checkout">Checkout pendiente</string>
     <string name="hoteladmin_estado_finalizada">Finalizada</string>
+
+    <!-- Logo -->
+    <string name="hoteladmin_logo_iot">IoT</string>
+    <string name="hoteladmin_logo_elito">elito</string>
+
+    <!-- Dashboard (adm-dashboard) -->
+    <string name="hoteladmin_saludo">Hola, %1$s 👋</string>
+    <string name="hoteladmin_panel_control">%1$s · Panel de Control</string>
+    <string name="hoteladmin_resumen_hoy">Resumen de hoy</string>
+    <string name="hoteladmin_stat_ocupadas">Hab. Ocupadas</string>
+    <string name="hoteladmin_stat_disponibles">Hab. Disponibles</string>
+    <string name="hoteladmin_stat_salidas">Salidas de hoy</string>
+    <string name="hoteladmin_stat_ingresos">Ingresos hoy</string>
+    <string name="hoteladmin_stat_ocupacion">%1$d%% de ocupación</string>
+    <string name="hoteladmin_stat_listas">Listas para check-in</string>
+    <string name="hoteladmin_stat_pendientes">Pendientes por revisar</string>
+    <string name="hoteladmin_stat_vs_ayer" formatted="false">+15% vs ayer</string>
+    <string name="hoteladmin_alertas">Alertas pendientes (2)</string>
+    <string name="hoteladmin_alerta_checkout_titulo">Check-out retrasado: Hab 402</string>
+    <string name="hoteladmin_alerta_checkout_desc">Debió salir hace 45 minutos. Huésped no responde.</string>
+    <string name="hoteladmin_alerta_taxi_titulo">Taxi activo solicitado</string>
+    <string name="hoteladmin_alerta_taxi_desc">Traslado al aeropuerto solicitado para las 14:00.</string>
+    <string name="hoteladmin_accesos_rapidos">Accesos rápidos</string>
+    <string name="hoteladmin_acceso_habitaciones">Habitaciones</string>
+    <string name="hoteladmin_acceso_servicios">Servicios</string>
+    <string name="hoteladmin_acceso_datos">Datos hotel</string>
+    <string name="hoteladmin_proximamente">Disponible próximamente</string>
 </resources>

@@ -20,7 +20,7 @@
         android:id="@+id/hoteladmin_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/io_navy"
+        android:background="@color/white"
         app:itemIconTint="@color/nav_item_color"
         app:itemTextColor="@color/nav_item_color"
         app:itemRippleColor="@color/io_teal_light"

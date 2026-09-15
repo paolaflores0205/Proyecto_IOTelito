@@ -28,6 +28,9 @@ public final class HotelAdminSampleData {
 
     public static final int HOTEL_ID = 1;
 
+    /** Nombre del administrador autenticado (mostrado en el saludo del dashboard). */
+    public static String adminNombre = "Admin Carlos";
+
     // ---- Datos editables del hotel (pantallas Datos del hotel / Fotos) ----
     public static String hotelNombre = "Hotel Miraflores Park";
     public static String hotelDireccion = "Av. Malecón de la Reserva 1037, Miraflores, Lima";
