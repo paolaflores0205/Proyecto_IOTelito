@@ -243,9 +243,8 @@ public final class HotelAdminSampleData {
     public static Reporte reporte() {
         List<ItemConsumo> porServicio = new ArrayList<>(Arrays.asList(
                 new ItemConsumo("Traslado Aeropuerto", 2880.0),
-                new ItemConsumo("Desayuno Buffet", 4320.0),
-                new ItemConsumo("Lavandería Express", 1240.0),
-                new ItemConsumo("Spa & Masajes", 3600.0)
+                new ItemConsumo("Desayuno Buffet", 4520.0),
+                new ItemConsumo("Lavandería Express", 1240.0)
         ));
         // Ordenados de menor a mayor según el monto total generado (requisito del plan).
         Collections.sort(porServicio, new Comparator<ItemConsumo>() {

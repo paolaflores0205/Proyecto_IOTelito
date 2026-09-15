@@ -374,7 +374,29 @@
     <string name="hoteladmin_mensajes_titulo">Mensajes</string>
     <string name="hoteladmin_mensajes_placeholder">Aquí irá la bandeja de conversaciones con los huéspedes de reservas activas.</string>
     <string name="hoteladmin_reportes_titulo">Reportes</string>
-    <string name="hoteladmin_reportes_placeholder">Aquí irán los ingresos por servicios adicionales, ordenados de menor a mayor.</string>
+    <string name="hoteladmin_periodo_diario">Diario</string>
+    <string name="hoteladmin_periodo_mensual">Mensual</string>
+    <string name="hoteladmin_periodo_anual">Anual</string>
+    <string name="hoteladmin_reportes_mes">Julio 2025</string>
+    <string name="hoteladmin_mes_anterior">Mes anterior</string>
+    <string name="hoteladmin_mes_siguiente">Mes siguiente</string>
+    <string name="hoteladmin_kpi_ingresos">Ingresos</string>
+    <string name="hoteladmin_kpi_reservas">Reservas</string>
+    <string name="hoteladmin_kpi_ocupacion">Ocupación</string>
+    <string name="hoteladmin_kpi_servicios">Servicios vendidos</string>
+    <string name="hoteladmin_kpi_ingresos_delta" formatted="false">↑ +12.4% vs Jun</string>
+    <string name="hoteladmin_kpi_reservas_delta" formatted="false">↑ +4.2% vs Jun</string>
+    <string name="hoteladmin_kpi_ocupacion_delta" formatted="false">↑ +8.5% vs Jun</string>
+    <string name="hoteladmin_kpi_servicios_delta" formatted="false">↑ +15.3% vs Jun</string>
+    <string name="hoteladmin_reportes_semanal">Ingresos por reservas (semanal)</string>
+    <string name="hoteladmin_reportes_sem1">Sem 1</string>
+    <string name="hoteladmin_reportes_sem2">Sem 2</string>
+    <string name="hoteladmin_reportes_sem3">Sem 3</string>
+    <string name="hoteladmin_reportes_sem4">Sem 4</string>
+    <string name="hoteladmin_reportes_por_servicio">Ingresos por servicios adicionales</string>
+    <string name="hoteladmin_reportes_servicio_rank">%1$d. %2$s</string>
+    <string name="hoteladmin_reportes_ver_detalle">Ver detalle del reporte completo</string>
+    <string name="hoteladmin_reportes_demo">Esta demo solo incluye datos de julio 2025.</string>
 
     <!-- Estados de checkout de una reserva (pills) -->
     <string name="hoteladmin_estado_proxima">Próxima</string>
