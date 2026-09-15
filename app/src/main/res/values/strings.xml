@@ -479,4 +479,30 @@
     <string name="hoteladmin_disponible_actualmente_sub">Habilitar reserva inmediata en catálogo</string>
     <string name="hoteladmin_guardar_servicio">Guardar servicio</string>
     <string name="hoteladmin_servicio_guardado">Servicio guardado</string>
+
+    <!-- Administrador de hotel: datos y fotografías -->
+    <string name="hoteladmin_titulo_datos_hotel">Datos del hotel</string>
+    <string name="hoteladmin_nombre_hotel">Nombre del hotel</string>
+    <string name="hoteladmin_direccion">Dirección</string>
+    <string name="hoteladmin_mapa_ubicacion">Mapa de ubicación</string>
+    <string name="hoteladmin_lugares_cercanos">Lugares de interés cercanos</string>
+    <string name="hoteladmin_telefono">Teléfono</string>
+    <string name="hoteladmin_email">Email</string>
+    <string name="hoteladmin_email_invalido">Ingresa un correo válido</string>
+    <string name="hoteladmin_guardar_cambios">Guardar cambios</string>
+    <string name="hoteladmin_datos_guardados">Datos del hotel actualizados</string>
+    <string name="hoteladmin_gestionar_fotos">Gestionar fotografías</string>
+    <string name="hoteladmin_titulo_fotos_hotel">Fotos del hotel</string>
+    <string name="hoteladmin_fotografias_subidas">Fotografías subidas</string>
+    <string name="hoteladmin_fotos_total">%1$d fotos en total</string>
+    <string name="hoteladmin_agregar_foto">Agregar nueva foto</string>
+    <string name="hoteladmin_principal">Principal ★</string>
+    <string name="hoteladmin_reemplazar">Reemplazar</string>
+    <string name="hoteladmin_guardar_fotografias">Guardar fotografías</string>
+    <string name="hoteladmin_fotografias_guardadas">Fotografías guardadas</string>
+    <string name="hoteladmin_foto_agregada">Fotografía agregada</string>
+    <string name="hoteladmin_foto_reemplazada">Fotografía reemplazada</string>
+    <string name="hoteladmin_minimo_fotos">El hotel debe conservar al menos 4 fotografías</string>
+    <string name="hoteladmin_confirmar_eliminar_foto">¿Eliminar esta fotografía?</string>
+    <string name="hoteladmin_foto_principal_info">La primera fotografía se usa como imagen principal.</string>
 </resources>

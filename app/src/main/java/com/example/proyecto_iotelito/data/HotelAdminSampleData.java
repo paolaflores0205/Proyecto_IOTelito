@@ -33,21 +33,23 @@ public final class HotelAdminSampleData {
 
     // ---- Datos editables del hotel (pantallas Datos del hotel / Fotos) ----
     public static String hotelNombre = "Hotel Miraflores Park";
-    public static String hotelDireccion = "Av. Malecón de la Reserva 1037, Miraflores, Lima";
+    public static String hotelDireccion = "Av. Malecón de la Reserva 1035, Miraflores";
     public static String hotelDescripcion =
             "Ubicado frente al imponente Océano Pacífico, este hotel combina elegancia "
                     + "clásica con conectividad inteligente de última generación.";
     public static String hotelAtracciones =
-            "Parque Kennedy (1.2 km) · Huaca Pucllana (1.5 km) · Malecón de Miraflores (0.1 km)";
+            "Huaca Pucllana (1.5 km), Parque Kennedy (1.2 km), Malecón de Miraflores (0.1 km)";
     public static String hotelTelefono = "+51 1 610 4000";
-    public static String hotelEmail = "reservas@mirafloraspark.pe";
+    public static String hotelEmail = "contacto@miraflorespark.pe";
 
     /** Fotos del hotel (mín. 4). El índice 0 es la foto principal. */
     public static final List<Integer> FOTOS = new ArrayList<>(Arrays.asList(
             R.drawable.superadmin_hotel_hero,
             R.drawable.superadmin_hotel_sol,
             R.drawable.superadmin_hotel_barranco,
-            R.drawable.superadmin_hotel_hero
+            R.drawable.superadmin_hotel_hero,
+            R.drawable.superadmin_hotel_sol,
+            R.drawable.superadmin_hotel_barranco
     ));
 
     // ---- Habitaciones ----
