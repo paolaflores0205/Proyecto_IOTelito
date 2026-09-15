@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil | IoTelito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-main">
+                <span class="material-symbols-rounded logo-box">apartment</span>
+                <div class="brand-name"><span class="iot">IoT</span><span class="elito">elito</span></div>
+            </div>
+            <div class="tagline">Tu estadia, conectada.</div>
+        </div>
+
+        <nav class="menu">
+            <a th:href="@{/superadmin/dashboard}" class="menu-item"><span class="material-symbols-rounded">grid_view</span>Inicio</a>
+            <a th:href="@{/superadmin/solicitudes/evaluar}" class="menu-item"><span class="material-symbols-rounded">pending_actions</span><span class="menu-label">Solicitudes</span><span class="badge" th:text="${pendientes}">0</span></a>
+            <a th:href="@{/superadmin/taxistas}" class="menu-item"><span class="material-symbols-rounded">group</span>Taxistas</a>
+            <a th:href="@{/superadmin/reportes}" class="menu-item"><span class="material-symbols-rounded">bar_chart</span>Reportes</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a th:href="@{/}" class="menu-item"><span class="material-symbols-rounded">logout</span>Cerrar sesion</a>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="breadcrumb">
+                <strong>Panel de Control</strong>
+                <span class="slash">/</span>
+                <span>Perfil</span>
+            </div>
+
+            <div class="admin-user">
+                <a th:href="@{/superadmin/notificaciones}" class="notification" aria-label="Ver notificaciones">
+                    <span class="material-symbols-rounded">notifications</span>
+                </a>
+
+                <a th:href="@{/superadmin/perfil}" class="user-block profile-trigger" aria-label="Ver perfil del usuario">
+                    <div class="avatar" th:text="${#strings.substring(usuarioActual.nombres,0,1) + #strings.substring(usuarioActual.apellidos,0,1)}">SA</div>
+                    <span th:text="${usuarioActual.nombres + ' ' + usuarioActual.apellidos}">Super Administrador</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="page-title-row">
+                <h1 class="page-title">Perfil del usuario</h1>
+                <a th:href="@{/superadmin/dashboard}" class="btn btn-outline">Volver al panel</a>
+            </div>
+
+            <section class="profile-page-grid">
+                <article class="card profile-summary-card">
+                    <div class="profile-avatar large" th:text="${#strings.substring(usuarioActual.nombres,0,1) + #strings.substring(usuarioActual.apellidos,0,1)}">SA</div>
+                    <h2 th:text="${usuarioActual.nombres + ' ' + usuarioActual.apellidos}">Super Administrador</h2>
+                    <p>Superadministrador general de IoTelito</p>
+                    <span class="chip chip-success">Cuenta activa</span>
+                </article>
+
+                <article class="card">
+                    <h2 class="section-title">Informacion completa</h2>
+                    <div class="info-list">
+                        <div><span class="data-label">Nombres</span><strong th:text="${usuarioActual.nombres}">Super</strong></div>
+                        <div><span class="data-label">Apellidos</span><strong th:text="${usuarioActual.apellidos}">Administrador</strong></div>
+                        <div><span class="data-label">Correo</span><strong th:text="${usuarioActual.correo}">admin@iotelito.com</strong></div>
+                        <div><span class="data-label">Telefono</span><strong th:text="${usuarioActual.telefono}">999999999</strong></div>
+                        <div><span class="data-label">Rol</span><strong th:text="${usuarioActual.rol}">SUPERADMIN</strong></div>
+                        <div><span class="data-label">Estado</span><strong th:text="${usuarioActual.activo} ? 'Activo' : 'Inactivo'">Activo</strong></div>
+                    </div>
+                </article>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>

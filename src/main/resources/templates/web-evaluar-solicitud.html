@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Evaluar solicitud | IoTelito
+    </title>
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap"
+            rel="stylesheet">
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+            rel="stylesheet">
+
+    <link
+            rel="stylesheet"
+            th:href="@{/css/admin.css}">
+
+</head>
+
+
+<body>
+
+
+<div class="admin-layout">
+
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-main">
+
+                <span class="material-symbols-rounded logo-box">
+                    apartment
+                </span>
+
+                <div class="brand-name">
+
+                    <span class="iot">
+                        IoT
+                    </span>
+
+                    <span class="elito">
+                        elito
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="tagline">
+                Tu estadía, conectada.
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+
+            <a th:href="@{/superadmin/dashboard}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    grid_view
+                </span>
+
+                Inicio
+
+            </a>
+
+
+            <a th:href="@{/superadmin/solicitudes/evaluar}"
+               class="menu-item active">
+
+                <span class="material-symbols-rounded">
+                    pending_actions
+                </span>
+
+                <span class="menu-label">
+                    Solicitudes
+                </span>
+
+                <span class="badge"
+                      th:text="${pendientes}">
+                    0
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/taxistas}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    group
+                </span>
+
+                Taxistas
+
+            </a>
+
+
+            <a th:href="@{/superadmin/reportes}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    bar_chart
+                </span>
+
+                Reportes
+
+            </a>
+
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a th:href="@{/}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    logout
+                </span>
+
+                Cerrar sesión
+
+            </a>
+
+        </div>
+
+
+    </aside>
+
+
+    <main class="admin-main">
+
+
+        <header class="admin-header">
+
+
+            <div class="breadcrumb">
+
+                <strong>
+                    Panel de Control
+                </strong>
+
+                <span class="slash">
+                    /
+                </span>
+
+                <span>
+                    Evaluar Solicitud de Registro
+                </span>
+
+            </div>
+
+
+            <div class="admin-user">
+
+
+                <a th:href="@{/superadmin/notificaciones}"
+                   class="notification"
+                   aria-label="Ver notificaciones">
+
+                    <span class="material-symbols-rounded">
+                        notifications
+                    </span>
+
+                </a>
+
+
+                <a th:href="@{/superadmin/perfil}"
+                   class="user-block profile-trigger"
+                   aria-label="Ver perfil del usuario">
+
+                    <div class="avatar"
+                         th:text="${#strings.substring(usuarioActual.nombres,0,1) + #strings.substring(usuarioActual.apellidos,0,1)}">
+                        SA
+                    </div>
+
+                    <span th:text="${usuarioActual.nombres + ' ' + usuarioActual.apellidos}">
+                        Super Administrador
+                    </span>
+
+                </a>
+
+
+            </div>
+
+
+        </header>
+
+
+        <div class="content">
+
+
+            <div class="chip chip-success"
+                 style="margin-bottom:16px"
+                 th:if="${mensaje != null}"
+                 th:text="${mensaje}">
+                Mensaje
+            </div>
+
+            <h1 class="page-title"
+                style="margin-bottom:24px"
+                th:text="${taxista == null ? 'Solicitudes pendientes' : 'Evaluar Solicitud: ' + taxista.usuario.nombres + ' ' + taxista.usuario.apellidos}">
+
+                Evaluar Solicitud: Carlos Mendoza
+
+            </h1>
+
+
+            <section class="card table-card"
+                     th:if="${taxista == null}">
+
+                <div class="card-title-row">
+                    <h2 class="section-title">
+                        Taxistas por evaluar
+                    </h2>
+
+                    <span class="mini-total"
+                          th:text="${#lists.size(solicitudes)} + ' pendientes'">
+                        0 pendientes
+                    </span>
+                </div>
+
+                <table th:if="${!#lists.isEmpty(solicitudes)}">
+                    <thead>
+                    <tr>
+                        <th>Taxista</th>
+                        <th>DNI</th>
+                        <th>Licencia</th>
+                        <th>Vehiculo</th>
+                        <th>Fecha</th>
+                        <th>Accion</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="solicitud : ${solicitudes}">
+                        <td>
+                            <div class="driver-cell">
+                                <span class="mini-avatar"
+                                      th:text="${#strings.substring(solicitud.usuario.nombres, 0, 1) + #strings.substring(solicitud.usuario.apellidos, 0, 1)}">
+                                    CM
+                                </span>
+
+                                <div>
+                                    <strong th:text="${solicitud.usuario.nombres + ' ' + solicitud.usuario.apellidos}">
+                                        Carlos Mendoza
+                                    </strong>
+                                    <br>
+                                    <small th:text="${solicitud.usuario.correo}">
+                                        correo@demo.com
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td th:text="${solicitud.dni}">
+                            71234567
+                        </td>
+
+                        <td th:text="${solicitud.numeroLicencia}">
+                            Q71234567
+                        </td>
+
+                        <td th:text="${solicitud.marcaVehiculo + ' ' + solicitud.modeloVehiculo}">
+                            Toyota Corolla
+                        </td>
+
+                        <td th:text="${#temporals.format(solicitud.fechaSolicitud, 'dd/MM/yyyy')}">
+                            14/09/2026
+                        </td>
+
+                        <td>
+                            <a th:href="@{/superadmin/taxistas/{id}/evaluar(id=${solicitud.id})}"
+                               class="table-link">
+                                Evaluar
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="pagination-bar"
+                     th:if="${pagina != null}">
+
+                    <span class="pagination-info"
+                          th:text="'Pagina ' + ${pagina.number + 1} + ' de ' + ${pagina.totalPages}">
+                        Pagina 1 de 1
+                    </span>
+
+                    <div class="pagination-actions">
+                        <a class="page-button"
+                           th:classappend="${pagina.first} ? ' disabled' : ''"
+                           th:href="@{/superadmin/solicitudes/evaluar(page=${pagina.number - 1})}">
+                            Anterior
+                        </a>
+
+                        <a class="page-button"
+                           th:each="i : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                           th:if="${i >= pagina.number - 2 && i <= pagina.number + 2}"
+                           th:classappend="${i == pagina.number} ? ' active' : ''"
+                           th:href="@{/superadmin/solicitudes/evaluar(page=${i})}"
+                           th:text="${i + 1}">
+                            1
+                        </a>
+
+                        <a class="page-button"
+                           th:classappend="${pagina.last} ? ' disabled' : ''"
+                           th:href="@{/superadmin/solicitudes/evaluar(page=${pagina.number + 1})}">
+                            Siguiente
+                        </a>
+                    </div>
+
+                </div>
+
+                <div class="empty-state"
+                     th:if="${#lists.isEmpty(solicitudes)}">
+                    <span class="material-symbols-rounded">
+                        task_alt
+                    </span>
+
+                    <strong>
+                        No hay solicitudes pendientes
+                    </strong>
+
+                    <p>
+                        Cuando un taxista envie su solicitud, aparecera en esta lista.
+                    </p>
+                </div>
+
+            </section>
+
+
+            <div class="evaluate-grid"
+                 th:if="${taxista != null}">
+
+
+                <section class="card">
+
+
+                    <h2 class="section-title">
+                        Panel de Documentación Legal
+                    </h2>
+
+
+                    <div class="document-list"
+                         style="margin-top:20px">
+
+
+                        <div class="document-row">
+
+
+                            <div class="document-name">
+
+                                <span class="material-symbols-rounded">
+                                    description
+                                </span>
+
+                                Documento de Identidad (DNI) escaneado
+
+                            </div>
+
+
+                            <span class="chip chip-success">
+                                VÁLIDO
+                            </span>
+
+
+                        </div>
+
+
+                        <div class="document-row">
+
+
+                            <div class="document-name">
+
+                                <span class="material-symbols-rounded">
+                                    description
+                                </span>
+
+                                Licencia de conducir vigente
+
+                            </div>
+
+
+                            <span class="chip chip-success">
+                                VÁLIDO
+                            </span>
+
+
+                        </div>
+
+
+                        <div class="document-row">
+
+
+                            <div class="document-name">
+
+                                <span class="material-symbols-rounded">
+                                    warning
+                                </span>
+
+                                Seguro obligatorio de accidentes (SOAT)
+
+                            </div>
+
+
+                            <span class="chip chip-warning">
+                                POR VENCER (4 Días)
+                            </span>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="divider"></div>
+
+
+                    <h3>
+                        Confirmar verificación de requisitos:
+                    </h3>
+
+
+                    <div class="check-list">
+
+
+                        <label class="check-item">
+
+                            <input
+                                    type="checkbox"
+                                    checked>
+
+                            He verificado la vigencia y datos del DNI
+                            del conductor.
+
+                        </label>
+
+
+                        <label class="check-item">
+
+                            <input
+                                    type="checkbox"
+                                    checked>
+
+                            He verificado que la Licencia cuenta con
+                            la categoría requerida (mínimo A-IIb).
+
+                        </label>
+
+
+                        <label class="check-item">
+
+                            <input type="checkbox">
+
+                            Tarjeta de propiedad y SOAT coinciden
+                            con la placa del vehículo.
+
+                        </label>
+
+
+                    </div>
+
+
+                </section>
+
+
+                <section class="card">
+
+
+                    <h2 class="section-title">
+                        Observaciones y Dictamen
+                    </h2>
+
+
+                    <div style="margin-top:20px">
+
+
+                        <label class="data-label">
+
+                            Escriba observaciones o motivos adicionales *
+
+                        </label>
+
+
+                        <textarea
+                                placeholder="El SOAT tiene fecha de vencimiento próxima, se requiere advertir al conductor..."></textarea>
+
+
+                    </div>
+
+
+                    <div style="
+                        display:flex;
+                        flex-direction:column;
+                        gap:8px;
+                        margin-top:20px;
+                    ">
+
+
+                        <form th:action="@{/superadmin/taxistas/{id}/aprobar(id=${taxista.id})}"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-block">
+
+                                Aprobar taxista
+
+                            </button>
+
+                        </form>
+
+
+                        <form th:action="@{/superadmin/taxistas/{id}/rechazar(id=${taxista.id})}"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-danger-outline btn-block">
+
+                                Rechazar solicitud
+
+                            </button>
+
+                        </form>
+
+
+                    </div>
+
+
+                </section>
+
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+</body>
+
+</html>
+
+

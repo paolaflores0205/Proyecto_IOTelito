@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Flota de conducción | IoTelito
+    </title>
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap"
+            rel="stylesheet">
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+            rel="stylesheet">
+
+    <link
+            rel="stylesheet"
+            th:href="@{/css/admin.css}">
+
+</head>
+
+
+<body>
+
+
+<div class="admin-layout">
+
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-main">
+
+                <span class="material-symbols-rounded logo-box">
+                    apartment
+                </span>
+
+                <div class="brand-name">
+
+                    <span class="iot">
+                        IoT
+                    </span>
+
+                    <span class="elito">
+                        elito
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="tagline">
+                Tu estadía, conectada.
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+
+            <a th:href="@{/superadmin/dashboard}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    grid_view
+                </span>
+
+                Inicio
+
+            </a>
+
+
+            <a th:href="@{/superadmin/solicitudes/evaluar}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    pending_actions
+                </span>
+
+                <span class="menu-label">
+                    Solicitudes
+                </span>
+
+                <span class="badge"
+                      th:text="${pendientes}">
+                    0
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/taxistas}"
+               class="menu-item active">
+
+                <span class="material-symbols-rounded">
+                    group
+                </span>
+
+                Taxistas
+
+            </a>
+
+
+            <a th:href="@{/superadmin/reportes}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    bar_chart
+                </span>
+
+                Reportes
+
+            </a>
+
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a th:href="@{/}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    logout
+                </span>
+
+                Cerrar sesión
+
+            </a>
+
+        </div>
+
+
+    </aside>
+
+
+    <main class="admin-main">
+
+
+        <header class="admin-header">
+
+
+            <div class="breadcrumb">
+
+                <strong>
+                    Panel de Control
+                </strong>
+
+                <span class="slash">
+                    /
+                </span>
+
+                <span>
+                    Flota de Conducción Activa
+                </span>
+
+            </div>
+
+
+            <div class="admin-user">
+
+
+                <a th:href="@{/superadmin/notificaciones}"
+                   class="notification"
+                   aria-label="Ver notificaciones">
+
+                    <span class="material-symbols-rounded">
+                        notifications
+                    </span>
+
+                </a>
+
+
+                <a th:href="@{/superadmin/perfil}"
+                   class="user-block profile-trigger"
+                   aria-label="Ver perfil del usuario">
+
+                    <div class="avatar"
+                         th:text="${#strings.substring(usuarioActual.nombres,0,1) + #strings.substring(usuarioActual.apellidos,0,1)}">
+                        SA
+                    </div>
+
+                    <span th:text="${usuarioActual.nombres + ' ' + usuarioActual.apellidos}">
+                        Super Administrador
+                    </span>
+
+                </a>
+
+
+            </div>
+
+
+        </header>
+
+
+        <div class="content">
+
+
+            <h1 class="page-title"
+                style="margin-bottom:24px">
+
+                Taxistas en Servicio
+
+            </h1>
+
+
+            <div class="tabs">
+
+
+                <a th:href="@{/superadmin/taxistas/flota(disponible=true)}"
+                   class="tab"
+                   th:classappend="${disponibleSeleccionado == null || disponibleSeleccionado == true} ? ' active' : ''">
+                    Activos
+                </a>
+
+
+                <a th:href="@{/superadmin/taxistas/flota(disponible=false)}"
+                   class="tab"
+                   th:classappend="${disponibleSeleccionado == false} ? ' active' : ''">
+                    Inactivos
+                </a>
+
+
+            </div>
+
+
+            <section class="card table-card">
+
+
+                <table>
+
+
+                    <thead>
+
+
+                    <tr>
+
+                        <th>
+                            CONDUCTOR
+                        </th>
+
+                        <th>
+                            PLACA
+                        </th>
+
+                        <th>
+                            VEHÍCULO
+                        </th>
+
+                        <th>
+                            CALIFICACIÓN
+                        </th>
+
+                        <th>
+                            SERVICIOS
+                        </th>
+
+                        <th>
+                            ÚLTIMA ACTIVIDAD
+                        </th>
+
+                        <th>
+                            ESTADO
+                        </th>
+
+                        <th>
+                            OPCIONES
+                        </th>
+
+                    </tr>
+
+
+                    </thead>
+
+
+                    <tbody>
+
+                    <tr th:if="${#lists.isEmpty(taxistas)}">
+                        <td colspan="8">
+                            No hay taxistas en este estado.
+                        </td>
+                    </tr>
+
+                    <tr th:each="taxista : ${taxistas}">
+                        <td>
+                            <strong th:text="${taxista.usuario.nombres + ' ' + taxista.usuario.apellidos}">
+                                Conductor
+                            </strong>
+                        </td>
+                        <td class="success">
+                            <strong th:text="${taxista.placaVehiculo}">
+                                Placa
+                            </strong>
+                        </td>
+                        <td th:text="${taxista.marcaVehiculo + ' ' + taxista.modeloVehiculo + ' (' + taxista.anioVehiculo + ')'}">
+                            Vehiculo
+                        </td>
+                        <td th:text="${taxista.calificacion + ' / 5'}">
+                            Calificacion
+                        </td>
+                        <td th:text="${taxista.cantidadServicios + ' viajes'}">
+                            Servicios
+                        </td>
+                        <td th:text="${#temporals.format(taxista.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">
+                            Fecha
+                        </td>
+                        <td>
+                            <form th:action="@{/superadmin/taxistas/{id}/disponibilidad(id=${taxista.id})}"
+                                  method="post">
+                                <input type="hidden"
+                                       name="disponible"
+                                       th:value="${!taxista.disponible}">
+                                <button type="submit"
+                                        class="switch"
+                                        th:classappend="${taxista.disponible} ? '' : ' off'"
+                                        aria-label="Cambiar disponibilidad">
+                                    <span class="switch-dot"></span>
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <a th:href="@{/superadmin/taxistas/{id}(id=${taxista.id})}"
+                               class="table-link">
+                                Ver perfil
+                            </a>
+                        </td>
+                    </tr>
+
+                    <th:block th:remove="all">
+
+
+                    <tr>
+
+
+                        <td>
+
+                            <strong>
+                                Juan Carlos Baca
+                            </strong>
+
+                        </td>
+
+
+                        <td class="success">
+
+                            <strong>
+                                ABC-123
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            Toyota Corolla (2022)
+                        </td>
+
+
+                        <td>
+                            ⭐⭐⭐⭐⭐
+                        </td>
+
+
+                        <td>
+                            142 viajes
+                        </td>
+
+
+                        <td>
+                            Hace 5 minutos
+                        </td>
+
+
+                        <td>
+
+                            <div class="switch">
+
+                                <div class="switch-dot"></div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <a th:href="@{/superadmin/taxistas/detalle}"
+                               class="table-link">
+
+                                Ver perfil
+
+                            </a>
+
+
+                            <a href="#"
+                               class="table-link">
+
+                                Historial
+
+                            </a>
+
+                        </td>
+
+
+                    </tr>
+
+
+                    <tr>
+
+
+                        <td>
+
+                            <strong>
+                                María del Carmen Silva
+                            </strong>
+
+                        </td>
+
+
+                        <td class="success">
+
+                            <strong>
+                                XYZ-987
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            Nissan Sentra (2021)
+                        </td>
+
+
+                        <td>
+                            ⭐⭐⭐⭐⭐
+                        </td>
+
+
+                        <td>
+                            98 viajes
+                        </td>
+
+
+                        <td>
+                            Hace 1 hora
+                        </td>
+
+
+                        <td>
+
+                            <div class="switch">
+
+                                <div class="switch-dot"></div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <a th:href="@{/superadmin/taxistas/detalle}"
+                               class="table-link">
+
+                                Ver perfil
+
+                            </a>
+
+
+                            <a href="#"
+                               class="table-link">
+
+                                Historial
+
+                            </a>
+
+                        </td>
+
+
+                    </tr>
+
+
+                    <tr>
+
+
+                        <td>
+
+                            <strong>
+                                Luis Eduardo Ruiz
+                            </strong>
+
+                        </td>
+
+
+                        <td class="success">
+
+                            <strong>
+                                MNO-456
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            Kia Cerato (2020)
+                        </td>
+
+
+                        <td>
+                            ⭐⭐⭐⭐☆
+                        </td>
+
+
+                        <td>
+                            320 viajes
+                        </td>
+
+
+                        <td>
+                            Ayer
+                        </td>
+
+
+                        <td>
+
+                            <div class="switch off">
+
+                                <div class="switch-dot"></div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <a th:href="@{/superadmin/taxistas/detalle}"
+                               class="table-link">
+
+                                Ver perfil
+
+                            </a>
+
+
+                            <a href="#"
+                               class="table-link">
+
+                                Historial
+
+                            </a>
+
+                        </td>
+
+
+                    </tr>
+
+
+                    <tr>
+
+
+                        <td>
+
+                            <strong>
+                                Patricia Luna Vargas
+                            </strong>
+
+                        </td>
+
+
+                        <td class="success">
+
+                            <strong>
+                                KLP-789
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            Hyundai Elantra (2023)
+                        </td>
+
+
+                        <td>
+                            ⭐⭐⭐⭐⭐
+                        </td>
+
+
+                        <td>
+                            12 viajes
+                        </td>
+
+
+                        <td>
+                            Hace 3 días
+                        </td>
+
+
+                        <td>
+
+                            <div class="switch">
+
+                                <div class="switch-dot"></div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <a th:href="@{/superadmin/taxistas/detalle}"
+                               class="table-link">
+
+                                Ver perfil
+
+                            </a>
+
+
+                            <a href="#"
+                               class="table-link">
+
+                                Historial
+
+                            </a>
+
+                        </td>
+
+
+                    </tr>
+
+
+                    </th:block>
+
+                    </tbody>
+
+
+                </table>
+
+
+                <div class="pagination-bar"
+                     th:if="${pagina != null}">
+
+                    <span class="pagination-info"
+                          th:text="'Pagina ' + ${pagina.number + 1} + ' de ' + ${pagina.totalPages}">
+                        Pagina 1 de 1
+                    </span>
+
+                    <div class="pagination-actions">
+                        <a class="page-button"
+                           th:classappend="${pagina.first} ? ' disabled' : ''"
+                           th:href="@{/superadmin/taxistas/flota(page=${pagina.number - 1}, disponible=${disponibleSeleccionado})}">
+                            Anterior
+                        </a>
+
+                        <a class="page-button"
+                           th:each="i : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                           th:if="${i >= pagina.number - 2 && i <= pagina.number + 2}"
+                           th:classappend="${i == pagina.number} ? ' active' : ''"
+                           th:href="@{/superadmin/taxistas/flota(page=${i}, disponible=${disponibleSeleccionado})}"
+                           th:text="${i + 1}">
+                            1
+                        </a>
+
+                        <a class="page-button"
+                           th:classappend="${pagina.last} ? ' disabled' : ''"
+                           th:href="@{/superadmin/taxistas/flota(page=${pagina.number + 1}, disponible=${disponibleSeleccionado})}">
+                            Siguiente
+                        </a>
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+</body>
+
+</html>
+
+

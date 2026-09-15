@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | IoTelito</title>
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap"
+            rel="stylesheet">
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+            rel="stylesheet">
+
+    <link
+            rel="stylesheet"
+            th:href="@{/css/admin.css}">
+
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-main">
+
+                <span class="material-symbols-rounded logo-box">
+                    apartment
+                </span>
+
+                <div class="brand-name">
+                    <span class="iot">IoT</span>
+                    <span class="elito">elito</span>
+                </div>
+
+            </div>
+
+            <div class="tagline">
+                Tu estadía, conectada.
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a th:href="@{/superadmin/dashboard}"
+               class="menu-item active">
+
+                <span class="material-symbols-rounded">
+                    grid_view
+                </span>
+
+                <span class="menu-label">
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/solicitudes/evaluar}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    pending_actions
+                </span>
+
+                <span class="menu-label">
+                    Solicitudes
+                </span>
+
+                <span class="badge"
+                      th:text="${pendientes}">
+                    0
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/taxistas}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    group
+                </span>
+
+                <span class="menu-label">
+                    Taxistas
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/reportes}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    bar_chart
+                </span>
+
+                <span class="menu-label">
+                    Reportes
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a th:href="@{/}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    logout
+                </span>
+
+                <span>
+                    Cerrar sesión
+                </span>
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- CONTENIDO -->
+
+    <main class="admin-main">
+
+        <header class="admin-header">
+
+            <div class="breadcrumb">
+
+                <strong>
+                    Panel de Control
+                </strong>
+
+                <span class="slash">
+                    /
+                </span>
+
+                <span>
+                    Consola de Gestión de Taxistas
+                </span>
+
+            </div>
+
+
+            <div class="admin-user">
+
+                <a th:href="@{/superadmin/notificaciones}"
+                   class="notification"
+                   aria-label="Ver notificaciones">
+
+                    <span class="material-symbols-rounded">
+                        notifications
+                    </span>
+
+                </a>
+
+                <a th:href="@{/superadmin/perfil}"
+                   class="user-block profile-trigger"
+                   aria-label="Ver perfil del usuario">
+
+                    <div class="avatar"
+                         th:text="${#strings.substring(usuarioActual.nombres,0,1) + #strings.substring(usuarioActual.apellidos,0,1)}">
+                        SA
+                    </div>
+
+                    <span th:text="${usuarioActual.nombres + ' ' + usuarioActual.apellidos}">
+                        Super Administrador
+                    </span>
+
+                </a>
+
+            </div>
+
+        </header>
+
+
+        <div class="content">
+
+            <!-- TITULO -->
+
+            <div class="page-title-row">
+
+                <div>
+
+                    <h1 class="page-title">
+                        Resumen del Sistema
+                    </h1>
+
+                    <p style="
+                        margin:6px 0 0;
+                        color:#4a5d74;
+                        font-size:14px;
+                    ">
+                        Gestiona la flota de taxistas, revisa solicitudes
+                        y mantén el servicio siempre activo.
+                    </p>
+
+                </div>
+
+
+                <div class="actions">
+
+                    <a th:href="@{/superadmin/solicitudes/evaluar}"
+                       class="btn btn-primary">
+
+                        <span class="material-symbols-rounded">
+                            description
+                        </span>
+
+                        Revisar Solicitudes
+
+                    </a>
+
+
+                    <a th:href="@{/superadmin/taxistas}"
+                       class="btn btn-navy">
+
+                        <span class="material-symbols-rounded">
+                            group
+                        </span>
+
+                        Ver todos los Taxistas
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- CARDS -->
+
+            <div class="stats-grid">
+
+                <div class="card shadow-card stat-card">
+
+                    <div class="stat-head">
+
+                        Solicitudes Pendientes
+
+                        <span class="material-symbols-rounded primary">
+                            pending_actions
+                        </span>
+
+                    </div>
+
+                    <div class="stat-number"
+                         th:text="${pendientes}">
+                        0
+                    </div>
+
+                    <div style="
+                        margin-top:6px;
+                        color:#00c2a8;
+                        font-size:12px;
+                    ">
+                        +3 desde ayer
+                    </div>
+
+                </div>
+
+
+                <div class="card shadow-card stat-card">
+
+                    <div class="stat-head">
+
+                        Taxistas Activos
+
+                        <span class="material-symbols-rounded success">
+                            group
+                        </span>
+
+                    </div>
+
+                    <div class="stat-number"
+                         th:text="${activos}">
+                        0
+                    </div>
+
+                    <div style="
+                        margin-top:6px;
+                        color:#00c2a8;
+                        font-size:12px;
+                    ">
+                        +5 esta semana
+                    </div>
+
+                </div>
+
+
+                <div class="card shadow-card stat-card">
+
+                    <div class="stat-head">
+
+                        Taxistas Inactivos
+
+                        <span class="material-symbols-rounded"
+                              style="color:#b3261e;">
+                            person_off
+                        </span>
+
+                    </div>
+
+                    <div class="stat-number"
+                         th:text="${inactivos}">
+                        0
+                    </div>
+
+                    <div style="
+                        margin-top:6px;
+                        color:#4a5d74;
+                        font-size:12px;
+                    ">
+                        -2 esta semana
+                    </div>
+
+                </div>
+
+
+                <div class="card shadow-card stat-card">
+
+                    <div class="stat-head">
+
+                        Solicitudes Rechazadas
+
+                        <span class="material-symbols-rounded"
+                              style="color:#b3261e;">
+                            cancel
+                        </span>
+
+                    </div>
+
+                    <div class="stat-number"
+                         th:text="${rechazados}">
+                        0
+                    </div>
+
+                    <div style="
+                        margin-top:6px;
+                        color:#4a5d74;
+                        font-size:12px;
+                    ">
+                        Sin cambios
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="analytics-grid">
+
+                <section class="card chart-card">
+
+                    <div class="card-title-row">
+                        <h2 class="section-title">
+                            Solicitudes Recibidas (Últimos 6 meses)
+                        </h2>
+
+                        <span class="mini-total"
+                              th:text="${'Total: ' + totalTaxistas}">
+                            Total: 185
+                        </span>
+                    </div>
+
+                    <div class="bar-chart">
+                        <div class="bar-item"><span class="bar" style="height:48px"></span><span>Abr</span></div>
+                        <div class="bar-item"><span class="bar" style="height:64px"></span><span>May</span></div>
+                        <div class="bar-item"><span class="bar" style="height:85px"></span><span>Jun</span></div>
+                        <div class="bar-item"><span class="bar" style="height:75px"></span><span>Jul</span></div>
+                        <div class="bar-item"><span class="bar" style="height:109px"></span><span>Ago</span></div>
+                        <div class="bar-item"><span class="bar" style="height:112px"></span><span>Set</span></div>
+                    </div>
+
+                </section>
+
+
+                <section class="card expiring-card">
+
+                    <div class="card-title-row">
+                        <h2 class="section-title">
+                            Documentos por vencer
+                        </h2>
+
+                        <span class="chip chip-warning">
+                            Alerta
+                        </span>
+                    </div>
+
+                    <div class="alert-list compact-alerts">
+                        <div class="alert-row">
+                            <span class="material-symbols-rounded">warning</span>
+                            <div>
+                                <strong>Carlos Mendoza Quispe</strong>
+                                <div>SOAT • Vence: En 4 días</div>
+                            </div>
+                        </div>
+                        <div class="alert-row">
+                            <span class="material-symbols-rounded">warning</span>
+                            <div>
+                                <strong>María Silva Torres</strong>
+                                <div>Licencia A-IIb • Vence: En 12 días</div>
+                            </div>
+                        </div>
+                        <div class="alert-row">
+                            <span class="material-symbols-rounded">warning</span>
+                            <div>
+                                <strong>Luis Ruiz Vargas</strong>
+                                <div>Tarjeta de Prop. • Vence: En 18 días</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- PARTE INFERIOR -->
+
+            <div class="dashboard-grid">
+
+                <!-- SOLICITUDES -->
+
+                <section class="card">
+
+                    <div class="page-title-row"
+                         style="margin-bottom:15px;">
+
+                        <h2 class="section-title">
+                            Solicitudes recientes
+                        </h2>
+
+                        <a th:href="@{/superadmin/solicitudes/evaluar}"
+                           class="table-link">
+
+                            Ver todas →
+
+                        </a>
+
+                    </div>
+
+
+                    <table>
+
+                        <thead>
+
+                        <tr>
+
+                            <th>
+                                CONDUCTOR
+                            </th>
+
+                            <th>
+                                DNI
+                            </th>
+
+                            <th>
+                                CATEGORÍA LIC.
+                            </th>
+
+                            <th>
+                                FECHA
+                            </th>
+
+                            <th>
+                                ESTADO
+                            </th>
+
+                            <th>
+                                ACCIÓN
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        <tr th:if="${#lists.isEmpty(solicitudesRecientes)}">
+                            <td colspan="6">
+                                No hay solicitudes pendientes.
+                            </td>
+                        </tr>
+
+                        <tr th:each="taxista : ${solicitudesRecientes}">
+                            <td>
+                                <div class="driver-cell">
+                                    <span class="mini-avatar"
+                                          th:text="${#strings.substring(taxista.usuario.nombres,0,1)}">
+                                        C
+                                    </span>
+                                    <strong th:text="${taxista.usuario.nombres + ' ' + taxista.usuario.apellidos}">
+                                    Conductor
+                                    </strong>
+                                </div>
+                            </td>
+                            <td th:text="${taxista.dni}">DNI</td>
+                            <td th:text="${taxista.categoriaLicencia}">Categoría</td>
+                            <td th:text="${#temporals.format(taxista.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                            <td>
+                                <span class="chip chip-warning"
+                                      th:text="${taxista.estadoSolicitud}">
+                                    Pendiente
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/superadmin/taxistas/{id}(id=${taxista.id})}"
+                                   class="table-link">
+                                    Revisar
+                                </a>
+                            </td>
+                        </tr>
+
+                        <th:block th:remove="all">
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    Carlos Mendoza Quispe
+                                </strong>
+                            </td>
+
+                            <td>
+                                71234567
+                            </td>
+
+                            <td>
+                                ABC-123
+                            </td>
+
+                            <td>
+                                Hoy, 12:30
+                            </td>
+
+                            <td>
+                                <span class="chip chip-warning">
+                                    Pendiente
+                                </span>
+                            </td>
+
+                            <td>
+                                <a th:href="@{/superadmin/taxistas/detalle}"
+                                   class="table-link">
+
+                                    Ver detalle
+
+                                </a>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    María Silva Torres
+                                </strong>
+                            </td>
+
+                            <td>
+                                73569421
+                            </td>
+
+                            <td>
+                                XYZ-987
+                            </td>
+
+                            <td>
+                                Hoy, 10:15
+                            </td>
+
+                            <td>
+                                <span class="chip chip-warning">
+                                    Pendiente
+                                </span>
+                            </td>
+
+                            <td>
+                                <a th:href="@{/superadmin/taxistas/detalle}"
+                                   class="table-link">
+
+                                    Ver detalle
+
+                                </a>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    Luis Eduardo Ruiz
+                                </strong>
+                            </td>
+
+                            <td>
+                                70324598
+                            </td>
+
+                            <td>
+                                MNO-456
+                            </td>
+
+                            <td>
+                                Ayer, 18:45
+                            </td>
+
+                            <td>
+                                <span class="chip chip-danger">
+                                    Rechazado
+                                </span>
+                            </td>
+
+                            <td>
+                                <a th:href="@{/superadmin/taxistas/detalle}"
+                                   class="table-link">
+
+                                    Ver detalle
+
+                                </a>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    Patricia Luna Vargas
+                                </strong>
+                            </td>
+
+                            <td>
+                                75842136
+                            </td>
+
+                            <td>
+                                KLP-789
+                            </td>
+
+                            <td>
+                                12/09/2026
+                            </td>
+
+                            <td>
+                                <span class="chip chip-warning">
+                                    Pendiente
+                                </span>
+                            </td>
+
+                            <td>
+                                <a th:href="@{/superadmin/taxistas/detalle}"
+                                   class="table-link">
+
+                                    Ver detalle
+
+                                </a>
+                            </td>
+
+                        </tr>
+
+                        </th:block>
+
+                        </tbody>
+
+                    </table>
+
+                </section>
+
+
+                <!-- ALERTAS -->
+
+                <section class="card">
+
+                    <div class="page-title-row"
+                         style="margin-bottom:15px;">
+
+                        <h2 class="section-title">
+                            Alertas del sistema
+                        </h2>
+
+                        <span class="table-link">
+                            Ver todas →
+                        </span>
+
+                    </div>
+
+
+                    <div class="alert-list">
+
+                        <div class="alert-row">
+
+                            <span class="material-symbols-rounded">
+                                warning
+                            </span>
+
+                            <div style="flex:1;">
+
+                                <strong>
+                                    SOAT próximo a vencer
+                                </strong>
+
+                                <div>
+                                    3 taxistas requieren revisión en los próximos 7 días.
+                                </div>
+
+                            </div>
+
+                            <span style="
+                                color:#94a3b8;
+                                font-size:11px;
+                            ">
+                                Hoy, 09:15
+                            </span>
+
+                        </div>
+
+
+                        <div class="alert-row">
+
+                            <span class="material-symbols-rounded">
+                                warning
+                            </span>
+
+                            <div style="flex:1;">
+
+                                <strong>
+                                    Licencias por vencer
+                                </strong>
+
+                                <div>
+                                    2 conductores con licencia próxima a vencer.
+                                </div>
+
+                            </div>
+
+                            <span style="
+                                color:#94a3b8;
+                                font-size:11px;
+                            ">
+                                Hoy, 08:40
+                            </span>
+
+                        </div>
+
+
+                        <div class="alert-row">
+
+                            <span class="material-symbols-rounded"
+                                  style="color:#1976d2;">
+                                info
+                            </span>
+
+                            <div style="flex:1;">
+
+                                <strong>
+                                    Documentación incompleta
+                                </strong>
+
+                                <div>
+                                    4 solicitudes con documentos pendientes.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="alert-row">
+
+                            <span class="material-symbols-rounded"
+                                  style="color:#1976d2;">
+                                info
+                            </span>
+
+                            <div style="flex:1;">
+
+                                <strong>
+                                    Baja actividad
+                                </strong>
+
+                                <div>
+                                    5 taxistas no han registrado servicios recientemente.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>
+
+

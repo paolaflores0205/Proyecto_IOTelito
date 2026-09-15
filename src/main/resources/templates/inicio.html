@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>IoTelito | Administración de taxistas</title>
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap"
+          rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          th:href="@{/css/inicio.css}">
+</head>
+
+<body>
+
+<main class="login-page">
+
+    <!-- ================================================= -->
+    <!-- PANEL IZQUIERDO -->
+    <!-- ================================================= -->
+
+    <section class="left-panel">
+
+        <div class="login-visual-carousel"
+             aria-hidden="true">
+            <div class="visual-slide slide-one"></div>
+            <div class="visual-slide slide-two"></div>
+            <div class="visual-slide slide-three"></div>
+            <div class="visual-slide slide-four"></div>
+        </div>
+
+        <div class="visual-overlay"></div>
+
+        <div class="brand">
+
+            <div class="brand-main">
+
+                <div class="brand-icon">
+                    <span class="material-symbols-rounded">
+                        apartment
+                    </span>
+                </div>
+
+                <div class="brand-name">
+                    <span class="iot">IoT</span>
+                    <span class="elito">elito</span>
+                </div>
+
+            </div>
+
+            <span class="tagline">
+                Tu estadía, conectada.
+            </span>
+
+        </div>
+
+
+        <div class="hero-copy">
+
+            <div class="hero-kicker">
+                <span class="material-symbols-rounded">
+                    local_taxi
+                </span>
+                Transporte hotelero inteligente
+            </div>
+
+            <h1>
+                Gestiona tu flota de taxistas de manera eficiente.
+            </h1>
+
+            <p>
+                Control total de accesos, aprobación de documentación legal
+                y monitoreo integrado para dar un servicio de excelencia.
+            </p>
+
+        </div>
+
+
+        <div class="footer-copy">
+            © 2026 IoTelito - Administración
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- PANEL DERECHO -->
+    <!-- ================================================= -->
+
+    <section class="right-panel">
+
+        <div class="login-box">
+
+            <header class="login-brand-mobile">
+                <div class="brand-icon">
+                    <span class="material-symbols-rounded">
+                        apartment
+                    </span>
+                </div>
+
+                <div class="brand-name">
+                    <span class="iot">IoT</span>
+                    <span class="elito">elito</span>
+                </div>
+            </header>
+
+            <div class="login-chip">
+                <span class="material-symbols-rounded">
+                    verified_user
+                </span>
+                Acceso superadmin
+            </div>
+
+            <h2>
+                Administración de taxistas
+            </h2>
+
+            <p class="subtitle">
+                Por favor, ingresa tus credenciales de superadministrador.
+            </p>
+
+
+            <div class="alert-error"
+                 th:if="${error != null}"
+                 th:text="${error}">
+                Error
+            </div>
+
+            <form th:action="@{/login}"
+                  method="post">
+
+                <div class="field">
+
+                    <label for="correo">
+                        Correo electrónico
+                    </label>
+
+                    <div class="input-shell">
+                        <span class="material-symbols-rounded input-icon">
+                            mail
+                        </span>
+
+                        <input
+                                id="correo"
+                                name="correo"
+                                type="email"
+                                placeholder="admin@iotelito.com"
+                                required>
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="password">
+                        Contraseña
+                    </label>
+
+                    <div class="password-wrapper input-shell">
+
+                        <span class="material-symbols-rounded input-icon">
+                            lock
+                        </span>
+
+                        <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                placeholder="admin123"
+                                required>
+
+                        <button class="password-toggle"
+                                type="button"
+                                onclick="togglePassword()"
+                                aria-label="Mostrar u ocultar contrasena">
+                            <span class="material-symbols-rounded password-icon">
+                                visibility
+                            </span>
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-options">
+
+                    <label class="remember">
+
+                        <input type="checkbox">
+
+                        <span>
+                            Recordar sesión
+                        </span>
+
+                    </label>
+
+                    <a th:href="@{/}">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+
+                </div>
+
+
+                <button
+                        type="submit"
+                        class="login-button">
+
+                    <span class="material-symbols-rounded">
+                        login
+                    </span>
+
+                    Iniciar sesión
+
+                </button>
+
+            </form>
+
+
+            <div class="driver-application-card">
+
+                <div class="driver-request-icon">
+                    <span class="material-symbols-rounded">
+                        local_taxi
+                    </span>
+                </div>
+
+                <div class="driver-request-copy">
+                    <strong>
+                        Quieres ser taxista aliado?
+                    </strong>
+
+                    <span>
+                        Envia tu solicitud para trabajar con IoTelito.
+                    </span>
+                </div>
+
+                <a th:href="@{/taxistas/registro}"
+                   class="driver-request-link"
+                   aria-label="Enviar solicitud de taxista">
+                    <span class="material-symbols-rounded">
+                        arrow_forward
+                    </span>
+                </a>
+
+            </div>
+
+
+            <div class="driver-request-card">
+
+                <span>
+                    ¿No tienes una cuenta?
+                </span>
+
+                <a th:href="@{/taxistas/registro}">
+                    Crea una
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById("password");
+        const icon = document.querySelector(".password-toggle .material-symbols-rounded");
+
+        if (!input || !icon) {
+            return;
+        }
+
+        const showPassword = input.type === "password";
+        input.type = showPassword ? "text" : "password";
+        icon.textContent = showPassword ? "visibility_off" : "visibility";
+    }
+</script>
+
+</body>
+</html>

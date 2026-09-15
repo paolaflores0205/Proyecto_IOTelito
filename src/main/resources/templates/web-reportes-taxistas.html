@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Reportes | IoTelito</title>
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap"
+            rel="stylesheet">
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+            rel="stylesheet">
+
+    <link
+            rel="stylesheet"
+            th:href="@{/css/admin.css}">
+
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-main">
+
+                <span class="material-symbols-rounded logo-box">
+                    apartment
+                </span>
+
+                <div class="brand-name">
+                    <span class="iot">IoT</span>
+                    <span class="elito">elito</span>
+                </div>
+
+            </div>
+
+            <div class="tagline">
+                Tu estadía, conectada.
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a th:href="@{/superadmin/dashboard}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    grid_view
+                </span>
+
+                <span class="menu-label">
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/solicitudes/evaluar}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    pending_actions
+                </span>
+
+                <span class="menu-label">
+                    Solicitudes
+                </span>
+
+                <span class="badge"
+                      th:text="${pendientes}">
+                    0
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/taxistas}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    group
+                </span>
+
+                <span class="menu-label">
+                    Taxistas
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/reportes}"
+               class="menu-item active">
+
+                <span class="material-symbols-rounded">
+                    bar_chart
+                </span>
+
+                <span class="menu-label">
+                    Reportes
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a th:href="@{/}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    logout
+                </span>
+
+                <span>
+                    Cerrar sesión
+                </span>
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- CONTENIDO -->
+
+    <main class="admin-main">
+
+        <header class="admin-header">
+
+            <div class="breadcrumb">
+
+                <strong>
+                    Panel de Control
+                </strong>
+
+                <span class="slash">
+                    /
+                </span>
+
+                <span>
+                    Reportes
+                </span>
+
+            </div>
+
+
+            <div class="admin-user">
+
+                <a th:href="@{/superadmin/notificaciones}"
+                   class="notification"
+                   aria-label="Ver notificaciones">
+
+                    <span class="material-symbols-rounded">
+                        notifications
+                    </span>
+
+                </a>
+
+
+                <a th:href="@{/superadmin/perfil}"
+                   class="user-block profile-trigger"
+                   aria-label="Ver perfil del usuario">
+
+                    <div class="avatar"
+                         th:text="${#strings.substring(usuarioActual.nombres,0,1) + #strings.substring(usuarioActual.apellidos,0,1)}">
+                        SA
+                    </div>
+
+                    <span th:text="${usuarioActual.nombres + ' ' + usuarioActual.apellidos}">
+                        Super Administrador
+                    </span>
+
+                </a>
+
+            </div>
+
+        </header>
+
+
+        <div class="content">
+
+            <!-- CABECERA -->
+
+            <div class="page-title-row">
+
+                <div>
+
+                    <h1 class="page-title">
+                        Reportes y Estadísticas
+                    </h1>
+
+                    <p style="
+                        margin:6px 0 0;
+                        color:#4a5d74;
+                        font-size:14px;
+                    ">
+                        Visualiza el rendimiento de la flota y genera
+                        reportes para una mejor toma de decisiones.
+                    </p>
+
+                </div>
+
+
+                <div class="actions">
+
+                    <a th:href="@{/superadmin/reportes}"
+                       class="btn btn-outline">
+
+                        <span class="material-symbols-rounded">
+                            calendar_month
+                        </span>
+
+                        Reporte actual
+
+                    </a>
+
+
+                    <a th:href="@{/superadmin/reportes/exportar}"
+                       class="btn btn-primary">
+
+                        <span class="material-symbols-rounded">
+                            download
+                        </span>
+
+                        Exportar Reporte
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- ESTADISTICAS -->
+
+            <div class="stats-grid">
+
+                <div class="card shadow-card stat-card">
+
+                    <div class="stat-head">
+
+                        Total de Servicios
+
+                        <span class="material-symbols-rounded primary">
+                            local_taxi
+                        </span>
+
+                    </div>
+
+                    <div class="stat-number"
+                         th:text="${totalServicios}">
+                        0
+                    </div>
+
+                    <div style="
+                        color:#00c2a8;
+                        font-size:12px;
+                        margin-top:6px;
+                    ">
+                        +12% vs. mes anterior
+                    </div>
+
+                </div>
+
+
+                <div class="card shadow-card stat-card">
+
+                    <div class="stat-head">
+
+                        Ingresos Estimados
+
+                        <span class="material-symbols-rounded primary">
+                            payments
+                        </span>
+
+                    </div>
+
+                    <div class="stat-number"
+                         th:text="${'S/ ' + (totalServicios * 25)}">
+                        S/ 0
+                    </div>
+
+                    <div style="
+                        color:#00c2a8;
+                        font-size:12px;
+                        margin-top:6px;
+                    ">
+                        +8% vs. mes anterior
+                    </div>
+
+                </div>
+
+
+                <div class="card shadow-card stat-card">
+
+                    <div class="stat-head">
+
+                        Taxistas Activos
+
+                        <span class="material-symbols-rounded success">
+                            group
+                        </span>
+
+                    </div>
+
+                    <div class="stat-number"
+                         th:text="${activos}">
+                        0
+                    </div>
+
+                    <div style="
+                        color:#00c2a8;
+                        font-size:12px;
+                        margin-top:6px;
+                    ">
+                        +5% vs. mes anterior
+                    </div>
+
+                </div>
+
+
+                <div class="card shadow-card stat-card">
+
+                    <div class="stat-head">
+
+                        Calificación Promedio
+
+                        <span class="material-symbols-rounded"
+                              style="color:#ffb300;">
+                            star
+                        </span>
+
+                    </div>
+
+                    <div class="stat-number"
+                         th:text="${#numbers.formatDecimal(promedioCalificacion, 1, 1) + ' / 5'}">
+                        0.0 / 5
+                    </div>
+
+                    <div style="
+                        color:#00c2a8;
+                        font-size:12px;
+                        margin-top:6px;
+                    ">
+                        +0.2 vs. mes anterior
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- REPORTES -->
+
+            <div style="
+                display:grid;
+                grid-template-columns:1.6fr 1fr 1fr;
+                gap:24px;
+                margin-top:24px;
+            ">
+
+                <!-- SERVICIOS POR DIA -->
+
+                <section class="card">
+
+                    <div class="page-title-row"
+                         style="margin-bottom:20px;">
+
+                        <h2 class="section-title">
+                            Servicios por día
+                        </h2>
+
+                        <a th:href="@{/superadmin/reportes}"
+                           class="btn btn-outline">
+                            Últimos 14 días
+                        </a>
+
+                    </div>
+
+
+                    <div style="
+                        height:260px;
+                        position:relative;
+                        padding:20px 10px 0;
+                    ">
+
+                        <div style="
+                            position:absolute;
+                            left:35px;
+                            right:10px;
+                            top:30px;
+                            bottom:35px;
+                            background:
+                                repeating-linear-gradient(
+                                    to bottom,
+                                    transparent,
+                                    transparent 42px,
+                                    #e2e8f0 43px
+                                );
+                        ">
+                        </div>
+
+
+                        <svg
+                                viewBox="0 0 600 220"
+                                width="100%"
+                                height="100%"
+                                style="position:relative;">
+
+                            <polyline
+                                    points="
+                                    0,185
+                                    55,160
+                                    110,110
+                                    165,135
+                                    220,100
+                                    275,130
+                                    330,130
+                                    385,95
+                                    440,130
+                                    495,80
+                                    550,105
+                                    600,65"
+                                    fill="none"
+                                    stroke="#00c2a8"
+                                    stroke-width="4"/>
+
+                        </svg>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ESTADO -->
+
+                <section class="card">
+
+                    <h2 class="section-title">
+                        Estado de taxistas
+                    </h2>
+
+
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        margin-top:35px;
+                    ">
+
+                        <div style="
+                            width:150px;
+                            height:150px;
+                            border-radius:50%;
+                            background:
+                                conic-gradient(
+                                    #00c2a8 0 87%,
+                                    #cbd5e1 87% 100%
+                                );
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                        ">
+
+                            <div style="
+                                width:100px;
+                                height:100px;
+                                border-radius:50%;
+                                background:white;
+                                display:flex;
+                                flex-direction:column;
+                                justify-content:center;
+                                align-items:center;
+                            ">
+
+                                <strong style="
+                                    font-size:26px;
+                                ">
+                                    179
+                                </strong>
+
+                                <span style="
+                                    font-size:12px;
+                                    color:#4a5d74;
+                                ">
+                                    Total
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        margin-top:25px;
+                        display:flex;
+                        flex-direction:column;
+                        gap:12px;
+                    ">
+
+                        <div style="
+                            display:flex;
+                            justify-content:space-between;
+                            font-size:13px;
+                        ">
+
+                            <span>
+                                ðŸŸ¢ Activos
+                            </span>
+
+                            <strong>
+                                156 (87%)
+                            </strong>
+
+                        </div>
+
+
+                        <div style="
+                            display:flex;
+                            justify-content:space-between;
+                            font-size:13px;
+                        ">
+
+                            <span>
+                                ⚪ Inactivos
+                            </span>
+
+                            <strong>
+                                23 (13%)
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- SERVICIOS POR TIPO -->
+
+                <section class="card">
+
+                    <h2 class="section-title">
+                        Servicios por tipo
+                    </h2>
+
+
+                    <div style="
+                        margin-top:25px;
+                        display:flex;
+                        flex-direction:column;
+                        gap:20px;
+                    ">
+
+                        <div>
+
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                                margin-bottom:7px;
+                                font-size:13px;
+                            ">
+
+                                <span>
+                                    Traslados hotel
+                                </span>
+
+                                <strong>
+                                    640
+                                </strong>
+
+                            </div>
+
+                            <div style="
+                                height:12px;
+                                border-radius:10px;
+                                background:#e2e8f0;
+                                overflow:hidden;
+                            ">
+
+                                <div style="
+                                    width:90%;
+                                    height:100%;
+                                    background:#00c2a8;
+                                ">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                                margin-bottom:7px;
+                                font-size:13px;
+                            ">
+
+                                <span>
+                                    Tours turísticos
+                                </span>
+
+                                <strong>
+                                    350
+                                </strong>
+
+                            </div>
+
+                            <div style="
+                                height:12px;
+                                border-radius:10px;
+                                background:#e2e8f0;
+                                overflow:hidden;
+                            ">
+
+                                <div style="
+                                    width:55%;
+                                    height:100%;
+                                    background:#00c2a8;
+                                ">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                                margin-bottom:7px;
+                                font-size:13px;
+                            ">
+
+                                <span>
+                                    Servicios privados
+                                </span>
+
+                                <strong>
+                                    180
+                                </strong>
+
+                            </div>
+
+                            <div style="
+                                height:12px;
+                                border-radius:10px;
+                                background:#e2e8f0;
+                                overflow:hidden;
+                            ">
+
+                                <div style="
+                                    width:32%;
+                                    height:100%;
+                                    background:#00c2a8;
+                                ">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                                margin-bottom:7px;
+                                font-size:13px;
+                            ">
+
+                                <span>
+                                    Otros
+                                </span>
+
+                                <strong>
+                                    78
+                                </strong>
+
+                            </div>
+
+                            <div style="
+                                height:12px;
+                                border-radius:10px;
+                                background:#e2e8f0;
+                                overflow:hidden;
+                            ">
+
+                                <div style="
+                                    width:15%;
+                                    height:100%;
+                                    background:#00c2a8;
+                                ">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>
+
+

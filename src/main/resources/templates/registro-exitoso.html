@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Solicitud enviada | IoTelito</title>
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap"
+          rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          th:href="@{/css/registro-exitoso.css}">
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-main">
+
+            <div class="brand-icon">
+                <span class="material-symbols-rounded">
+                    sensors
+                </span>
+            </div>
+
+            <div class="brand-name">
+                <span class="brand-iot">IoT</span>
+                <span class="brand-elito">elito</span>
+            </div>
+
+        </div>
+
+        <div class="brand-tagline">
+            Tu estadía, conectada.
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="page">
+
+    <section class="success-card">
+
+        <div class="success-icon">
+
+            <span class="material-symbols-rounded">
+                check_circle
+            </span>
+
+        </div>
+
+
+        <div class="title-section">
+
+            <h1>
+                Solicitud enviada correctamente
+            </h1>
+
+            <div class="status-chip">
+
+                <span class="status-dot"></span>
+
+                <span>
+                    Pendiente de revisión
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="request-info">
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Código de solicitud:
+                </span>
+
+                <strong>
+                    SOL-2025-00847
+                </strong>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Fecha de registro:
+                </span>
+
+                <span class="info-value">
+                    Hoy, 12:30 PM
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="message">
+
+            <p>
+                El superadministrador revisará tus documentos
+                en un plazo de 24 a 48 horas.
+            </p>
+
+            <p class="email-message">
+                Recibirás la respuesta en:
+
+                <span th:text="${taxista != null && taxista.usuario != null
+                ? taxista.usuario.correo
+                : 'carlos.mendoza@gmail.com'}">
+            carlos.mendoza@gmail.com
+        </span>
+
+            </p>
+
+        </div>
+
+        <a th:href="@{/taxistas/registro}"
+           class="material-button">
+
+            Volver al inicio
+
+        </a>
+
+    </section>
+
+</main>
+
+</body>
+</html>

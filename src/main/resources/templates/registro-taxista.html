@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Registro de Taxista | IoTelito</title>
+
+    <!-- ROBOTO - MATERIAL DESIGN -->
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap"
+          rel="stylesheet">
+
+    <!-- MATERIAL SYMBOLS -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          th:href="@{/css/registro-taxista.css}">
+</head>
+
+<body>
+
+
+<!-- ====================================================== -->
+<!-- HEADER -->
+<!-- ====================================================== -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-main">
+
+            <div class="brand-icon">
+                <span class="material-symbols-rounded">
+                    sensors
+                </span>
+            </div>
+
+            <div class="brand-name">
+                <span class="brand-iot">IoT</span>
+                <span class="brand-elito">elito</span>
+            </div>
+
+        </div>
+
+        <div class="brand-tagline">
+            Tu estadía, conectada.
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- ====================================================== -->
+<!-- BODY -->
+<!-- ====================================================== -->
+
+<main class="page">
+
+    <article class="registration-card">
+
+
+        <!-- ================================================= -->
+        <!-- TÍTULO -->
+        <!-- ================================================= -->
+
+        <section class="page-title">
+
+            <h1>
+                Regístrate como taxista
+            </h1>
+
+            <p>
+                Únete a la red de transporte preferente para huéspedes de IoTelito.
+            </p>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- STEPPER -->
+        <!-- ================================================= -->
+
+        <section class="stepper">
+
+            <div class="step step-completed">
+
+                <div class="step-circle">
+                    1
+                </div>
+
+                <span>
+                    Datos personales
+                </span>
+
+            </div>
+
+
+            <div class="step-line active"></div>
+
+
+            <div class="step step-completed">
+
+                <div class="step-circle">
+                    2
+                </div>
+
+                <span>
+                    Datos de conductor
+                </span>
+
+            </div>
+
+
+            <div class="step-line active"></div>
+
+
+            <div class="step">
+
+                <div class="step-circle">
+                    3
+                </div>
+
+                <span>
+                    Vehículo
+                </span>
+
+            </div>
+
+
+            <div class="step-line"></div>
+
+
+            <div class="step">
+
+                <div class="step-circle">
+                    4
+                </div>
+
+                <span>
+                    Documentos
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- ERROR -->
+        <!-- ================================================= -->
+
+        <div class="alert-error"
+             th:if="${error != null}">
+
+            <span class="material-symbols-rounded">
+                error
+            </span>
+
+            <span th:text="${error}">
+                Error
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- FORM -->
+        <!-- ================================================= -->
+
+        <form
+                th:action="@{/taxistas/registro}"
+                th:object="${form}"                method="post"
+                enctype="multipart/form-data">
+
+
+            <!-- ================================================= -->
+            <!-- INFORMACIÓN PERSONAL -->
+            <!-- ================================================= -->
+
+            <section class="form-section">
+
+                <h2>
+                    1. Información Personal
+                </h2>
+
+
+                <div class="form-row">
+
+                    <div class="field">
+
+                        <label for="nombres">
+                            Nombres *
+                        </label>
+
+                        <input
+                                id="nombres"
+                                type="text"
+                                th:field="*{nombres}"
+                                placeholder="Ej. Carlos Alberto"
+                                required>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="apellidos">
+                            Apellidos *
+                        </label>
+
+                        <input
+                                id="apellidos"
+                                type="text"
+                                th:field="*{apellidos}"
+                                placeholder="Ej. Mendoza Quispe"
+                                required>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="field">
+
+                        <label for="dni">
+                            Documento Nacional de Identidad (DNI) *
+                        </label>
+
+                        <input
+                                id="dni"
+                                type="text"
+                                th:field="*{dni}"
+                                placeholder="8 dígitos (Ej. 71234567)"
+                                maxlength="8"
+                                pattern="[0-9]{8}"
+                                required>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="fechaNacimiento">
+                            Fecha de Nacimiento *
+                        </label>
+
+                        <input
+                                id="fechaNacimiento"
+                                type="date"
+                                th:field="*{fechaNacimiento}"
+                                required>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="field">
+
+                        <label for="telefono">
+                            Teléfono Celular *
+                        </label>
+
+                        <input
+                                id="telefono"
+                                type="tel"
+                                th:field="*{telefono}"
+                                placeholder="+51 987 654 321"
+                                required>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="correo">
+                            Correo electrónico *
+                        </label>
+
+                        <input
+                                id="correo"
+                                type="email"
+                                th:field="*{correo}"
+                                placeholder="carlos.mendoza@gmail.com"
+                                required>
+
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="domicilio">
+                        Domicilio actual *
+                    </label>
+
+                    <input
+                            id="domicilio"
+                            type="text"
+                            th:field="*{domicilio}"
+                            placeholder="Av. Larco 123, Miraflores, Lima"
+                            required>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================= -->
+            <!-- LICENCIA -->
+            <!-- ================================================= -->
+
+            <section class="form-section">
+
+                <h2>
+                    2. Licencia de Conducir
+                </h2>
+
+
+                <div class="form-row three">
+
+                    <div class="field">
+
+                        <label for="numeroLicencia">
+                            Número de Licencia *
+                        </label>
+
+                        <input
+                                id="numeroLicencia"
+                                type="text"
+                                th:field="*{numeroLicencia}"
+                                placeholder="Q71234567"
+                                required>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="categoriaLicencia">
+                            Categoría *
+                        </label>
+
+                        <input
+                                id="categoriaLicencia"
+                                type="text"
+                                th:field="*{categoriaLicencia}"
+                                placeholder="Ej. A-IIb (A-IIb, A-IIIa, etc.)"
+                                required>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="fechaVencimientoLicencia">
+                            Fecha de vencimiento *
+                        </label>
+
+                        <input
+                                id="fechaVencimientoLicencia"
+                                type="date"
+                                th:field="*{fechaVencimientoLicencia}"
+                                required>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================= -->
+            <!-- VEHÍCULO -->
+            <!-- ================================================= -->
+
+            <section class="form-section">
+
+                <h2>
+                    3. Datos del Vehículo
+                </h2>
+
+
+                <div class="form-row three">
+
+                    <div class="field">
+
+                        <label for="marcaVehiculo">
+                            Marca *
+                        </label>
+
+                        <input
+                                id="marcaVehiculo"
+                                type="text"
+                                th:field="*{marcaVehiculo}"
+                                placeholder="Ej. Toyota"
+                                required>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="modeloVehiculo">
+                            Modelo *
+                        </label>
+
+                        <input
+                                id="modeloVehiculo"
+                                type="text"
+                                th:field="*{modeloVehiculo}"
+                                placeholder="Ej. Corolla"
+                                required>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="anioVehiculo">
+                            Año *
+                        </label>
+
+                        <input
+                                id="anioVehiculo"
+                                type="number"
+                                th:field="*{anioVehiculo}"
+                                placeholder="Ej. 2022"
+                                required>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="field">
+
+                        <label for="colorVehiculo">
+                            Color *
+                        </label>
+
+                        <input
+                                id="colorVehiculo"
+                                type="text"
+                                th:field="*{colorVehiculo}"
+                                placeholder="Ej. Gris Plateado"
+                                required>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="placaVehiculo">
+                            Placa de Rodaje *
+                        </label>
+
+                        <input
+                                id="placaVehiculo"
+                                type="text"
+                                th:field="*{placaVehiculo}"
+                                placeholder="ABC-123"
+                                required>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================= -->
+            <!-- DOCUMENTOS -->
+            <!-- ================================================= -->
+
+            <section class="form-section">
+
+                <h2>
+                    4. Documentación requerida
+                </h2>
+
+
+                <div class="documents-row">
+
+
+                    <!-- FOTO -->
+
+                    <div class="document-column">
+
+                        <label class="document-label">
+                            Fotografía del conductor (rostro de frente)
+                        </label>
+
+                        <label class="upload-card photo-upload">
+
+                            <div class="photo-icon">
+
+                                <span class="material-symbols-rounded">
+                                    person
+                                </span>
+
+                            </div>
+
+                            <div class="upload-info">
+
+                                <strong>
+                                    Subir foto formal
+                                </strong>
+
+                                <span>
+                                    Formatos JPG, PNG • Máx 2MB
+                                </span>
+
+                            </div>
+
+                            <input
+                                    type="file"
+                                    name="fotoConductorFile"
+                                    accept=".jpg,.jpeg,.png">
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- DNI -->
+
+                    <div class="document-column">
+
+                        <label class="document-label">
+                            DNI Escaneado (Ambas caras) *
+                        </label>
+
+                        <label class="upload-card drop-upload">
+
+                            <span class="material-symbols-rounded upload-symbol">
+                                cloud_upload
+                            </span>
+
+                            <strong>
+                                DNI Escaneado (Ambas caras) *
+                            </strong>
+
+                            <span>
+                                Arrastrar archivo o seleccionar
+                                (PDF, JPG, PNG máx. 5MB)
+                            </span>
+
+                            <input
+                                    type="file"
+                                    name="dniFile"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    required>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <div class="documents-row">
+
+
+                    <!-- LICENCIA -->
+
+                    <div class="document-column">
+
+                        <label class="upload-card drop-upload">
+
+                            <span class="material-symbols-rounded upload-symbol">
+                                cloud_upload
+                            </span>
+
+                            <strong>
+                                Licencia de conducir vigente *
+                            </strong>
+
+                            <span>
+                                Arrastrar archivo o seleccionar
+                                (PDF, JPG, PNG máx. 5MB)
+                            </span>
+
+                            <input
+                                    type="file"
+                                    name="licenciaFile"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    required>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- SOAT -->
+
+                    <div class="document-column">
+
+                        <label class="upload-card drop-upload">
+
+                            <span class="material-symbols-rounded upload-symbol">
+                                cloud_upload
+                            </span>
+
+                            <strong>
+                                SOAT Vigente del vehículo *
+                            </strong>
+
+                            <span>
+                                Arrastrar archivo o seleccionar
+                                (PDF, JPG, PNG máx. 5MB)
+                            </span>
+
+                            <input
+                                    type="file"
+                                    name="soatFile"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    required>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TARJETA -->
+
+                <label class="upload-card drop-upload property-upload">
+
+                    <span class="material-symbols-rounded upload-symbol">
+                        cloud_upload
+                    </span>
+
+                    <strong>
+                        Tarjeta de propiedad vehicular *
+                    </strong>
+
+                    <span>
+                        Arrastrar archivo o seleccionar
+                        (PDF, JPG, PNG máx. 5MB)
+                    </span>
+
+                    <input
+                            type="file"
+                            name="tarjetaPropiedadFile"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            required>
+
+                </label>
+
+            </section>
+
+
+            <!-- ================================================= -->
+            <!-- CHECK MATERIAL -->
+            <!-- ================================================= -->
+
+            <div class="terms">
+
+                <label class="material-checkbox">
+
+                    <input
+                            id="aceptaTerminos"
+                            type="checkbox"
+                            th:field="*{aceptaTerminos}"
+                            required>
+
+                    <span class="checkmark">
+
+                        <span class="material-symbols-rounded">
+                            check
+                        </span>
+
+                    </span>
+
+                </label>
+
+
+                <label for="aceptaTerminos"
+                       class="terms-text">
+
+                    Declaro bajo juramento que toda la información
+                    brindada es verdadera y verídica, y acepto los
+
+                    <a href="#aceptaTerminos">
+                        Términos y condiciones de servicio
+                    </a>
+
+                    y
+
+                    <a href="#aceptaTerminos">
+                        políticas de privacidad
+                    </a>
+
+                    de IoTelito Perú.
+
+                </label>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- BUTTON -->
+            <!-- ================================================= -->
+
+            <div class="submit-row">
+
+                <button
+                        type="button"
+                        class="material-button secondary-button wizard-back">
+
+                    Regresar
+
+                </button>
+
+                <button
+                        type="button"
+                        class="material-button wizard-next">
+
+                    Siguiente
+
+                </button>
+
+                <button
+                        type="submit"
+                        class="material-button wizard-submit">
+
+                    Enviar solicitud de registro
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </article>
+
+</main>
+
+<script>
+    (function () {
+        const form = document.querySelector("form");
+        const sections = Array.from(document.querySelectorAll(".form-section"));
+        const steps = Array.from(document.querySelectorAll(".stepper .step"));
+        const lines = Array.from(document.querySelectorAll(".stepper .step-line"));
+        const backButton = document.querySelector(".wizard-back");
+        const nextButton = document.querySelector(".wizard-next");
+        const submitButton = document.querySelector(".wizard-submit");
+        const terms = document.querySelector(".terms");
+        let currentStep = 0;
+
+        if (!form || sections.length === 0) {
+            return;
+        }
+
+        sections.forEach(function (section, index) {
+            section.dataset.wizardStep = String(index);
+        });
+
+        if (terms && sections.length > 0) {
+            sections[sections.length - 1].appendChild(terms);
+        }
+
+        function fieldsForStep(index) {
+            return Array.from(sections[index].querySelectorAll("input, select, textarea"));
+        }
+
+        function validateStep(index) {
+            const fields = fieldsForStep(index);
+            const invalid = fields.find(function (field) {
+                return !field.checkValidity();
+            });
+
+            if (invalid) {
+                invalid.reportValidity();
+                invalid.focus({ preventScroll: false });
+                return false;
+            }
+
+            return true;
+        }
+
+        function showStep(index) {
+            currentStep = Math.max(0, Math.min(index, sections.length - 1));
+
+            sections.forEach(function (section, sectionIndex) {
+                section.classList.toggle("wizard-section-active", sectionIndex === currentStep);
+                section.classList.toggle("wizard-section-hidden", sectionIndex !== currentStep);
+            });
+
+            steps.forEach(function (step, stepIndex) {
+                step.classList.toggle("step-completed", stepIndex <= currentStep);
+                step.classList.toggle("step-current", stepIndex === currentStep);
+            });
+
+            lines.forEach(function (line, lineIndex) {
+                line.classList.toggle("active", lineIndex < currentStep);
+            });
+
+            if (backButton) {
+                backButton.hidden = currentStep === 0;
+            }
+
+            if (nextButton) {
+                nextButton.hidden = currentStep === sections.length - 1;
+            }
+
+            if (submitButton) {
+                submitButton.hidden = currentStep !== sections.length - 1;
+            }
+
+            sections[currentStep].scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        if (backButton) {
+            backButton.addEventListener("click", function () {
+                showStep(currentStep - 1);
+            });
+        }
+
+        if (nextButton) {
+            nextButton.addEventListener("click", function () {
+                if (validateStep(currentStep)) {
+                    showStep(currentStep + 1);
+                }
+            });
+        }
+
+        form.addEventListener("submit", function (event) {
+            const firstInvalidStep = sections.findIndex(function (_section, index) {
+                return !fieldsForStep(index).every(function (field) {
+                    return field.checkValidity();
+                });
+            });
+
+            if (firstInvalidStep !== -1) {
+                event.preventDefault();
+                showStep(firstInvalidStep);
+                validateStep(firstInvalidStep);
+            }
+        });
+
+        showStep(0);
+    })();
+</script>
+
+</body>
+</html>

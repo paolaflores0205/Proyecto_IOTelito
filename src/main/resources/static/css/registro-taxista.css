@@ -1,0 +1,1264 @@
+/* =========================================
+   MATERIAL DESIGN TOKENS - IOTELITO
+========================================= */
+
+:root {
+    --primary: #00c2a8;
+    --primary-hover: #00ad96;
+
+    --navy: #071a33;
+
+    --text-primary: #071a33;
+    --text-secondary: #4a5d74;
+    --text-placeholder: #94a3b8;
+
+    --background: #f5f5f5;
+    --surface: #ffffff;
+
+    --outline: #e2e8f0;
+
+    --error: #b3261e;
+
+    --radius-field: 8px;
+    --radius-card: 16px;
+
+    --shadow-card:
+            0 4px 6px rgba(7, 26, 51, 0.06);
+}
+
+
+/* =========================================
+   RESET
+========================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: "Roboto", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.topbar {
+    width: 100%;
+    height: 124px;
+
+    background: var(--navy);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.brand-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.brand-icon {
+    width: 43px;
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--primary);
+}
+
+
+.brand-icon .material-symbols-rounded {
+    font-size: 36px;
+}
+
+
+.brand-name {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+
+    font-size: 22px;
+}
+
+
+.brand-iot {
+    color: var(--primary);
+    font-weight: 900;
+}
+
+
+.brand-elito {
+    color: white;
+    font-weight: 700;
+}
+
+
+.brand-tagline {
+    margin-top: 3px;
+
+    color: var(--primary);
+
+    font-size: 11px;
+    font-weight: 500;
+}
+
+
+/* =========================================
+   MAIN AREA
+========================================= */
+
+.page {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+
+    padding: 48px 20px 64px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.registration-card {
+    width: 800px;
+    max-width: 100%;
+
+    padding: 40px;
+
+    background: var(--surface);
+
+    border-radius: var(--radius-card);
+
+    box-shadow: var(--shadow-card);
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+.page-title {
+    text-align: center;
+
+    margin-bottom: 32px;
+}
+
+
+.page-title h1 {
+    margin: 0;
+
+    color: var(--text-primary);
+
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+
+.page-title p {
+    margin: 8px 0 0;
+
+    color: var(--text-secondary);
+
+    font-size: 15px;
+}
+
+
+/* =========================================
+   STEPPER - MATERIAL
+========================================= */
+
+.stepper {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 24px;
+
+    margin-bottom: 32px;
+}
+
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    white-space: nowrap;
+
+    color: var(--text-secondary);
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+.step-circle {
+    width: 28px;
+    height: 28px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--background);
+
+    border: 1px solid var(--outline);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.step-completed {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+
+.step-completed .step-circle {
+    background: var(--primary);
+
+    border-color: var(--primary);
+
+    color: white;
+}
+
+
+.step-line {
+    height: 2px;
+
+    flex: 1;
+
+    margin: 0;
+
+    background: var(--outline);
+}
+
+
+.step-line.active {
+    background: var(--primary);
+}
+
+
+/* =========================================
+   FORM SECTION
+========================================= */
+
+.form-section {
+    margin-bottom: 32px;
+}
+
+
+.form-section h2 {
+    margin: 0 0 16px;
+
+    color: var(--text-primary);
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+/* =========================================
+   FORM GRID
+========================================= */
+
+.form-row {
+    display: grid;
+
+    grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+
+.form-row.three {
+    grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+}
+
+
+/* =========================================
+   MATERIAL OUTLINED FIELD
+========================================= */
+
+.field {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.field label {
+    color: var(--text-secondary);
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.field input {
+    width: 100%;
+    height: 44px;
+
+    padding: 0 14px;
+
+    border:
+            1px solid var(--outline);
+
+    border-radius:
+            var(--radius-field);
+
+    background: white;
+
+    color: var(--text-primary);
+
+    font-family:
+            "Roboto",
+            sans-serif;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+            border-color 150ms ease,
+            box-shadow 150ms ease,
+            background 150ms ease;
+}
+
+
+.field input::placeholder {
+    color: var(--text-placeholder);
+}
+
+
+.field input:hover {
+    border-color: #b8c2ce;
+}
+
+
+.field input:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+            0 0 0 2px
+            rgba(0, 194, 168, 0.14);
+}
+
+
+/* =========================================
+   DOCUMENTS
+========================================= */
+
+.documents-row {
+    display: grid;
+
+    grid-template-columns:
+            1fr 1fr;
+
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+
+.document-column {
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+.document-label {
+    color: var(--text-secondary);
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+.upload-card {
+    position: relative;
+
+    border:
+            1px dashed #cbd5e1;
+
+    border-radius: 8px;
+
+    background: white;
+
+    cursor: pointer;
+
+    transition:
+            background 150ms ease,
+            border-color 150ms ease,
+            box-shadow 150ms ease;
+}
+
+
+.upload-card:hover {
+    background: #f8fffd;
+
+    border-color: var(--primary);
+
+    box-shadow:
+            0 0 0 2px
+            rgba(0, 194, 168, 0.08);
+}
+
+
+.upload-card input[type="file"] {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   PHOTO
+========================================= */
+
+.photo-upload {
+    min-height: 84px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 12px;
+
+    gap: 16px;
+}
+
+
+.photo-icon {
+    width: 60px;
+    height: 60px;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #f5f5f5;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--text-secondary);
+}
+
+
+.photo-icon .material-symbols-rounded {
+    font-size: 28px;
+}
+
+
+.upload-info {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.upload-info strong {
+    color: var(--text-primary);
+
+    font-size: 13px;
+}
+
+
+.upload-info span {
+    color: var(--text-secondary);
+
+    font-size: 11px;
+}
+
+
+/* =========================================
+   DROP ZONE
+========================================= */
+
+.drop-upload {
+    min-height: 100px;
+
+    padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    gap: 5px;
+}
+
+
+.upload-symbol {
+    color: var(--primary);
+
+    font-size: 25px;
+}
+
+
+.drop-upload strong {
+    color: var(--text-primary);
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.drop-upload span:not(.material-symbols-rounded) {
+    color: var(--text-secondary);
+
+    font-size: 11px;
+}
+
+
+.property-upload {
+    width: 100%;
+
+    margin-top: 16px;
+}
+
+
+/* =========================================
+   TERMS
+========================================= */
+
+.terms {
+    margin-top: 8px;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+}
+
+
+.terms-text {
+    color: var(--text-secondary);
+
+    font-size: 12px;
+
+    line-height: 18px;
+}
+
+
+.terms-text a {
+    color: var(--primary);
+
+    text-decoration: none;
+
+    font-weight: 600;
+}
+
+
+.terms-text a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   MATERIAL CHECKBOX
+========================================= */
+
+.material-checkbox {
+    position: relative;
+
+    width: 20px;
+    height: 20px;
+
+    flex-shrink: 0;
+
+    cursor: pointer;
+}
+
+
+.material-checkbox input {
+    position: absolute;
+
+    opacity: 0;
+}
+
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+            2px solid var(--text-secondary);
+
+    border-radius: 4px;
+
+    transition:
+            background 120ms ease,
+            border-color 120ms ease;
+}
+
+
+.checkmark .material-symbols-rounded {
+    color: white;
+
+    font-size: 16px;
+
+    opacity: 0;
+}
+
+
+.material-checkbox input:checked + .checkmark {
+    background: var(--primary);
+
+    border-color: var(--primary);
+}
+
+
+.material-checkbox
+input:checked
++ .checkmark
+.material-symbols-rounded {
+
+    opacity: 1;
+}
+
+
+/* =========================================
+   BUTTON
+========================================= */
+
+.submit-row {
+    display: flex;
+
+    justify-content: center;
+
+    padding-top: 32px;
+}
+
+
+.material-button {
+    min-width: 245px;
+    height: 48px;
+
+    padding: 0 32px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-family:
+            "Roboto",
+            sans-serif;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow:
+            0 1px 2px
+            rgba(7, 26, 51, 0.16);
+
+    transition:
+            background 150ms ease,
+            box-shadow 150ms ease,
+            transform 80ms ease;
+}
+
+
+.material-button:hover {
+    background: var(--primary-hover);
+
+    box-shadow:
+            0 3px 6px
+            rgba(7, 26, 51, 0.18);
+}
+
+
+.material-button:active {
+    transform: scale(0.985);
+}
+
+
+/* =========================================
+   ERROR MATERIAL
+========================================= */
+
+.alert-error {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 12px 14px;
+
+    margin-bottom: 24px;
+
+    border-radius: 8px;
+
+    background: #ffdad6;
+
+    color: var(--error);
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 760px) {
+
+    .registration-card {
+        padding: 24px;
+    }
+
+    .stepper {
+        padding: 0;
+
+        overflow-x: auto;
+    }
+
+    .form-row,
+    .form-row.three,
+    .documents-row {
+
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        height: 104px;
+    }
+
+    .page {
+        padding:
+                24px 12px
+                40px;
+    }
+
+}
+
+
+/* =========================================
+   MATERIAL DESIGN 3 OVERRIDES
+========================================= */
+
+:root {
+    --md-primary: #006b5b;
+    --md-on-primary: #ffffff;
+    --md-primary-container: #78f8df;
+    --md-on-primary-container: #00201a;
+    --md-secondary: #4a635d;
+    --md-surface: #fffbff;
+    --md-surface-container: #f0f4f1;
+    --md-surface-container-high: #e9efeb;
+    --md-outline: #6f7975;
+    --md-outline-variant: #bec9c4;
+    --md-error: #ba1a1a;
+    --md-error-container: #ffdad6;
+    --md-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.12);
+    --md-shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.16), 0 6px 16px rgba(0, 0, 0, 0.10);
+}
+
+body {
+    background: var(--md-surface-container);
+    color: #171d1b;
+}
+
+.topbar {
+    background: #10201c;
+}
+
+.brand-iot,
+.brand-tagline,
+.upload-symbol,
+.terms-text a,
+.step-completed {
+    color: var(--md-primary-container);
+}
+
+.registration-card {
+    background: var(--md-surface);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: 12px;
+    box-shadow: var(--md-shadow-raised);
+}
+
+.form-section {
+    padding: 24px 0;
+    border-top: 1px solid var(--md-outline-variant);
+}
+
+.form-section:first-of-type {
+    border-top: 0;
+}
+
+.field input {
+    height: 56px;
+    border-color: var(--md-outline);
+    border-radius: 4px 4px 0 0;
+    background: var(--md-surface-container);
+}
+
+.field input:hover {
+    border-color: var(--md-secondary);
+}
+
+.field input:focus {
+    border-color: var(--md-primary);
+    box-shadow: inset 0 -2px 0 var(--md-primary);
+    background: var(--md-surface-container-high);
+}
+
+.step-circle {
+    border-color: var(--md-outline);
+    background: var(--md-surface-container);
+}
+
+.step-completed .step-circle,
+.step-line.active,
+.material-checkbox input:checked + .checkmark,
+.material-button {
+    background: var(--md-primary);
+    border-color: var(--md-primary);
+    color: var(--md-on-primary);
+}
+
+.upload-card {
+    border: 1px solid var(--md-outline-variant);
+    border-radius: 12px;
+    background: var(--md-surface);
+}
+
+.upload-card:hover {
+    border-color: var(--md-primary);
+    background: var(--md-surface-container);
+    box-shadow: var(--md-shadow);
+}
+
+.photo-icon {
+    border-radius: 12px;
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+}
+
+.material-button {
+    height: 48px;
+    border-radius: 24px;
+    box-shadow: none;
+}
+
+.material-button:hover {
+    background: #005144;
+    box-shadow: var(--md-shadow);
+}
+
+.alert-error {
+    background: var(--md-error-container);
+    color: var(--md-error);
+}
+
+
+/* =========================================
+   FIGMA ALIGNMENT - IOTELITO
+========================================= */
+
+:root {
+    --figma-navy: #071a33;
+    --figma-primary: #00c2a8;
+    --figma-primary-hover: #00ad96;
+    --figma-text: #071a33;
+    --figma-secondary: #4a5d74;
+    --figma-placeholder: #94a3b8;
+    --figma-bg: #f5f5f5;
+    --figma-border: #e2e8f0;
+}
+
+body {
+    background: var(--figma-bg);
+}
+
+.topbar {
+    height: 124px;
+    background: var(--figma-navy);
+}
+
+.brand-iot,
+.brand-tagline,
+.upload-symbol,
+.terms-text a,
+.step-completed {
+    color: var(--figma-primary);
+}
+
+.registration-card {
+    width: 800px;
+    padding: 40px;
+    border: 0;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 4px 6px rgba(7, 26, 51, 0.06);
+}
+
+.form-section {
+    padding: 0;
+    border-top: 0;
+    margin-bottom: 32px;
+}
+
+.page-title h1 {
+    color: var(--figma-text);
+    font-size: 28px;
+}
+
+.page-title p,
+.field label,
+.document-label,
+.terms-text {
+    color: var(--figma-secondary);
+}
+
+.field input {
+    height: 44px;
+    border: 1px solid var(--figma-border);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.field input::placeholder {
+    color: var(--figma-placeholder);
+}
+
+.field input:focus {
+    border-color: var(--figma-primary);
+    box-shadow: 0 0 0 2px rgba(0, 194, 168, 0.14);
+    background: #ffffff;
+}
+
+.step-completed .step-circle,
+.step-line.active,
+.material-checkbox input:checked + .checkmark,
+.material-button {
+    background: var(--figma-primary);
+    border-color: var(--figma-primary);
+}
+
+.upload-card {
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: none;
+}
+
+.upload-card:hover {
+    border-color: var(--figma-primary);
+    background: #f8fffd;
+    box-shadow: 0 0 0 2px rgba(0, 194, 168, 0.08);
+}
+
+.photo-icon {
+    border-radius: 8px;
+    background: #f5f5f5;
+    color: var(--figma-secondary);
+}
+
+.material-button {
+    border-radius: 8px;
+    background: var(--figma-primary);
+}
+
+.material-button:hover {
+    background: var(--figma-primary-hover);
+    box-shadow: 0 3px 6px rgba(7, 26, 51, 0.18);
+}
+
+.wizard-section-hidden {
+    display: none !important;
+}
+
+.wizard-section-active {
+    display: block;
+    animation: wizardFade 180ms ease-out;
+}
+
+@keyframes wizardFade {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-current .step-circle {
+    outline: 4px solid rgba(0, 194, 168, 0.16);
+}
+
+.secondary-button {
+    background: #ffffff !important;
+    color: var(--figma-secondary) !important;
+    border: 1px solid var(--figma-border) !important;
+}
+
+.secondary-button:hover {
+    background: #f8fafc !important;
+    box-shadow: none;
+}
+
+.submit-row {
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.wizard-back,
+.wizard-next,
+.wizard-submit {
+    min-width: 180px;
+}
+
+/* =========================================
+   RESPONSIVE POLISH
+========================================= */
+
+@media (max-width: 900px) {
+    .page {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .registration-card {
+        width: 100%;
+        max-width: 800px;
+        padding: 32px;
+    }
+
+    .documents-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .topbar {
+        height: 104px;
+    }
+
+    .page {
+        padding: 34px 16px;
+    }
+
+    .registration-card {
+        padding: 24px;
+        border-radius: 12px;
+    }
+
+    .page-title h1 {
+        font-size: 24px;
+        line-height: 1.2;
+    }
+
+    .stepper {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .step-line {
+        display: none;
+    }
+
+    .step {
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+
+    .form-row,
+    .documents-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .upload-card {
+        min-height: 132px;
+    }
+
+    .submit-row,
+    .terms-row {
+        align-items: stretch;
+    }
+
+    .material-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .submit-row {
+        flex-direction: column-reverse;
+    }
+}
+
+@media (max-width: 480px) {
+    .page {
+        padding: 26px 12px;
+    }
+
+    .registration-card {
+        padding: 20px;
+    }
+
+    .page-title h1 {
+        font-size: 22px;
+    }
+
+    .section-title {
+        font-size: 17px;
+    }
+
+    .field input {
+        width: 100%;
+    }
+
+    .upload-card {
+        padding: 16px;
+    }
+}
+
+/* =========================================
+   FINAL MOBILE FIX
+========================================= */
+
+@media (max-width: 900px) {
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .page {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .registration-card {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .form-row,
+    .form-row.three,
+    .documents-row,
+    .documents-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .topbar {
+        height: auto !important;
+        min-height: 92px;
+        padding: 18px 16px;
+    }
+
+    .brand {
+        width: 100%;
+    }
+
+    .page {
+        padding: 24px 12px !important;
+    }
+
+    .registration-card {
+        padding: 20px !important;
+        border-radius: 12px !important;
+    }
+
+    .page-title h1 {
+        font-size: 22px !important;
+        line-height: 1.2 !important;
+    }
+
+    .page-title p,
+    .terms-text {
+        overflow-wrap: anywhere;
+    }
+
+    .stepper {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .step,
+    .field,
+    .upload-card,
+    .document-column,
+    .material-button {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .step-line {
+        display: none !important;
+    }
+
+    .material-button {
+        justify-content: center !important;
+    }
+}

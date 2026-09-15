@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Detalle de conductor | IoTelito
+    </title>
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap"
+            rel="stylesheet">
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+            rel="stylesheet">
+
+    <link
+            rel="stylesheet"
+            th:href="@{/css/admin.css}">
+
+</head>
+
+
+<body>
+
+
+<div class="admin-layout">
+
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-main">
+
+                <span class="material-symbols-rounded logo-box">
+                    apartment
+                </span>
+
+                <div class="brand-name">
+
+                    <span class="iot">
+                        IoT
+                    </span>
+
+                    <span class="elito">
+                        elito
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="tagline">
+                Tu estadía, conectada.
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+
+            <a th:href="@{/superadmin/dashboard}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    grid_view
+                </span>
+
+                Inicio
+
+            </a>
+
+
+            <a th:href="@{/superadmin/solicitudes/evaluar}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    pending_actions
+                </span>
+
+                <span class="menu-label">
+                    Solicitudes
+                </span>
+
+                <span class="badge"
+                      th:text="${pendientes}">
+                    0
+                </span>
+
+            </a>
+
+
+            <a th:href="@{/superadmin/taxistas}"
+               class="menu-item active">
+
+                <span class="material-symbols-rounded">
+                    group
+                </span>
+
+                Taxistas
+
+            </a>
+
+
+            <a th:href="@{/superadmin/reportes}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    bar_chart
+                </span>
+
+                Reportes
+
+            </a>
+
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a th:href="@{/}"
+               class="menu-item">
+
+                <span class="material-symbols-rounded">
+                    logout
+                </span>
+
+                Cerrar sesión
+
+            </a>
+
+        </div>
+
+
+    </aside>
+
+
+    <main class="admin-main">
+
+
+        <header class="admin-header">
+
+
+            <div class="breadcrumb">
+
+                <strong>
+                    Panel de Control
+                </strong>
+
+                <span class="slash">
+                    /
+                </span>
+
+                <span>
+                    Detalle de Conductor
+                </span>
+
+            </div>
+
+
+            <div class="admin-user">
+
+
+                <a th:href="@{/superadmin/notificaciones}"
+                   class="notification"
+                   aria-label="Ver notificaciones">
+
+                    <span class="material-symbols-rounded">
+                        notifications
+                    </span>
+
+                </a>
+
+
+                <a th:href="@{/superadmin/perfil}"
+                   class="user-block profile-trigger"
+                   aria-label="Ver perfil del usuario">
+
+                    <div class="avatar"
+                         th:text="${#strings.substring(usuarioActual.nombres,0,1) + #strings.substring(usuarioActual.apellidos,0,1)}">
+                        SA
+                    </div>
+
+                    <span th:text="${usuarioActual.nombres + ' ' + usuarioActual.apellidos}">
+                        Super Administrador
+                    </span>
+
+                </a>
+
+
+            </div>
+
+
+        </header>
+
+
+        <div class="content">
+
+            <div class="chip chip-success"
+                 style="margin-bottom:16px"
+                 th:if="${mensaje != null}"
+                 th:text="${mensaje}">
+                Mensaje
+            </div>
+
+
+            <a th:href="@{/superadmin/taxistas}"
+               class="back-link">
+
+                ← Volver a la lista
+
+            </a>
+
+
+            <div class="detail-grid">
+
+
+                <section class="card profile-card">
+
+
+                    <div class="profile-avatar"
+                         th:text="${#strings.substring(taxista.usuario.nombres,0,1) + #strings.substring(taxista.usuario.apellidos,0,1)}">
+                        CM
+                    </div>
+
+
+                    <h2 th:text="${taxista.usuario.nombres + ' ' + taxista.usuario.apellidos}">
+                        Carlos Mendoza Quispe
+                    </h2>
+
+
+                    <p th:text="${'ID Solicitud: SOL-' + taxista.id}">
+                        ID Solicitud: SOL-2025-00847
+                    </p>
+
+
+                    <span class="chip"
+                          th:classappend="${taxista.estadoSolicitud.name() == 'APROBADO'} ? ' chip-success' : (${taxista.estadoSolicitud.name() == 'RECHAZADO'} ? ' chip-danger' : ' chip-warning')"
+                          th:text="${taxista.estadoSolicitud}">
+                        Pendiente
+                    </span>
+
+
+                    <div class="divider"></div>
+
+
+                    <div class="data-list">
+
+
+                        <div>
+
+                            <span class="data-label">
+                                TELÉFONO CELULAR
+                            </span>
+
+                            <span class="data-value"
+                                  th:text="${taxista.usuario.telefono}">
+                                +51 987 654 321
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="data-label">
+                                CORREO ELECTRÓNICO
+                            </span>
+
+                            <span class="data-value"
+                                  th:text="${taxista.usuario.correo}">
+                                carlos.mendoza@gmail.com
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="data-label">
+                                DOMICILIO ACTUAL
+                            </span>
+
+                            <span class="data-value"
+                                  th:text="${taxista.domicilio}">
+                                Av. Larco 123, Miraflores, Lima
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="data-label">
+                                FECHA DE REGISTRO
+                            </span>
+
+                            <span class="data-value"
+                                  th:text="${#temporals.format(taxista.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">
+                                Hoy, 12:30 PM
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="divider"></div>
+
+
+                    <div style="
+                        display:flex;
+                        flex-direction:column;
+                        gap:8px;
+                        width:100%;
+                    ">
+
+
+                        <form th:action="@{/superadmin/taxistas/{id}/aprobar(id=${taxista.id})}"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-block"
+                                    th:disabled="${taxista.estadoSolicitud.name() == 'APROBADO'}">
+
+                                Aprobar Solicitud
+
+                            </button>
+
+                        </form>
+
+
+                        <form th:action="@{/superadmin/taxistas/{id}/rechazar(id=${taxista.id})}"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-danger-outline btn-block"
+                                    th:disabled="${taxista.estadoSolicitud.name() == 'RECHAZADO'}">
+
+                                Rechazar Solicitud
+
+                            </button>
+
+                        </form>
+
+
+                        <form th:action="@{/superadmin/taxistas/{id}/disponibilidad(id=${taxista.id})}"
+                              method="post">
+
+                            <input type="hidden"
+                                   name="disponible"
+                                   th:value="${!taxista.disponible}">
+
+                            <button type="submit"
+                                    class="btn btn-outline btn-block"
+                                    th:text="${taxista.disponible} ? 'Desactivar Conductor' : 'Activar Conductor'">
+
+                                Cambiar disponibilidad
+
+                            </button>
+
+                        </form>
+
+
+                    </div>
+
+
+                </section>
+
+
+                <div class="cards-column">
+
+
+                    <section class="card">
+
+
+                        <h2 class="section-title">
+                            Información del conductor
+                        </h2>
+
+
+                        <div class="divider"></div>
+
+
+                        <div class="two-column-info">
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    DNI
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${taxista.dni}">
+                                    71234567
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    FECHA DE NACIMIENTO
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${#temporals.format(taxista.fechaNacimiento, 'dd/MM/yyyy')}">
+                                    15/04/1992
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    NÚMERO DE LICENCIA
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${taxista.numeroLicencia}">
+                                    Q71234567
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    CATEGORÍA
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${taxista.categoriaLicencia}">
+                                    A-IIb
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    VENCIMIENTO
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${#temporals.format(taxista.fechaVencimientoLicencia, 'dd/MM/yyyy')}">
+                                    18/08/2028
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </section>
+
+
+                    <section class="card">
+
+
+                        <h2 class="section-title">
+                            Datos del vehículo
+                        </h2>
+
+
+                        <div class="divider"></div>
+
+
+                        <div class="two-column-info">
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    MARCA
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${taxista.marcaVehiculo}">
+                                    Toyota
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    MODELO
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${taxista.modeloVehiculo}">
+                                    Corolla
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    AÑO
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${taxista.anioVehiculo}">
+                                    2022
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    COLOR
+                                </span>
+
+                                <span class="data-value"
+                                      th:text="${taxista.colorVehiculo}">
+                                    Gris Plateado
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="data-label">
+                                    PLACA DE RODAJE
+                                </span>
+
+                                <span class="data-value primary"
+                                      th:text="${taxista.placaVehiculo}">
+                                    ABC-123
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </section>
+
+
+                    <section class="card">
+
+
+                        <h2 class="section-title">
+                            Documentación
+                        </h2>
+
+
+                        <div class="divider"></div>
+
+
+                        <div class="document-list">
+
+
+                            <div class="document-row">
+
+                                <span>
+                                    DNI escaneado
+                                </span>
+
+                                <span class="chip chip-success">
+                                    VÁLIDO
+                                </span>
+
+                            </div>
+
+
+                            <div class="document-row">
+
+                                <span>
+                                    Licencia de conducir
+                                </span>
+
+                                <span class="chip chip-success">
+                                    VÁLIDO
+                                </span>
+
+                            </div>
+
+
+                            <div class="document-row">
+
+                                <span>
+                                    SOAT
+                                </span>
+
+                                <span class="chip chip-warning">
+                                    POR VENCER
+                                </span>
+
+                            </div>
+
+
+                            <div class="document-row">
+
+                                <span>
+                                    Tarjeta de propiedad
+                                </span>
+
+                                <span class="chip chip-success">
+                                    VÁLIDO
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </section>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+</body>
+
+</html>
+
+

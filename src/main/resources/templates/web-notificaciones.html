@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones | IoTelito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-main">
+                <span class="material-symbols-rounded logo-box">apartment</span>
+                <div class="brand-name"><span class="iot">IoT</span><span class="elito">elito</span></div>
+            </div>
+            <div class="tagline">Tu estadia, conectada.</div>
+        </div>
+
+        <nav class="menu">
+            <a th:href="@{/superadmin/dashboard}" class="menu-item"><span class="material-symbols-rounded">grid_view</span>Inicio</a>
+            <a th:href="@{/superadmin/solicitudes/evaluar}" class="menu-item"><span class="material-symbols-rounded">pending_actions</span><span class="menu-label">Solicitudes</span><span class="badge" th:text="${pendientes}">0</span></a>
+            <a th:href="@{/superadmin/taxistas}" class="menu-item"><span class="material-symbols-rounded">group</span>Taxistas</a>
+            <a th:href="@{/superadmin/reportes}" class="menu-item"><span class="material-symbols-rounded">bar_chart</span>Reportes</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a th:href="@{/}" class="menu-item"><span class="material-symbols-rounded">logout</span>Cerrar sesion</a>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="breadcrumb">
+                <strong>Panel de Control</strong>
+                <span class="slash">/</span>
+                <span>Notificaciones</span>
+            </div>
+
+            <div class="admin-user">
+                <a th:href="@{/superadmin/notificaciones}" class="notification" aria-label="Ver notificaciones">
+                    <span class="material-symbols-rounded">notifications</span>
+                </a>
+
+                <a th:href="@{/superadmin/perfil}" class="user-block profile-trigger" aria-label="Ver perfil del usuario">
+                    <div class="avatar" th:text="${#strings.substring(usuarioActual.nombres,0,1) + #strings.substring(usuarioActual.apellidos,0,1)}">SA</div>
+                    <span th:text="${usuarioActual.nombres + ' ' + usuarioActual.apellidos}">Super Administrador</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="page-title-row">
+                <h1 class="page-title">Notificaciones</h1>
+                <a th:href="@{/superadmin/solicitudes/evaluar}" class="btn btn-primary">Revisar solicitudes</a>
+            </div>
+
+            <section class="notifications-list">
+                <article class="card notification-row strong-alert" th:if="${pendientes > 0}">
+                    <span class="material-symbols-rounded">pending_actions</span>
+                    <div>
+                        <strong th:text="${pendientes} + ' solicitudes pendientes'">4 solicitudes pendientes</strong>
+                        <p>Hay taxistas esperando evaluacion de documentos.</p>
+                    </div>
+                    <a th:href="@{/superadmin/solicitudes/evaluar}" class="table-link">Ver</a>
+                </article>
+
+                <article class="card notification-row" th:each="solicitud : ${solicitudes}">
+                    <span class="material-symbols-rounded">person_add</span>
+                    <div>
+                        <strong th:text="${solicitud.usuario.nombres + ' ' + solicitud.usuario.apellidos}">Carlos Mendoza</strong>
+                        <p th:text="'Nueva solicitud de taxista - DNI ' + ${solicitud.dni}">Nueva solicitud de taxista</p>
+                    </div>
+                    <a th:href="@{/superadmin/taxistas/{id}/evaluar(id=${solicitud.id})}" class="table-link">Evaluar</a>
+                </article>
+
+                <article class="card notification-row">
+                    <span class="material-symbols-rounded">database</span>
+                    <div>
+                        <strong>Base de datos conectada</strong>
+                        <p>La informacion se esta leyendo desde MySQL mediante el backend.</p>
+                    </div>
+                    <span class="chip chip-success">OK</span>
+                </article>
+
+                <div class="empty-state" th:if="${#lists.isEmpty(solicitudes)}">
+                    <span class="material-symbols-rounded">notifications_off</span>
+                    <strong>No hay notificaciones urgentes</strong>
+                    <p>Cuando llegue una nueva solicitud aparecera en esta pantalla.</p>
+                </div>
+
+                <div class="pagination-bar" th:if="${pagina != null}">
+                    <span th:text="'Pagina ' + ${pagina.number + 1} + ' de ' + ${pagina.totalPages == 0 ? 1 : pagina.totalPages}">Pagina 1 de 1</span>
+                    <div class="pagination-actions">
+                        <a class="page-button"
+                           th:classappend="${pagina.first} ? ' disabled'"
+                           th:href="@{/superadmin/notificaciones(page=${pagina.number - 1})}">Anterior</a>
+                        <a class="page-button"
+                           th:each="i : ${#numbers.sequence(0, pagina.totalPages == 0 ? 0 : pagina.totalPages - 1)}"
+                           th:classappend="${i == pagina.number} ? ' active'"
+                           th:href="@{/superadmin/notificaciones(page=${i})}"
+                           th:text="${i + 1}">1</a>
+                        <a class="page-button"
+                           th:classappend="${pagina.last} ? ' disabled'"
+                           th:href="@{/superadmin/notificaciones(page=${pagina.number + 1})}">Siguiente</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>
