@@ -86,6 +86,7 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <!-- Flujo taxi cliente -->
         <activity
             android:name=".ui.taxi.BeneficioTaxiActivity"
             android:exported="false" />
@@ -109,6 +110,41 @@
 
         <activity
             android:name=".ui.taxi.CalificarTaxiActivity"
+            android:exported="false" />
+
+        <!-- Rol Taxista -->
+        <activity
+            android:name=".ui.taxista.TaxistaMainActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name=".ui.taxista.DetalleServicioActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.taxista.TaxistaMainActivity" />
+
+        <activity
+            android:name=".ui.taxista.ServicioAsignadoActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.taxista.DetalleServicioActivity" />
+
+        <activity
+            android:name=".ui.taxista.DireccionHotelActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.taxista.ServicioAsignadoActivity" />
+
+        <activity
+            android:name=".ui.taxista.DireccionAeropuertoActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.taxista.DireccionHotelActivity" />
+
+        <activity
+            android:name=".ui.taxista.FinalizarServicioActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.taxista.DireccionAeropuertoActivity" />
+
+        <activity
+            android:name=".ui.taxista.ServicioFinalizadoActivity"
             android:exported="false" />
     </application>
 

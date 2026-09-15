@@ -297,4 +297,105 @@
     <string name="link_volver_inicio">Volver al inicio</string>
     <string name="footer_gracias_iot">¡Gracias por ayudarnos a mejorar el servicio domótico e IoT de IoTelito!</string>
     <string name="label_comentarios_taxi">Comentarios y sugerencias (Opcional)</string>
+
+    <!-- ============ Rol Taxista ============ -->
+
+    <!-- Navegación inferior -->
+    <string name="taxi_nav_inicio">Inicio</string>
+    <string name="taxi_nav_solicitudes">Solicitudes</string>
+    <string name="taxi_nav_historial">Historial</string>
+    <string name="taxi_nav_perfil">Perfil</string>
+
+    <!-- Inicio -->
+    <string name="taxi_saludo">Hola, %1$s 👋</string>
+    <string name="taxi_subtitulo_saludo">Conductor certificado IoTelito</string>
+    <string name="taxi_disponible_label">Disponible para recibir solicitudes</string>
+    <string name="taxi_disponible_desc">Estado: Disponible</string>
+    <string name="taxi_no_disponible_desc">Estado: No disponible</string>
+    <string name="taxi_resumen_hoy">Resumen de hoy</string>
+    <string name="taxi_stat_servicios">Servicios hoy</string>
+    <string name="taxi_stat_trasladados">Trasladados</string>
+    <string name="taxi_stat_calificacion">Calificación</string>
+    <string name="taxi_alerta_nueva_solicitud">¡Nueva solicitud disponible!</string>
+    <string name="taxi_alerta_nueva_solicitud_desc">Hotel Miraflores Park solicita traslado inmediato</string>
+    <string name="taxi_btn_ver_solicitudes">Ver solicitudes (%1$d)</string>
+
+    <!-- Solicitudes disponibles -->
+    <string name="taxi_solicitudes_titulo">Solicitudes disponibles</string>
+    <string name="taxi_solicitudes_subtitulo">3 solicitudes cerca de tu ubicación</string>
+    <string name="taxi_tag_taxi_incluido">TAXI INCLUIDO</string>
+    <string name="taxi_tag_menos_5_min">Menos de 5 min</string>
+    <string name="taxi_btn_ver_solicitud">Ver solicitud</string>
+
+    <!-- Detalle del servicio -->
+    <string name="taxi_detalle_servicio_titulo">Detalle del Servicio</string>
+    <string name="taxi_label_origen">Origen</string>
+    <string name="taxi_label_destino">Destino</string>
+    <string name="taxi_nota_pago_asegurado">Servicio cubierto por la reserva del hotel. Pago ya asegurado.</string>
+    <string name="taxi_confirmar_aceptar">¿Confirmas que deseas aceptar este servicio?</string>
+    <string name="taxi_btn_rechazar">Rechazar</string>
+    <string name="taxi_btn_aceptar_servicio">Aceptar servicio</string>
+
+    <!-- Estados del servicio (pill) -->
+    <string name="taxi_estado_solicitado">SOLICITADO</string>
+    <string name="taxi_estado_asignado">ASIGNADO</string>
+    <string name="taxi_estado_en_camino">EN CAMINO</string>
+    <string name="taxi_estado_en_traslado">EN TRASLADO</string>
+    <string name="taxi_estado_finalizado">FINALIZADO</string>
+    <string name="taxi_estado_cancelado">CANCELADO</string>
+
+    <!-- Servicio asignado -->
+    <string name="taxi_servicio_asignado_titulo">Servicio asignado</string>
+    <string name="taxi_servicio_asignado_subtitulo">Tienes una solicitud programada</string>
+    <string name="taxi_btn_iniciar_recorrido">Iniciar recorrido al hotel</string>
+
+    <!-- Dirección al hotel / aeropuerto -->
+    <string name="taxi_direccion_al_hotel">DIRECCIÓN AL HOTEL</string>
+    <string name="taxi_direccion_al_aeropuerto">DIRECCIÓN AL AEROPUERTO</string>
+    <string name="taxi_btn_llegue_al_hotel">Llegué al hotel</string>
+    <string name="taxi_btn_llegue_al_destino">Llegué al destino</string>
+
+    <!-- Finalizar servicio -->
+    <string name="taxi_finalizar_servicio_titulo">Finalizar servicio</string>
+    <string name="taxi_solicita_qr">Solicita al huésped el código QR de su reserva</string>
+    <string name="taxi_solicita_qr_desc">El sistema validará el hospedaje y finalizará el traslado con este dato</string>
+    <string name="taxi_btn_validar_codigo">Validar código</string>
+
+    <!-- Servicio finalizado -->
+    <string name="taxi_servicio_finalizado_titulo">¡Servicio finalizado!</string>
+    <string name="taxi_resumen_traslado">Resumen del traslado</string>
+    <string name="taxi_btn_volver_inicio">Volver al inicio</string>
+    <string name="taxi_btn_ver_historial">Ver historial</string>
+
+    <!-- Historial -->
+    <string name="taxi_historial_titulo">Historial de servicios</string>
+    <string name="taxi_historial_subtitulo">Registro de tus traslados</string>
+    <string name="taxi_tab_todos">Todos (12)</string>
+    <string name="taxi_tab_completados">Completados</string>
+    <string name="taxi_tab_cancelados">Cancelados</string>
+    <string name="taxi_stat_completados">48 Completados</string>
+    <string name="taxi_stat_cuota">S/ 0.00 Cuota</string>
+    <string name="taxi_btn_ver_detalle_historial">Ver detalle</string>
+
+    <!-- Perfil taxista -->
+    <string name="taxi_perfil_titulo">Miguel Arispe S.</string>
+    <string name="taxi_perfil_subtitulo">Conductor activo</string>
+    <string name="taxi_datos_personales">Datos personales</string>
+    <string name="taxi_label_dni">DNI</string>
+    <string name="taxi_label_telefono">Teléfono</string>
+    <string name="taxi_label_correo">Correo</string>
+    <string name="taxi_vehiculo_verificado">Vehículo verificado</string>
+    <string name="taxi_label_modelo">Modelo</string>
+    <string name="taxi_label_placa">Placa</string>
+    <string name="taxi_label_color">Color</string>
+    <string name="taxi_badge_verificado">Verificado</string>
+    <string name="taxi_menu_editar_foto">Editar foto de perfil</string>
+    <string name="taxi_menu_soporte">Soporte y Ayuda</string>
+    <string name="taxi_menu_cerrar_sesion">Cerrar sesión</string>
+    <string name="label_distancia">Distancia:</string>
+    <string name="label_tiempo">Tiempo:</string>
+    <string name="cd_llamar">Llamar al pasajero</string>
+    <string name="taxi_toast_proximamente">Disponible próximamente</string>
+    <string name="taxi_toast_sesion_cerrada">Sesión cerrada</string>
+
 </resources>
