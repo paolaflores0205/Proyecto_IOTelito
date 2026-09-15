@@ -112,6 +112,15 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/io_text_muted"
+                android:textSize="11sp"
+                android:textAllCaps="true"
+                android:text="@string/taxi_historial_recientes" />
+
             <include
                 android:id="@+id/card_historial_1"
                 layout="@layout/item_historial_card" />
@@ -119,6 +128,21 @@
             <include
                 android:id="@+id/card_historial_2"
                 layout="@layout/item_historial_card" />
+
+            <include
+                android:id="@+id/card_historial_3"
+                layout="@layout/item_historial_card" />
+
+            <TextView
+                android:id="@+id/tv_historial_vacio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:textColor="@color/io_text_muted"
+                android:textSize="13sp"
+                android:text="@string/taxi_historial_vacio"
+                android:visibility="gone" />
 
         </LinearLayout>
     </ScrollView>

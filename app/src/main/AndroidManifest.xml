@@ -140,6 +140,12 @@
             android:parentActivityName=".ui.taxista.TaxistaMainActivity" />
 
         <activity
+            android:name=".ui.taxista.ChatPasajeroTaxistaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.taxista.TaxistaMainActivity" />
+
+        <activity
             android:name=".ui.taxista.ServicioAsignadoActivity"
             android:exported="false"
             android:parentActivityName=".ui.taxista.DetalleServicioActivity" />

@@ -53,6 +53,19 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/iv_chat"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:padding="8dp"
+        android:background="@drawable/bg_circle_teal_light"
+        android:src="@drawable/ic_chat"
+        android:tint="@color/io_teal"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="@string/cd_chat" />
+
+    <ImageView
         android:id="@+id/iv_llamar"
         android:layout_width="36dp"
         android:layout_height="36dp"

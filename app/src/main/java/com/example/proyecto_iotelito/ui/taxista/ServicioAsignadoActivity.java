@@ -29,6 +29,8 @@ public class ServicioAsignadoActivity extends AppCompatActivity {
         ((TextView) rowPasajero.findViewById(R.id.tv_avatar_inicial)).setText("AG");
         ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_nombre)).setText("Ana García");
         ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_detalle)).setText("Hotel Miraflores Park · 400");
+        rowPasajero.findViewById(R.id.iv_chat).setOnClickListener(v ->
+                startActivity(ChatPasajeroTaxistaActivity.createIntent(this, "Ana García", "AG")));
 
         ((TextView) findViewById(R.id.tv_ruta_resumen)).setText("31 min · 19 km");
 

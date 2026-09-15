@@ -32,6 +32,8 @@ public class DireccionAeropuertoActivity extends AppCompatActivity {
         ((TextView) rowPasajero.findViewById(R.id.tv_avatar_inicial)).setText("MG");
         ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_nombre)).setText("María García");
         ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_detalle)).setText("Hotel Miraflores Park · 1 pasajero");
+        rowPasajero.findViewById(R.id.iv_chat).setOnClickListener(v ->
+                startActivity(ChatPasajeroTaxistaActivity.createIntent(this, "María García", "MG")));
 
         findViewById(R.id.btn_llegue_al_destino).setOnClickListener(v ->
                 startActivity(new Intent(this, FinalizarServicioActivity.class)));

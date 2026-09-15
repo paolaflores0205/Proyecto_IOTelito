@@ -154,12 +154,36 @@
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_map_placeholder">
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="#20000000" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:background="#20000000" />
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="34dp"
+                    android:layout_marginBottom="22dp"
+                    android:src="@drawable/ic_taxi"
+                    android:tint="@color/io_teal"
+                    android:contentDescription="@null" />
+
                 <ImageView
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:layout_gravity="center"
+                    android:layout_marginStart="28dp"
+                    android:layout_marginTop="18dp"
                     android:src="@drawable/ic_location_pin"
-                    android:tint="@color/io_text_muted"
+                    android:tint="@color/io_warning_text"
                     android:contentDescription="@null" />
 
                 <TextView

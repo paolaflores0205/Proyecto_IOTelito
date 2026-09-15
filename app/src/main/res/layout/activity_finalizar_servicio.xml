@@ -48,48 +48,112 @@
             android:text="@string/taxi_estado_en_traslado" />
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:paddingHorizontal="32dp">
+        android:layout_weight="1">
 
-        <FrameLayout
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:background="@drawable/bg_qr_frame">
-
-            <ImageView
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_qr_code"
-                android:tint="@color/io_text_primary"
-                android:contentDescription="@null" />
-        </FrameLayout>
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="center"
-            android:textColor="@color/white"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:text="@string/taxi_solicita_qr" />
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingHorizontal="32dp"
+            android:paddingVertical="16dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:alpha="0.7"
-            android:gravity="center"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:text="@string/taxi_solicita_qr_desc" />
-    </LinearLayout>
+            <FrameLayout
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:background="@drawable/bg_qr_frame">
+
+                <ImageView
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_qr_code"
+                    android:tint="@color/io_text_primary"
+                    android:contentDescription="@null" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:text="@string/taxi_solicita_qr" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:alpha="0.7"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:text="@string/taxi_solicita_qr_desc" />
+
+            <!-- separador "o" -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:alpha="0.3"
+                    android:background="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:alpha="0.7"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:text="@string/taxi_separador_o" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:alpha="0.3"
+                    android:background="@color/white" />
+            </LinearLayout>
+
+            <!-- validación manual -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="@string/taxi_validar_manualmente" />
+
+            <EditText
+                android:id="@+id/et_codigo_manual"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_input_field"
+                android:gravity="center"
+                android:hint="@string/taxi_hint_codigo_manual"
+                android:inputType="textCapCharacters"
+                android:singleLine="true"
+                android:textColor="@color/io_text_primary"
+                android:textColorHint="@color/io_text_muted"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </ScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_validar_codigo"

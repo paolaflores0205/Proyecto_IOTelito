@@ -25,6 +25,7 @@ public class ServicioFinalizadoActivity extends AppCompatActivity {
         ((TextView) rowPasajero.findViewById(R.id.tv_avatar_inicial)).setText("MG");
         ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_nombre)).setText("María García");
         ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_detalle)).setText("Huésped");
+        rowPasajero.findViewById(R.id.iv_chat).setVisibility(View.GONE);
 
         bindRow(R.id.row_origen, R.string.taxi_label_origen, "Hotel Miraflores Park");
         bindRow(R.id.row_destino, R.string.taxi_label_destino, "Aeropuerto Jorge Chávez (Callao)");

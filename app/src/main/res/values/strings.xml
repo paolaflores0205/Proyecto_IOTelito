@@ -326,6 +326,9 @@
     <string name="taxi_tag_taxi_incluido">TAXI INCLUIDO</string>
     <string name="taxi_tag_menos_5_min">Menos de 5 min</string>
     <string name="taxi_btn_ver_solicitud">Ver solicitud</string>
+    <string name="taxi_chip_todas">Todas</string>
+    <string name="taxi_chip_menos_10_min">Menos de 10 min</string>
+    <string name="taxi_chip_taxi_incluido">Con taxi incluido</string>
 
     <!-- Detalle del servicio -->
     <string name="taxi_detalle_servicio_titulo">Detalle del Servicio</string>
@@ -360,6 +363,10 @@
     <string name="taxi_solicita_qr">Solicita al huésped el código QR de su reserva</string>
     <string name="taxi_solicita_qr_desc">El sistema validará el hospedaje y finalizará el traslado con este dato</string>
     <string name="taxi_btn_validar_codigo">Validar código</string>
+    <string name="taxi_separador_o">o</string>
+    <string name="taxi_validar_manualmente">Validar manualmente</string>
+    <string name="taxi_hint_codigo_manual">Ej. 4892-6516</string>
+    <string name="taxi_toast_codigo_vacio">Escanea el QR o escribe el código de la reserva</string>
 
     <!-- Servicio finalizado -->
     <string name="taxi_servicio_finalizado_titulo">¡Servicio finalizado!</string>
@@ -370,11 +377,13 @@
     <!-- Historial -->
     <string name="taxi_historial_titulo">Historial de servicios</string>
     <string name="taxi_historial_subtitulo">Registro de tus traslados</string>
-    <string name="taxi_tab_todos">Todos (12)</string>
-    <string name="taxi_tab_completados">Completados</string>
-    <string name="taxi_tab_cancelados">Cancelados</string>
-    <string name="taxi_stat_completados">48 Completados</string>
-    <string name="taxi_stat_cuota">S/ 0.00 Cuota</string>
+    <string name="taxi_tab_todos">Todos (3)</string>
+    <string name="taxi_tab_completados">Completados (2)</string>
+    <string name="taxi_tab_cancelados">Cancelados (1)</string>
+    <string name="taxi_stat_completados">48 servicios en total</string>
+    <string name="taxi_stat_cuota">S/ 245.50 Cuota</string>
+    <string name="taxi_historial_recientes">Servicios recientes</string>
+    <string name="taxi_historial_vacio">No tienes servicios en esta categoría.</string>
     <string name="taxi_btn_ver_detalle_historial">Ver detalle</string>
 
     <!-- Perfil taxista -->
@@ -400,6 +409,11 @@
     <string name="label_distancia">Distancia:</string>
     <string name="label_tiempo">Tiempo:</string>
     <string name="cd_llamar">Llamar al pasajero</string>
+    <string name="cd_chat">Chatear con el pasajero</string>
+    <string name="taxi_estado_en_linea">En línea</string>
+    <string name="taxi_msg_pasajero_1">Hola, ya estoy afuera del hotel</string>
+    <string name="taxi_msg_taxista_1">Perfecto, llego en unos minutos</string>
+    <string name="taxi_respuesta_automatica_pasajero">Gracias, te espero aquí.</string>
     <string name="taxi_toast_proximamente">Disponible próximamente</string>
     <string name="taxi_toast_sesion_cerrada">Sesión cerrada</string>
 
