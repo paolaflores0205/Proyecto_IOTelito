@@ -51,12 +51,12 @@ public class AdminHotelFragment extends Fragment {
 
         binding.cardHabitaciones.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), HabitacionesActivity.class)));
+        binding.cardServicios.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), ServiciosActivity.class)));
 
-        // TODO Hito 2: enrutar a ServiciosActivity / DatosHotelActivity cuando existan.
-        View.OnClickListener proximamente = v ->
-                Toast.makeText(requireContext(), R.string.hoteladmin_proximamente, Toast.LENGTH_SHORT).show();
-        binding.cardServicios.setOnClickListener(proximamente);
-        binding.cardDatos.setOnClickListener(proximamente);
+        // TODO Hito 2: enrutar a DatosHotelActivity cuando exista.
+        binding.cardDatos.setOnClickListener(v ->
+                Toast.makeText(requireContext(), R.string.hoteladmin_proximamente, Toast.LENGTH_SHORT).show());
     }
 
     @Override

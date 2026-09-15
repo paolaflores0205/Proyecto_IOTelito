@@ -73,16 +73,16 @@ public final class HotelAdminSampleData {
     private static final List<Servicio> SERVICIOS = new ArrayList<>(Arrays.asList(
             new Servicio(1, HOTEL_ID, "Desayuno Buffet",
                     "Variedad de comida internacional y peruana, de 6:00 a 10:00 a.m.",
-                    45.0, R.drawable.superadmin_hotel_sol, true),
+                    45.0, "persona", R.drawable.superadmin_hotel_sol, true),
             new Servicio(2, HOTEL_ID, "Lavandería Express",
                     "Lavado y planchado en menos de 4 horas.",
-                    35.0, R.drawable.superadmin_hotel_barranco, true),
+                    35.0, "carga", R.drawable.superadmin_hotel_barranco, true),
             new Servicio(3, HOTEL_ID, "Traslado Aeropuerto",
                     "Servicio privado seguro hacia/desde el aeropuerto.",
-                    80.0, R.drawable.superadmin_hotel_hero, true),
+                    80.0, "servicio", R.drawable.superadmin_hotel_hero, true),
             new Servicio(4, HOTEL_ID, "Spa & Masajes",
                     "Sesiones terapéuticas y de relajación corporal.",
-                    120.0, R.drawable.superadmin_hotel_sol, false)
+                    120.0, "sesión", R.drawable.superadmin_hotel_sol, false)
     ));
 
     // ---- Reservas ----

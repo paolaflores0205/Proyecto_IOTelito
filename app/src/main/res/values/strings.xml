@@ -453,4 +453,30 @@
         <item>Habitación Simple</item>
         <item>Económica</item>
     </string-array>
+
+    <!-- Servicios (adm-servicios) -->
+    <string name="hoteladmin_titulo_servicios">Servicios del hotel</string>
+    <string name="hoteladmin_badge_activo">Activo</string>
+    <string name="hoteladmin_badge_inactivo">Inactivo</string>
+    <string name="hoteladmin_precio_unidad">x %1$s</string>
+    <string name="hoteladmin_agregar_servicio">Agregar servicio</string>
+    <string name="hoteladmin_servicio_eliminado">Servicio eliminado</string>
+    <string name="hoteladmin_confirmar_eliminar_serv_msg">¿Seguro que deseas eliminar este servicio?</string>
+    <plurals name="hoteladmin_servicios_activos">
+        <item quantity="one">Servicios activos (%d)</item>
+        <item quantity="other">Servicios activos (%d)</item>
+    </plurals>
+
+    <!-- Formulario de servicio (adm-formulario-servicio) -->
+    <string name="hoteladmin_titulo_nuevo_servicio">Nuevo servicio</string>
+    <string name="hoteladmin_titulo_editar_servicio">Editar servicio</string>
+    <string name="hoteladmin_subir_foto_serv">Sube foto referencial del servicio</string>
+    <string name="hoteladmin_nombre_servicio">Nombre del servicio</string>
+    <string name="hoteladmin_nombre_servicio_hint">Spa &amp; Masajes</string>
+    <string name="hoteladmin_descripcion_serv_hint">Describe el servicio…</string>
+    <string name="hoteladmin_precio_servicio">Precio (S/.)</string>
+    <string name="hoteladmin_disponible_actualmente">Disponible actualmente</string>
+    <string name="hoteladmin_disponible_actualmente_sub">Habilitar reserva inmediata en catálogo</string>
+    <string name="hoteladmin_guardar_servicio">Guardar servicio</string>
+    <string name="hoteladmin_servicio_guardado">Servicio guardado</string>
 </resources>
