@@ -42,6 +42,29 @@
         <item name="strokeWidth">0dp</item>
     </style>
 
+    <style name="Widget.IoTelito.Card.Metric" parent="Widget.IoTelito.Card">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="strokeColor">@color/io_border</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="Widget.IoTelito.Card.Action" parent="Widget.IoTelito.Card">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="strokeColor">@color/io_border</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="TextAppearance.IoTelito.SectionTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/io_navy</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="Widget.IoTelito.Input" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxBackgroundColor">@color/io_surface</item>
         <item name="boxCornerRadiusTopStart">8dp</item>

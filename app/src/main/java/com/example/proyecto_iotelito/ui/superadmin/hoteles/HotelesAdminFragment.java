@@ -10,19 +10,21 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SuperadminSampleData;
 import com.example.proyecto_iotelito.databinding.FragmentSuperadminHotelesBinding;
-import com.example.proyecto_iotelito.databinding.ItemSuperadminHotelBinding;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HotelesAdminFragment extends Fragment {
     private FragmentSuperadminHotelesBinding binding;
+    private HotelesAdapter adapter;
 
     @Nullable
     @Override
@@ -35,6 +37,9 @@ public class HotelesAdminFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         updateSummary();
+        adapter = new HotelesAdapter(hotel -> openDetail(hotel.id));
+        binding.rvHotels.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvHotels.setAdapter(adapter);
         binding.etHotelSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
@@ -66,24 +71,17 @@ public class HotelesAdminFragment extends Fragment {
     private void renderHotels() {
         String query = String.valueOf(binding.etHotelSearch.getText()).trim().toLowerCase(Locale.ROOT);
         String district = selectedDistrict();
-        binding.hotelListContainer.removeAllViews();
+        List<ManagedHotel> filtered = new ArrayList<>();
         for (ManagedHotel hotel : SuperadminSampleData.hotels()) {
             String searchable = (hotel.name + " " + hotel.address).toLowerCase(Locale.ROOT);
             if (!query.isEmpty() && !searchable.contains(query)) continue;
             if (district != null && !district.equals(hotel.district)) continue;
 
-            ItemSuperadminHotelBinding item = ItemSuperadminHotelBinding.inflate(getLayoutInflater(), binding.hotelListContainer, false);
-            item.ivHotelPhoto.setImageResource(hotel.imageRes);
-            item.tvHotelName.setText(hotel.name);
-            item.tvHotelAddress.setText(hotel.address);
-            item.tvHotelAdmin.setText(getString(R.string.superadmin_admin_format, hotel.administrator));
-            item.tvHotelRooms.setText(getString(R.string.superadmin_rooms_format, hotel.rooms));
-            item.tvHotelReservations.setText(getString(R.string.superadmin_month_reservations_format, hotel.reservations));
-            item.tvHotelStatus.setText(hotel.active ? R.string.superadmin_filter_active : R.string.superadmin_filter_inactive);
-            item.tvHotelStatus.setTextColor(ContextCompat.getColor(requireContext(), hotel.active ? R.color.io_success_text : R.color.io_danger_text));
-            item.btnHotelManage.setOnClickListener(v -> openDetail(hotel.id));
-            binding.hotelListContainer.addView(item.getRoot());
+            filtered.add(hotel);
         }
+        adapter.setHotels(filtered);
+        binding.cardHotelsEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.rvHotels.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     private void openDetail(int hotelId) {
