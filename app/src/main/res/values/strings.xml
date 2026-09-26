@@ -230,8 +230,10 @@
     <string name="badge_beneficio_exclusivo">BENEFICIO EXCLUSIVO</string>
     <string name="titulo_taxi_gratuito">Taxi gratuito al aeropuerto</string>
     <string name="desc_taxi_gratuito">¡Felicitaciones! Tu reserva de estadía en el <b>Hotel Miraflores Park</b> superó el monto mínimo de consumo acumulado y has desbloqueado un traslado privado 100% cubierto.</string>
+    <string name="desc_taxi_gratuito_dinamico">¡Felicitaciones! Tu reserva de estadía en el %1$s superó el monto mínimo de consumo acumulado y has desbloqueado un traslado privado 100%% cubierto.</string>
     <string name="item_valido_aeropuerto">Válido para salidas al Aeropuerto Jorge Chávez</string>
     <string name="item_monitoreo_satelital">Monitoreo satelital y domótica vinculada</string>
+    <string name="taxi_beneficios_listado_titulo">Servicios incluidos</string>
     <string name="btn_solicitar_taxi_gratuito">Solicitar taxi gratuito</string>
     <string name="btn_no_gracias">No, gracias</string>
 
@@ -239,8 +241,8 @@
     <string name="titulo_solicitar_taxi">Solicitar taxi</string>
     <string name="label_aeropuerto_destino">Aeropuerto de destino</string>
     <string name="valor_aeropuerto">Aeropuerto Internacional Jorge Chávez (LIM)</string>
-    <string name="label_hora_salida">Hora estimada de salida</string>
-    <string name="valor_hora_salida">15:30 PM</string>
+    <string name="label_hora_salida">Hora programada de recojo</string>
+    <string name="valor_hora_salida">15:30</string>
     <string name="label_pasajeros">Pasajeros</string>
     <string name="label_maletas">Maletas grandes</string>
     <string name="label_direccion_recojo">Dirección de recojo (Hotel)</string>
@@ -259,13 +261,13 @@
     <string name="modelo_vehiculo">Toyota Camry Híbrido</string>
     <string name="placa_vehiculo">BYA-482</string>
     <string name="color_vehiculo">Color: Blanco Perla · Aire Acondicionado</string>
-    <string name="label_tiempo_llegada">Tiempo de llegada estimado</string>
-    <string name="valor_tiempo_llegada">8 minutos</string>
+    <string name="label_tiempo_llegada">Llegada del conductor al hotel</string>
+    <string name="valor_tiempo_llegada">15:22 · 8 min antes</string>
     <string name="btn_ver_ubicacion">Ver ubicación en tiempo real</string>
     <string name="link_cancelar_solicitud">Cancelar solicitud</string>
 
     <!-- Seguimiento de taxi -->
-    <string name="etiqueta_llegada">Llegada en 5 min · 1.8 km</string>
+    <string name="etiqueta_llegada">Llegada al hotel en 5 min · 1.8 km</string>
     <string name="paso_solicitado">SOLICITADO</string>
     <string name="paso_asignado">ASIGNADO</string>
     <string name="paso_en_camino">EN CAMINO</string>
@@ -569,8 +571,10 @@
     <string name="login_email">Correo electrónico</string>
     <string name="login_password">Contraseña</string>
     <string name="login_button">Iniciar sesión</string>
-    <string name="login_forgot">Olvidé mi contraseña</string>
-    <string name="login_create_account">Crear cuenta de cliente</string>
+    <string name="login_email_hint">ejemplo@correo.com</string>
+    <string name="login_forgot">¿Olvidé mi contraseña?</string>
+    <string name="login_signup_prompt">¿No tienes una cuenta?</string>
+    <string name="login_create_account">Crear cuenta</string>
     <string name="login_local_notice">Modo local: todavía no se utiliza una base de datos.</string>
     <string name="login_error_required">Completa este campo</string>
     <string name="login_error_credentials">El correo o la contraseña son incorrectos</string>
@@ -580,6 +584,50 @@
     <string name="login_demo_admin">Administrador de hotel — admin@iotelito.pe</string>
     <string name="login_demo_driver">Taxista — taxista@iotelito.pe</string>
     <string name="login_demo_superadmin">Superadmin — superadmin@iotelito.pe</string>
+
+    <!-- Registro y recuperación de cuenta cliente -->
+    <string name="register_title">Crear cuenta</string>
+    <string name="register_add_photo">Agregar foto</string>
+    <string name="register_names">Nombres</string>
+    <string name="register_names_hint">Ej. Juan Carlos</string>
+    <string name="register_lastnames">Apellidos</string>
+    <string name="register_lastnames_hint">Ej. Pérez Quispe</string>
+    <string name="register_document_type">Tipo de documento</string>
+    <string name="register_document_default">DNI</string>
+    <string name="register_document_number">Número de documento</string>
+    <string name="register_document_hint">71234567</string>
+    <string name="register_birthdate">Fecha de nacimiento</string>
+    <string name="register_birthdate_hint">DD/MM/AAAA</string>
+    <string name="register_phone">Teléfono</string>
+    <string name="register_phone_hint">987 654 321</string>
+    <string name="register_address">Domicilio</string>
+    <string name="register_address_hint">Av. Larco 123, Miraflores</string>
+    <string name="register_button">Registrarme</string>
+    <string name="register_success_demo">Cuenta registrada en modo demo. Ya puedes iniciar sesión cuando se conecte la base de datos.</string>
+    <string name="register_error_name">Ingresa tus nombres</string>
+    <string name="register_error_lastname">Ingresa tus apellidos</string>
+    <string name="register_error_document">El DNI debe tener 8 dígitos</string>
+    <string name="register_error_birthdate">Usa DD/MM/AAAA y debes ser mayor de edad</string>
+    <string name="register_error_email">Ingresa un correo válido</string>
+    <string name="register_error_email_exists">Este correo ya existe</string>
+    <string name="register_error_phone">El teléfono debe tener 9 dígitos</string>
+    <string name="register_error_address">Ingresa un domicilio válido</string>
+
+    <string name="recover_title">Recuperar contraseña</string>
+    <string name="recover_subtitle">Ingresa tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.</string>
+    <string name="recover_button">Enviar instrucciones</string>
+    <string name="recover_error_unknown_email">No encontramos una cuenta con este correo</string>
+    <string name="recover_sent_title">Revisa tu correo</string>
+    <string name="recover_sent_email">Enviamos las instrucciones de recuperación a %1$s. Usa el enlace del correo para crear una nueva contraseña.</string>
+    <string name="recover_continue_demo">Abrir enlace de recuperación</string>
+    <string name="new_password_title">Nueva contraseña</string>
+    <string name="new_password_subtitle">Crea una nueva contraseña para recuperar el acceso a tu cuenta.</string>
+    <string name="new_password_label">Nueva contraseña</string>
+    <string name="new_password_confirm_label">Confirmar nueva contraseña</string>
+    <string name="new_password_button">Cambiar contraseña</string>
+    <string name="new_password_error_match">Las contraseñas no coinciden</string>
+    <string name="password_updated_title">¡Contraseña actualizada!</string>
+    <string name="password_updated_subtitle">Ya puedes iniciar sesión con tu nueva contraseña.</string>
 
     <!-- Resumen temporal para roles cuyos módulos aún no están integrados -->
     <string name="role_session_started">Sesión local iniciada correctamente</string>

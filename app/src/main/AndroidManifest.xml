@@ -29,6 +29,34 @@
             android:parentActivityName=".ui.auth.LoginActivity" />
 
         <activity
+            android:name=".ui.auth.RegisterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.auth.LoginActivity" />
+
+        <activity
+            android:name=".ui.auth.RecoverPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.auth.LoginActivity" />
+
+        <activity
+            android:name=".ui.auth.RecoverPasswordSentActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.auth.RecoverPasswordActivity" />
+
+        <activity
+            android:name=".ui.auth.NewPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.auth.RecoverPasswordSentActivity" />
+
+        <activity
+            android:name=".ui.auth.PasswordUpdatedActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.auth.LoginActivity" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="false"
             android:launchMode="singleTop"

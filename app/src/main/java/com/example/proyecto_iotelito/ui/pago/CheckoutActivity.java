@@ -112,7 +112,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
         sheetView.findViewById(R.id.btn_aceptar_taxi).setOnClickListener(v -> {
             sheet.dismiss();
-            startActivity(new Intent(this, BeneficioTaxiActivity.class));
+            Intent intent = new Intent(this, BeneficioTaxiActivity.class);
+            intent.putExtra(BeneficioTaxiActivity.EXTRA_RESERVA_ID, reserva.id);
+            startActivity(intent);
             finish();
         });
 

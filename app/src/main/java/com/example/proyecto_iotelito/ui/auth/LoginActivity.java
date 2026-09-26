@@ -20,13 +20,6 @@ import com.example.proyecto_iotelito.ui.taxista.TaxistaMainActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String[] DEMO_EMAILS = {
-            "cliente@iotelito.pe",
-            "admin@iotelito.pe",
-            "taxista@iotelito.pe",
-            "superadmin@iotelito.pe"
-    };
-
     private ActivityLoginBinding binding;
 
     @Override
@@ -35,7 +28,6 @@ public class LoginActivity extends AppCompatActivity {
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        configureDemoAccounts();
         binding.loginButton.setOnClickListener(view -> attemptLogin());
         binding.passwordEditText.setOnEditorActionListener((view, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -44,8 +36,10 @@ public class LoginActivity extends AppCompatActivity {
             }
             return false;
         });
-        binding.forgotPasswordButton.setOnClickListener(view -> showMessage(R.string.login_recovery_pending));
-        binding.createAccountButton.setOnClickListener(view -> showMessage(R.string.login_registration_pending));
+        binding.forgotPasswordButton.setOnClickListener(view ->
+                startActivity(new Intent(this, RecoverPasswordActivity.class)));
+        binding.createAccountButton.setOnClickListener(view ->
+                startActivity(new Intent(this, RegisterActivity.class)));
     }
 
     @Override
@@ -54,21 +48,6 @@ public class LoginActivity extends AppCompatActivity {
         if (binding != null) {
             binding.passwordEditText.setText("");
         }
-    }
-
-    private void configureDemoAccounts() {
-        String[] labels = {
-                getString(R.string.login_demo_client),
-                getString(R.string.login_demo_admin),
-                getString(R.string.login_demo_driver),
-                getString(R.string.login_demo_superadmin)
-        };
-        binding.demoAccountDropdown.setSimpleItems(labels);
-        binding.demoAccountDropdown.setOnItemClickListener((parent, view, position, id) -> {
-            binding.emailEditText.setText(DEMO_EMAILS[position]);
-            binding.emailLayout.setError(null);
-            binding.passwordEditText.requestFocus();
-        });
     }
 
     private void attemptLogin() {
@@ -89,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         if (hasError) return;
 
-        AuthenticatedUser user = LocalAuthRepository.authenticate(email, password);
+        AuthenticatedUser user = LocalAuthRepository.authenticate(this, email, password);
         if (user == null) {
             binding.passwordLayout.setError(getString(R.string.login_error_credentials));
             return;
@@ -119,7 +98,4 @@ public class LoginActivity extends AppCompatActivity {
         return value == null ? "" : value.toString();
     }
 
-    private void showMessage(int messageResource) {
-        Snackbar.make(binding.getRoot(), messageResource, Snackbar.LENGTH_LONG).show();
-    }
 }
