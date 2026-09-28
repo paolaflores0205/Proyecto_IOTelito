@@ -322,13 +322,14 @@
 
     <!-- Solicitudes disponibles -->
     <string name="taxi_solicitudes_titulo">Solicitudes disponibles</string>
-    <string name="taxi_solicitudes_subtitulo">4 solicitudes cerca de tu ubicación</string>
-    <string name="taxi_tag_taxi_incluido">TAXI INCLUIDO</string>
+    <string name="taxi_solicitudes_subtitulo">%1$d solicitudes cerca de tu ubicación</string>
+    <string name="taxi_solicitudes_vacio">No hay solicitudes disponibles por ahora.</string>
+    <string name="taxi_pill_minutos">%1$d min</string>
     <string name="taxi_tag_menos_5_min">Menos de 5 min</string>
     <string name="taxi_btn_ver_solicitud">Ver solicitud</string>
     <string name="taxi_chip_todas">Todas</string>
     <string name="taxi_chip_menos_10_min">Menos de 10 min</string>
-    <string name="taxi_chip_taxi_incluido">Con taxi incluido</string>
+    <string name="taxi_chip_mayor_tarifa">Mayor tarifa</string>
 
     <!-- Detalle del servicio -->
     <string name="taxi_detalle_servicio_titulo">Detalle del Servicio</string>
@@ -377,11 +378,21 @@
     <!-- Historial -->
     <string name="taxi_historial_titulo">Historial de servicios</string>
     <string name="taxi_historial_subtitulo">Registro de tus traslados</string>
-    <string name="taxi_tab_todos">Todos (3)</string>
-    <string name="taxi_tab_completados">Completados (2)</string>
-    <string name="taxi_tab_cancelados">Cancelados (1)</string>
-    <string name="taxi_stat_completados">48 servicios en total</string>
-    <string name="taxi_stat_cuota">S/ 245.50 Cuota</string>
+    <string name="taxi_tab_todos">Todos (%1$d)</string>
+    <string name="taxi_tab_completados">Completados (%1$d)</string>
+    <string name="taxi_tab_cancelados">Cancelados (%1$d)</string>
+    <string name="taxi_stat_completados">%1$d servicios completados</string>
+    <string name="taxi_stat_cuota">S/ %1$.2f Cuota</string>
+    <string name="taxi_pasajero_vehiculo">%1$s · %2$s</string>
+    <string name="taxi_tarifa_monto">S/ %1$.2f</string>
+    <string name="taxi_label_tarifa">Tarifa del servicio</string>
+    <string name="taxi_label_pagado_por">Pagado por</string>
+    <string name="taxi_valor_hotel">Hotel</string>
+    <string name="taxi_label_hora">Hora</string>
+    <string name="taxi_label_motivo">Motivo</string>
+    <string name="taxi_pasajero_huesped">Huésped</string>
+    <string name="taxi_resumen_servicio_titulo">Resumen del servicio</string>
+    <string name="taxi_btn_cerrar">Cerrar</string>
     <string name="taxi_historial_recientes">Servicios recientes</string>
     <string name="taxi_historial_vacio">No tienes servicios en esta categoría.</string>
     <string name="taxi_btn_ver_detalle_historial">Ver detalle</string>

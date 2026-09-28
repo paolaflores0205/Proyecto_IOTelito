@@ -40,16 +40,13 @@
                 android:layout_weight="1" />
 
             <TextView
-                android:id="@+id/tv_tag_incluido"
+                android:id="@+id/tv_tarifa"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_badge_dark"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
-                android:textColor="@color/white"
-                android:textSize="10sp"
+                android:textColor="@color/io_teal"
+                android:textSize="15sp"
                 android:textStyle="bold"
-                android:text="@string/taxi_tag_taxi_incluido" />
+                tools:text="S/ 45.50" />
         </LinearLayout>
 
         <TextView

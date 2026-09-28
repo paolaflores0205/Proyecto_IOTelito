@@ -1,69 +1,85 @@
 package com.example.proyecto_iotelito.ui.taxista;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
-import com.google.android.material.button.MaterialButton;
+import com.example.proyecto_iotelito.data.TaxistaSampleData;
+import com.example.proyecto_iotelito.databinding.FragmentSolicitudesTaxistaBinding;
+import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Pestaña "Solicitudes": servicios disponibles cerca del conductor.
- * Tarjetas con contenido de ejemplo; el listado dinámico (RecyclerView)
- * llega en el siguiente incremento.
+ * Pestaña "Solicitudes": servicios disponibles cerca del conductor, en un
+ * RecyclerView alimentado por {@link TaxistaSampleData}. Los chips filtran u ordenan la lista.
  */
 public class SolicitudesTaxistaFragment extends Fragment {
+
+    private FragmentSolicitudesTaxistaBinding binding;
+    private SolicitudesAdapter adapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                               @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_solicitudes_taxista, container, false);
+        binding = FragmentSolicitudesTaxistaBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ((com.google.android.material.chip.Chip) view.findViewById(R.id.chip_todas)).setChecked(true);
+        adapter = new SolicitudesAdapter(this::abrirDetalle);
+        binding.rvSolicitudes.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvSolicitudes.setAdapter(adapter);
 
-        bindSolicitud(view.findViewById(R.id.card_solicitud_1),
-                "Menos de 5 min", "Hotel Miraflores Park",
-                "Aeropuerto Internacional Jorge Chávez", "02 ago 2026, 14:00",
-                "Ana García", "AG", "14 min · 6.2 km");
-
-        bindSolicitud(view.findViewById(R.id.card_solicitud_2),
-                "20 min", "Palacio del Inka Cusco (Lima Branch)",
-                "Aeropuerto Internacional Jorge Chávez", "03 ago 2026, 15:30",
-                "Carlos Mendoza", "CM", "22 min · 9.8 km");
-
-        bindSolicitud(view.findViewById(R.id.card_solicitud_3),
-                "10 min", "Dazzler Miraflores",
-                "Aeropuerto Internacional Jorge Chávez", "04 ago 2026, 09:15",
-                "Rodrigo Salas", "RS", "11 min · 4.5 km");
-
-        bindSolicitud(view.findViewById(R.id.card_solicitud_4),
-                "35 min", "Barranco Art Boutique",
-                "Terminal Terrestre Javier Prado", "05 ago 2026, 11:00",
-                "Valentina Ríos", "VR", "38 min · 21 km");
+        binding.chipTodas.setChecked(true);
+        binding.chipGroupFiltros.setOnCheckedStateChangeListener((group, checkedIds) -> renderSolicitudes());
+        renderSolicitudes();
     }
 
-    private void bindSolicitud(View card, String tiempo, String hotel, String destino, String fechaHora,
-                                String pasajeroNombre, String iniciales, String distanciaTiempo) {
-        ((TextView) card.findViewById(R.id.tv_tiempo_pill)).setText(tiempo);
-        ((TextView) card.findViewById(R.id.tv_hotel_nombre)).setText(hotel);
-        ((TextView) card.findViewById(R.id.tv_destino)).setText(destino);
-        ((TextView) card.findViewById(R.id.tv_fecha_hora)).setText(fechaHora);
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Al volver del detalle, la solicitud aceptada ya no debe aparecer.
+        if (binding != null) {
+            renderSolicitudes();
+        }
+    }
 
-        MaterialButton btnVerSolicitud = card.findViewById(R.id.btn_ver_solicitud);
-        btnVerSolicitud.setOnClickListener(v -> startActivity(DetalleServicioActivity.createIntent(
-                getActivity(), hotel, destino, pasajeroNombre, iniciales, distanciaTiempo)));
+    private void renderSolicitudes() {
+        int chipActivo = binding.chipGroupFiltros.getCheckedChipId();
+        List<SolicitudServicio> filtradas = new ArrayList<>();
+        for (SolicitudServicio solicitud : TaxistaSampleData.solicitudes()) {
+            if (chipActivo == R.id.chip_menos_10_min && solicitud.minutosEspera >= 10) continue;
+            filtradas.add(solicitud);
+        }
+        if (chipActivo == R.id.chip_mayor_tarifa) {
+            filtradas.sort((a, b) -> Double.compare(b.tarifa, a.tarifa));
+        }
+        adapter.setSolicitudes(filtradas);
+        binding.tvSolicitudesSubtitulo.setText(getString(R.string.taxi_solicitudes_subtitulo, filtradas.size()));
+        binding.tvSolicitudesVacio.setVisibility(filtradas.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.rvSolicitudes.setVisibility(filtradas.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void abrirDetalle(SolicitudServicio solicitud) {
+        startActivity(DetalleServicioActivity.createIntent(requireContext(), solicitud.id));
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

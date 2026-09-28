@@ -23,12 +23,13 @@
             android:text="@string/taxi_solicitudes_titulo" />
 
         <TextView
+            android:id="@+id/tv_solicitudes_subtitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="@color/io_text_secondary"
             android:textSize="13sp"
-            android:text="@string/taxi_solicitudes_subtitulo" />
+            tools:text="4 solicitudes cerca de tu ubicación" />
     </LinearLayout>
 
     <HorizontalScrollView
@@ -62,44 +63,39 @@
                 android:text="@string/taxi_chip_menos_10_min" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_taxi_incluido"
+                android:id="@+id/chip_mayor_tarifa"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="@string/taxi_chip_taxi_incluido" />
-
+                android:text="@string/taxi_chip_mayor_tarifa" />
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
-    <ScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_solicitudes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp"
+            tools:listitem="@layout/item_solicitud_card" />
+
+        <TextView
+            android:id="@+id/tv_solicitudes_vacio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingBottom="16dp">
-
-            <include
-                android:id="@+id/card_solicitud_1"
-                layout="@layout/item_solicitud_card" />
-
-            <include
-                android:id="@+id/card_solicitud_2"
-                layout="@layout/item_solicitud_card" />
-
-            <include
-                android:id="@+id/card_solicitud_3"
-                layout="@layout/item_solicitud_card" />
-
-            <include
-                android:id="@+id/card_solicitud_4"
-                layout="@layout/item_solicitud_card" />
-
-        </LinearLayout>
-    </ScrollView>
+            android:layout_gravity="center"
+            android:layout_margin="24dp"
+            android:gravity="center"
+            android:textColor="@color/io_text_muted"
+            android:textSize="13sp"
+            android:text="@string/taxi_solicitudes_vacio"
+            android:visibility="gone" />
+    </FrameLayout>
 </LinearLayout>
