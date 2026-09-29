@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_superadmin_graph"
+    app:startDestination="@id/nav_superadmin_home">
+
+    <fragment
+        android:id="@+id/nav_superadmin_home"
+        android:name="com.example.proyecto_iotelito.ui.superadmin.dashboard.DashboardFragment"
+        android:label="@string/superadmin_nav_home"
+        tools:layout="@layout/fragment_superadmin_dashboard" />
+
+    <fragment
+        android:id="@+id/nav_superadmin_users"
+        android:name="com.example.proyecto_iotelito.ui.superadmin.usuarios.UsuariosFragment"
+        android:label="@string/superadmin_nav_users"
+        tools:layout="@layout/fragment_superadmin_usuarios" />
+
+    <fragment
+        android:id="@+id/nav_superadmin_hotels"
+        android:name="com.example.proyecto_iotelito.ui.superadmin.hoteles.HotelesAdminFragment"
+        android:label="@string/superadmin_nav_hotels"
+        tools:layout="@layout/fragment_superadmin_hoteles" />
+
+    <fragment
+        android:id="@+id/nav_superadmin_reports"
+        android:name="com.example.proyecto_iotelito.ui.superadmin.reportes.ReportesFragment"
+        android:label="@string/superadmin_nav_reports"
+        tools:layout="@layout/fragment_superadmin_reportes" />
+</navigation>

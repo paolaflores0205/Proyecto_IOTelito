@@ -7,27 +7,88 @@
     android:background="@color/io_surface_variant"
     tools:context=".ui.superadmin.SuperadminMainActivity">
 
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/superadmin_fragment_container"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:defaultNavHost="true"
         app:layout_constraintBottom_toTopOf="@id/superadmin_bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:navGraph="@navigation/nav_superadmin" />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <LinearLayout
         android:id="@+id/superadmin_bottom_nav"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:background="@color/io_navy"
-        app:itemIconTint="@color/nav_item_color"
-        app:itemTextColor="@color/nav_item_color"
-        app:itemRippleColor="@color/io_teal_light"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/superadmin_bottom_nav_menu"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:id="@+id/nav_superadmin_home_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="3dp">
+            <ImageView android:layout_width="44dp" android:layout_height="28dp" android:background="@drawable/bg_superadmin_nav_icon" android:contentDescription="@null" android:padding="5dp" android:src="@drawable/ic_home" app:tint="@color/superadmin_nav_item_color" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_nav_home" android:textColor="@color/superadmin_nav_item_color" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_superadmin_users_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="3dp">
+            <ImageView android:layout_width="44dp" android:layout_height="28dp" android:background="@drawable/bg_superadmin_nav_icon" android:contentDescription="@null" android:padding="5dp" android:src="@drawable/ic_person" app:tint="@color/superadmin_nav_item_color" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_nav_users" android:textColor="@color/superadmin_nav_item_color" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_superadmin_hotels_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="3dp">
+            <ImageView android:layout_width="44dp" android:layout_height="28dp" android:background="@drawable/bg_superadmin_nav_icon" android:contentDescription="@null" android:padding="5dp" android:src="@drawable/ic_building" app:tint="@color/superadmin_nav_item_color" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_nav_hotels" android:textColor="@color/superadmin_nav_item_color" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_superadmin_reports_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="3dp">
+            <ImageView android:layout_width="44dp" android:layout_height="28dp" android:background="@drawable/bg_superadmin_nav_icon" android:contentDescription="@null" android:padding="5dp" android:src="@drawable/ic_bar_chart" app:tint="@color/superadmin_nav_item_color" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_nav_reports" android:textColor="@color/superadmin_nav_item_color" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

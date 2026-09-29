@@ -36,9 +36,22 @@ public class ReportesFragment extends Fragment {
     private void updateRange() {
         int id = binding.chipGroupPeriod.getCheckedChipId();
         String range;
-        if (id == R.id.chip_daily) range = "13 de setiembre de 2026";
-        else if (id == R.id.chip_yearly) range = "Enero - Diciembre, 2026";
-        else range = "01 de setiembre - 30 de setiembre, 2026";
+        if (id == R.id.chip_daily) {
+            range = "13 de setiembre de 2026";
+            binding.weeklyBookingsChart.setData(
+                    new String[]{"08h", "10h", "12h", "14h", "16h", "18h"},
+                    new int[]{4, 7, 12, 9, 15, 11});
+        } else if (id == R.id.chip_yearly) {
+            range = "Enero - Diciembre, 2026";
+            binding.weeklyBookingsChart.setData(
+                    new String[]{"Ene", "Mar", "May", "Jul", "Set", "Nov"},
+                    new int[]{420, 510, 635, 720, 856, 910});
+        } else {
+            range = "01 de setiembre - 30 de setiembre, 2026";
+            binding.weeklyBookingsChart.setData(
+                    new String[]{"Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"},
+                    new int[]{18, 26, 34, 42, 38, 51, 45});
+        }
         binding.tvSelectedRange.setText(getString(R.string.superadmin_selected_range, range));
     }
 

@@ -5,10 +5,27 @@
     style="@style/Widget.IoTelito.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp">
+    android:layout_marginBottom="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="16dp"
+    app:strokeColor="@color/io_border"
+    app:strokeWidth="1dp">
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="14dp">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="top" android:orientation="horizontal">
+            <TextView
+                android:id="@+id/tv_user_initials"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/bg_avatar_circle"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="MG" />
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
                 <TextView android:id="@+id/tv_user_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/io_text_primary" android:textSize="16sp" android:textStyle="bold" tools:text="María García López" />
                 <TextView android:id="@+id/tv_user_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="@color/io_text_secondary" android:textSize="12sp" tools:text="maria.garcia@gmail.com" />
@@ -17,10 +34,10 @@
         </LinearLayout>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:gravity="bottom" android:orientation="horizontal">
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                <TextView android:id="@+id/tv_user_role" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/io_text_primary" android:textSize="12sp" tools:text="Rol: Cliente" />
+                <TextView android:id="@+id/tv_user_role" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_tag_gray" android:paddingHorizontal="8dp" android:paddingVertical="4dp" android:textColor="@color/io_text_primary" android:textSize="11sp" android:textStyle="bold" tools:text="Cliente" />
                 <TextView android:id="@+id/tv_user_registered" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/io_text_secondary" android:textSize="11sp" tools:text="Reg: 15/03/2024" />
             </LinearLayout>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btn_user_detail" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="wrap_content" android:layout_height="40dp" android:text="@string/superadmin_view_detail" android:textAllCaps="false" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_user_detail" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="wrap_content" android:layout_height="40dp" android:text="@string/superadmin_view_detail" android:textAllCaps="false" app:icon="@drawable/ic_chevron_right" app:iconGravity="textEnd" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

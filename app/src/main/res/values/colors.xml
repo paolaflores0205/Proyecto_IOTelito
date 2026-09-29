@@ -28,4 +28,6 @@
     <color name="io_warning_surface">#FFFFF3CD</color>
     <color name="io_warning_dark">#FF856404</color>
     <color name="io_divider">#FFE2E8F0</color>
+    <color name="io_metric_violet">#7C3AED</color>
+    <color name="io_nav_selected_bg">#EADDFC</color>
 </resources>

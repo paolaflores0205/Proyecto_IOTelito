@@ -41,12 +41,25 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <TextView
+                style="@style/TextAppearance.IoTelito.SectionTitle"
+                android:layout_marginTop="20dp"
+                android:text="@string/superadmin_section_identity" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/superadmin_section_identity_help"
+                android:textColor="@color/io_text_secondary"
+                android:textSize="12sp" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_name"
                 style="@style/Widget.IoTelito.Input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="10dp"
                 android:hint="@string/superadmin_hotel_name"
                 app:placeholderText="@string/superadmin_hotel_name_hint">
                 <com.google.android.material.textfield.TextInputEditText
@@ -56,12 +69,17 @@
                     android:inputType="textCapWords" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                style="@style/TextAppearance.IoTelito.SectionTitle"
+                android:layout_marginTop="22dp"
+                android:text="@string/superadmin_section_location" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_address"
                 style="@style/Widget.IoTelito.Input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:hint="@string/superadmin_address">
                 <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPostalAddress" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -100,19 +118,41 @@
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <ImageView
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.IoTelito.Card.Metric"
                 android:layout_width="match_parent"
-                android:layout_height="130dp"
-                android:layout_marginTop="12dp"
-                android:contentDescription="@string/superadmin_cd_map_preview"
-                android:scaleType="centerCrop"
-                android:src="@drawable/superadmin_map_form" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/bg_icon_teal" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/ic_location_pin" app:tint="@color/io_teal" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_map_location_title" android:textColor="@color/io_navy" android:textStyle="bold" />
+                            <TextView android:id="@+id/tv_location_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/superadmin_map_location_pending" android:textColor="@color/io_text_secondary" android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btn_current_location" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="0dp" android:layout_height="52dp" android:layout_marginEnd="5dp" android:layout_weight="1" android:text="@string/superadmin_use_current_location" android:textAllCaps="false" android:textSize="12sp" app:icon="@drawable/ic_location_pin" app:iconPadding="4dp" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btn_open_map" style="@style/Widget.IoTelito.Button.Outline" android:layout_width="0dp" android:layout_height="52dp" android:layout_marginStart="5dp" android:layout_weight="1" android:text="@string/superadmin_view_in_maps" android:textSize="12sp" app:icon="@drawable/ic_location_pin" app:iconPadding="4dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                style="@style/TextAppearance.IoTelito.SectionTitle"
+                android:layout_marginTop="22dp"
+                android:text="@string/superadmin_section_contact" />
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.IoTelito.Input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:hint="@string/superadmin_contact_phone">
                 <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="phone" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -121,10 +161,15 @@
                 style="@style/Widget.IoTelito.Input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:hint="@string/label_email">
                 <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/TextAppearance.IoTelito.SectionTitle"
+                android:layout_marginTop="22dp"
+                android:text="@string/superadmin_section_settings" />
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.IoTelito.Input"

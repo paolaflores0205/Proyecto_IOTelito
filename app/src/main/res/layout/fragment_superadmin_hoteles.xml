@@ -58,19 +58,46 @@
             <com.google.android.material.chip.Chip android:id="@+id/chip_barranco" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_barranco" />
         </com.google.android.material.chip.ChipGroup>
 
-        <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:clipToPadding="false">
-            <LinearLayout android:id="@+id/hotel_list_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingTop="8dp" android:paddingBottom="96dp" />
-        </androidx.core.widget.NestedScrollView>
+        <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_hotels"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="96dp"
+                tools:listitem="@layout/item_superadmin_hotel" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_hotels_empty"
+                style="@style/Widget.IoTelito.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="24dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="28dp">
+                    <ImageView android:layout_width="48dp" android:layout_height="48dp" android:contentDescription="@null" android:src="@drawable/ic_building" app:tint="@color/io_text_muted" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/superadmin_hotels_empty_title" android:textColor="@color/io_navy" android:textSize="17sp" android:textStyle="bold" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="@string/superadmin_hotels_empty_subtitle" android:textColor="@color/io_text_secondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_add_hotel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         android:contentDescription="@string/superadmin_cd_add_hotel"
-        android:src="@drawable/ic_add"
+        android:text="@string/superadmin_add_hotel"
+        android:textColor="@color/io_navy"
+        app:icon="@drawable/ic_add"
         app:backgroundTint="@color/io_teal"
-        app:tint="@color/io_navy" />
+        app:iconTint="@color/io_navy" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

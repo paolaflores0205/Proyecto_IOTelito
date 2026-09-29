@@ -10,19 +10,21 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SuperadminSampleData;
 import com.example.proyecto_iotelito.databinding.FragmentSuperadminUsuariosBinding;
-import com.example.proyecto_iotelito.databinding.ItemSuperadminUserBinding;
 import com.example.proyecto_iotelito.model.superadmin.AdminUser;
 
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UsuariosFragment extends Fragment {
     private FragmentSuperadminUsuariosBinding binding;
+    private UsuariosAdapter adapter;
 
     @Nullable
     @Override
@@ -35,6 +37,9 @@ public class UsuariosFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         updateSummary();
+        adapter = new UsuariosAdapter(this::openUserDetail);
+        binding.rvUsers.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvUsers.setAdapter(adapter);
         binding.etUserSearch.addTextChangedListener(new SimpleTextWatcher(this::renderUsers));
         binding.chipGroupRoles.setOnCheckedStateChangeListener((group, checkedIds) -> renderUsers());
         binding.chipGroupStatus.setOnCheckedStateChangeListener((group, checkedIds) -> renderUsers());
@@ -65,8 +70,7 @@ public class UsuariosFragment extends Fragment {
         String query = String.valueOf(binding.etUserSearch.getText()).trim().toLowerCase(Locale.ROOT);
         String role = selectedRole();
         Boolean active = selectedStatus();
-        binding.userListContainer.removeAllViews();
-        int visible = 0;
+        List<AdminUser> filtered = new ArrayList<>();
 
         for (AdminUser user : SuperadminSampleData.users()) {
             String searchable = (user.name + " " + user.email + " " + user.document).toLowerCase(Locale.ROOT);
@@ -74,22 +78,18 @@ public class UsuariosFragment extends Fragment {
             if (role != null && !role.equals(user.role)) continue;
             if (active != null && active != user.active) continue;
 
-            ItemSuperadminUserBinding item = ItemSuperadminUserBinding.inflate(getLayoutInflater(), binding.userListContainer, false);
-            item.tvUserName.setText(user.name);
-            item.tvUserEmail.setText(user.email);
-            item.tvUserRole.setText(getString(R.string.superadmin_role_format, user.role));
-            item.tvUserRegistered.setText(getString(R.string.superadmin_registered_format, user.registeredAt));
-            item.tvUserStatus.setText(user.active ? R.string.superadmin_filter_active : R.string.superadmin_filter_inactive);
-            item.tvUserStatus.setTextColor(ContextCompat.getColor(requireContext(), user.active ? R.color.io_success_text : R.color.io_danger_text));
-            item.btnUserDetail.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), DetalleUsuarioActivity.class);
-                intent.putExtra(DetalleUsuarioActivity.EXTRA_USER_ID, user.id);
-                startActivity(intent);
-            });
-            binding.userListContainer.addView(item.getRoot());
-            visible++;
+            filtered.add(user);
         }
-        binding.tvUserCount.setText(getString(R.string.superadmin_showing_users, visible));
+        adapter.setUsers(filtered);
+        binding.tvUserCount.setText(getString(R.string.superadmin_showing_users, filtered.size()));
+        binding.cardUsersEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.rvUsers.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void openUserDetail(AdminUser user) {
+        Intent intent = new Intent(requireContext(), DetalleUsuarioActivity.class);
+        intent.putExtra(DetalleUsuarioActivity.EXTRA_USER_ID, user.id);
+        startActivity(intent);
     }
 
     private String selectedRole() {

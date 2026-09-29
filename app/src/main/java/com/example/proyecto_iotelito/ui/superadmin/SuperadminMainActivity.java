@@ -1,21 +1,17 @@
 package com.example.proyecto_iotelito.ui.superadmin;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.databinding.ActivitySuperadminMainBinding;
-import com.example.proyecto_iotelito.ui.superadmin.dashboard.DashboardFragment;
-import com.example.proyecto_iotelito.ui.superadmin.hoteles.HotelesAdminFragment;
-import com.example.proyecto_iotelito.ui.superadmin.reportes.ReportesFragment;
-import com.example.proyecto_iotelito.ui.superadmin.usuarios.UsuariosFragment;
 
 public class SuperadminMainActivity extends AppCompatActivity {
     public static final String EXTRA_OPEN_TAB = "superadmin_open_tab";
     private ActivitySuperadminMainBinding binding;
+    private NavController navController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,16 +19,16 @@ public class SuperadminMainActivity extends AppCompatActivity {
         binding = ActivitySuperadminMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.superadminBottomNav.setOnItemSelectedListener(item -> {
-            Fragment fragment;
-            int id = item.getItemId();
-            if (id == R.id.nav_superadmin_users) fragment = new UsuariosFragment();
-            else if (id == R.id.nav_superadmin_hotels) fragment = new HotelesAdminFragment();
-            else if (id == R.id.nav_superadmin_reports) fragment = new ReportesFragment();
-            else fragment = new DashboardFragment();
-            show(fragment);
-            return true;
-        });
+        NavHostFragment navHost = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.superadmin_fragment_container);
+        if (navHost == null) throw new IllegalStateException("NavHost de superadmin no encontrado");
+        navController = navHost.getNavController();
+        binding.navSuperadminHomeButton.setOnClickListener(v -> openTab(R.id.nav_superadmin_home));
+        binding.navSuperadminUsersButton.setOnClickListener(v -> openTab(R.id.nav_superadmin_users));
+        binding.navSuperadminHotelsButton.setOnClickListener(v -> openTab(R.id.nav_superadmin_hotels));
+        binding.navSuperadminReportsButton.setOnClickListener(v -> openTab(R.id.nav_superadmin_reports));
+        navController.addOnDestinationChangedListener((controller, destination, arguments) ->
+                updateSelectedButton(destination.getId()));
 
         if (savedInstanceState == null) {
             openTab(getIntent().getIntExtra(EXTRA_OPEN_TAB, R.id.nav_superadmin_home));
@@ -40,12 +36,18 @@ public class SuperadminMainActivity extends AppCompatActivity {
     }
 
     public void openTab(int menuId) {
-        binding.superadminBottomNav.setSelectedItemId(menuId);
+        if (navController.getCurrentDestination() == null
+                || navController.getCurrentDestination().getId() != menuId) {
+            navController.navigate(menuId);
+        }
+        updateSelectedButton(menuId);
     }
 
-    private void show(@NonNull Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.superadmin_fragment_container, fragment)
-                .commit();
+    private void updateSelectedButton(int destinationId) {
+        binding.navSuperadminHomeButton.setSelected(destinationId == R.id.nav_superadmin_home);
+        binding.navSuperadminUsersButton.setSelected(destinationId == R.id.nav_superadmin_users);
+        binding.navSuperadminHotelsButton.setSelected(destinationId == R.id.nav_superadmin_hotels);
+        binding.navSuperadminReportsButton.setSelected(destinationId == R.id.nav_superadmin_reports);
     }
+
 }

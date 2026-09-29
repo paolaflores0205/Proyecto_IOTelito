@@ -41,6 +41,9 @@ dependencies {
     implementation libs.material
     implementation libs.fragment
     implementation libs.recyclerview
+    implementation libs.navigation.fragment
+    implementation libs.navigation.ui
+    implementation libs.play.services.location
     testImplementation libs.junit
     androidTestImplementation libs.espresso.core
     androidTestImplementation libs.ext.junit

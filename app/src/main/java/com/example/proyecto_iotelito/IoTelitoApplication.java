@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,9 +38,6 @@ public class IoTelitoApplication extends Application implements Application.Acti
             bottomNavigation = superadminBottomNavigation;
         }
         boolean hasBottomNavigation = bottomNavigation != null;
-        int maximumBottomNavigationInset = getResources()
-                .getDimensionPixelSize(R.dimen.bottom_navigation_safe_space);
-
         if (bottomNavigation != null) {
             View navigationView = bottomNavigation;
             int navigationLeft = navigationView.getPaddingLeft();
@@ -52,12 +50,27 @@ public class IoTelitoApplication extends Application implements Application.Acti
             // su propia franja. Sustituimos ese listener para conservar solo el padding
             // original del componente.
             ViewCompat.setOnApplyWindowInsetsListener(navigationView, (view, windowInsets) -> {
+                Insets navigationInsets = windowInsets.getInsets(
+                        WindowInsetsCompat.Type.navigationBars()
+                );
                 view.setPadding(
                         navigationLeft,
                         navigationTop,
                         navigationRight,
                         navigationBottom
                 );
+
+                // El espacio de la barra del teléfono debe quedar fuera del menú,
+                // no sumarse dentro de su fondo ni de su altura.
+                ViewGroup.LayoutParams rawParams = view.getLayoutParams();
+                if (rawParams instanceof ViewGroup.MarginLayoutParams) {
+                    ViewGroup.MarginLayoutParams marginParams =
+                            (ViewGroup.MarginLayoutParams) rawParams;
+                    if (marginParams.bottomMargin != navigationInsets.bottom) {
+                        marginParams.bottomMargin = navigationInsets.bottom;
+                        view.setLayoutParams(marginParams);
+                    }
+                }
                 return windowInsets;
             });
         }
@@ -67,9 +80,9 @@ public class IoTelitoApplication extends Application implements Application.Acti
                     WindowInsetsCompat.Type.systemBars()
                             | WindowInsetsCompat.Type.displayCutout()
             );
-            int bottomInset = hasBottomNavigation
-                    ? Math.min(safeInsets.bottom, maximumBottomNavigationInset)
-                    : safeInsets.bottom;
+            // Las pantallas con menú inferior gestionan su inset como margen del
+            // propio menú. Aplicarlo también aquí generaba la franja vacía del A55.
+            int bottomInset = hasBottomNavigation ? 0 : safeInsets.bottom;
             view.setPadding(
                     initialLeft + safeInsets.left,
                     initialTop + safeInsets.top,
