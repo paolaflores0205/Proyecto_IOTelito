@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SuperadminSampleData;
+import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.databinding.ActivitySuperadminFormularioHotelBinding;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -61,8 +62,9 @@ public class FormularioHotelActivity extends AppCompatActivity {
         locationClient = LocationServices.getFusedLocationProviderClient(this);
         binding.toolbar.setNavigationOnClickListener(v -> finish());
 
-        String[] districts = {"Miraflores", "San Isidro", "Barranco", "Surco"};
-        String[] cities = {"Lima", "Arequipa", "Cusco"};
+        String[] districts = {"Miraflores", "San Isidro", "Barranco", "Surco",
+                "Centro Histórico", "Yanahuara", "Cercado", "Paracas"};
+        String[] cities = {"Lima", "Arequipa", "Cusco", "Trujillo", "Paracas"};
         binding.actvDistrict.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, districts));
         binding.actvCity.setAdapter(new ArrayAdapter<>(this,
@@ -80,7 +82,7 @@ public class FormularioHotelActivity extends AppCompatActivity {
         binding.etName.setText(hotel.name);
         binding.etAddress.setText(hotel.address);
         binding.actvDistrict.setText(hotel.district, false);
-        binding.actvCity.setText("Lima", false);
+        binding.actvCity.setText(SampleData.findById(hotel.id).city, false);
         binding.etPhone.setText("+51 1 445 6210");
         binding.etEmail.setText("contacto@hotelsol.pe");
         binding.etDescription.setText(

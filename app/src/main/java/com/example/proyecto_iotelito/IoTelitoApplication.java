@@ -12,6 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /** Aplica a todas las pantallas el espacio seguro de las barras del sistema. */
 public class IoTelitoApplication extends Application implements Application.ActivityLifecycleCallbacks {
@@ -23,7 +24,9 @@ public class IoTelitoApplication extends Application implements Application.Acti
     }
 
     @Override
-    public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
+    public void onActivityPostCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
+        // Esperar a que termine onCreate: antes de setContentView el menú todavía
+        // no existe y se trataría la pantalla como si no tuviera navegación.
         View content = activity.findViewById(android.R.id.content);
         if (content == null) return;
 
@@ -38,42 +41,7 @@ public class IoTelitoApplication extends Application implements Application.Acti
             bottomNavigation = superadminBottomNavigation;
         }
         boolean hasBottomNavigation = bottomNavigation != null;
-        if (bottomNavigation != null) {
-            View navigationView = bottomNavigation;
-            int navigationLeft = navigationView.getPaddingLeft();
-            int navigationTop = navigationView.getPaddingTop();
-            int navigationRight = navigationView.getPaddingRight();
-            int navigationBottom = navigationView.getPaddingBottom();
-
-            // Material agrega automáticamente el inset inferior al BottomNavigationView.
-            // En Samsung esto duplicaba el espacio porque la barra del sistema ya ocupa
-            // su propia franja. Sustituimos ese listener para conservar solo el padding
-            // original del componente.
-            ViewCompat.setOnApplyWindowInsetsListener(navigationView, (view, windowInsets) -> {
-                Insets navigationInsets = windowInsets.getInsets(
-                        WindowInsetsCompat.Type.navigationBars()
-                );
-                view.setPadding(
-                        navigationLeft,
-                        navigationTop,
-                        navigationRight,
-                        navigationBottom
-                );
-
-                // El espacio de la barra del teléfono debe quedar fuera del menú,
-                // no sumarse dentro de su fondo ni de su altura.
-                ViewGroup.LayoutParams rawParams = view.getLayoutParams();
-                if (rawParams instanceof ViewGroup.MarginLayoutParams) {
-                    ViewGroup.MarginLayoutParams marginParams =
-                            (ViewGroup.MarginLayoutParams) rawParams;
-                    if (marginParams.bottomMargin != navigationInsets.bottom) {
-                        marginParams.bottomMargin = navigationInsets.bottom;
-                        view.setLayoutParams(marginParams);
-                    }
-                }
-                return windowInsets;
-            });
-        }
+        View navigationView = bottomNavigation;
 
         ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
             Insets safeInsets = windowInsets.getInsets(
@@ -89,22 +57,44 @@ public class IoTelitoApplication extends Application implements Application.Acti
                     initialRight + safeInsets.right,
                     initialBottom + bottomInset
             );
+            if (hasBottomNavigation) {
+                // El contenedor aplica los insets una sola vez. Material puede
+                // reinstalar su listener al adjuntarse; por eso no lo sustituimos.
+                // El espacio inferior queda como margen externo, no como padding.
+                if (navigationView instanceof BottomNavigationView) {
+                    navigationView.setPadding(navigationView.getPaddingLeft(), 0,
+                            navigationView.getPaddingRight(), 0);
+                }
+                ViewGroup.LayoutParams rawParams = navigationView.getLayoutParams();
+                if (rawParams instanceof ViewGroup.MarginLayoutParams) {
+                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) rawParams;
+                    if (params.bottomMargin != safeInsets.bottom) {
+                        params.bottomMargin = safeInsets.bottom;
+                        navigationView.setLayoutParams(params);
+                    }
+                }
+                // Los hijos ya están dentro del área segura. No deben sumar de
+                // nuevo las barras, pero conservan los insets del teclado (IME).
+                return new WindowInsetsCompat.Builder(windowInsets)
+                        .setInsets(WindowInsetsCompat.Type.systemBars()
+                                | WindowInsetsCompat.Type.displayCutout(), Insets.NONE)
+                        .build();
+            }
             return windowInsets;
         });
 
         WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView())
                 .setAppearanceLightStatusBars(true);
 
-        boolean usesDarkBottomNavigation = superadminBottomNavigation != null;
-        activity.getWindow().setNavigationBarColor(activity.getColor(
-                usesDarkBottomNavigation ? R.color.io_navy : R.color.white
-        ));
+        // Todos los roles usan un menú blanco y una barra del sistema clara.
+        activity.getWindow().setNavigationBarColor(activity.getColor(R.color.white));
         activity.getWindow().setNavigationBarContrastEnforced(false);
         WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView())
-                .setAppearanceLightNavigationBars(!usesDarkBottomNavigation);
+                .setAppearanceLightNavigationBars(true);
         ViewCompat.requestApplyInsets(content);
     }
 
+    @Override public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) { }
     @Override public void onActivityStarted(@NonNull Activity activity) { }
     @Override public void onActivityResumed(@NonNull Activity activity) { }
     @Override public void onActivityPaused(@NonNull Activity activity) { }

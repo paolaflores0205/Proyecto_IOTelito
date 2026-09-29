@@ -71,8 +71,40 @@ public final class SampleData {
                 "Habitación Superior", "2 adultos, 1 niño", "35 m²",
                 new String[]{"Cama King Size", "Vista al volcán Misti", "Minibar", "Smart TV 43\" con domótica integrada"}
         ));
+        add(hotelDemo(4, "Lima", "Hotel Sol de Miraflores", "Av. Larco 345, Miraflores, Lima",
+                4.5, 128, 320, "Suite con balcón", "32 m²", "Parque Kennedy", "0.5 km"));
+        add(hotelDemo(5, "Lima", "Barranco Art Boutique", "Jr. Centenario 102, Barranco, Lima",
+                4.8, 96, 290, "Habitación Boutique", "28 m²", "Puente de los Suspiros", "0.4 km"));
+        add(hotelDemo(6, "Lima", "San Isidro Grand Suite", "Av. Camino Real 820, San Isidro, Lima",
+                4.7, 175, 410, "Suite Ejecutiva", "42 m²", "Bosque El Olivar", "0.3 km"));
+        add(hotelDemo(7, "Lima", "Barranco Garden House", "Av. San Martín 420, Barranco, Lima",
+                4.3, 87, 240, "Habitación Jardín", "26 m²", "Museo de Arte Contemporáneo", "0.6 km"));
+        add(hotelDemo(8, "Lima", "Surco Business Hotel", "Av. Primavera 1050, Surco, Lima",
+                4.4, 112, 280, "Habitación Ejecutiva", "30 m²", "Parque de la Amistad", "2 km"));
+        add(hotelDemo(9, "Cusco", "Cusco Plaza Inn", "Calle Plateros 250, Centro Histórico, Cusco",
+                4.6, 154, 310, "Habitación Colonial", "29 m²", "Plaza de Armas", "0.2 km"));
+        add(hotelDemo(10, "Arequipa", "Misti Terra Hotel", "Calle Jerusalén 406, Cercado, Arequipa",
+                4.5, 103, 260, "Suite Misti", "34 m²", "Monasterio de Santa Catalina", "0.5 km"));
+        add(hotelDemo(11, "Trujillo", "Trujillo Centro Suites", "Jr. Independencia 485, Centro Histórico, Trujillo",
+                4.2, 78, 230, "Suite Familiar", "36 m²", "Plaza de Armas", "0.3 km"));
+        add(hotelDemo(12, "Paracas", "Paracas Costa Azul", "Av. Paracas 180, Paracas, Ica",
+                4.8, 201, 460, "Suite Vista al Mar", "44 m²", "Malecón de Paracas", "0.1 km"));
     }});
 
+    private static Hotel hotelDemo(int id, String ciudad, String nombre, String direccion,
+                                   double valoracion, int opiniones, double precio,
+                                   String habitacion, String area, String atractivo, String distancia) {
+        return new Hotel(id, ciudad, nombre, direccion, valoracion, opiniones,
+                "Hospedaje de demostración en " + ciudad + ". Disfruta de habitaciones cómodas, "
+                        + "atención personalizada y servicios conectados durante tu estadía.",
+                precio, new String[]{"Wi-Fi ultra-veloz", "Desayuno incluido", "Estacionamiento gratuito"},
+                new Attraction[]{new Attraction(atractivo, distancia)},
+                habitacion, "2 adultos, 1 niño", area,
+                new String[]{"Cama Queen Size", "Aire acondicionado", "Minibar", "Smart TV con domótica integrada"});
+    }
+
+    // El mismo catálogo se usa para construir los hoteles del superadmin.
+    // Se conservan los IDs 1, 2 y 3 porque las reservas existentes los referencian.
     public static Hotel findById(int id) {
         for (Hotel hotel : HOTELS) {
             if (hotel.id == id) {
