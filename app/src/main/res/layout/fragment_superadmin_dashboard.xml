@@ -1,172 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/io_surface_variant"
-    android:fillViewport="true"
-    tools:context=".ui.superadmin.dashboard.DashboardFragment">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/superadmin_greeting"
-                    android:textColor="@color/io_navy"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/superadmin_console_subtitle"
-                    android:textColor="@color/io_text_secondary"
-                    android:textSize="12sp" />
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/io_surface_variant" android:clipToPadding="false" android:fillViewport="true" tools:context=".ui.superadmin.dashboard.DashboardFragment">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" app:cardBackgroundColor="@color/io_navy" app:cardCornerRadius="24dp" app:cardElevation="0dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="20dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_greeting" android:textColor="@color/white" android:textSize="24sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/superadmin_console_subtitle" android:textColor="#BFD0E2" android:textSize="13sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:background="@drawable/bg_superadmin_connected" android:drawableStart="@drawable/ic_check_circle" android:drawablePadding="6dp" android:paddingHorizontal="10dp" android:paddingVertical="6dp" android:text="@string/superadmin_system_connected" android:textColor="@color/white" android:textSize="11sp" android:textStyle="bold" app:drawableTint="@color/io_teal" />
+                </LinearLayout>
+                <TextView android:id="@+id/btn_superadmin_profile" android:layout_width="58dp" android:layout_height="58dp" android:background="@drawable/bg_avatar_circle" android:clickable="true" android:contentDescription="@string/superadmin_open_profile" android:focusable="true" android:gravity="center" android:text="@string/superadmin_initials" android:textColor="@color/white" android:textSize="18sp" android:textStyle="bold" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/btn_superadmin_profile"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_avatar_circle"
-                android:clickable="true"
-                android:contentDescription="@string/superadmin_open_profile"
-                android:focusable="true"
-                android:gravity="center"
-                android:text="@string/superadmin_initials"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.IoTelito.Card"
-                android:layout_width="0dp"
-                android:layout_height="84dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_active_users" android:textAllCaps="true" android:textColor="@color/io_text_secondary" android:textSize="11sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="1,247" android:textColor="@color/io_navy" android:textSize="24sp" android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.IoTelito.Card"
-                android:layout_width="0dp"
-                android:layout_height="84dp"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_registered_hotels" android:textAllCaps="true" android:textColor="@color/io_text_secondary" android:textSize="11sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="38" android:textColor="@color/io_navy" android:textSize="24sp" android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
-            <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="84dp" android:layout_marginEnd="6dp" android:layout_weight="1">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_administrators" android:textAllCaps="true" android:textColor="@color/io_text_secondary" android:textSize="11sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="12" android:textColor="@color/io_navy" android:textSize="24sp" android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="84dp" android:layout_marginStart="6dp" android:layout_weight="1">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_month_bookings" android:textAllCaps="true" android:textColor="@color/io_text_secondary" android:textSize="11sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="856" android:textColor="@color/io_navy" android:textSize="24sp" android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/superadmin_pending_alerts"
-            android:textColor="@color/io_navy"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.IoTelito.Card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            app:cardBackgroundColor="@color/io_danger_bg">
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_warning" android:drawablePadding="10dp" android:gravity="center_vertical" android:minHeight="48dp" android:padding="12dp" android:text="@string/superadmin_inactive_users_alert" android:textColor="@color/io_danger_text" android:textStyle="bold" app:drawableTint="@color/io_danger_text" />
         </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.IoTelito.Card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardBackgroundColor="@color/io_warning_surface">
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_info_outline" android:drawablePadding="10dp" android:gravity="center_vertical" android:minHeight="48dp" android:padding="12dp" android:text="@string/superadmin_unassigned_hotels_alert" android:textColor="@color/io_warning_dark" android:textStyle="bold" app:drawableTint="@color/io_warning_dark" />
-        </com.google.android.material.card.MaterialCardView>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card.Metric" android:layout_width="0dp" android:layout_height="124dp" android:layout_marginEnd="6dp" android:layout_weight="1">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="14dp"><ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/bg_icon_teal" android:contentDescription="@null" android:padding="6dp" android:src="@drawable/ic_group" app:tint="@color/io_teal"/><TextView android:id="@+id/tv_dashboard_users" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textColor="@color/io_navy" android:textSize="24sp" android:textStyle="bold" tools:text="4"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_active_users" android:textColor="@color/io_text_secondary" android:textSize="11sp"/></LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card.Metric" android:layout_width="0dp" android:layout_height="124dp" android:layout_marginStart="6dp" android:layout_weight="1">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="14dp"><ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/bg_icon_blue" android:contentDescription="@null" android:padding="6dp" android:src="@drawable/ic_building" app:tint="@color/io_navy_soft"/><TextView android:id="@+id/tv_dashboard_hotels" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textColor="@color/io_navy" android:textSize="24sp" android:textStyle="bold" tools:text="2"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_registered_hotels" android:textColor="@color/io_text_secondary" android:textSize="11sp"/></LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card.Metric" android:layout_width="0dp" android:layout_height="124dp" android:layout_marginEnd="6dp" android:layout_weight="1"><LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="14dp"><ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/bg_icon_violet" android:contentDescription="@null" android:padding="6dp" android:src="@drawable/ic_person" app:tint="@color/io_metric_violet"/><TextView android:id="@+id/tv_dashboard_admins" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textColor="@color/io_navy" android:textSize="24sp" android:textStyle="bold" tools:text="1"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_administrators" android:textColor="@color/io_text_secondary" android:textSize="11sp"/></LinearLayout></com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card.Metric" android:layout_width="0dp" android:layout_height="124dp" android:layout_marginStart="6dp" android:layout_weight="1"><LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="14dp"><ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/bg_icon_orange" android:contentDescription="@null" android:padding="6dp" android:src="@drawable/ic_calendar" app:tint="@color/io_warning_text"/><TextView android:id="@+id/tv_dashboard_bookings" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textColor="@color/io_navy" android:textSize="24sp" android:textStyle="bold" tools:text="248"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/superadmin_month_bookings" android:textColor="@color/io_text_secondary" android:textSize="11sp"/></LinearLayout></com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/superadmin_quick_access" android:textColor="@color/io_navy" android:textSize="18sp" android:textStyle="bold" />
+        <TextView style="@style/TextAppearance.IoTelito.SectionTitle" android:layout_marginTop="22dp" android:text="@string/superadmin_pending_alerts" />
+        <com.google.android.material.card.MaterialCardView android:id="@+id/card_inactive_alert" style="@style/Widget.IoTelito.Card.Action" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" app:cardBackgroundColor="@color/io_danger_bg"><TextView android:id="@+id/tv_inactive_alert" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_warning" android:drawableEnd="@drawable/ic_chevron_right" android:drawablePadding="10dp" android:gravity="center_vertical" android:minHeight="58dp" android:padding="14dp" android:textColor="@color/io_danger_text" android:textStyle="bold" app:drawableTint="@color/io_danger_text" tools:text="1 usuario inactivo requiere revisión"/></com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView android:id="@+id/card_unassigned_alert" style="@style/Widget.IoTelito.Card.Action" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" app:cardBackgroundColor="@color/io_warning_surface"><TextView android:id="@+id/tv_unassigned_alert" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_info_outline" android:drawableEnd="@drawable/ic_chevron_right" android:drawablePadding="10dp" android:gravity="center_vertical" android:minHeight="58dp" android:padding="14dp" android:textColor="@color/io_warning_dark" android:textStyle="bold" app:drawableTint="@color/io_warning_dark" tools:text="1 hotel sin administrador asignado"/></com.google.android.material.card.MaterialCardView>
 
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:scrollbars="none">
-            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
-                <com.google.android.material.button.MaterialButton android:id="@+id/btn_quick_users" style="@style/Widget.Material3.Button" android:layout_width="wrap_content" android:layout_height="40dp" android:backgroundTint="@color/io_navy" android:text="@string/superadmin_nav_users" android:textAllCaps="false" />
-                <com.google.android.material.button.MaterialButton android:id="@+id/btn_quick_hotels" style="@style/Widget.Material3.Button" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="8dp" android:backgroundTint="@color/io_navy" android:text="@string/superadmin_nav_hotels" android:textAllCaps="false" />
-                <com.google.android.material.button.MaterialButton android:id="@+id/btn_quick_reports" style="@style/Widget.Material3.Button" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="8dp" android:backgroundTint="@color/io_navy" android:text="@string/superadmin_nav_reports" android:textAllCaps="false" />
-                <com.google.android.material.button.MaterialButton android:id="@+id/btn_quick_logs" style="@style/Widget.Material3.Button" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="8dp" android:backgroundTint="@color/io_navy" android:text="@string/superadmin_logs" android:textAllCaps="false" />
-            </LinearLayout>
-        </HorizontalScrollView>
+        <TextView style="@style/TextAppearance.IoTelito.SectionTitle" android:layout_marginTop="22dp" android:text="@string/superadmin_quick_access" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_quick_users" style="@style/Widget.IoTelito.Card.Action" android:layout_width="0dp" android:layout_height="86dp" android:layout_marginEnd="6dp" android:layout_weight="1"><LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp"><ImageView android:layout_width="28dp" android:layout_height="28dp" android:contentDescription="@null" android:src="@drawable/ic_group" app:tint="@color/io_teal"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:text="@string/superadmin_nav_users" android:textColor="@color/io_navy" android:textStyle="bold"/></LinearLayout></com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_quick_hotels" style="@style/Widget.IoTelito.Card.Action" android:layout_width="0dp" android:layout_height="86dp" android:layout_marginStart="6dp" android:layout_weight="1"><LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp"><ImageView android:layout_width="28dp" android:layout_height="28dp" android:contentDescription="@null" android:src="@drawable/ic_building" app:tint="@color/io_teal"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:text="@string/superadmin_nav_hotels" android:textColor="@color/io_navy" android:textStyle="bold"/></LinearLayout></com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_quick_reports" style="@style/Widget.IoTelito.Card.Action" android:layout_width="0dp" android:layout_height="86dp" android:layout_marginEnd="6dp" android:layout_weight="1"><LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp"><ImageView android:layout_width="28dp" android:layout_height="28dp" android:contentDescription="@null" android:src="@drawable/ic_bar_chart" app:tint="@color/io_teal"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:text="@string/superadmin_nav_reports" android:textColor="@color/io_navy" android:textStyle="bold"/></LinearLayout></com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_quick_logs" style="@style/Widget.IoTelito.Card.Action" android:layout_width="0dp" android:layout_height="86dp" android:layout_marginStart="6dp" android:layout_weight="1"><LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp"><ImageView android:layout_width="28dp" android:layout_height="28dp" android:contentDescription="@null" android:src="@drawable/ic_history" app:tint="@color/io_teal"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:text="@string/superadmin_logs" android:textColor="@color/io_navy" android:textStyle="bold"/></LinearLayout></com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/superadmin_recent_activity" android:textColor="@color/io_navy" android:textSize="18sp" android:textStyle="bold" />
-
-        <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:layout_marginBottom="16dp">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_building" android:drawablePadding="10dp" android:padding="6dp" android:text="Nuevo hotel registrado: Hotel Sol de Miraflores\nHace 10 min" android:textColor="@color/io_text_primary" app:drawableTint="@color/io_teal" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="6dp" android:background="@color/io_divider" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_person" android:drawablePadding="10dp" android:padding="6dp" android:text="Admin Carlos Mendoza Quispe actualizó perfil\nHace 1 hora" android:textColor="@color/io_text_primary" app:drawableTint="@color/io_teal" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="6dp" android:background="@color/io_divider" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_warning" android:drawablePadding="10dp" android:padding="6dp" android:text="Se desactivó usuario: maria.garcia@gmail.com\nHace 3 horas" android:textColor="@color/io_text_primary" app:drawableTint="@color/io_teal" />
-            </LinearLayout>
+        <TextView style="@style/TextAppearance.IoTelito.SectionTitle" android:layout_marginTop="22dp" android:text="@string/superadmin_recent_activity" />
+        <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:layout_marginBottom="16dp" app:cardCornerRadius="16dp" app:strokeColor="@color/io_border" app:strokeWidth="1dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="14dp"><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_building" android:drawablePadding="12dp" android:padding="6dp" android:text="@string/superadmin_activity_hotel" android:textColor="@color/io_text_primary" app:drawableTint="@color/io_teal"/><View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="8dp" android:background="@color/io_divider"/><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_person" android:drawablePadding="12dp" android:padding="6dp" android:text="@string/superadmin_activity_profile" android:textColor="@color/io_text_primary" app:drawableTint="@color/io_metric_violet"/><View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="8dp" android:background="@color/io_divider"/><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_warning" android:drawablePadding="12dp" android:padding="6dp" android:text="@string/superadmin_activity_inactive" android:textColor="@color/io_text_primary" app:drawableTint="@color/io_warning_text"/></LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

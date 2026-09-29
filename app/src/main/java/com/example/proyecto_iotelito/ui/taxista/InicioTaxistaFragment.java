@@ -11,15 +11,18 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.TaxistaSampleData;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 /**
  * Pestaña "Inicio" del taxista: saludo, disponibilidad, resumen del día
  * y acceso rápido a las solicitudes pendientes. Contenido con datos de
- * ejemplo; el listado real de solicitudes llega en el siguiente incremento.
+ * ejemplo; el contador de solicitudes sale de TaxistaSampleData.
  */
 public class InicioTaxistaFragment extends Fragment {
+
+    private MaterialButton btnVerSolicitudes;
 
     @Nullable
     @Override
@@ -50,11 +53,26 @@ public class InicioTaxistaFragment extends Fragment {
                         ? R.string.taxi_disponible_desc
                         : R.string.taxi_no_disponible_desc));
 
-        MaterialButton btnVerSolicitudes = view.findViewById(R.id.btn_ver_solicitudes);
-        btnVerSolicitudes.setText(getString(R.string.taxi_btn_ver_solicitudes, 4));
+        btnVerSolicitudes = view.findViewById(R.id.btn_ver_solicitudes);
+        actualizarContadorSolicitudes();
         btnVerSolicitudes.setOnClickListener(v -> irASolicitudes());
 
         view.findViewById(R.id.banner_nueva_solicitud).setOnClickListener(v -> irASolicitudes());
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            actualizarContadorSolicitudes();
+        }
+    }
+
+    private void actualizarContadorSolicitudes() {
+        if (btnVerSolicitudes != null) {
+            btnVerSolicitudes.setText(getString(R.string.taxi_btn_ver_solicitudes,
+                    TaxistaSampleData.solicitudes().size()));
+        }
     }
 
     private void irASolicitudes() {

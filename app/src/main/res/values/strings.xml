@@ -324,13 +324,14 @@
 
     <!-- Solicitudes disponibles -->
     <string name="taxi_solicitudes_titulo">Solicitudes disponibles</string>
-    <string name="taxi_solicitudes_subtitulo">4 solicitudes cerca de tu ubicación</string>
-    <string name="taxi_tag_taxi_incluido">TAXI INCLUIDO</string>
+    <string name="taxi_solicitudes_subtitulo">%1$d solicitudes cerca de tu ubicación</string>
+    <string name="taxi_solicitudes_vacio">No hay solicitudes disponibles por ahora.</string>
+    <string name="taxi_pill_minutos">%1$d min</string>
     <string name="taxi_tag_menos_5_min">Menos de 5 min</string>
     <string name="taxi_btn_ver_solicitud">Ver solicitud</string>
     <string name="taxi_chip_todas">Todas</string>
     <string name="taxi_chip_menos_10_min">Menos de 10 min</string>
-    <string name="taxi_chip_taxi_incluido">Con taxi incluido</string>
+    <string name="taxi_chip_mayor_tarifa">Mayor tarifa</string>
 
     <!-- Detalle del servicio -->
     <string name="taxi_detalle_servicio_titulo">Detalle del Servicio</string>
@@ -379,11 +380,21 @@
     <!-- Historial -->
     <string name="taxi_historial_titulo">Historial de servicios</string>
     <string name="taxi_historial_subtitulo">Registro de tus traslados</string>
-    <string name="taxi_tab_todos">Todos (3)</string>
-    <string name="taxi_tab_completados">Completados (2)</string>
-    <string name="taxi_tab_cancelados">Cancelados (1)</string>
-    <string name="taxi_stat_completados">48 servicios en total</string>
-    <string name="taxi_stat_cuota">S/ 245.50 Cuota</string>
+    <string name="taxi_tab_todos">Todos (%1$d)</string>
+    <string name="taxi_tab_completados">Completados (%1$d)</string>
+    <string name="taxi_tab_cancelados">Cancelados (%1$d)</string>
+    <string name="taxi_stat_completados">%1$d servicios completados</string>
+    <string name="taxi_stat_cuota">S/ %1$.2f Cuota</string>
+    <string name="taxi_pasajero_vehiculo">%1$s · %2$s</string>
+    <string name="taxi_tarifa_monto">S/ %1$.2f</string>
+    <string name="taxi_label_tarifa">Tarifa del servicio</string>
+    <string name="taxi_label_pagado_por">Pagado por</string>
+    <string name="taxi_valor_hotel">Hotel</string>
+    <string name="taxi_label_hora">Hora</string>
+    <string name="taxi_label_motivo">Motivo</string>
+    <string name="taxi_pasajero_huesped">Huésped</string>
+    <string name="taxi_resumen_servicio_titulo">Resumen del servicio</string>
+    <string name="taxi_btn_cerrar">Cerrar</string>
     <string name="taxi_historial_recientes">Servicios recientes</string>
     <string name="taxi_historial_vacio">No tienes servicios en esta categoría.</string>
     <string name="taxi_btn_ver_detalle_historial">Ver detalle</string>
@@ -423,6 +434,7 @@
     <string name="superadmin_app_name">IoTelito Superadmin</string>
     <string name="superadmin_greeting">Hola, Superadmin</string>
     <string name="superadmin_console_subtitle">IoTelito Perú · Consola de Control</string>
+    <string name="superadmin_system_connected">Sistema operativo y conectado</string>
     <string name="superadmin_initials">SA</string>
     <string name="superadmin_open_profile">Abrir perfil del superadministrador</string>
     <string name="superadmin_profile_title">Mi perfil</string>
@@ -442,16 +454,54 @@
     <string name="superadmin_users_total_label">USUARIOS REGISTRADOS</string>
     <string name="superadmin_users_status_label">ESTADO DE CUENTAS</string>
     <string name="superadmin_users_status_summary">%1$d activos · %2$d inactivos</string>
+    <string name="superadmin_users_empty_title">No encontramos usuarios</string>
+    <string name="superadmin_users_empty_subtitle">Prueba con otro nombre o retira alguno de los filtros.</string>
     <string name="superadmin_hotels_title">Gestión de hoteles</string>
     <string name="superadmin_hotels_subtitle">Supervisa establecimientos, administradores y operaciones</string>
     <string name="superadmin_hotels_total_label">HOTELES REGISTRADOS</string>
     <string name="superadmin_hotels_unassigned_label">SIN ADMINISTRADOR</string>
+    <string name="superadmin_hotels_empty_title">No encontramos hoteles</string>
+    <string name="superadmin_hotels_empty_subtitle">Prueba con otra búsqueda o selecciona un distrito diferente.</string>
+    <string name="superadmin_activity_hotel">Nuevo hotel registrado\nHace 10 min</string>
+    <string name="superadmin_activity_profile">Perfil de administrador actualizado\nHace 1 hora</string>
+    <string name="superadmin_activity_inactive">Cuenta inactiva detectada\nHace 3 horas</string>
+    <string name="superadmin_section_identity">Identidad del hotel</string>
+    <string name="superadmin_section_identity_help">Agrega una imagen clara y el nombre comercial completo.</string>
+    <string name="superadmin_section_location">Ubicación</string>
+    <string name="superadmin_section_contact">Información de contacto</string>
+    <string name="superadmin_section_settings">Descripción y configuración</string>
+    <string name="superadmin_reports_subtitle">Analiza reservas, ingresos y ocupación por periodo</string>
+    <string name="superadmin_map_location_title">Ubicación precisa del hotel</string>
+    <string name="superadmin_map_location_pending">Elige el punto exacto en el mapa o usa la ubicación del teléfono.</string>
+    <string name="superadmin_map_location_ready">Punto seleccionado: %1$.5f, %2$.5f</string>
+    <string name="superadmin_latitude">Latitud</string>
+    <string name="superadmin_longitude">Longitud</string>
+    <string name="superadmin_use_current_location">Mi ubicación</string>
+    <string name="superadmin_view_in_maps">Elegir en mapa</string>
+    <string name="superadmin_location_permission_denied">Se necesita permiso de ubicación para obtener las coordenadas actuales.</string>
+    <string name="superadmin_location_unavailable">No se pudo obtener la ubicación. Activa el GPS o elige el punto en el mapa.</string>
+    <string name="superadmin_invalid_coordinates">Selecciona la ubicación del hotel en el mapa.</string>
+    <string name="superadmin_location_picker_title">Seleccionar ubicación</string>
+    <string name="superadmin_location_picker_instruction">Mueve el mapa hasta colocar el cursor sobre la entrada del hotel.</string>
+    <string name="superadmin_location_picker_loading">Cargando mapa…</string>
+    <string name="superadmin_location_picker_point">Punto: %1$.5f, %2$.5f</string>
+    <string name="superadmin_location_picker_confirm">Confirmar ubicación</string>
+    <string name="superadmin_weekly_bookings_chart_description">Gráfica de reservas con valores por periodo</string>
+
+    <plurals name="superadmin_inactive_users_dynamic">
+        <item quantity="one">%d usuario inactivo requiere revisión</item>
+        <item quantity="other">%d usuarios inactivos requieren revisión</item>
+    </plurals>
+    <plurals name="superadmin_unassigned_hotels_dynamic">
+        <item quantity="one">%d hotel sin administrador asignado</item>
+        <item quantity="other">%d hoteles sin administrador asignado</item>
+    </plurals>
     <string name="superadmin_nav_home">Inicio</string>
     <string name="superadmin_nav_users">Usuarios</string>
     <string name="superadmin_nav_hotels">Hoteles</string>
     <string name="superadmin_nav_reports">Reportes</string>
     <string name="superadmin_active_users">Usuarios activos</string>
-    <string name="superadmin_registered_hotels">Hoteles reg.</string>
+    <string name="superadmin_registered_hotels">Hoteles registrados</string>
     <string name="superadmin_administrators">Administradores</string>
     <string name="superadmin_month_bookings">Reservas del mes</string>
     <string name="superadmin_pending_alerts">Alertas pendientes</string>

@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".IoTelitoApplication"
         android:allowBackup="true"
@@ -217,6 +221,11 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+
+        <activity
+            android:name=".ui.superadmin.hoteles.SeleccionarUbicacionActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.hoteles.FormularioHotelActivity" />
 
         <activity
             android:name=".ui.superadmin.hoteles.DetalleHotelAdminActivity"
