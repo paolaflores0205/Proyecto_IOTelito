@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.TaxistaSampleData;
+import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
 
 /**
  * Traslado en curso con el pasajero a bordo, rumbo al aeropuerto.
@@ -25,15 +27,18 @@ public class DireccionAeropuertoActivity extends AppCompatActivity {
         ((TextView) subHeader.findViewById(R.id.tv_title)).setText(R.string.taxi_direccion_al_aeropuerto);
         EstadoServicioUi.pintarPill(subHeader.findViewById(R.id.tv_estado_pill), EstadoServicio.EN_TRASLADO);
 
-        ((TextView) findViewById(R.id.tv_direccion)).setText("Aeropuerto Jorge Chávez (Callao)");
-        ((TextView) findViewById(R.id.tv_tiempo_distancia)).setText("25 min · 18.2 km");
+        SolicitudServicio servicio = TaxistaSampleData.servicioActivo();
+        ((TextView) findViewById(R.id.tv_direccion)).setText(servicio.destino);
+        ((TextView) findViewById(R.id.tv_tiempo_distancia)).setText(
+                getString(R.string.taxi_tiempo_distancia, servicio.viajeDuracion, servicio.viajeDistancia));
 
         View rowPasajero = findViewById(R.id.row_pasajero);
-        ((TextView) rowPasajero.findViewById(R.id.tv_avatar_inicial)).setText("MG");
-        ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_nombre)).setText("María García");
-        ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_detalle)).setText("Hotel Miraflores Park · 1 pasajero");
+        ((TextView) rowPasajero.findViewById(R.id.tv_avatar_inicial)).setText(servicio.pasajeroIniciales);
+        ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_nombre)).setText(servicio.pasajeroNombre);
+        ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_detalle)).setText(
+                getString(R.string.taxi_hotel_un_pasajero, servicio.hotel));
         rowPasajero.findViewById(R.id.iv_chat).setOnClickListener(v ->
-                startActivity(ChatPasajeroTaxistaActivity.createIntent(this, "María García", "MG")));
+                startActivity(ChatPasajeroTaxistaActivity.createIntent(this, servicio.pasajeroNombre, servicio.pasajeroIniciales)));
 
         findViewById(R.id.btn_llegue_al_destino).setOnClickListener(v ->
                 startActivity(new Intent(this, FinalizarServicioActivity.class)));

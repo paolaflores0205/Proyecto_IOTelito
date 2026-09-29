@@ -64,7 +64,7 @@ public class DetalleServicioActivity extends AppCompatActivity {
         findViewById(R.id.btn_aceptar_servicio).setOnClickListener(v -> {
             // Al aceptar, el pedido deja de estar disponible para los demás taxistas.
             TaxistaSampleData.aceptarSolicitud(solicitud.id);
-            startActivity(ServicioAsignadoActivity.createIntent(this, solicitud));
+            startActivity(new Intent(this, ServicioAsignadoActivity.class));
         });
     }
 }

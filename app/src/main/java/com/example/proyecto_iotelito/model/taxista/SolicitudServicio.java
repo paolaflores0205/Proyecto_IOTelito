@@ -16,10 +16,14 @@ public class SolicitudServicio {
     public final String distanciaTiempo;
     /** Tarifa del servicio, cubierta por la reserva del hotel (no la paga el pasajero). */
     public final double tarifa;
+    /** Tramo hotel → aeropuerto (el servicio en sí), a diferencia de distanciaTiempo, que es el tramo hasta el hotel. */
+    public final String viajeDistancia;
+    public final String viajeDuracion;
 
     public SolicitudServicio(int id, int minutosEspera, String hotel, String destino,
                              String fechaHora, String pasajeroNombre, String pasajeroIniciales,
-                             String distanciaTiempo, double tarifa) {
+                             String distanciaTiempo, double tarifa,
+                             String viajeDistancia, String viajeDuracion) {
         this.id = id;
         this.minutosEspera = minutosEspera;
         this.hotel = hotel;
@@ -29,5 +33,7 @@ public class SolicitudServicio {
         this.pasajeroIniciales = pasajeroIniciales;
         this.distanciaTiempo = distanciaTiempo;
         this.tarifa = tarifa;
+        this.viajeDistancia = viajeDistancia;
+        this.viajeDuracion = viajeDuracion;
     }
 }

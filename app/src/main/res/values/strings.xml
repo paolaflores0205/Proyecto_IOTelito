@@ -395,6 +395,8 @@
     <string name="taxi_pasajero_huesped">Huésped</string>
     <string name="taxi_resumen_servicio_titulo">Resumen del servicio</string>
     <string name="taxi_btn_cerrar">Cerrar</string>
+    <string name="taxi_tiempo_distancia">%1$s · %2$s</string>
+    <string name="taxi_hotel_un_pasajero">%1$s · 1 pasajero</string>
     <string name="taxi_historial_recientes">Servicios recientes</string>
     <string name="taxi_historial_vacio">No tienes servicios en esta categoría.</string>
     <string name="taxi_btn_ver_detalle_historial">Ver detalle</string>

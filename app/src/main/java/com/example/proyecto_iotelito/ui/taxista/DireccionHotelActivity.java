@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.TaxistaSampleData;
+import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
 
 /**
  * Recorrido en curso hacia el hotel de recojo. Contenido de ejemplo;
@@ -25,9 +27,10 @@ public class DireccionHotelActivity extends AppCompatActivity {
         ((TextView) subHeader.findViewById(R.id.tv_title)).setText(R.string.taxi_direccion_al_hotel);
         EstadoServicioUi.pintarPill(subHeader.findViewById(R.id.tv_estado_pill), EstadoServicio.EN_CAMINO);
 
-        ((TextView) findViewById(R.id.tv_direccion)).setText("Av. Malecón de la Reserva 1035");
+        SolicitudServicio servicio = TaxistaSampleData.servicioActivo();
+        ((TextView) findViewById(R.id.tv_direccion)).setText(servicio.hotel);
         ((TextView) findViewById(R.id.tv_instruccion)).setText("Gira a la derecha en 30m");
-        ((TextView) findViewById(R.id.tv_tiempo_distancia)).setText("12 min · 4.2 km");
+        ((TextView) findViewById(R.id.tv_tiempo_distancia)).setText(servicio.distanciaTiempo);
 
         findViewById(R.id.btn_llegue_al_hotel).setOnClickListener(v ->
                 startActivity(new Intent(this, DireccionAeropuertoActivity.class)));

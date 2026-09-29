@@ -21,17 +21,17 @@ public final class TaxistaSampleData {
 
     private static final List<SolicitudServicio> SOLICITUDES = new ArrayList<>(Arrays.asList(
             new SolicitudServicio(1, 4, "Hotel Miraflores Park", AEROPUERTO,
-                    "02 ago 2026, 14:00", "Ana García", "AG", "14 min · 6.2 km", 45.50),
+                    "02 ago 2026, 14:00", "Ana García", "AG", "14 min · 6.2 km", 45.50, "18.2 km", "25 min"),
             new SolicitudServicio(2, 20, "Palacio del Inka Cusco (Lima Branch)", AEROPUERTO,
-                    "03 ago 2026, 15:30", "Carlos Mendoza", "CM", "22 min · 9.8 km", 62.00),
+                    "03 ago 2026, 15:30", "Carlos Mendoza", "CM", "22 min · 9.8 km", 62.00, "22.5 km", "34 min"),
             new SolicitudServicio(3, 10, "Dazzler Miraflores", AEROPUERTO,
-                    "04 ago 2026, 09:15", "Rodrigo Salas", "RS", "11 min · 4.5 km", 38.00),
+                    "04 ago 2026, 09:15", "Rodrigo Salas", "RS", "11 min · 4.5 km", 38.00, "17.8 km", "24 min"),
             new SolicitudServicio(4, 35, "Barranco Art Boutique", AEROPUERTO,
-                    "05 ago 2026, 11:00", "Valentina Ríos", "VR", "38 min · 21 km", 55.00),
+                    "05 ago 2026, 11:00", "Valentina Ríos", "VR", "38 min · 21 km", 55.00, "24 km", "38 min"),
             new SolicitudServicio(5, 8, "Casa Andina Premium Miraflores", AEROPUERTO,
-                    "06 ago 2026, 06:45", "Lucía Fernández", "LF", "9 min · 3.8 km", 32.00),
+                    "06 ago 2026, 06:45", "Lucía Fernández", "LF", "9 min · 3.8 km", 32.00, "16.5 km", "23 min"),
             new SolicitudServicio(6, 15, "Hotel B Barranco", AEROPUERTO,
-                    "06 ago 2026, 18:20", "Mateo Quispe", "MQ", "17 min · 7.1 km", 48.00)));
+                    "06 ago 2026, 18:20", "Mateo Quispe", "MQ", "17 min · 7.1 km", 48.00, "23 km", "36 min")));
 
     private static final List<ServicioHistorial> HISTORIAL = Arrays.asList(
             new ServicioHistorial(1, "14:10", EstadoServicio.FINALIZADO,
@@ -56,6 +56,14 @@ public final class TaxistaSampleData {
                     "Country Club Lima Hotel", "Aeropuerto Jorge Chávez",
                     "Camila Rojas", "Toyota Corolla", "22 km", "30 min", null, 50.00));
 
+    /** Servicio que se muestra si se abre el flujo sin haber aceptado ninguna solicitud. */
+    private static final SolicitudServicio SERVICIO_DEMO = new SolicitudServicio(0, 4,
+            "Hotel Miraflores Park", AEROPUERTO, "02 ago 2026, 14:00", "Ana García", "AG",
+            "14 min · 6.2 km", 45.50, "18.2 km", "25 min");
+
+    /** Solicitud que el taxista aceptó y está atendiendo; null si no tiene ningún servicio en curso. */
+    private static SolicitudServicio servicioActivo;
+
     private TaxistaSampleData() {
     }
 
@@ -73,12 +81,27 @@ public final class TaxistaSampleData {
         return null;
     }
 
-    /** El taxista acepta el pedido: queda asignado y deja de estar disponible para los demás. */
+    /**
+     * Servicio en curso, compartido por todas las pantallas del flujo (asignado, camino al hotel,
+     * traslado, QR y resumen final). Si no hay ninguno devuelve un servicio de ejemplo.
+     */
+    public static SolicitudServicio servicioActivo() {
+        return servicioActivo != null ? servicioActivo : SERVICIO_DEMO;
+    }
+
+    /** El servicio terminó: el taxista queda libre para aceptar otro. */
+    public static void finalizarServicioActivo() {
+        servicioActivo = null;
+    }
+
+    /** El taxista acepta el pedido: queda asignado (servicio activo) y deja de estar disponible para los demás. */
     public static void aceptarSolicitud(int id) {
         Iterator<SolicitudServicio> it = SOLICITUDES.iterator();
         while (it.hasNext()) {
-            if (it.next().id == id) {
+            SolicitudServicio solicitud = it.next();
+            if (solicitud.id == id) {
                 it.remove();
+                servicioActivo = solicitud;
                 return;
             }
         }
