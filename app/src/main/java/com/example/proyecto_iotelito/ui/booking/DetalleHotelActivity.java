@@ -44,6 +44,7 @@ public class DetalleHotelActivity extends AppCompatActivity {
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
         Hotel hotel = SampleData.findById(hotelId);
+        BookingSelection bookingSelection = BookingSelection.from(getIntent());
 
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         findViewById(R.id.iv_favorito).setOnClickListener(v ->
@@ -65,6 +66,7 @@ public class DetalleHotelActivity extends AppCompatActivity {
         findViewById(R.id.btn_ver_habitaciones).setOnClickListener(v -> {
             Intent intent = new Intent(this, DetalleHabitacionActivity.class);
             intent.putExtra(DetalleHabitacionActivity.EXTRA_HOTEL_ID, hotel.id);
+            bookingSelection.putInto(intent);
             startActivity(intent);
         });
     }

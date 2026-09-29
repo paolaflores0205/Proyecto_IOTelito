@@ -22,9 +22,9 @@ import java.util.Locale;
 public class ReservaConfirmadaActivity extends AppCompatActivity {
 
     public static final String EXTRA_HOTEL_ID = "extra_hotel_id";
-    public static final String EXTRA_FECHAS = "extra_fechas";
     public static final String EXTRA_TOTAL = "extra_total";
     public static final String EXTRA_CODIGO = "extra_codigo";
+    public static final String EXTRA_RESERVA_ID = "extra_reserva_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,16 +33,18 @@ public class ReservaConfirmadaActivity extends AppCompatActivity {
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
         Hotel hotel = SampleData.findById(hotelId);
-        String fechas = getIntent().getStringExtra(EXTRA_FECHAS);
-        double total = getIntent().getDoubleExtra(EXTRA_TOTAL, hotel.pricePerNight * 3);
+        BookingSelection bookingSelection = BookingSelection.from(getIntent());
+        double total = getIntent().getDoubleExtra(
+                EXTRA_TOTAL, hotel.pricePerNight * bookingSelection.noches());
         String codigo = getIntent().getStringExtra(EXTRA_CODIGO);
 
         ((TextView) findViewById(R.id.tv_codigo)).setText(getString(R.string.codigo_reserva, codigo));
 
         bindRow(R.id.row_hotel, R.string.label_hotel, hotel.name);
         bindRow(R.id.row_habitacion, R.string.label_habitacion, hotel.roomName);
-        bindRow(R.id.row_fechas, R.string.label_fechas, fechas);
-        bindRow(R.id.row_huespedes, R.string.label_huespedes_dp, hotel.roomCapacity);
+        bindRow(R.id.row_fechas, R.string.label_fechas, bookingSelection.textoFechas());
+        bindRow(R.id.row_huespedes, R.string.label_huespedes_dp,
+                bookingSelection.textoHuespedes(this));
 
         ((TextView) findViewById(R.id.tv_monto_total)).setText("S/ " + String.format(Locale.US, "%,.0f", total));
 

@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
+import com.example.proyecto_iotelito.model.Reserva;
 
 import java.util.Locale;
 import java.util.Random;
@@ -28,11 +29,10 @@ import java.util.Random;
 public class ConfirmacionReservaActivity extends AppCompatActivity {
 
     public static final String EXTRA_HOTEL_ID = "extra_hotel_id";
-    public static final String EXTRA_FECHAS = "extra_fechas";
     public static final String EXTRA_TOTAL = "extra_total";
 
     private Hotel hotel;
-    private String fechas;
+    private BookingSelection bookingSelection;
     private double total;
 
     @Override
@@ -42,8 +42,9 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
         hotel = SampleData.findById(hotelId);
-        fechas = getIntent().getStringExtra(EXTRA_FECHAS);
-        total = getIntent().getDoubleExtra(EXTRA_TOTAL, hotel.pricePerNight * 3);
+        bookingSelection = BookingSelection.from(getIntent());
+        total = getIntent().getDoubleExtra(
+                EXTRA_TOTAL, hotel.pricePerNight * bookingSelection.noches());
 
         View subHeader = findViewById(R.id.sub_header);
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
@@ -52,8 +53,9 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_hotel_nombre)).setText(hotel.name);
 
         bindRow(R.id.row_habitacion, R.string.label_habitacion, hotel.roomName, false);
-        bindRow(R.id.row_fechas, R.string.label_fechas, fechas, false);
-        bindRow(R.id.row_huespedes, R.string.label_huespedes_dp, hotel.roomCapacity, false);
+        bindRow(R.id.row_fechas, R.string.label_fechas, bookingSelection.textoFechas(), false);
+        bindRow(R.id.row_huespedes, R.string.label_huespedes_dp,
+                bookingSelection.textoHuespedes(this), false);
         bindRow(R.id.row_precio_noche, R.string.label_precio_noche,
                 formatMoney(hotel.pricePerNight), true);
 
@@ -175,11 +177,22 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         String codigo = String.format(Locale.getDefault(), "IOT-%04d-%04d",
                 hotel.id, new Random().nextInt(9000) + 1000);
 
+        Reserva reserva = SampleData.agregarReserva(
+                hotel,
+                bookingSelection.fechaEntrada(),
+                bookingSelection.fechaSalida(),
+                bookingSelection.textoHuespedes(this),
+                total,
+                codigo);
+
+        findViewById(R.id.btn_confirmar_reserva).setEnabled(false);
+
         Intent intent = new Intent(this, ReservaConfirmadaActivity.class);
         intent.putExtra(ReservaConfirmadaActivity.EXTRA_HOTEL_ID, hotel.id);
-        intent.putExtra(ReservaConfirmadaActivity.EXTRA_FECHAS, fechas);
         intent.putExtra(ReservaConfirmadaActivity.EXTRA_TOTAL, total);
         intent.putExtra(ReservaConfirmadaActivity.EXTRA_CODIGO, codigo);
+        intent.putExtra(ReservaConfirmadaActivity.EXTRA_RESERVA_ID, reserva.id);
+        bookingSelection.putInto(intent);
         startActivity(intent);
     }
 

@@ -20,15 +20,12 @@ import com.example.proyecto_iotelito.model.Hotel;
 import java.util.Locale;
 
 /**
- * Detalle de la habitación destacada de un hotel. Calcula el total de
- * la estadía (estática: 15-18 ago, 3 noches) y lo envía a la
- * confirmación de reserva.
+ * Detalle de la habitación destacada de un hotel. Muestra la selección
+ * realizada en Explorar y calcula el total según sus noches reales.
  */
 public class DetalleHabitacionActivity extends AppCompatActivity {
 
     public static final String EXTRA_HOTEL_ID = "extra_hotel_id";
-    private static final int NOCHES = 3;
-    private static final String FECHAS = "15 ago – 18 ago (3 noches)";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +34,7 @@ public class DetalleHabitacionActivity extends AppCompatActivity {
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
         Hotel hotel = SampleData.findById(hotelId);
+        BookingSelection bookingSelection = BookingSelection.from(getIntent());
 
         ((ImageView) findViewById(R.id.iv_room_photo))
                 .setImageResource(HotelMedia.galleryImage(hotel.id, 1));
@@ -48,18 +46,22 @@ public class DetalleHabitacionActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_room_name)).setText(hotel.roomName);
         ((TextView) findViewById(R.id.tv_room_price)).setText(
                 String.format(Locale.getDefault(), "S/ %.0f", hotel.pricePerNight));
-        ((TextView) findViewById(R.id.tag_capacidad)).setText(hotel.roomCapacity);
+        // Esta etiqueta describe la reserva que el usuario está armando, no la
+        // capacidad estática usada originalmente por el mockup.
+        ((TextView) findViewById(R.id.tag_capacidad)).setText(
+                bookingSelection.textoHuespedes(this));
         ((TextView) findViewById(R.id.tag_tamano)).setText(hotel.roomSize);
-        ((TextView) findViewById(R.id.tv_estadia)).setText(getString(R.string.estadia_seleccionada, FECHAS));
+        ((TextView) findViewById(R.id.tv_estadia)).setText(
+                getString(R.string.estadia_seleccionada, bookingSelection.textoFechas()));
 
         poblarCaracteristicas(hotel);
 
-        double total = hotel.pricePerNight * NOCHES;
+        double total = hotel.pricePerNight * bookingSelection.noches();
         findViewById(R.id.btn_reservar).setOnClickListener(v -> {
             Intent intent = new Intent(this, ConfirmacionReservaActivity.class);
             intent.putExtra(ConfirmacionReservaActivity.EXTRA_HOTEL_ID, hotel.id);
-            intent.putExtra(ConfirmacionReservaActivity.EXTRA_FECHAS, FECHAS);
             intent.putExtra(ConfirmacionReservaActivity.EXTRA_TOTAL, total);
+            bookingSelection.putInto(intent);
             startActivity(intent);
         });
     }

@@ -14,13 +14,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.HotelMedia;
 import com.example.proyecto_iotelito.data.SampleData;
-import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity;
 import com.example.proyecto_iotelito.ui.booking.ResultadosActivity;
+import com.example.proyecto_iotelito.ui.hoteles.HotelAdapter;
 import com.example.proyecto_iotelito.ui.hoteles.ListaHotelesActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
@@ -100,11 +101,25 @@ public class ExplorarFragment extends Fragment {
         MaterialButton btnBuscar = view.findViewById(R.id.btn_buscar_hoteles);
         btnBuscar.setOnClickListener(v -> abrirResultados());
 
-        bindHotelCard(view.findViewById(R.id.card_hotel_0), SampleData.HOTELS.get(0));
-        bindHotelCard(view.findViewById(R.id.card_hotel_1), SampleData.HOTELS.get(1));
+        RecyclerView rvRecomendados = view.findViewById(R.id.rv_hoteles_recomendados);
+        rvRecomendados.setLayoutManager(new LinearLayoutManager(
+                requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvRecomendados.setNestedScrollingEnabled(false);
+        HotelAdapter recomendadosAdapter = new HotelAdapter(
+                HotelAdapter.TipoTarjeta.HORIZONTAL, hotel -> {
+                    Intent intent = new Intent(getActivity(), DetalleHotelActivity.class);
+                    intent.putExtra(DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
+                    seleccionActual().putInto(intent);
+                    startActivity(intent);
+                });
+        rvRecomendados.setAdapter(recomendadosAdapter);
+        recomendadosAdapter.submitList(SampleData.HOTELS);
 
-        view.findViewById(R.id.tv_ver_todos).setOnClickListener(v ->
-                startActivity(new Intent(getActivity(), ListaHotelesActivity.class)));
+        view.findViewById(R.id.tv_ver_todos).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ListaHotelesActivity.class);
+            seleccionActual().putInto(intent);
+            startActivity(intent);
+        });
     }
 
     private void inicializarFechasPorDefecto() {
@@ -263,27 +278,13 @@ public class ExplorarFragment extends Fragment {
         Intent intent = new Intent(getActivity(), ResultadosActivity.class);
         intent.putExtra(ResultadosActivity.EXTRA_DESTINO, destino);
         intent.putExtra(ResultadosActivity.EXTRA_RESUMEN, resumen);
+        seleccionActual().putInto(intent);
         startActivity(intent);
     }
 
-    private void bindHotelCard(View cardRoot, Hotel hotel) {
-        ImageView ivPhoto = cardRoot.findViewById(R.id.iv_photo);
-        TextView tvCity = cardRoot.findViewById(R.id.tv_city);
-        TextView tvRating = cardRoot.findViewById(R.id.tv_rating);
-        TextView tvName = cardRoot.findViewById(R.id.tv_name);
-        TextView tvPrice = cardRoot.findViewById(R.id.tv_price);
-
-        ivPhoto.setImageResource(HotelMedia.hotelImage(hotel.id));
-        tvCity.setText(hotel.city);
-        tvRating.setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
-        tvName.setText(hotel.name);
-        tvPrice.setText(getString(R.string.precio_por_noche,
-                String.format(Locale.getDefault(), "S/ %.0f", hotel.pricePerNight)));
-
-        cardRoot.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), DetalleHotelActivity.class);
-            intent.putExtra(DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
-            startActivity(intent);
-        });
+    private com.example.proyecto_iotelito.ui.booking.BookingSelection seleccionActual() {
+        return new com.example.proyecto_iotelito.ui.booking.BookingSelection(
+                fechaEntradaMillis, fechaSalidaMillis, adultos, ninos);
     }
+
 }

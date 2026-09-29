@@ -290,31 +290,15 @@
                     android:text="@string/ver_todos" />
             </LinearLayout>
 
-            <HorizontalScrollView
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_hoteles_recomendados"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:scrollbars="none"
-                android:clipToPadding="false">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <include
-                        android:id="@+id/card_hotel_0"
-                        layout="@layout/item_hotel_card_horizontal" />
-
-                    <View
-                        android:layout_width="12dp"
-                        android:layout_height="1dp" />
-
-                    <include
-                        android:id="@+id/card_hotel_1"
-                        layout="@layout/item_hotel_card_horizontal" />
-                </LinearLayout>
-            </HorizontalScrollView>
+                android:overScrollMode="never"
+                android:clipToPadding="false"
+                tools:listitem="@layout/item_hotel_card_horizontal" />
         </LinearLayout>
 
     </LinearLayout>

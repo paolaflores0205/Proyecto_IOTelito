@@ -101,7 +101,34 @@ public final class SampleData {
         lista.add(new Reserva(104, 1, "Suite Deluxe", "310",
                 hoy.minusDays(117), hoy.minusDays(115), "2 adultos",
                 900.0, Reserva.Estado.CANCELADA, "IOT-1042-1187"));
-        RESERVAS = Collections.unmodifiableList(lista);
+        RESERVAS = lista;
+    }
+
+    /** Añade una reserva confirmada durante la sesión local actual. */
+    public static synchronized Reserva agregarReserva(
+            Hotel hotel,
+            LocalDate fechaEntrada,
+            LocalDate fechaSalida,
+            String huespedes,
+            double precioTotal,
+            String codigo) {
+        int nuevoId = 1;
+        for (Reserva reserva : RESERVAS) {
+            nuevoId = Math.max(nuevoId, reserva.id + 1);
+        }
+        Reserva nuevaReserva = new Reserva(
+                nuevoId,
+                hotel.id,
+                hotel.roomName,
+                "Por asignar",
+                fechaEntrada,
+                fechaSalida,
+                huespedes,
+                precioTotal,
+                Reserva.Estado.CONFIRMADA,
+                codigo);
+        RESERVAS.add(nuevaReserva);
+        return nuevaReserva;
     }
 
     public static Reserva findReservaById(int id) {

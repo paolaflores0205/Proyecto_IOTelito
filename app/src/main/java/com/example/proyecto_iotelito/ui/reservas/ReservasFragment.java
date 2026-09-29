@@ -1,31 +1,27 @@
 package com.example.proyecto_iotelito.ui.reservas;
 
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SampleData;
-import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Pestaña "Reservas": segmented control Activas/Finalizadas (Clase 2.3 -
@@ -37,7 +33,7 @@ import java.util.Locale;
 public class ReservasFragment extends Fragment {
 
     private TabLayout tabLayout;
-    private LinearLayout listContainer;
+    private ReservaAdapter reservaAdapter;
     private TextView vacioView;
 
     @Nullable
@@ -52,7 +48,10 @@ public class ReservasFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         tabLayout = view.findViewById(R.id.tab_layout);
-        listContainer = view.findViewById(R.id.reservas_list_container);
+        RecyclerView rvReservas = view.findViewById(R.id.rv_reservas);
+        rvReservas.setLayoutManager(new LinearLayoutManager(requireContext()));
+        reservaAdapter = new ReservaAdapter(reserva -> abrirDetalle(reserva.id));
+        rvReservas.setAdapter(reservaAdapter);
         vacioView = view.findViewById(R.id.tv_reservas_vacio);
 
         configurarTabs();
@@ -101,7 +100,7 @@ public class ReservasFragment extends Fragment {
     }
 
     private void renderReservas(boolean activas) {
-        listContainer.removeAllViews();
+        List<ReservaAdapter.Item> items = new ArrayList<>();
 
         if (activas) {
             List<Reserva> proximas = new ArrayList<>();
@@ -124,12 +123,12 @@ public class ReservasFragment extends Fragment {
             vacioView.setText(R.string.sin_reservas_activas);
 
             if (!proximas.isEmpty()) {
-                agregarEncabezadoSeccion(R.string.seccion_proximas_estadias);
-                agregarTarjetasReserva(proximas);
+                items.add(ReservaAdapter.Item.encabezado(R.string.seccion_proximas_estadias));
+                agregarReservas(items, proximas);
             }
             if (!enCurso.isEmpty()) {
-                agregarEncabezadoSeccion(R.string.seccion_en_curso);
-                agregarTarjetasReserva(enCurso);
+                items.add(ReservaAdapter.Item.encabezado(R.string.seccion_en_curso));
+                agregarReservas(items, enCurso);
             }
         } else {
             List<Reserva> pasadas = new ArrayList<>();
@@ -144,70 +143,22 @@ public class ReservasFragment extends Fragment {
             vacioView.setText(R.string.sin_reservas_historial);
 
             if (!pasadas.isEmpty()) {
-                agregarEncabezadoSeccion(R.string.seccion_pasadas);
-                agregarTarjetasReserva(pasadas);
+                items.add(ReservaAdapter.Item.encabezado(R.string.seccion_pasadas));
+                agregarReservas(items, pasadas);
             }
         }
+        reservaAdapter.submitList(items);
     }
 
-    private void agregarEncabezadoSeccion(int textoRes) {
-        TextView header = new TextView(requireContext());
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.topMargin = listContainer.getChildCount() > 0 ? dp(20) : 0;
-        params.bottomMargin = dp(8);
-        header.setLayoutParams(params);
-        header.setText(textoRes);
-        header.setAllCaps(true);
-        header.setTextSize(11);
-        header.setLetterSpacing(0.05f);
-        header.setTypeface(header.getTypeface(), android.graphics.Typeface.BOLD);
-        header.setTextColor(ContextCompat.getColor(requireContext(), R.color.io_text_muted));
-        listContainer.addView(header);
-    }
-
-    private void agregarTarjetasReserva(List<Reserva> reservas) {
-        LayoutInflater inflater = LayoutInflater.from(requireContext());
-        for (int i = 0; i < reservas.size(); i++) {
-            View card = inflater.inflate(R.layout.item_reserva_card, listContainer, false);
-            bindReservaCard(card, reservas.get(i));
-            if (i > 0) {
-                ((LinearLayout.LayoutParams) card.getLayoutParams()).topMargin = dp(12);
-            }
-            listContainer.addView(card);
+    private void agregarReservas(List<ReservaAdapter.Item> items, List<Reserva> reservas) {
+        for (Reserva reserva : reservas) {
+            items.add(ReservaAdapter.Item.reserva(reserva));
         }
-    }
-
-    private void bindReservaCard(View card, Reserva reserva) {
-        Hotel hotel = SampleData.findById(reserva.hotelId);
-
-        ((TextView) card.findViewById(R.id.tv_hotel_nombre)).setText(hotel.name);
-        ((TextView) card.findViewById(R.id.tv_habitacion)).setText(reserva.roomName);
-        ((TextView) card.findViewById(R.id.tv_fechas_huespedes)).setText(
-                reserva.rangoFechasTexto() + " · " + reserva.huespedes);
-        ((TextView) card.findViewById(R.id.tv_precio_total)).setText(
-                "S/ " + String.format(Locale.US, "%,.0f", reserva.precioTotal));
-
-        boolean enCurso = reserva.esActiva() && reserva.estaEnCurso();
-        TextView tvEstado = card.findViewById(R.id.tv_estado);
-        int colorFondo = enCurso ? R.color.io_teal : EstadoUi.colorFondo(reserva.estado);
-        int colorTexto = enCurso ? R.color.white : EstadoUi.colorTexto(reserva.estado);
-        tvEstado.setText(enCurso ? getString(R.string.estado_en_curso) : EstadoUi.texto(requireContext(), reserva.estado));
-        tvEstado.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), colorFondo)));
-        tvEstado.setTextColor(ContextCompat.getColor(requireContext(), colorTexto));
-
-        MaterialButton btnVerDetalle = card.findViewById(R.id.btn_ver_detalle_reserva);
-        btnVerDetalle.setOnClickListener(v -> abrirDetalle(reserva.id));
-        card.setOnClickListener(v -> abrirDetalle(reserva.id));
     }
 
     private void abrirDetalle(int reservaId) {
         Intent intent = new Intent(getActivity(), DetalleReservaActivity.class);
         intent.putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reservaId);
         startActivity(intent);
-    }
-
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 }

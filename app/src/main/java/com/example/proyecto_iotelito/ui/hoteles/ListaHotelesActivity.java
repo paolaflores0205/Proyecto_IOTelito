@@ -8,16 +8,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.HotelMedia;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
+import com.example.proyecto_iotelito.ui.booking.BookingSelection;
 import com.example.proyecto_iotelito.util.ServicioIconos;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -56,7 +57,8 @@ public class ListaHotelesActivity extends AppCompatActivity {
     private MaterialButton btnFiltros;
     private TextView tvLimpiarFiltros;
     private TextView tvConteo;
-    private LinearLayout listContainer;
+    private HotelAdapter hotelAdapter;
+    private BookingSelection bookingSelection;
     private View vacioView;
 
     private double dominioPrecioMin;
@@ -74,6 +76,7 @@ public class ListaHotelesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_hoteles);
+        bookingSelection = BookingSelection.from(getIntent());
 
         double[] dominio = calcularDominioPrecio();
         dominioPrecioMin = dominio[0];
@@ -84,7 +87,15 @@ public class ListaHotelesActivity extends AppCompatActivity {
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
 
         tvConteo = findViewById(R.id.tv_conteo);
-        listContainer = findViewById(R.id.hotel_list_container);
+        RecyclerView rvHoteles = findViewById(R.id.rv_hoteles);
+        rvHoteles.setLayoutManager(new LinearLayoutManager(this));
+        hotelAdapter = new HotelAdapter(HotelAdapter.TipoTarjeta.VERTICAL, hotel -> {
+            Intent intent = new Intent(this, com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity.class);
+            intent.putExtra(com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
+            bookingSelection.putInto(intent);
+            startActivity(intent);
+        });
+        rvHoteles.setAdapter(hotelAdapter);
         vacioView = findViewById(R.id.tv_vacio);
 
         tvLimpiarFiltros = findViewById(R.id.tv_limpiar_filtros);
@@ -362,38 +373,8 @@ public class ListaHotelesActivity extends AppCompatActivity {
     }
 
     private void renderHoteles(List<Hotel> hoteles) {
-        listContainer.removeAllViews();
         vacioView.setVisibility(hoteles.isEmpty() ? View.VISIBLE : View.GONE);
-
-        LayoutInflater inflater = LayoutInflater.from(this);
-        for (Hotel hotel : hoteles) {
-            View card = inflater.inflate(R.layout.item_hotel_card_vertical, listContainer, false);
-            bindHotelCard(card, hotel);
-            if (listContainer.getChildCount() > 0) {
-                ((LinearLayout.LayoutParams) card.getLayoutParams()).topMargin = dp(16);
-            }
-            listContainer.addView(card);
-        }
-    }
-
-    private void bindHotelCard(View card, Hotel hotel) {
-        ((ImageView) card.findViewById(R.id.iv_photo)).setImageResource(HotelMedia.hotelImage(hotel.id));
-        ((TextView) card.findViewById(R.id.tv_location)).setText(hotel.address);
-        ((TextView) card.findViewById(R.id.tv_rating)).setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
-        ((TextView) card.findViewById(R.id.tv_name)).setText(hotel.name);
-        ((TextView) card.findViewById(R.id.tv_price)).setText(
-                getString(R.string.desde_precio, String.format(Locale.getDefault(), "S/ %.0f", hotel.pricePerNight)));
-
-        MaterialButton btnVerDetalle = card.findViewById(R.id.btn_ver_detalle);
-        btnVerDetalle.setOnClickListener(v -> {
-            Intent intent = new Intent(this, com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity.class);
-            intent.putExtra(com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
-            startActivity(intent);
-        });
-    }
-
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
+        hotelAdapter.submitList(hoteles);
     }
 
     private float dpF(int value) {
