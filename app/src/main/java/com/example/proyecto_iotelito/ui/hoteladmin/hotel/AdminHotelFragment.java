@@ -46,7 +46,8 @@ public class AdminHotelFragment extends Fragment {
         binding.tvOcupacion.setText(getString(R.string.hoteladmin_stat_ocupacion, ocupacionPct));
         binding.tvDisponibles.setText(String.valueOf(resumen.disponibles));
         binding.tvSalidas.setText(String.valueOf(resumen.salidasHoy));
-        binding.tvIngresos.setText("S/ " + String.format(Locale.US, "%,.0f", resumen.ingresosHoy));
+        binding.tvIngresos.setText(getString(R.string.hoteladmin_moneda,
+                String.format(Locale.US, "%,.0f", resumen.ingresosHoy)));
 
         binding.cardHabitaciones.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), HabitacionesActivity.class)));

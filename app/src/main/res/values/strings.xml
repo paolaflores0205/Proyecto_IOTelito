@@ -773,6 +773,7 @@
     <string name="hoteladmin_aforo_area">%1$s · %2$d m²</string>
     <string name="hoteladmin_agregar_habitacion">Agregar habitación</string>
     <string name="hoteladmin_habitacion_eliminada">Habitación eliminada</string>
+    <string name="hoteladmin_sin_habitaciones">No hay habitaciones registradas.</string>
     <string name="hoteladmin_confirmar_eliminar_hab_msg">¿Seguro que deseas eliminar esta habitación?</string>
     <plurals name="hoteladmin_listado_habitaciones">
         <item quantity="one">Listado (%d habitación)</item>
@@ -814,6 +815,7 @@
     <string name="hoteladmin_precio_unidad">x %1$s</string>
     <string name="hoteladmin_agregar_servicio">Agregar servicio</string>
     <string name="hoteladmin_servicio_eliminado">Servicio eliminado</string>
+    <string name="hoteladmin_sin_servicios">No hay servicios registrados.</string>
     <string name="hoteladmin_confirmar_eliminar_serv_msg">¿Seguro que deseas eliminar este servicio?</string>
     <plurals name="hoteladmin_servicios_activos">
         <item quantity="one">Servicios activos (%d)</item>

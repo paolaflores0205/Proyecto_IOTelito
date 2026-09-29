@@ -32,6 +32,7 @@ public class AdminChatActivity extends AppCompatActivity {
     private Conversacion conversacion;
     private ArrayList<Mensaje> mensajes;
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
