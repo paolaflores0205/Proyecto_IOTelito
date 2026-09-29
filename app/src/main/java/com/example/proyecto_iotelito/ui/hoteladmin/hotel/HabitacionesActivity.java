@@ -1,23 +1,20 @@
 package com.example.proyecto_iotelito.ui.hoteladmin.hotel;
 
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminHabitacionesBinding;
-import com.example.proyecto_iotelito.databinding.ItemHoteladminHabitacionBinding;
 import com.example.proyecto_iotelito.model.hoteladmin.Habitacion;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Lista de habitaciones del hotel (adm-habitaciones). Permite editar y eliminar
@@ -27,6 +24,7 @@ import java.util.Locale;
 public class HabitacionesActivity extends AppCompatActivity {
 
     private ActivityHoteladminHabitacionesBinding binding;
+    private HabitacionesAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +39,12 @@ public class HabitacionesActivity extends AppCompatActivity {
                 Toast.makeText(this, R.string.hoteladmin_proximamente, Toast.LENGTH_SHORT).show());
 
         binding.fabAdd.setOnClickListener(v -> abrirFormulario(-1));
+        adapter = new HabitacionesAdapter(new HabitacionesAdapter.OnHabitacionActionListener() {
+            @Override public void onEditar(Habitacion habitacion) { abrirFormulario(habitacion.id); }
+            @Override public void onEliminar(Habitacion habitacion) { confirmarEliminar(habitacion); }
+        });
+        binding.rvHabitaciones.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvHabitaciones.setAdapter(adapter);
     }
 
     @Override
@@ -50,31 +54,12 @@ public class HabitacionesActivity extends AppCompatActivity {
     }
 
     private void renderList() {
-        binding.llHabitaciones.removeAllViews();
         List<Habitacion> habitaciones = HotelAdminSampleData.habitaciones();
         binding.tvListado.setText(getResources().getQuantityString(
                 R.plurals.hoteladmin_listado_habitaciones, habitaciones.size(), habitaciones.size()));
 
-        LayoutInflater inflater = LayoutInflater.from(this);
-        for (Habitacion h : habitaciones) {
-            ItemHoteladminHabitacionBinding item =
-                    ItemHoteladminHabitacionBinding.inflate(inflater, binding.llHabitaciones, false);
-            item.ivFoto.setImageResource(h.fotoRes);
-            item.tvTipo.setText(h.tipo);
-            item.tvAforoArea.setText(getString(R.string.hoteladmin_aforo_area, h.aforo(), h.areaM2));
-            item.tvPrecio.setText("S/ " + String.format(Locale.US, "%,.0f", h.precioNoche));
-
-            item.tvBadge.setText(h.disponible
-                    ? R.string.hoteladmin_badge_disponible : R.string.hoteladmin_badge_ocupada);
-            item.tvBadge.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this,
-                    h.disponible ? R.color.io_success_bg : R.color.io_danger_bg)));
-            item.tvBadge.setTextColor(ContextCompat.getColor(this,
-                    h.disponible ? R.color.io_success_text : R.color.io_danger_text));
-
-            item.tvEditar.setOnClickListener(v -> abrirFormulario(h.id));
-            item.tvEliminar.setOnClickListener(v -> confirmarEliminar(h));
-            binding.llHabitaciones.addView(item.getRoot());
-        }
+        adapter.setHabitaciones(habitaciones);
+        binding.tvSinHabitaciones.setVisibility(habitaciones.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void abrirFormulario(int habitacionId) {

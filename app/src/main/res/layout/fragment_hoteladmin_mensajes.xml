@@ -40,9 +40,15 @@
         <com.google.android.material.chip.Chip android:id="@+id/chip_hospedados" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/hoteladmin_filtro_hospedados" />
     </com.google.android.material.chip.ChipGroup>
 
-    <TextView android:id="@+id/tv_sin_conversaciones" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:padding="32dp" android:text="@string/hoteladmin_sin_conversaciones" android:textColor="@color/io_text_secondary" android:visibility="gone" />
-
-    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
-        <LinearLayout android:id="@+id/ll_conversaciones" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingTop="6dp" android:paddingBottom="16dp" />
-    </androidx.core.widget.NestedScrollView>
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_conversaciones"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="16dp" />
+        <TextView android:id="@+id/tv_sin_conversaciones" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="center" android:gravity="center" android:padding="32dp" android:text="@string/hoteladmin_sin_conversaciones" android:textColor="@color/io_text_secondary" android:visibility="gone" />
+    </FrameLayout>
 </LinearLayout>

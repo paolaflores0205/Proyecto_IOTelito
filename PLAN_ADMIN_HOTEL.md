@@ -14,7 +14,7 @@ Copiadas del módulo **Superadmin** de referencia (`ui/superadmin/*`). No invent
 - **View Binding** en Activities y Fragments (`buildFeatures viewBinding true` ya está activo). Nada de `findViewById`.
 - **Entrada por login-por-rol**: `LoginActivity` enruta `HOTEL_ADMIN → HotelAdminMainActivity`. Cuenta demo `admin@iotelito.pe`. (Ya cableado en el andamiaje.)
 - **Shell** con `BottomNavigationView` + `replace()` de fragments (como `SuperadminMainActivity`).
-- **Listas: inflado manual** de `item_*.xml` en un `LinearLayout` contenedor (patrón de `UsuariosFragment`). ⚠️ El **RecyclerView** llega en el **Lab 4 (29/sep)**: entonces se refactorizan las listas de todos los módulos juntos.
+- **Listas:** el Lab 3 usó inflado manual de `item_*.xml`. En el Lab 4, las listas principales del administrador (habitaciones, servicios, reservas y conversaciones) usan `RecyclerView` con `Adapter`, `ViewHolder` y `LinearLayoutManager`, conservando los mismos layouts de fila.
 - **Gráficos/medidores: sin librería** → barras estáticas (`<View>` con alto fijo, fondo `@color/io_teal`) y `com.google.android.material.progressindicator.LinearProgressIndicator` (patrón de `fragment_superadmin_reportes.xml`). **No** usar MPAndroidChart ni un custom view.
 - **Datos estáticos** en un `HotelAdminSampleData` propio (espejo de `SuperadminSampleData`). Persistencia real (Firebase) recién en Lab 6.
 - **Recursos compartidos ya existentes**: colores `io_navy`, `io_divider`, `io_surface`, `io_success_*`, `io_warning_*`, `io_danger_*`; estilos `Widget.IoTelito.Card` / `.Button.Primary` / `.Button.Outline` / `.Input`; iconos `ic_home`, `ic_building`, `ic_bar_chart`, `ic_calendar`, `ic_chat`, `ic_person`, `ic_add`, `ic_edit`, etc. Reutilizar; crear solo lo que falte.
@@ -110,8 +110,8 @@ POJO `Serializable`, campos `public final` (mutables solo donde se edita en memo
 - [x] **Hito 3 – Pestaña Reservas**: lista con chips Próximas/Hospedados/Checkout (8) → cobro/checkout con cobro por daños (9) → estado de taxi (10).
 - [x] **Hito 4 – Pestaña Mensajes**: bandeja (11) → chat (12).
 - [x] **Hito 5 – Pestaña Reportes**: KPIs + ingresos por servicio ordenados de menor a mayor + barras estáticas (13).
-- [ ] **Hito 6 – Pulido**: estados vacíos, validaciones, `contentDescription`, revisión contra Figma, sin texto hardcodeado.
-- [ ] **Lab 4 (posterior)**: migrar todas las listas a **RecyclerView** (coordinado con el equipo).
+- [x] **Hito 6 – Pulido**: estados vacíos, validaciones, `contentDescription`, revisión contra Figma, sin texto hardcodeado.
+- [x] **Lab 4 – RecyclerView (módulo administrador)**: migradas las cuatro listas principales con datos estáticos. Las listas pequeñas de detalle (consumos, fotos, chat y reporte) conservan su presentación actual; los otros roles son responsabilidad de sus módulos.
 
 Cada hito compila y es demostrable (login como `admin@iotelito.pe`).
 

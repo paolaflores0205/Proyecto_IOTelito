@@ -1,7 +1,6 @@
 package com.example.proyecto_iotelito.ui.hoteladmin.reservas;
 
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -11,20 +10,22 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.databinding.FragmentHoteladminReservasBinding;
-import com.example.proyecto_iotelito.databinding.ItemHoteladminReservaBinding;
 import com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
-/** Pantalla adm-reservas-checkout: búsqueda, filtros y lista inflada manualmente. */
+/** Pantalla adm-reservas-checkout: búsqueda, filtros y lista reciclable. */
 public class AdminReservasFragment extends Fragment {
     private FragmentHoteladminReservasBinding binding;
+    private ReservasAdapter adapter;
 
     @Nullable
     @Override
@@ -36,6 +37,14 @@ public class AdminReservasFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        adapter = new ReservasAdapter(new ReservasAdapter.OnReservaActionListener() {
+            @Override public void onDetalle(ReservaAdmin reserva) { abrirCheckout(reserva.id); }
+            @Override public void onTaxi(ReservaAdmin reserva) {
+                startActivity(new Intent(requireContext(), EstadoTaxiActivity.class));
+            }
+        });
+        binding.rvReservas.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvReservas.setAdapter(adapter);
         binding.etBuscar.addTextChangedListener(new SimpleTextWatcher(this::renderReservas));
         binding.chipGroupEstado.setOnCheckedStateChangeListener((group, ids) -> renderReservas());
         binding.chipGroupFecha.setOnCheckedStateChangeListener((group, ids) -> renderReservas());
@@ -53,8 +62,7 @@ public class AdminReservasFragment extends Fragment {
     private void renderReservas() {
         String query = String.valueOf(binding.etBuscar.getText()).trim().toLowerCase(Locale.ROOT);
         ReservaAdmin.EstadoCheckout filtro = estadoSeleccionado();
-        binding.llReservas.removeAllViews();
-        int visibles = 0;
+        List<ReservaAdmin> visibles = new ArrayList<>();
         for (ReservaAdmin reserva : HotelAdminSampleData.reservas()) {
             String searchable = (reserva.huespedNombre + " " + reserva.habitacion + " "
                     + reserva.huespedDoc).toLowerCase(Locale.ROOT);
@@ -62,31 +70,12 @@ public class AdminReservasFragment extends Fragment {
             if (filtro != null && reserva.estado != filtro) continue;
             if (!coincideFecha(reserva)) continue;
 
-            ItemHoteladminReservaBinding item = ItemHoteladminReservaBinding.inflate(
-                    getLayoutInflater(), binding.llReservas, false);
-            item.tvHuesped.setText(reserva.huespedNombre);
-            item.tvHabitacion.setText(reserva.habitacion);
-            item.tvFechas.setText(getString(R.string.hoteladmin_reserva_fechas,
-                    reserva.rangoFechas, reserva.noches));
-            item.tvEstado.setText(EstadoCheckoutUi.texto(requireContext(), reserva.estado));
-            item.tvEstado.setTextColor(ContextCompat.getColor(requireContext(),
-                    EstadoCheckoutUi.colorTexto(reserva.estado)));
-            item.tvEstado.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
-                    requireContext(), EstadoCheckoutUi.colorFondo(reserva.estado))));
-            boolean pendiente = reserva.estado == ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE;
-            item.tvAlerta.setVisibility(pendiente ? View.VISIBLE : View.GONE);
-            item.btnCheckout.setVisibility(pendiente ? View.VISIBLE : View.GONE);
-            item.btnTaxi.setVisibility(reserva.tieneTaxi ? View.VISIBLE : View.GONE);
-            item.btnDetalle.setOnClickListener(v -> abrirCheckout(reserva.id));
-            item.btnCheckout.setOnClickListener(v -> abrirCheckout(reserva.id));
-            item.btnTaxi.setOnClickListener(v -> startActivity(
-                    new Intent(requireContext(), EstadoTaxiActivity.class)));
-            binding.llReservas.addView(item.getRoot());
-            visibles++;
+            visibles.add(reserva);
         }
+        adapter.setReservas(visibles);
         binding.tvCantidad.setText(getResources().getQuantityString(
-                R.plurals.hoteladmin_reservas_encontradas, visibles, visibles));
-        binding.tvSinResultados.setVisibility(visibles == 0 ? View.VISIBLE : View.GONE);
+                R.plurals.hoteladmin_reservas_encontradas, visibles.size(), visibles.size()));
+        binding.tvSinResultados.setVisibility(visibles.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private ReservaAdmin.EstadoCheckout estadoSeleccionado() {
@@ -118,6 +107,8 @@ public class AdminReservasFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        binding.rvReservas.setAdapter(null);
+        adapter = null;
         binding = null;
     }
 
