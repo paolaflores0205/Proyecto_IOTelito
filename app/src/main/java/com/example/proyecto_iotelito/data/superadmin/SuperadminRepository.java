@@ -32,6 +32,8 @@ public final class SuperadminRepository {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final MutableLiveData<Boolean> ready = new MutableLiveData<>(false);
     private final MutableLiveData<String> error = new MutableLiveData<>();
+    private final java.util.concurrent.CountDownLatch initialized = new java.util.concurrent.CountDownLatch(1);
+    private volatile boolean initializationSucceeded;
     private final LiveData<List<ManagedHotel>> hotels;
     private final LiveData<List<AdminUser>> users;
     private final LiveData<List<ActivityLog>> logs;
@@ -64,10 +66,13 @@ public final class SuperadminRepository {
         worker.execute(() -> {
             try {
                 database.runInTransaction(this::seed);
+                initializationSucceeded = true;
                 ready.postValue(true);
             } catch (Exception exception) {
                 Log.e("SuperadminStorage", "No se pudo abrir el almacenamiento", exception);
                 error.postValue("No se pudo cargar el almacenamiento local. Cierra y vuelve a abrir la aplicación.");
+            } finally {
+                initialized.countDown();
             }
         });
     }
@@ -106,6 +111,13 @@ public final class SuperadminRepository {
     }
 
     public LiveData<List<ManagedHotel>> hotels() { return hotels; }
+    @androidx.annotation.WorkerThread
+    public void awaitInitialization() throws InterruptedException {
+        if (Looper.myLooper() == Looper.getMainLooper()) throw new IllegalStateException("Usa un hilo de trabajo");
+        if (!initialized.await(15, java.util.concurrent.TimeUnit.SECONDS) || !initializationSucceeded) {
+            throw new IllegalStateException("El catálogo local no está disponible");
+        }
+    }
     public LiveData<List<AdminUser>> users() { return users; }
     public LiveData<List<ActivityLog>> logs() { return logs; }
     public LiveData<List<AdminAlertEntity>> alerts() { return dao.observeAlerts(); }

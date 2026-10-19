@@ -109,15 +109,18 @@ public class ExplorarFragment extends Fragment {
                 HotelAdapter.TipoTarjeta.HORIZONTAL, hotel -> {
                     Intent intent = new Intent(getActivity(), DetalleHotelActivity.class);
                     intent.putExtra(DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
-                    seleccionActual().putInto(intent);
                     startActivity(intent);
                 });
         rvRecomendados.setAdapter(recomendadosAdapter);
-        recomendadosAdapter.submitList(SampleData.HOTELS);
+        com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(requireContext())
+                .observe(getViewLifecycleOwner(), hoteles -> {
+                    List<com.example.proyecto_iotelito.model.Hotel> activos = new ArrayList<>();
+                    for (com.example.proyecto_iotelito.model.Hotel hotel : hoteles) if (hotel.active) activos.add(hotel);
+                    recomendadosAdapter.submitList(activos);
+                });
 
         view.findViewById(R.id.tv_ver_todos).setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ListaHotelesActivity.class);
-            seleccionActual().putInto(intent);
             startActivity(intent);
         });
     }

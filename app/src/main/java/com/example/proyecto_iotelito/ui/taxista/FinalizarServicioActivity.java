@@ -9,6 +9,7 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.TaxiRepository;
 
 /**
  * Validación de la reserva para cerrar el servicio: por QR (simulado) o
@@ -32,10 +33,19 @@ public class FinalizarServicioActivity extends AppCompatActivity {
     }
 
     private void validar() {
+        int id = getIntent().getIntExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID, -1);
+        TaxiRepository.ejecutar(this, this, () -> id < 100000
+                || TaxiRepository.avanzar(this, id, TaxiRepository.Estado.FINALIZADO), actualizado -> {
+            if (actualizado && !isFinishing()) mostrarFinalizado();
+        });
+    }
+
+    private void mostrarFinalizado() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(etCodigoManual.getWindowToken(), 0);
         }
         startActivity(new Intent(this, ServicioFinalizadoActivity.class));
+        finish();
     }
 }

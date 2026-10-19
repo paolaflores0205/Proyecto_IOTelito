@@ -21,6 +21,12 @@ public class ClientNavigationTest {
     @Test
     public void menuClienteQuedaEncimaDeLaBarraDelSistema() {
         android.app.Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        android.content.Context context = instrumentation.getTargetContext();
+        com.example.proyecto_iotelito.model.auth.AuthenticatedUser previous =
+                com.example.proyecto_iotelito.data.SessionRepository.obtener(context);
+        com.example.proyecto_iotelito.data.SessionRepository.guardar(context,
+                new com.example.proyecto_iotelito.model.auth.AuthenticatedUser("cliente@iotelito.pe", "Carlos",
+                        com.example.proyecto_iotelito.model.auth.UserRole.CLIENT));
         Intent intent = new Intent(instrumentation.getTargetContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Activity activity = instrumentation.startActivitySync(intent);
@@ -52,6 +58,8 @@ public class ClientNavigationTest {
             });
         } finally {
             instrumentation.runOnMainSync(activity::finish);
+            if (previous == null) com.example.proyecto_iotelito.data.SessionRepository.cerrar(context);
+            else com.example.proyecto_iotelito.data.SessionRepository.guardar(context, previous);
         }
     }
 }

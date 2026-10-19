@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
 
 /**
@@ -24,6 +25,7 @@ public class ServicioAsignadoActivity extends AppCompatActivity {
 
     public static Intent createIntent(Context context, SolicitudServicio solicitud) {
         Intent intent = new Intent(context, ServicioAsignadoActivity.class);
+        intent.putExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID, solicitud.id);
         intent.putExtra(EXTRA_PASAJERO_NOMBRE, solicitud.pasajeroNombre);
         intent.putExtra(EXTRA_PASAJERO_INICIALES, solicitud.pasajeroIniciales);
         intent.putExtra(EXTRA_HOTEL, solicitud.hotel);
@@ -53,8 +55,15 @@ public class ServicioAsignadoActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.tv_ruta_resumen)).setText("31 min · 19 km");
 
-        findViewById(R.id.btn_iniciar_recorrido).setOnClickListener(v ->
-                startActivity(new Intent(this, DireccionHotelActivity.class)));
+        findViewById(R.id.btn_iniciar_recorrido).setOnClickListener(v -> {
+            int id = getIntent().getIntExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID, -1);
+            TaxiRepository.ejecutar(this, this, () -> id < 100000
+                    || TaxiRepository.avanzar(this, id, TaxiRepository.Estado.EN_CAMINO), actualizado -> {
+                if (!actualizado || isFinishing()) return;
+                startActivity(new Intent(this, DireccionHotelActivity.class).putExtra(TaxiRepository.EXTRA_ID, id));
+                finish();
+            });
+        });
     }
 
     private String valorOrDefault(String valor, String porDefecto) {

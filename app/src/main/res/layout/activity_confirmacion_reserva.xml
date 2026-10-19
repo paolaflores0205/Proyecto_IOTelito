@@ -12,9 +12,13 @@
         layout="@layout/item_sub_header" />
 
     <ScrollView
+        android:id="@+id/scroll_confirmacion"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="24dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -130,6 +134,7 @@
                         android:textColor="@color/io_text_primary"
                         android:textSize="14sp"
                         android:inputType="number"
+                        android:imeOptions="actionNext"
                         android:maxLength="19"
                         android:singleLine="true" />
 
@@ -165,6 +170,7 @@
                                 android:textColor="@color/io_text_primary"
                                 android:textSize="14sp"
                                 android:inputType="number"
+                                android:imeOptions="actionNext"
                                 android:maxLength="5"
                                 android:singleLine="true" />
                         </LinearLayout>
@@ -196,6 +202,7 @@
                                 android:textColor="@color/io_text_primary"
                                 android:textSize="14sp"
                                 android:inputType="numberPassword"
+                                android:imeOptions="actionDone"
                                 android:maxLength="3"
                                 android:singleLine="true" />
                         </LinearLayout>

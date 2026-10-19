@@ -43,7 +43,7 @@ public class ChatHotelActivity extends AppCompatActivity {
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
         int conversacionId = getIntent().getIntExtra(EXTRA_CONVERSACION_ID, 0);
-        Hotel hotel = SampleData.findById(hotelId);
+        com.example.proyecto_iotelito.data.ClientDataLoader.hotel(this, hotelId, hotel -> {
 
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         ((TextView) findViewById(R.id.tv_hotel_nombre)).setText(hotel.name);
@@ -67,6 +67,7 @@ public class ChatHotelActivity extends AppCompatActivity {
             return false;
         });
         findViewById(R.id.btn_enviar).setOnClickListener(v -> enviarMensaje(etMensaje));
+        });
     }
 
     private void enviarMensaje(EditText etMensaje) {

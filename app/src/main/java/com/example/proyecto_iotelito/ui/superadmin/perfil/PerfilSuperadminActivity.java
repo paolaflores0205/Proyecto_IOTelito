@@ -31,6 +31,7 @@ public class PerfilSuperadminActivity extends AppCompatActivity {
                 .setMessage(R.string.superadmin_profile_logout_message)
                 .setNegativeButton(R.string.superadmin_cancel, null)
                 .setPositiveButton(R.string.superadmin_profile_logout, (dialog, which) -> {
+                    com.example.proyecto_iotelito.data.SessionRepository.cerrar(this);
                     Intent intent = new Intent(this, LoginActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);

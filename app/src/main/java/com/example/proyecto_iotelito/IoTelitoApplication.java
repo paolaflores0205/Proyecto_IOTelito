@@ -14,12 +14,17 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import com.example.proyecto_iotelito.notification.ClienteNotificationManager;
+import com.example.proyecto_iotelito.data.PerfilRepository;
+
 /** Aplica a todas las pantallas el espacio seguro de las barras del sistema. */
 public class IoTelitoApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onCreate() {
         super.onCreate();
+        PerfilRepository.aplicarEnMemoria(PerfilRepository.cargar(this));
+        ClienteNotificationManager.crearCanal(this);
         registerActivityLifecycleCallbacks(this);
     }
 

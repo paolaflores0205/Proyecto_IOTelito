@@ -937,4 +937,41 @@
     <string name="hoteladmin_detalle_reserva_activa">Reserva activa</string>
     <string name="hoteladmin_detalle_reserva_chat">Huésped: %1$s\nHabitación: %2$s\nEstado: Hospedado</string>
     <string name="hoteladmin_entendido">Entendido</string>
+
+    <!-- Notificaciones locales del cliente -->
+    <string name="notif_canal_reservas">Reservas y pagos</string>
+    <string name="notif_canal_reservas_descripcion">Confirmaciones de reservas, checkout y cobros</string>
+    <string name="notif_reserva_confirmada_titulo">¡Reserva confirmada!</string>
+    <string name="notif_reserva_confirmada_texto">Tu reserva en %1$s para %2$s quedó registrada.</string>
+    <string name="notif_pago_realizado_titulo">Pago realizado</string>
+    <string name="notif_pago_realizado_texto">Se realizó el cargo de S/ %1$s de la reserva %2$s.</string>
+    <string name="marcar_todas_leidas">Marcar leídas</string>
+    <string name="sin_notificaciones">Todavía no tienes notificaciones. Tus confirmaciones de reserva y pagos aparecerán aquí.</string>
+
+    <!-- Selección de una o varias habitaciones -->
+    <string name="titulo_opciones_habitaciones">Opciones de habitaciones</string>
+    <string name="opciones_explicacion">Estas opciones cubren la capacidad del grupo seleccionado. El precio mostrado suma todas las habitaciones.</string>
+    <string name="sin_combinaciones_habitaciones">No encontramos una combinación disponible para este grupo. Prueba con otro hotel o cambia la cantidad de huéspedes.</string>
+    <plurals name="opcion_capacidad_habitaciones">
+        <item quantity="one">%1$s · %2$d habitación</item>
+        <item quantity="other">%1$s · %2$d habitaciones</item>
+    </plurals>
+    <string name="opcion_precio_noche">S/ %1$s / noche</string>
+    <plurals name="opcion_precio_estadia">
+        <item quantity="one">S/ %1$s por %2$d noche</item>
+        <item quantity="other">S/ %1$s por %2$d noches</item>
+    </plurals>
+    <string name="ver_detalle_habitaciones">Ver habitaciones y características</string>
+    <string name="detalle_combinacion">Detalle de la combinación</string>
+    <string name="area_total_formato">%1$d m² en total</string>
+    <string name="resumen_busqueda_habitaciones">%1$s · %2$s</string>
+    <string name="titulo_habitacion_codigo">%1$s · %2$s</string>
+    <string name="detalle_habitacion_capacidad">%1$s · %2$d m²\n%3$s</string>
+    <string name="titulo_catalogo_habitaciones">Habitaciones disponibles</string>
+    <string name="catalogo_habitaciones_subtitulo">Catálogo de habitaciones del hotel</string>
+    <string name="catalogo_habitaciones_explicacion">Explora las habitaciones disponibles, sus capacidades y características. Para reservar, realiza una búsqueda con fechas y huéspedes.</string>
+    <string name="sin_habitaciones_disponibles">Este hotel no tiene habitaciones disponibles en este momento.</string>
+    <string name="ver_caracteristicas_habitacion">Ver características</string>
+    <string name="elegir_fechas_reservar">Elegir fechas para reservar</string>
+    <string name="capacidad_area_habitacion">%1$s · %2$d m²</string>
 </resources>

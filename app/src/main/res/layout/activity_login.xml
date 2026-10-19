@@ -88,12 +88,14 @@
                 android:layout_marginTop="6dp"
                 app:hintEnabled="false">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                     android:id="@+id/email_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="@string/login_email_hint"
                     android:inputType="textEmailAddress"
+                    android:completionThreshold="1"
+                    android:importantForAutofill="no"
                     android:maxLines="1"
                     android:textColor="@color/io_text_primary"
                     android:textColorHint="@color/io_text_muted"
@@ -123,6 +125,7 @@
                     android:hint="••••••••"
                     android:imeOptions="actionDone"
                     android:inputType="textPassword"
+                    android:importantForAutofill="no"
                     android:maxLines="1"
                     android:textColor="@color/io_text_primary"
                     android:textColorHint="@color/io_text_muted"
@@ -142,6 +145,12 @@
                 android:textColor="@color/io_teal"
                 android:textSize="13sp"
                 android:textStyle="bold" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/remember_me"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cliente_recordarme" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/login_button"

@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.CatalogoHabitaciones;
+import com.example.proyecto_iotelito.data.GeneradorOpcionesHabitaciones;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.ui.hoteles.HotelAdapter;
@@ -50,7 +52,7 @@ public class ResultadosActivity extends AppCompatActivity {
     public static final String EXTRA_DESTINO = "extra_destino";
     public static final String EXTRA_RESUMEN = "extra_resumen";
 
-    private final List<Hotel> todosLosHoteles = new ArrayList<>(SampleData.HOTELS);
+    private final List<Hotel> todosLosHoteles = new ArrayList<>();
     private HotelAdapter hotelAdapter;
     private BookingSelection bookingSelection;
     private String destinoBusqueda;
@@ -106,15 +108,26 @@ public class ResultadosActivity extends AppCompatActivity {
         btnFiltros.setOnClickListener(v -> mostrarFiltros());
         tvLimpiarFiltros.setOnClickListener(v -> limpiarFiltros());
 
-        aplicarFiltros();
+        com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(this).observe(this, hoteles -> {
+            boolean rangoCompleto = precioMinimo == dominioPrecioMin && precioMaximo == dominioPrecioMax;
+            todosLosHoteles.clear();
+            for (Hotel hotel : hoteles) if (hotel.active) todosLosHoteles.add(hotel);
+            double[] nuevoDominio = calcularDominioPrecio();
+            dominioPrecioMin = nuevoDominio[0];
+            dominioPrecioMax = nuevoDominio[1];
+            if (rangoCompleto) { precioMinimo = dominioPrecioMin; precioMaximo = dominioPrecioMax; }
+            aplicarFiltros();
+        });
     }
 
     private double[] calcularDominioPrecio() {
+        if (todosLosHoteles.isEmpty()) return new double[]{0, 1000};
         double min = Double.MAX_VALUE;
         double max = 0;
         for (Hotel hotel : todosLosHoteles) {
-            min = Math.min(min, hotel.pricePerNight);
-            max = Math.max(max, hotel.pricePerNight);
+            double precioDesde = precioDesde(hotel);
+            min = Math.min(min, precioDesde);
+            max = Math.max(max, precioDesde);
         }
         double desde = Math.max(0, Math.floor(min / 50.0) * 50 - 50);
         double hasta = Math.ceil(max / 50.0) * 50 + 50;
@@ -291,10 +304,15 @@ public class ResultadosActivity extends AppCompatActivity {
             if (!coincideConDestino(hotel, destinoBusqueda)) {
                 continue;
             }
+            if (hotel.hasInventory && GeneradorOpcionesHabitaciones.generar(
+                    hotel.id, bookingSelection.adultos, bookingSelection.ninos).isEmpty()) {
+                continue;
+            }
             if (hotel.rating < calificacionMinima) {
                 continue;
             }
-            if (hotel.pricePerNight < precioMinimo || hotel.pricePerNight > precioMaximo) {
+            double precioDesde = precioDesde(hotel);
+            if (precioDesde < precioMinimo || precioDesde > precioMaximo) {
                 continue;
             }
             if (!serviciosSeleccionados.isEmpty()
@@ -305,9 +323,9 @@ public class ResultadosActivity extends AppCompatActivity {
         }
 
         if (modoOrden == ORDEN_MENOR_A_MAYOR) {
-            Collections.sort(resultado, Comparator.comparingDouble(h -> h.pricePerNight));
+            Collections.sort(resultado, Comparator.comparingDouble(this::precioDesde));
         } else if (modoOrden == ORDEN_MAYOR_A_MENOR) {
-            Collections.sort(resultado, (a, b) -> Double.compare(b.pricePerNight, a.pricePerNight));
+            Collections.sort(resultado, (a, b) -> Double.compare(precioDesde(b), precioDesde(a)));
         }
 
         int filtrosActivos = contarFiltrosActivos();
@@ -350,6 +368,10 @@ public class ResultadosActivity extends AppCompatActivity {
 
     private void renderHoteles(List<Hotel> hoteles) {
         hotelAdapter.submitList(hoteles);
+    }
+
+    private double precioDesde(Hotel hotel) {
+        return CatalogoHabitaciones.precioMinimoDisponible(hotel.id, hotel.pricePerNight);
     }
 
     private float dpF(int value) {

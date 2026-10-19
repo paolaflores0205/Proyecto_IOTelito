@@ -1,5 +1,7 @@
 # Adaptaciones pendientes del rol cliente
 
+> Actualización: la integración local ya está realizada. Los apartados 1 (Room fuera del hilo principal), 2 (catálogo compartido) y 5 (conservar menú) se completaron. Los apartados 3 (separación por cuenta) y 4 (estado administrativo en login) siguen pendientes. La lista de comprobaciones del apartado 6 es una guía, no una declaración de que todas esas funcionalidades estén implementadas. Consulta `INTEGRACION_CLIENTE_SUPERADMIN.md`. El texto original que sigue se conserva como referencia del plan anterior.
+
 El código del cliente no se modificó en este avance. Tampoco se hizo merge de su rama.
 Su base `iotelito_local.db` y la nueva base administrativa `iotelito_superadmin.db` tienen nombres y tablas diferentes, para poder integrar sin reemplazar ni borrar las reservas existentes.
 

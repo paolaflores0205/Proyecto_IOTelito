@@ -13,11 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SampleData;
+import com.example.proyecto_iotelito.data.PerfilRepository;
 import com.example.proyecto_iotelito.model.UserProfile;
 
 /**
- * Pestaña "Perfil": datos del cliente (estáticos en memoria) y accesos a
+ * Pestaña "Perfil": datos del cliente persistidos localmente y accesos a
  * Editar perfil, Notificaciones, Ayuda y Soporte y Cerrar Sesión.
  */
 public class PerfilFragment extends Fragment {
@@ -47,8 +47,11 @@ public class PerfilFragment extends Fragment {
                 Toast.makeText(requireContext(), "Centro de Ayuda y Soporte IoTelito", Toast.LENGTH_SHORT).show());
 
         // Opción Cerrar Sesión
-        view.findViewById(R.id.row_cerrar_sesion).setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show());
+        view.findViewById(R.id.row_cerrar_sesion).setOnClickListener(v -> {
+            com.example.proyecto_iotelito.data.SessionRepository.cerrar(requireContext());
+            startActivity(new Intent(requireContext(), com.example.proyecto_iotelito.ui.auth.LoginActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        });
     }
 
     @Override
@@ -61,7 +64,8 @@ public class PerfilFragment extends Fragment {
     }
 
     private void pintarDatosPerfil(View view) {
-        UserProfile perfil = SampleData.PERFIL;
+        UserProfile perfil = PerfilRepository.cargar(requireContext());
+        PerfilRepository.aplicarEnMemoria(perfil);
 
         ((TextView) view.findViewById(R.id.tv_avatar_inicial)).setText(perfil.initials());
         ((TextView) view.findViewById(R.id.tv_nombre)).setText(perfil.name);

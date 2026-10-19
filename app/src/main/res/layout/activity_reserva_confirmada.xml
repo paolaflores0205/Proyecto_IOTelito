@@ -86,6 +86,16 @@
                         android:textStyle="bold"
                         android:text="@string/resumen_compra" />
 
+                    <ImageView
+                        android:id="@+id/iv_resumen_hotel"
+                        android:layout_width="match_parent"
+                        android:layout_height="140dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_photo_placeholder"
+                        android:contentDescription="@null"
+                        android:scaleType="centerCrop"
+                        tools:src="@drawable/superadmin_hotel_hero" />
+
                     <include layout="@layout/item_summary_row" android:id="@+id/row_hotel" android:layout_marginTop="10dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_habitacion" android:layout_marginTop="6dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_fechas" android:layout_marginTop="6dp" />

@@ -27,7 +27,7 @@ import java.util.Locale;
 
 /**
  * Detalle de un hotel: galería, descripción, servicios (Chips) y
- * atracciones cercanas. Navega al detalle de la habitación destacada.
+ * atracciones cercanas. Navega a las opciones que cubren al grupo seleccionado.
  */
 public class DetalleHotelActivity extends AppCompatActivity {
 
@@ -43,8 +43,9 @@ public class DetalleHotelActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detalle_hotel);
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
-        Hotel hotel = SampleData.findById(hotelId);
-        BookingSelection bookingSelection = BookingSelection.from(getIntent());
+        com.example.proyecto_iotelito.data.ClientDataLoader.hotel(this, hotelId, hotel -> {
+        boolean desdeBusqueda = BookingSelection.isPresent(getIntent());
+        BookingSelection bookingSelection = desdeBusqueda ? BookingSelection.from(getIntent()) : null;
 
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         findViewById(R.id.iv_favorito).setOnClickListener(v ->
@@ -55,7 +56,10 @@ public class DetalleHotelActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_rating)).setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
         ((TextView) findViewById(R.id.tv_opiniones)).setText(getString(R.string.opiniones, hotel.reviews));
         ((TextView) findViewById(R.id.tv_direccion)).setText(hotel.address);
-        ((TextView) findViewById(R.id.tv_descripcion)).setText(hotel.description);
+        String contact = hotel.description;
+        if (!hotel.contactPhone.isEmpty()) contact += "\n\nTeléfono: " + hotel.contactPhone;
+        if (!hotel.contactEmail.isEmpty()) contact += "\nCorreo: " + hotel.contactEmail;
+        ((TextView) findViewById(R.id.tv_descripcion)).setText(contact);
 
         findViewById(R.id.card_mapa).setOnClickListener(v -> abrirUbicacionEnMapa(hotel));
 
@@ -64,15 +68,20 @@ public class DetalleHotelActivity extends AppCompatActivity {
         poblarAtracciones(hotel);
 
         findViewById(R.id.btn_ver_habitaciones).setOnClickListener(v -> {
-            Intent intent = new Intent(this, DetalleHabitacionActivity.class);
-            intent.putExtra(DetalleHabitacionActivity.EXTRA_HOTEL_ID, hotel.id);
-            bookingSelection.putInto(intent);
+            Intent intent = new Intent(this, OpcionesHabitacionesActivity.class);
+            intent.putExtra(OpcionesHabitacionesActivity.EXTRA_HOTEL_ID, hotel.id);
+            if (bookingSelection != null) bookingSelection.putInto(intent);
             startActivity(intent);
+        });
+        TextView habitaciones = findViewById(R.id.btn_ver_habitaciones);
+        habitaciones.setEnabled(hotel.active && hotel.hasInventory);
+        if (!hotel.active || !hotel.hasInventory) habitaciones.setText("Sin habitaciones disponibles");
         });
     }
 
     private void poblarGaleria(Hotel hotel) {
         LinearLayout galleryRow = findViewById(R.id.gallery_row);
+        galleryRow.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
         for (int i = 0; i < 4; i++) {
             View photo = inflater.inflate(R.layout.item_gallery_photo, galleryRow, false);
@@ -132,8 +141,9 @@ public class DetalleHotelActivity extends AppCompatActivity {
      * el SDK de Maps (API key, Play Services) para datos que aún son estáticos.
      */
     private void abrirUbicacionEnMapa(Hotel hotel) {
-        Uri uri = Uri.parse("https://www.google.com/maps/search/?api=1&query="
-                + Uri.encode(hotel.address));
+        String location = hotel.latitude != null && hotel.longitude != null
+                ? hotel.latitude + "," + hotel.longitude : hotel.address;
+        Uri uri = Uri.parse("https://www.google.com/maps/search/?api=1&query=" + Uri.encode(location));
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, uri));
         } catch (ActivityNotFoundException e) {

@@ -48,6 +48,12 @@ public class ReservaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     private final List<Item> items = new ArrayList<>();
+    private final java.util.Map<Integer, Hotel> hoteles = new java.util.HashMap<>();
+    public void setHotels(List<Hotel> rows) {
+        hoteles.clear();
+        for (Hotel hotel : rows) hoteles.put(hotel.id, hotel);
+        notifyDataSetChanged();
+    }
     private final OnReservaClickListener listener;
 
     public ReservaAdapter(OnReservaClickListener listener) {
@@ -111,7 +117,7 @@ public class ReservaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    static class ReservaViewHolder extends RecyclerView.ViewHolder {
+    class ReservaViewHolder extends RecyclerView.ViewHolder {
         final TextView hotelNombre;
         final TextView habitacion;
         final TextView fechasHuespedes;
@@ -130,8 +136,8 @@ public class ReservaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         void bind(Reserva reserva, OnReservaClickListener listener) {
-            Hotel hotel = SampleData.findById(reserva.hotelId);
-            hotelNombre.setText(hotel.name);
+            Hotel hotel = hoteles.get(reserva.hotelId);
+            hotelNombre.setText(hotel == null ? "Cargando hotel…" : hotel.name);
             habitacion.setText(reserva.roomName);
             fechasHuespedes.setText(reserva.rangoFechasTexto() + " · " + reserva.huespedes);
             precioTotal.setText("S/ " + String.format(Locale.US, "%,.0f", reserva.precioTotal));

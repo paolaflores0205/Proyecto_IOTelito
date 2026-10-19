@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.TaxistaSampleData;
+import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.example.proyecto_iotelito.databinding.FragmentSolicitudesTaxistaBinding;
 import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
 
@@ -57,10 +58,25 @@ public class SolicitudesTaxistaFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden && binding != null) renderSolicitudes();
+    }
+
     private void renderSolicitudes() {
+        android.content.Context app = requireContext().getApplicationContext();
+        TaxiRepository.ejecutar(app, getViewLifecycleOwner(), () -> TaxiRepository.disponibles(app),
+                this::pintarSolicitudes);
+    }
+
+    private void pintarSolicitudes(List<SolicitudServicio> persistidas) {
+        if (binding == null) return;
         int chipActivo = binding.chipGroupFiltros.getCheckedChipId();
         List<SolicitudServicio> filtradas = new ArrayList<>();
-        for (SolicitudServicio solicitud : TaxistaSampleData.solicitudes()) {
+        List<SolicitudServicio> disponibles = new ArrayList<>(TaxistaSampleData.solicitudes());
+        disponibles.addAll(persistidas);
+        for (SolicitudServicio solicitud : disponibles) {
             if (chipActivo == R.id.chip_menos_10_min && solicitud.minutosEspera >= 10) continue;
             filtradas.add(solicitud);
         }

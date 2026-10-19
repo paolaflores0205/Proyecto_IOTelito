@@ -1,5 +1,7 @@
 # Superadmin: almacenamiento local y notificaciones
 
+> Documento de la primera etapa, anterior a la integración. La rama de cliente ya se integró localmente. Consulta `INTEGRACION_CLIENTE_SUPERADMIN.md` para el estado actual; las referencias siguientes a «sin merge» describen únicamente aquella primera etapa.
+
 ## Alcance de este avance
 
 Trabajo en la rama `superadmin`, sin hacer merge de `feature/inicio-cliente-reserva`.
