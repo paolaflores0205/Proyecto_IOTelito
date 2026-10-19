@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
@@ -31,8 +32,12 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_solicitud_taxi);
 
-        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, SampleData.RESERVAS.get(0).id);
-        reserva = SampleData.findReservaById(reservaId);
+        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+        reserva = ReservaRepository.getInstance(this).buscarPorId(reservaId);
+        if (reserva == null) {
+            finish();
+            return;
+        }
         hotel = SampleData.findById(reserva.hotelId);
         maxPasajeros = Math.max(1, obtenerCantidadHuespedes(reserva.huespedes));
         maxMaletas = maxPasajeros * 2;

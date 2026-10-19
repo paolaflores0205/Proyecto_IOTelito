@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
@@ -26,6 +27,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private static final double MONTO_MINIMO_TAXI_GRATIS = 1000.0;
 
     private Reserva reserva;
+    private ReservaRepository reservaRepository;
     private boolean elegibleTaxi;
     private int calificacion = 0;
 
@@ -34,8 +36,13 @@ public class CheckoutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checkout);
 
-        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, SampleData.RESERVAS.get(0).id);
-        reserva = SampleData.findReservaById(reservaId);
+        reservaRepository = ReservaRepository.getInstance(this);
+        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+        reserva = reservaRepository.buscarPorId(reservaId);
+        if (reserva == null) {
+            finish();
+            return;
+        }
         Hotel hotel = SampleData.findById(reserva.hotelId);
 
         View subHeader = findViewById(R.id.sub_header);
@@ -96,6 +103,7 @@ public class CheckoutActivity extends AppCompatActivity {
         }
 
         reserva.estado = Reserva.Estado.COMPLETADA;
+        reservaRepository.actualizarEstado(reserva.id, reserva.estado);
 
         if (elegibleTaxi) {
             mostrarOfertaTaxi();

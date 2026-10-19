@@ -109,7 +109,6 @@ public class ExplorarFragment extends Fragment {
                 HotelAdapter.TipoTarjeta.HORIZONTAL, hotel -> {
                     Intent intent = new Intent(getActivity(), DetalleHotelActivity.class);
                     intent.putExtra(DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
-                    seleccionActual().putInto(intent);
                     startActivity(intent);
                 });
         rvRecomendados.setAdapter(recomendadosAdapter);
@@ -117,7 +116,6 @@ public class ExplorarFragment extends Fragment {
 
         view.findViewById(R.id.tv_ver_todos).setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ListaHotelesActivity.class);
-            seleccionActual().putInto(intent);
             startActivity(intent);
         });
     }

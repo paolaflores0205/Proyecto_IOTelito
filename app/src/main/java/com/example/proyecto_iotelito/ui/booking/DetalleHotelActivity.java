@@ -27,7 +27,7 @@ import java.util.Locale;
 
 /**
  * Detalle de un hotel: galería, descripción, servicios (Chips) y
- * atracciones cercanas. Navega al detalle de la habitación destacada.
+ * atracciones cercanas. Navega a las opciones que cubren al grupo seleccionado.
  */
 public class DetalleHotelActivity extends AppCompatActivity {
 
@@ -44,7 +44,8 @@ public class DetalleHotelActivity extends AppCompatActivity {
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
         Hotel hotel = SampleData.findById(hotelId);
-        BookingSelection bookingSelection = BookingSelection.from(getIntent());
+        boolean desdeBusqueda = BookingSelection.isPresent(getIntent());
+        BookingSelection bookingSelection = desdeBusqueda ? BookingSelection.from(getIntent()) : null;
 
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         findViewById(R.id.iv_favorito).setOnClickListener(v ->
@@ -64,9 +65,9 @@ public class DetalleHotelActivity extends AppCompatActivity {
         poblarAtracciones(hotel);
 
         findViewById(R.id.btn_ver_habitaciones).setOnClickListener(v -> {
-            Intent intent = new Intent(this, DetalleHabitacionActivity.class);
-            intent.putExtra(DetalleHabitacionActivity.EXTRA_HOTEL_ID, hotel.id);
-            bookingSelection.putInto(intent);
+            Intent intent = new Intent(this, OpcionesHabitacionesActivity.class);
+            intent.putExtra(OpcionesHabitacionesActivity.EXTRA_HOTEL_ID, hotel.id);
+            if (bookingSelection != null) bookingSelection.putInto(intent);
             startActivity(intent);
         });
     }

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.CatalogoHabitaciones;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.ui.booking.BookingSelection;
@@ -76,7 +77,8 @@ public class ListaHotelesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_hoteles);
-        bookingSelection = BookingSelection.from(getIntent());
+        bookingSelection = BookingSelection.isPresent(getIntent())
+                ? BookingSelection.from(getIntent()) : null;
 
         double[] dominio = calcularDominioPrecio();
         dominioPrecioMin = dominio[0];
@@ -92,7 +94,7 @@ public class ListaHotelesActivity extends AppCompatActivity {
         hotelAdapter = new HotelAdapter(HotelAdapter.TipoTarjeta.VERTICAL, hotel -> {
             Intent intent = new Intent(this, com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity.class);
             intent.putExtra(com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
-            bookingSelection.putInto(intent);
+            if (bookingSelection != null) bookingSelection.putInto(intent);
             startActivity(intent);
         });
         rvHoteles.setAdapter(hotelAdapter);
@@ -126,8 +128,9 @@ public class ListaHotelesActivity extends AppCompatActivity {
         double min = Double.MAX_VALUE;
         double max = 0;
         for (Hotel hotel : todosLosHoteles) {
-            min = Math.min(min, hotel.pricePerNight);
-            max = Math.max(max, hotel.pricePerNight);
+            double precioDesde = precioDesde(hotel);
+            min = Math.min(min, precioDesde);
+            max = Math.max(max, precioDesde);
         }
         double desde = Math.max(0, Math.floor(min / 50.0) * 50 - 50);
         double hasta = Math.ceil(max / 50.0) * 50 + 50;
@@ -345,7 +348,8 @@ public class ListaHotelesActivity extends AppCompatActivity {
             if (hotel.rating < calificacionMinima) {
                 continue;
             }
-            if (hotel.pricePerNight < precioMinimo || hotel.pricePerNight > precioMaximo) {
+            double precioDesde = precioDesde(hotel);
+            if (precioDesde < precioMinimo || precioDesde > precioMaximo) {
                 continue;
             }
             if (!serviciosSeleccionados.isEmpty()
@@ -356,9 +360,9 @@ public class ListaHotelesActivity extends AppCompatActivity {
         }
 
         if (modoOrden == ORDEN_MENOR_A_MAYOR) {
-            Collections.sort(resultado, Comparator.comparingDouble(h -> h.pricePerNight));
+            Collections.sort(resultado, Comparator.comparingDouble(this::precioDesde));
         } else if (modoOrden == ORDEN_MAYOR_A_MENOR) {
-            Collections.sort(resultado, (a, b) -> Double.compare(b.pricePerNight, a.pricePerNight));
+            Collections.sort(resultado, (a, b) -> Double.compare(precioDesde(b), precioDesde(a)));
         }
 
         int filtrosActivos = contarFiltrosActivos();
@@ -375,6 +379,10 @@ public class ListaHotelesActivity extends AppCompatActivity {
     private void renderHoteles(List<Hotel> hoteles) {
         vacioView.setVisibility(hoteles.isEmpty() ? View.VISIBLE : View.GONE);
         hotelAdapter.submitList(hoteles);
+    }
+
+    private double precioDesde(Hotel hotel) {
+        return CatalogoHabitaciones.precioMinimoDisponible(hotel.id, hotel.pricePerNight);
     }
 
     private float dpF(int value) {

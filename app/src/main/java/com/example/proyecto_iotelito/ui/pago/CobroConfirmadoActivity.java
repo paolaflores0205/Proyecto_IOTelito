@@ -1,17 +1,22 @@
 package com.example.proyecto_iotelito.ui.pago;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.proyecto_iotelito.MainActivity;
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
+import com.example.proyecto_iotelito.notification.ClienteNotificationManager;
 
 import java.util.Locale;
 
@@ -19,13 +24,26 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
 
     public static final String EXTRA_RESERVA_ID = "extra_reserva_id";
 
+    private Reserva reserva;
+    private final ActivityResultLauncher<String> permisoNotificaciones = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            concedido -> {
+                if (concedido && reserva != null) {
+                    ClienteNotificationManager.mostrarPagoRealizado(this, reserva);
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cobro_confirmado);
 
-        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, SampleData.RESERVAS.get(0).id);
-        Reserva reserva = SampleData.findReservaById(reservaId);
+        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+        reserva = ReservaRepository.getInstance(this).buscarPorId(reservaId);
+        if (reserva == null) {
+            finish();
+            return;
+        }
         Hotel hotel = SampleData.findById(reserva.hotelId);
 
         bindRow(R.id.row_hotel, R.string.label_hotel, hotel.name);
@@ -39,6 +57,19 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_continuar).setOnClickListener(v -> irAlShell());
         findViewById(R.id.btn_ver_historial).setOnClickListener(v -> irAlShell());
+
+        if (savedInstanceState == null) {
+            mostrarNotificacionPago();
+        }
+    }
+
+    private void mostrarNotificacionPago() {
+        boolean teniaPermiso = ClienteNotificationManager.tienePermiso(this);
+        // La bandeja interna conserva el evento aunque Android no permita mostrar el aviso.
+        ClienteNotificationManager.mostrarPagoRealizado(this, reserva);
+        if (!teniaPermiso) {
+            permisoNotificaciones.launch(Manifest.permission.POST_NOTIFICATIONS);
+        }
     }
 
     private void bindRow(int rowId, int labelRes, String value) {

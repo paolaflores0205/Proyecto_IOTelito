@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
@@ -29,8 +30,12 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beneficio_taxi);
 
-        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, SampleData.RESERVAS.get(0).id);
-        reserva = SampleData.findReservaById(reservaId);
+        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+        reserva = ReservaRepository.getInstance(this).buscarPorId(reservaId);
+        if (reserva == null) {
+            finish();
+            return;
+        }
         hotel = SampleData.findById(reserva.hotelId);
 
         TextView tvDescripcion = findViewById(R.id.tv_desc_taxi_gratuito);

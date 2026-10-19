@@ -46,6 +46,14 @@ public final class BookingSelection {
                 intent.getIntExtra(EXTRA_NINOS, 1));
     }
 
+    /** Indica si el Intent proviene de una búsqueda hecha por el cliente. */
+    public static boolean isPresent(Intent intent) {
+        return intent.hasExtra(EXTRA_CHECK_IN_MILLIS)
+                && intent.hasExtra(EXTRA_CHECK_OUT_MILLIS)
+                && intent.hasExtra(EXTRA_ADULTOS)
+                && intent.hasExtra(EXTRA_NINOS);
+    }
+
     public void putInto(Intent intent) {
         intent.putExtra(EXTRA_CHECK_IN_MILLIS, checkInMillis);
         intent.putExtra(EXTRA_CHECK_OUT_MILLIS, checkOutMillis);

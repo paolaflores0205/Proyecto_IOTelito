@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".IoTelitoApplication"
@@ -85,12 +86,17 @@
         <activity
             android:name=".ui.booking.DetalleHabitacionActivity"
             android:exported="false"
+            android:parentActivityName=".ui.booking.OpcionesHabitacionesActivity" />
+
+        <activity
+            android:name=".ui.booking.OpcionesHabitacionesActivity"
+            android:exported="false"
             android:parentActivityName=".ui.booking.DetalleHotelActivity" />
 
         <activity
             android:name=".ui.booking.ConfirmacionReservaActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
             android:parentActivityName=".ui.booking.DetalleHabitacionActivity" />
 
         <activity

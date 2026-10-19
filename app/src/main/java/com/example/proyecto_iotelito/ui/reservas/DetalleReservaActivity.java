@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.NotificacionRepository;
+import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
@@ -25,14 +27,24 @@ import java.util.Locale;
 public class DetalleReservaActivity extends AppCompatActivity {
 
     public static final String EXTRA_RESERVA_ID = "extra_reserva_id";
+    public static final String EXTRA_NOTIFICACION_ID = "extra_notificacion_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalle_reserva);
 
-        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, SampleData.RESERVAS.get(0).id);
-        Reserva reserva = SampleData.findReservaById(reservaId);
+        ReservaRepository reservaRepository = ReservaRepository.getInstance(this);
+        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+        int notificacionId = getIntent().getIntExtra(EXTRA_NOTIFICACION_ID, -1);
+        if (notificacionId != -1) {
+            NotificacionRepository.getInstance(this).marcarLeida(notificacionId);
+        }
+        Reserva reserva = reservaRepository.buscarPorId(reservaId);
+        if (reserva == null) {
+            finish();
+            return;
+        }
         Hotel hotel = SampleData.findById(reserva.hotelId);
 
         View subHeader = findViewById(R.id.sub_header);

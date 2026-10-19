@@ -1,6 +1,7 @@
 package com.example.proyecto_iotelito.ui.booking;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -9,13 +10,19 @@ import android.text.method.DigitsKeyListener;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ScrollView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
+import com.example.proyecto_iotelito.model.OpcionHabitaciones;
 import com.example.proyecto_iotelito.model.Reserva;
 
 import java.util.Locale;
@@ -33,6 +40,7 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
 
     private Hotel hotel;
     private BookingSelection bookingSelection;
+    private OpcionHabitaciones opcionHabitaciones;
     private double total;
 
     @Override
@@ -43,8 +51,20 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
         hotel = SampleData.findById(hotelId);
         bookingSelection = BookingSelection.from(getIntent());
+        opcionHabitaciones = (OpcionHabitaciones) getIntent().getSerializableExtra(
+                OpcionesHabitacionesActivity.EXTRA_OPCION);
+        if (opcionHabitaciones == null) {
+            java.util.List<OpcionHabitaciones> opciones =
+                    com.example.proyecto_iotelito.data.GeneradorOpcionesHabitaciones.generar(
+                            hotelId, bookingSelection.adultos, bookingSelection.ninos);
+            if (opciones.isEmpty()) {
+                finish();
+                return;
+            }
+            opcionHabitaciones = opciones.get(0);
+        }
         total = getIntent().getDoubleExtra(
-                EXTRA_TOTAL, hotel.pricePerNight * bookingSelection.noches());
+                EXTRA_TOTAL, opcionHabitaciones.precioPorNoche() * bookingSelection.noches());
 
         View subHeader = findViewById(R.id.sub_header);
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
@@ -52,19 +72,55 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.tv_hotel_nombre)).setText(hotel.name);
 
-        bindRow(R.id.row_habitacion, R.string.label_habitacion, hotel.roomName, false);
+        bindRow(R.id.row_habitacion, R.string.label_habitacion,
+                opcionHabitaciones.resumenTipos(), false);
         bindRow(R.id.row_fechas, R.string.label_fechas, bookingSelection.textoFechas(), false);
         bindRow(R.id.row_huespedes, R.string.label_huespedes_dp,
                 bookingSelection.textoHuespedes(this), false);
         bindRow(R.id.row_precio_noche, R.string.label_precio_noche,
-                formatMoney(hotel.pricePerNight), true);
+                formatMoney(opcionHabitaciones.precioPorNoche()), true);
 
         ((TextView) findViewById(R.id.tv_monto_total)).setText(formatMoney(total));
 
-        configurarFormatoTarjeta(findViewById(R.id.et_numero_tarjeta));
-        configurarFormatoVencimiento(findViewById(R.id.et_vencimiento));
+        EditText etNumero = findViewById(R.id.et_numero_tarjeta);
+        EditText etVencimiento = findViewById(R.id.et_vencimiento);
+        EditText etCvv = findViewById(R.id.et_cvv);
+        configurarFormatoTarjeta(etNumero);
+        configurarFormatoVencimiento(etVencimiento);
+        configurarTeclado(findViewById(R.id.scroll_confirmacion), etNumero, etVencimiento, etCvv);
 
         findViewById(R.id.btn_confirmar_reserva).setOnClickListener(v -> onConfirmar());
+    }
+
+    /** Mantiene el campo activo visible incluso en dispositivos con teclado flotante o edge-to-edge. */
+    private void configurarTeclado(ScrollView scrollView, EditText... campos) {
+        int paddingInferiorBase = scrollView.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(scrollView, (view, windowInsets) -> {
+            Insets ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
+            int paddingIme = windowInsets.isVisible(WindowInsetsCompat.Type.ime()) ? ime.bottom : 0;
+            view.setPadding(
+                    view.getPaddingLeft(),
+                    view.getPaddingTop(),
+                    view.getPaddingRight(),
+                    paddingInferiorBase + paddingIme);
+            return windowInsets;
+        });
+
+        for (EditText campo : campos) {
+            campo.setOnFocusChangeListener((view, tieneFoco) -> {
+                if (!tieneFoco) return;
+                scrollView.postDelayed(() -> {
+                    Rect rect = new Rect(0, 0, view.getWidth(), view.getHeight());
+                    rect.bottom += dp(32);
+                    view.requestRectangleOnScreen(rect, true);
+                }, 250);
+            });
+        }
+        ViewCompat.requestApplyInsets(scrollView);
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     /** Agrupa el número de tarjeta de 4 en 4 dígitos mientras el usuario escribe (ej. 1234 5678 9012 3456). */
@@ -177,13 +233,15 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         String codigo = String.format(Locale.getDefault(), "IOT-%04d-%04d",
                 hotel.id, new Random().nextInt(9000) + 1000);
 
-        Reserva reserva = SampleData.agregarReserva(
+        Reserva reserva = ReservaRepository.getInstance(this).agregarReserva(
                 hotel,
                 bookingSelection.fechaEntrada(),
                 bookingSelection.fechaSalida(),
                 bookingSelection.textoHuespedes(this),
                 total,
-                codigo);
+                codigo,
+                opcionHabitaciones.resumenTipos(),
+                opcionHabitaciones.resumenCodigos());
 
         findViewById(R.id.btn_confirmar_reserva).setEnabled(false);
 
@@ -192,6 +250,7 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         intent.putExtra(ReservaConfirmadaActivity.EXTRA_TOTAL, total);
         intent.putExtra(ReservaConfirmadaActivity.EXTRA_CODIGO, codigo);
         intent.putExtra(ReservaConfirmadaActivity.EXTRA_RESERVA_ID, reserva.id);
+        intent.putExtra(OpcionesHabitacionesActivity.EXTRA_OPCION, opcionHabitaciones);
         bookingSelection.putInto(intent);
         startActivity(intent);
     }

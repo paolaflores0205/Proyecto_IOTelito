@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SampleData;
+import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.google.android.material.tabs.TabLayout;
 
@@ -35,6 +35,7 @@ public class ReservasFragment extends Fragment {
     private TabLayout tabLayout;
     private ReservaAdapter reservaAdapter;
     private TextView vacioView;
+    private ReservaRepository reservaRepository;
 
     @Nullable
     @Override
@@ -46,6 +47,7 @@ public class ReservasFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        reservaRepository = ReservaRepository.getInstance(requireContext());
 
         tabLayout = view.findViewById(R.id.tab_layout);
         RecyclerView rvReservas = view.findViewById(R.id.rv_reservas);
@@ -83,7 +85,7 @@ public class ReservasFragment extends Fragment {
     private void configurarTabs() {
         int activas = 0;
         int finalizadas = 0;
-        for (Reserva reserva : SampleData.RESERVAS) {
+        for (Reserva reserva : reservaRepository.obtenerTodas()) {
             if (reserva.esActiva()) {
                 activas++;
             } else {
@@ -105,7 +107,7 @@ public class ReservasFragment extends Fragment {
         if (activas) {
             List<Reserva> proximas = new ArrayList<>();
             List<Reserva> enCurso = new ArrayList<>();
-            for (Reserva reserva : SampleData.RESERVAS) {
+            for (Reserva reserva : reservaRepository.obtenerTodas()) {
                 if (!reserva.esActiva()) {
                     continue;
                 }
@@ -132,7 +134,7 @@ public class ReservasFragment extends Fragment {
             }
         } else {
             List<Reserva> pasadas = new ArrayList<>();
-            for (Reserva reserva : SampleData.RESERVAS) {
+            for (Reserva reserva : reservaRepository.obtenerTodas()) {
                 if (!reserva.esActiva()) {
                     pasadas.add(reserva);
                 }
