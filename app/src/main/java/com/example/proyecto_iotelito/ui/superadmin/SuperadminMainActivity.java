@@ -73,6 +73,13 @@ public class SuperadminMainActivity extends AppCompatActivity {
         updateSelectedButton(menuId);
     }
 
+    public void openFilteredTab(int menuId, String filter) {
+        Bundle arguments = new Bundle();
+        arguments.putString("alert_filter", filter);
+        navController.navigate(menuId, arguments);
+        updateSelectedButton(menuId);
+    }
+
     private void updateSelectedButton(int destinationId) {
         binding.navSuperadminHomeButton.setSelected(destinationId == R.id.nav_superadmin_home);
         binding.navSuperadminUsersButton.setSelected(destinationId == R.id.nav_superadmin_users);

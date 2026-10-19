@@ -45,8 +45,8 @@ public class DashboardFragment extends Fragment {
         binding.btnQuickLogs.setOnClickListener(v -> startActivity(new Intent(requireContext(), RegistroLogsActivity.class)));
         binding.btnSuperadminProfile.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), PerfilSuperadminActivity.class)));
-        binding.cardInactiveAlert.setOnClickListener(v -> host.openTab(R.id.nav_superadmin_users));
-        binding.cardUnassignedAlert.setOnClickListener(v -> host.openTab(R.id.nav_superadmin_hotels));
+        binding.cardInactiveAlert.setOnClickListener(v -> host.openFilteredTab(R.id.nav_superadmin_users, "inactive"));
+        binding.cardUnassignedAlert.setOnClickListener(v -> host.openFilteredTab(R.id.nav_superadmin_hotels, "unassigned"));
         SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         model.users().observe(getViewLifecycleOwner(), rows -> { users = rows; renderSummary(); });
         model.hotels().observe(getViewLifecycleOwner(), rows -> { hotels = rows; renderSummary(); });

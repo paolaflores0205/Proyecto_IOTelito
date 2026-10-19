@@ -103,6 +103,7 @@ public class HotelAdapter extends RecyclerView.Adapter<HotelAdapter.HotelViewHol
 
         void bind(Hotel hotel, TipoTarjeta tipo, OnHotelClickListener listener) {
             foto.setImageResource(HotelMedia.hotelImage(hotel.id));
+            if (!hotel.photos.isEmpty()) foto.setImageURI(android.net.Uri.parse(hotel.photos.get(0)));
             ubicacion.setText(tipo == TipoTarjeta.HORIZONTAL ? hotel.city : hotel.address);
             rating.setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
             if (hotel.reviews == 0) rating.setText("Sin calificaciones");

@@ -30,8 +30,9 @@
         }
     }
 
-    map.on('move', reportCenter);
     map.on('moveend', reportCenter);
+    map.on('click', event => map.panTo(event.latlng));
+    window.selectPoint = function(lat, lng) { map.setView([lat, lng], 17); reportCenter(); };
     reportCenter();
 </script>
 </body>

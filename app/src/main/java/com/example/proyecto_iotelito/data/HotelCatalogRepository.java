@@ -47,6 +47,7 @@ public final class HotelCatalogRepository {
         hotel.longitude = row.longitude;
         hotel.contactPhone = row.phone;
         hotel.contactEmail = row.email;
+        hotel.photos = new ArrayList<>(row.photos);
         return hotel;
     }
 }

@@ -48,6 +48,12 @@ public class HotelesAdminFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) { renderHotels(); }
         });
         binding.chipGroupDistricts.setOnCheckedStateChangeListener((group, checkedIds) -> renderHotels());
+        binding.chipUnassigned.setOnCheckedChangeListener((button, checked) -> renderHotels());
+        if (savedInstanceState == null && getArguments() != null
+                && "unassigned".equals(getArguments().getString("alert_filter"))) {
+            binding.chipGroupDistricts.clearCheck();
+            binding.chipUnassigned.setChecked(true);
+        }
         binding.fabAddHotel.setOnClickListener(v -> startActivity(new Intent(requireContext(), FormularioHotelActivity.class)));
         SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         model.hotels().observe(getViewLifecycleOwner(), rows -> {
@@ -84,6 +90,7 @@ public class HotelesAdminFragment extends Fragment {
             String searchable = (hotel.name + " " + hotel.address).toLowerCase(Locale.ROOT);
             if (!query.isEmpty() && !searchable.contains(query)) continue;
             if (district != null && !district.equals(hotel.district)) continue;
+            if (binding.chipUnassigned.isChecked() && hotel.administratorId != null) continue;
 
             filtered.add(hotel);
         }

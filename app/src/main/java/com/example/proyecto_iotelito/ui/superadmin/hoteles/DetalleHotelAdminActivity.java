@@ -38,7 +38,7 @@ public class DetalleHotelAdminActivity extends AppCompatActivity {
             binding.tvAddress.setText(row.address);
             binding.tvAdmin.setText(row.administrator);
             binding.tvRooms.setText(row.rooms + "\n" + getString(R.string.superadmin_rooms));
-            binding.ivHero.setImageResource(row.imageRes);
+            binding.photoGallery.show(row.photos, row.imageRes, null);
             binding.tvContactPhone.setText(row.phone.isEmpty() ? "Sin teléfono registrado" : row.phone);
             binding.tvContactEmail.setText(row.email.isEmpty() ? "Sin correo registrado" : row.email);
             setSwitchWithoutDialog(row.active);

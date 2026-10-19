@@ -45,6 +45,11 @@ public class UsuariosFragment extends Fragment {
         binding.etUserSearch.addTextChangedListener(new SimpleTextWatcher(this::renderUsers));
         binding.chipGroupRoles.setOnCheckedStateChangeListener((group, checkedIds) -> renderUsers());
         binding.chipGroupStatus.setOnCheckedStateChangeListener((group, checkedIds) -> renderUsers());
+        if (savedInstanceState == null && getArguments() != null
+                && "inactive".equals(getArguments().getString("alert_filter"))) {
+            binding.chipGroupRoles.clearCheck();
+            binding.chipGroupStatus.check(R.id.chip_inactive);
+        }
         SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         model.users().observe(getViewLifecycleOwner(), rows -> {
             users = rows;

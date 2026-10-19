@@ -10,6 +10,10 @@ import java.util.List;
 
 @Dao
 public interface SuperadminDao {
+    @Query("SELECT * FROM report_demo_bookings ORDER BY arrival, id")
+    LiveData<List<ReportDemoBookingEntity>> observeReportHistory();
+    @Query("SELECT COUNT(*) FROM report_demo_bookings") int countReportHistory();
+    @Insert(onConflict = OnConflictStrategy.IGNORE) void insertReportHistory(List<ReportDemoBookingEntity> rows);
     @Query("SELECT * FROM admin_hotels ORDER BY id") LiveData<List<AdminHotelEntity>> observeHotels();
     @Query("SELECT * FROM admin_users ORDER BY id") LiveData<List<AdminUserEntity>> observeUsers();
     @Query("SELECT * FROM admin_events ORDER BY createdAt DESC, id DESC") LiveData<List<AdminLogEntity>> observeLogs();

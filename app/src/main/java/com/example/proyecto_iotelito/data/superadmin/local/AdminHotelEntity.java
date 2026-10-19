@@ -12,6 +12,8 @@ public class AdminHotelEntity {
     public boolean active;
     public Double latitude, longitude;
     public Integer administratorId;
+    public String photosJson;
+    @androidx.room.ColumnInfo(defaultValue = "0") public boolean galleryInitialized;
 
     public static AdminHotelEntity from(ManagedHotel hotel) {
         AdminHotelEntity row = new AdminHotelEntity();
@@ -31,6 +33,7 @@ public class AdminHotelEntity {
         row.latitude = hotel.latitude;
         row.longitude = hotel.longitude;
         row.administratorId = hotel.administratorId;
+        row.photosJson = new org.json.JSONArray(hotel.photos).toString();
         return row;
     }
 
@@ -44,6 +47,10 @@ public class AdminHotelEntity {
         hotel.latitude = latitude;
         hotel.longitude = longitude;
         hotel.administratorId = administratorId;
+        try {
+            org.json.JSONArray photos = new org.json.JSONArray(photosJson == null ? "[]" : photosJson);
+            for (int i = 0; i < photos.length(); i++) hotel.photos.add(photos.getString(i));
+        } catch (org.json.JSONException ignored) { /* Registros antiguos sin galería. */ }
         return hotel;
     }
 }

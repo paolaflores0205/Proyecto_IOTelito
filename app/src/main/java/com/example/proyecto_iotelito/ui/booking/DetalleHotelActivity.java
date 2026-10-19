@@ -83,11 +83,16 @@ public class DetalleHotelActivity extends AppCompatActivity {
         LinearLayout galleryRow = findViewById(R.id.gallery_row);
         galleryRow.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < (hotel.photos.isEmpty() ? 4 : hotel.photos.size()); i++) {
             View photo = inflater.inflate(R.layout.item_gallery_photo, galleryRow, false);
             ((ImageView) photo.findViewById(R.id.iv_gallery_photo))
                     .setImageResource(HotelMedia.galleryImage(hotel.id, i));
             galleryRow.addView(photo);
+            photo.findViewById(R.id.tv_photo_illustrative).setVisibility(!hotel.photos.isEmpty()
+                    && com.example.proyecto_iotelito.data.SampleHotelGalleries.isIllustrative(hotel.photos.get(i))
+                    ? View.VISIBLE : View.GONE);
+            if (!hotel.photos.isEmpty()) ((ImageView) photo.findViewById(R.id.iv_gallery_photo))
+                    .setImageURI(Uri.parse(hotel.photos.get(i)));
         }
     }
 

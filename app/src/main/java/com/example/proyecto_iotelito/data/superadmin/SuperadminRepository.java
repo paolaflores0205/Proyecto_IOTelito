@@ -107,10 +107,53 @@ public final class SuperadminRepository {
         }
         if (firstRun) addLog("Sistema", "Catálogo inicial cargado",
                 "Se conservaron los 16 usuarios y 12 hoteles de demostración.");
-        for (AdminHotelEntity hotel : dao.hotels()) syncAlert(hotel);
+        for (AdminHotelEntity hotel : dao.hotels()) {
+            // Los IDs R pueden cambiar al añadir imágenes al APK; las fotos propias usan URIs estables.
+            int fallback = hotel.id >= 1 && hotel.id <= 12
+                    ? com.example.proyecto_iotelito.data.HotelMedia.hotelImage(hotel.id) : R.drawable.superadmin_hotel_hero;
+            boolean galleryChanged = hotel.imageRes != fallback;
+            hotel.imageRes = fallback;
+            if (!hotel.galleryInitialized && hotel.id >= 1 && hotel.id <= 12) {
+                ManagedHotel value = hotel.toModel();
+                if (value.photos.isEmpty()) {
+                    hotel.photosJson = new org.json.JSONArray(
+                            com.example.proyecto_iotelito.data.SampleHotelGalleries.forHotel(hotel.id)).toString();
+                }
+                hotel.galleryInitialized = true;
+                galleryChanged = true;
+            }
+            if (galleryChanged) dao.updateHotel(hotel);
+            syncAlert(hotel);
+        }
     }
 
     public LiveData<List<ManagedHotel>> hotels() { return hotels; }
+    public LiveData<List<com.example.proyecto_iotelito.model.Reserva>> reportHistory() {
+        // El mismo worker garantiza que el catálogo inicial ya esté listo.
+        worker.execute(() -> {
+            try {
+                database.runInTransaction(() -> {
+                    if (dao.countReportHistory() != 0) return;
+                    List<ManagedHotel> catalog = new ArrayList<>();
+                    for (AdminHotelEntity row : dao.hotels()) catalog.add(row.toModel());
+                    List<ReportDemoBookingEntity> rows = new ArrayList<>();
+                    for (com.example.proyecto_iotelito.model.Reserva booking :
+                            DemoBookingHistory.generate(catalog, java.time.LocalDate.now())) {
+                        rows.add(ReportDemoBookingEntity.from(booking));
+                    }
+                    dao.insertReportHistory(rows);
+                });
+            } catch (Exception exception) {
+                Log.e("SuperadminStorage", "No se pudo preparar el historial de demostración", exception);
+                error.postValue("No se pudo preparar el historial de reportes. Vuelve a abrir Reportes para reintentar.");
+            }
+        });
+        return Transformations.map(dao.observeReportHistory(), rows -> {
+            List<com.example.proyecto_iotelito.model.Reserva> result = new ArrayList<>();
+            for (ReportDemoBookingEntity row : rows) result.add(row.toModel());
+            return result;
+        });
+    }
     @androidx.annotation.WorkerThread
     public void awaitInitialization() throws InterruptedException {
         if (Looper.myLooper() == Looper.getMainLooper()) throw new IllegalStateException("Usa un hilo de trabajo");
@@ -141,6 +184,7 @@ public final class SuperadminRepository {
             }
             boolean creating = value.id == 0;
             AdminHotelEntity row = AdminHotelEntity.from(value);
+            row.galleryInitialized = true;
             if (creating) {
                 row.administratorId = null;
                 row.administrator = "Sin asignar";

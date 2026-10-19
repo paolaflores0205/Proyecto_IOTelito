@@ -8,6 +8,7 @@ import java.io.Serializable;
  * entregable posterior se reemplazará por la base de datos NoSQL.
  */
 public class Hotel implements Serializable {
+    public java.util.List<String> photos = new java.util.ArrayList<>();
     public boolean active = true;
     public boolean hasInventory = true;
     public Double latitude, longitude;

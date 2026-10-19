@@ -33,6 +33,23 @@ public class FormularioHotelActivity extends AppCompatActivity {
     private int hotelId;
     private ManagedHotel existing;
     private boolean formLoaded;
+    private final java.util.ArrayList<String> photos = new java.util.ArrayList<>();
+    private boolean importingPhotos;
+    private final ActivityResultLauncher<String[]> photoPicker = registerForActivityResult(
+            new ActivityResultContracts.OpenMultipleDocuments(), selected -> {
+                if (selected.isEmpty()) return;
+                int remaining = com.example.proyecto_iotelito.data.HotelPhotoStore.MAX_PHOTOS - photos.size();
+                if (remaining <= 0) return;
+                java.util.List<android.net.Uri> chosen = selected.subList(0, Math.min(remaining, selected.size()));
+                if (chosen.size() < selected.size()) Toast.makeText(this, "Se admiten hasta 8 fotos.", Toast.LENGTH_LONG).show();
+                model.importPhotos(chosen);
+            });
+
+    private void renderPhotos() {
+        binding.photoGallery.show(photos, existing == null ? R.drawable.superadmin_hotel_hero : existing.imageRes, this::renderPhotos);
+        binding.btnAddPhotos.setEnabled(formLoaded && !importingPhotos && photos.size() < 8);
+        binding.btnAddPhotos.setText("Añadir fotos (" + photos.size() + "/8)");
+    }
 
     private final ActivityResultLauncher<String[]> locationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -55,6 +72,9 @@ public class FormularioHotelActivity extends AppCompatActivity {
                         selectedLatitude = null;
                         selectedLongitude = null;
                     }
+                    binding.etAddress.setText(data.getStringExtra(SeleccionarUbicacionActivity.EXTRA_ADDRESS));
+                    binding.actvDistrict.setText(data.getStringExtra(SeleccionarUbicacionActivity.EXTRA_DISTRICT), false);
+                    binding.actvCity.setText(data.getStringExtra(SeleccionarUbicacionActivity.EXTRA_CITY), false);
                     updateLocationSummary();
                 }
             });
@@ -78,6 +98,12 @@ public class FormularioHotelActivity extends AppCompatActivity {
         hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 0);
         model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         formLoaded = hotelId == 0;
+        if (savedInstanceState != null) {
+            java.util.ArrayList<String> restored = savedInstanceState.getStringArrayList("hotel_photos");
+            if (restored != null) photos.addAll(restored);
+        }
+        renderPhotos();
+        binding.btnAddPhotos.setOnClickListener(v -> photoPicker.launch(new String[]{"image/*"}));
         if (savedInstanceState != null && savedInstanceState.containsKey("latitude")) {
             selectedLatitude = savedInstanceState.getDouble("latitude");
             selectedLongitude = savedInstanceState.getDouble("longitude");
@@ -91,10 +117,22 @@ public class FormularioHotelActivity extends AppCompatActivity {
                 if (hotel == null) return;
                 if (!formLoaded && !restoreExistingForm) fillHotel(hotel);
                 formLoaded = true;
-                binding.btnSave.setEnabled(!Boolean.TRUE.equals(model.busy().getValue()));
+                renderPhotos();
+                binding.btnSave.setEnabled(!importingPhotos && !Boolean.TRUE.equals(model.busy().getValue()));
             });
         }
-        model.busy().observe(this, busy -> binding.btnSave.setEnabled(formLoaded && !busy));
+        model.busy().observe(this, busy -> binding.btnSave.setEnabled(formLoaded && !busy && !importingPhotos));
+        model.photoBusy().observe(this, busy -> {
+            importingPhotos = busy;
+            renderPhotos();
+            binding.btnSave.setEnabled(formLoaded && !busy && !Boolean.TRUE.equals(model.busy().getValue()));
+        });
+        model.photoResult().observe(this, result -> {
+            if (!result.consume()) return;
+            if (result.error == null) photos.addAll(result.files);
+            else Snackbar.make(binding.getRoot(), result.error, Snackbar.LENGTH_LONG).show();
+            renderPhotos();
+        });
         model.result().observe(this, result -> {
             if (!result.consume()) return;
             if (result.error != null) {
@@ -122,6 +160,9 @@ public class FormularioHotelActivity extends AppCompatActivity {
         selectedLongitude = hotel.longitude;
         updateLocationSummary();
         binding.switchActive.setChecked(hotel.active);
+        photos.clear();
+        photos.addAll(hotel.photos);
+        renderPhotos();
     }
 
     private void requestCurrentLocation() {
@@ -151,25 +192,27 @@ public class FormularioHotelActivity extends AppCompatActivity {
                         Snackbar.LENGTH_LONG).show();
                 return;
             }
-            selectedLatitude = location.getLatitude();
-            selectedLongitude = location.getLongitude();
-            updateLocationSummary();
+            openMapPicker(location.getLatitude(), location.getLongitude());
         });
     }
 
     private void openMapPicker() {
+        openMapPicker(selectedLatitude, selectedLongitude);
+    }
+
+    private void openMapPicker(Double latitude, Double longitude) {
         Intent intent = new Intent(this, SeleccionarUbicacionActivity.class);
-        if (hasSelectedLocation()) {
-            intent.putExtra(SeleccionarUbicacionActivity.EXTRA_LATITUDE, selectedLatitude);
-            intent.putExtra(SeleccionarUbicacionActivity.EXTRA_LONGITUDE, selectedLongitude);
+        intent.putExtra(SeleccionarUbicacionActivity.EXTRA_QUERY, String.valueOf(binding.etAddress.getText()));
+        if (latitude != null && longitude != null) {
+            intent.putExtra(SeleccionarUbicacionActivity.EXTRA_LATITUDE, latitude);
+            intent.putExtra(SeleccionarUbicacionActivity.EXTRA_LONGITUDE, longitude);
         }
         mapPickerLauncher.launch(intent);
     }
 
     private void updateLocationSummary() {
         if (hasSelectedLocation()) {
-            binding.tvLocationStatus.setText(getString(R.string.superadmin_map_location_ready,
-                    selectedLatitude, selectedLongitude));
+            binding.tvLocationStatus.setText("Ubicación seleccionada: " + String.valueOf(binding.etAddress.getText()));
             binding.tvLocationStatus.setTextColor(ContextCompat.getColor(this, R.color.io_teal));
         } else {
             binding.tvLocationStatus.setText(R.string.superadmin_map_location_pending);
@@ -185,7 +228,7 @@ public class FormularioHotelActivity extends AppCompatActivity {
     }
 
     private void save() {
-        if (!formLoaded || Boolean.TRUE.equals(model.busy().getValue())) return;
+        if (!formLoaded || importingPhotos || Boolean.TRUE.equals(model.busy().getValue())) return;
         binding.tilName.setError(null);
         binding.tilAddress.setError(null);
         String name = String.valueOf(binding.etName.getText()).trim();
@@ -243,12 +286,20 @@ public class FormularioHotelActivity extends AppCompatActivity {
         value.description = String.valueOf(binding.etDescription.getText()).trim();
         value.latitude = selectedLatitude;
         value.longitude = selectedLongitude;
+        value.photos = new java.util.ArrayList<>(photos);
         model.saveHotel(value);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle state) {
+        super.onRestoreInstanceState(state);
+        updateLocationSummary();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle out) {
         out.putBoolean("form_loaded", formLoaded);
+        out.putStringArrayList("hotel_photos", new java.util.ArrayList<>(photos));
         if (hasSelectedLocation()) {
             out.putDouble("latitude", selectedLatitude);
             out.putDouble("longitude", selectedLongitude);

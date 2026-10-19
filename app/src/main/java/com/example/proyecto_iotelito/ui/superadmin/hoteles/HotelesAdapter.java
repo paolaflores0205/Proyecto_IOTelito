@@ -56,6 +56,7 @@ public class HotelesAdapter extends RecyclerView.Adapter<HotelesAdapter.HotelVie
 
         void bind(ManagedHotel hotel) {
             binding.ivHotelPhoto.setImageResource(hotel.imageRes);
+            if (!hotel.photos.isEmpty()) binding.ivHotelPhoto.setImageURI(android.net.Uri.parse(hotel.photos.get(0)));
             binding.tvHotelName.setText(hotel.name);
             binding.tvHotelAddress.setText(hotel.address);
             binding.tvHotelAdmin.setText(itemView.getContext().getString(
