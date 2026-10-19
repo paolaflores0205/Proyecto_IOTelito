@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.NotificacionRepository;
+import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.example.proyecto_iotelito.model.NotificacionCliente;
 import com.example.proyecto_iotelito.ui.reservas.DetalleReservaActivity;
 
@@ -70,6 +71,14 @@ public class NotificacionesActivity extends AppCompatActivity {
 
     private void abrirNotificacion(NotificacionCliente notificacion) {
         repository.marcarLeida(notificacion.id);
+        if (notificacion.tipo == NotificacionCliente.Tipo.TAXI) {
+            TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, notificacion.reservaId), id -> {
+                if (id >= 0 && !isFinishing()) startActivity(
+                        new Intent(this, com.example.proyecto_iotelito.ui.taxi.TaxistaAsignadoActivity.class)
+                                .putExtra(TaxiRepository.EXTRA_ID, id));
+            });
+            return;
+        }
         Intent intent = new Intent(this, DetalleReservaActivity.class);
         intent.putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, notificacion.reservaId);
         intent.putExtra(DetalleReservaActivity.EXTRA_NOTIFICACION_ID, notificacion.id);

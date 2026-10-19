@@ -47,8 +47,11 @@ public class PerfilFragment extends Fragment {
                 Toast.makeText(requireContext(), "Centro de Ayuda y Soporte IoTelito", Toast.LENGTH_SHORT).show());
 
         // Opción Cerrar Sesión
-        view.findViewById(R.id.row_cerrar_sesion).setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show());
+        view.findViewById(R.id.row_cerrar_sesion).setOnClickListener(v -> {
+            com.example.proyecto_iotelito.data.SessionRepository.cerrar(requireContext());
+            startActivity(new Intent(requireContext(), com.example.proyecto_iotelito.ui.auth.LoginActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        });
     }
 
     @Override

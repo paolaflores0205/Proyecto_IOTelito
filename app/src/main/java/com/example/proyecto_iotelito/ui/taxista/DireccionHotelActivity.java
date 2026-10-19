@@ -30,6 +30,8 @@ public class DireccionHotelActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_tiempo_distancia)).setText("12 min · 4.2 km");
 
         findViewById(R.id.btn_llegue_al_hotel).setOnClickListener(v ->
-                startActivity(new Intent(this, DireccionAeropuertoActivity.class)));
+                startActivity(new Intent(this, DireccionAeropuertoActivity.class).putExtra(
+                        com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID,
+                        getIntent().getIntExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID, -1))));
     }
 }

@@ -43,6 +43,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        com.example.proyecto_iotelito.model.auth.AuthenticatedUser user =
+                com.example.proyecto_iotelito.data.SessionRepository.obtener(this);
+        if (user == null || user.getRole() != com.example.proyecto_iotelito.model.auth.UserRole.CLIENT) {
+            startActivity(new Intent(this, com.example.proyecto_iotelito.ui.auth.LoginActivity.class));
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_main);
 
         FragmentManager fm = getSupportFragmentManager();

@@ -36,6 +36,8 @@ public class DireccionAeropuertoActivity extends AppCompatActivity {
                 startActivity(ChatPasajeroTaxistaActivity.createIntent(this, "María García", "MG")));
 
         findViewById(R.id.btn_llegue_al_destino).setOnClickListener(v ->
-                startActivity(new Intent(this, FinalizarServicioActivity.class)));
+                startActivity(new Intent(this, FinalizarServicioActivity.class).putExtra(
+                        com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID,
+                        getIntent().getIntExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID, -1))));
     }
 }

@@ -73,7 +73,8 @@ public class NotificacionAdapter extends RecyclerView.Adapter<NotificacionAdapte
             root.setBackgroundResource(notificacion.leida
                     ? R.drawable.bg_notif_read_card : R.drawable.bg_notif_unread_card);
             icono.setImageResource(notificacion.tipo == NotificacionCliente.Tipo.PAGO
-                    ? R.drawable.ic_credit_card : R.drawable.ic_calendar);
+                    ? R.drawable.ic_credit_card : notificacion.tipo == NotificacionCliente.Tipo.TAXI
+                    ? R.drawable.ic_taxi : R.drawable.ic_calendar);
             titulo.setText(notificacion.titulo);
             tiempo.setText(DateUtils.getRelativeTimeSpanString(
                     notificacion.creadaEn,

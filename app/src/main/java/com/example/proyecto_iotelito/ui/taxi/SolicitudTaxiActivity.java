@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
+import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.google.android.material.button.MaterialButton;
@@ -39,6 +40,9 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
             return;
         }
         hotel = SampleData.findById(reserva.hotelId);
+        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), existente -> {
+            if (existente >= 0) abrirSolicitud(existente);
+        });
         maxPasajeros = Math.max(1, obtenerCantidadHuespedes(reserva.huespedes));
         maxMaletas = maxPasajeros * 2;
         pasajeros = Math.min(pasajeros, maxPasajeros);
@@ -87,7 +91,7 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
     }
 
     private String formatearHoraRecojo() {
-        return String.format("%02d:%02d", horaRecojo, minutoRecojo);
+        return String.format(java.util.Locale.ROOT, "%02d:%02d", horaRecojo, minutoRecojo);
     }
 
     private void setupSteppers() {
@@ -113,9 +117,24 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
     private void setupConfirmButton() {
         MaterialButton btnConfirmar = findViewById(R.id.btn_confirmar_solicitud);
         btnConfirmar.setOnClickListener(v -> {
-            Intent intent = new Intent(this, TaxistaAsignadoActivity.class);
-            startActivity(intent);
+            String hora = formatearHoraRecojo();
+            int cantidadPasajeros = pasajeros;
+            int cantidadMaletas = maletas;
+            TaxiRepository.ejecutar(this, this, () -> TaxiRepository.crear(
+                    this, reserva, hotel.name, hotel.address, hora, cantidadPasajeros, cantidadMaletas), solicitudId -> {
+                if (solicitudId < 0) {
+                    android.widget.Toast.makeText(this, R.string.taxi_guardar_error, android.widget.Toast.LENGTH_LONG).show();
+                    return;
+                }
+                abrirSolicitud(solicitudId);
+            });
         });
+    }
+
+    private void abrirSolicitud(int id) {
+        if (isFinishing()) return;
+        startActivity(new Intent(this, TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID, id));
+        finish();
     }
 
     private int obtenerCantidadHuespedes(String textoHuespedes) {

@@ -63,8 +63,11 @@ public class PerfilTaxistaFragment extends Fragment {
         ((TextView) rowSoporte.findViewById(R.id.tv_label)).setText(R.string.taxi_menu_soporte);
         rowSoporte.setOnClickListener(v -> mostrarProximamente());
 
-        view.findViewById(R.id.tv_cerrar_sesion).setOnClickListener(v ->
-                Toast.makeText(getContext(), R.string.taxi_toast_sesion_cerrada, Toast.LENGTH_SHORT).show());
+        view.findViewById(R.id.tv_cerrar_sesion).setOnClickListener(v -> {
+            com.example.proyecto_iotelito.data.SessionRepository.cerrar(requireContext());
+            startActivity(new Intent(requireContext(), com.example.proyecto_iotelito.ui.auth.LoginActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        });
     }
 
     private void bindRow(View parent, int rowId, int labelRes, String value) {

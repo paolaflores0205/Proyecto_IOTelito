@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.TaxistaSampleData;
+import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
 
 /**
@@ -32,9 +33,31 @@ public class DetalleServicioActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalle_servicio);
 
-        SolicitudServicio solicitud = TaxistaSampleData.solicitudPorId(
-                getIntent().getIntExtra(EXTRA_SOLICITUD_ID, -1));
+        int solicitudId = getIntent().getIntExtra(EXTRA_SOLICITUD_ID, -1);
+        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.buscar(this, solicitudId),
+                pedido -> pintarSolicitud(solicitudId, pedido));
+    }
+
+    private void pintarSolicitud(int solicitudId, org.json.JSONObject pedido) {
+        SolicitudServicio solicitud = pedido == null ? TaxistaSampleData.solicitudPorId(solicitudId)
+                : com.example.proyecto_iotelito.data.TaxiRepository.convertir(pedido);
         if (solicitud == null) {
+            finish();
+            return;
+        }
+        if (pedido != null && !com.example.proyecto_iotelito.data.TaxiRepository.Estado.SOLICITADO.name()
+                .equals(pedido.optString("estado"))) {
+            com.example.proyecto_iotelito.model.auth.AuthenticatedUser user =
+                    com.example.proyecto_iotelito.data.SessionRepository.obtener(this);
+            if (user != null && user.getEmail().equals(pedido.optString("taxista"))
+                    && !com.example.proyecto_iotelito.data.TaxiRepository.Estado.FINALIZADO.name()
+                    .equals(pedido.optString("estado"))) {
+                Intent destino = com.example.proyecto_iotelito.data.TaxiRepository.Estado.ASIGNADO.name()
+                        .equals(pedido.optString("estado")) ? ServicioAsignadoActivity.createIntent(this, solicitud)
+                        : new Intent(this, DireccionHotelActivity.class)
+                        .putExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID, solicitud.id);
+                startActivity(destino);
+            }
             finish();
             return;
         }
@@ -63,8 +86,22 @@ public class DetalleServicioActivity extends AppCompatActivity {
         findViewById(R.id.btn_rechazar).setOnClickListener(v -> finish());
         findViewById(R.id.btn_aceptar_servicio).setOnClickListener(v -> {
             // Al aceptar, el pedido deja de estar disponible para los demás taxistas.
-            TaxistaSampleData.aceptarSolicitud(solicitud.id);
-            startActivity(ServicioAsignadoActivity.createIntent(this, solicitud));
+            if (pedido != null) {
+                TaxiRepository.ejecutar(this, this,
+                        () -> TaxiRepository.avanzar(this, solicitud.id, TaxiRepository.Estado.ASIGNADO), aceptada -> {
+                            if (aceptada) abrirServicio(solicitud);
+                            else finish();
+                        });
+            } else {
+                TaxistaSampleData.aceptarSolicitud(solicitud.id);
+                abrirServicio(solicitud);
+            }
         });
+    }
+
+    private void abrirServicio(SolicitudServicio solicitud) {
+        if (isFinishing()) return;
+        startActivity(ServicioAsignadoActivity.createIntent(this, solicitud));
+        finish();
     }
 }

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.TaxistaSampleData;
+import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
@@ -70,9 +71,20 @@ public class InicioTaxistaFragment extends Fragment {
 
     private void actualizarContadorSolicitudes() {
         if (btnVerSolicitudes != null) {
-            btnVerSolicitudes.setText(getString(R.string.taxi_btn_ver_solicitudes,
-                    TaxistaSampleData.solicitudes().size()));
+            android.content.Context app = requireContext().getApplicationContext();
+            TaxiRepository.ejecutar(app, getViewLifecycleOwner(), () -> TaxiRepository.disponibles(app), solicitudes -> {
+                if (btnVerSolicitudes != null) {
+                    btnVerSolicitudes.setText(getString(R.string.taxi_btn_ver_solicitudes,
+                            TaxistaSampleData.solicitudes().size() + solicitudes.size()));
+                }
+            });
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        btnVerSolicitudes = null;
+        super.onDestroyView();
     }
 
     private void irASolicitudes() {

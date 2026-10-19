@@ -27,6 +27,7 @@ import java.util.Locale;
 public final class ClienteNotificationManager {
 
     public static final String CHANNEL_RESERVAS = "reservas_cliente";
+    public static final String CHANNEL_TAXI = "taxi_cliente";
 
     private ClienteNotificationManager() { }
 
@@ -37,6 +38,9 @@ public final class ClienteNotificationManager {
                 NotificationManager.IMPORTANCE_DEFAULT);
         channel.setDescription(context.getString(R.string.notif_canal_reservas_descripcion));
         context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        NotificationChannel taxi = new NotificationChannel(CHANNEL_TAXI,
+                context.getString(R.string.taxi_canal_notificaciones), NotificationManager.IMPORTANCE_HIGH);
+        context.getSystemService(NotificationManager.class).createNotificationChannel(taxi);
     }
 
     public static boolean tienePermiso(Context context) {
@@ -68,6 +72,13 @@ public final class ClienteNotificationManager {
                         reserva.codigo));
     }
 
+    public static void mostrarEstadoTaxi(Context context, int solicitudId, int reservaId,
+                                         com.example.proyecto_iotelito.data.TaxiRepository.Estado estado) {
+        publicar(context, 1_000_000 + solicitudId * 4 + estado.ordinal(),
+                NotificacionCliente.Tipo.TAXI, reservaId,
+                context.getString(estado.texto), context.getString(estado.texto));
+    }
+
     @SuppressLint("MissingPermission")
     private static void publicar(Context context, int notificationId,
                                  NotificacionCliente.Tipo tipo, int reservaId,
@@ -79,6 +90,11 @@ public final class ClienteNotificationManager {
         }
 
         Intent intent = new Intent(context, DetalleReservaActivity.class);
+        if (tipo == NotificacionCliente.Tipo.TAXI) {
+            intent = new Intent(context, com.example.proyecto_iotelito.ui.taxi.TaxistaAsignadoActivity.class);
+            intent.putExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID,
+                    (notificationId - 1_000_000) / 4);
+        }
         intent.putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reservaId);
         intent.putExtra(DetalleReservaActivity.EXTRA_NOTIFICACION_ID, notificationId);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -88,12 +104,13 @@ public final class ClienteNotificationManager {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        NotificationCompat.Builder notification = new NotificationCompat.Builder(context, CHANNEL_RESERVAS)
+        boolean esTaxi = tipo == NotificacionCliente.Tipo.TAXI;
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(context, esTaxi ? CHANNEL_TAXI : CHANNEL_RESERVAS)
                 .setSmallIcon(R.drawable.ic_notifications)
                 .setContentTitle(titulo)
                 .setContentText(texto)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(texto))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(esTaxi ? NotificationCompat.PRIORITY_HIGH : NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
