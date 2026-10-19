@@ -14,8 +14,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SuperadminSampleData;
-import com.example.proyecto_iotelito.data.SampleData;
+import androidx.lifecycle.ViewModelProvider;
+import android.widget.Toast;
+import com.example.proyecto_iotelito.ui.superadmin.SuperadminViewModel;
 import com.example.proyecto_iotelito.databinding.ActivitySuperadminFormularioHotelBinding;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -28,6 +29,10 @@ public class FormularioHotelActivity extends AppCompatActivity {
     private FusedLocationProviderClient locationClient;
     private Double selectedLatitude;
     private Double selectedLongitude;
+    private SuperadminViewModel model;
+    private int hotelId;
+    private ManagedHotel existing;
+    private boolean formLoaded;
 
     private final ActivityResultLauncher<String[]> locationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -70,8 +75,35 @@ public class FormularioHotelActivity extends AppCompatActivity {
         binding.actvCity.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, cities));
 
-        int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, -1);
-        if (hotelId != -1) fillHotel(SuperadminSampleData.hotel(hotelId));
+        hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 0);
+        model = new ViewModelProvider(this).get(SuperadminViewModel.class);
+        formLoaded = hotelId == 0;
+        if (savedInstanceState != null && savedInstanceState.containsKey("latitude")) {
+            selectedLatitude = savedInstanceState.getDouble("latitude");
+            selectedLongitude = savedInstanceState.getDouble("longitude");
+            updateLocationSummary();
+        }
+        if (hotelId != 0) {
+            boolean restoreExistingForm = savedInstanceState != null && savedInstanceState.getBoolean("form_loaded");
+            binding.toolbar.setTitle(R.string.superadmin_edit_hotel);
+            model.hotel(hotelId).observe(this, hotel -> {
+                existing = hotel;
+                if (hotel == null) return;
+                if (!formLoaded && !restoreExistingForm) fillHotel(hotel);
+                formLoaded = true;
+                binding.btnSave.setEnabled(!Boolean.TRUE.equals(model.busy().getValue()));
+            });
+        }
+        model.busy().observe(this, busy -> binding.btnSave.setEnabled(formLoaded && !busy));
+        model.result().observe(this, result -> {
+            if (!result.consume()) return;
+            if (result.error != null) {
+                Snackbar.make(binding.getRoot(), result.error, Snackbar.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, R.string.superadmin_hotel_saved, Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
         binding.btnCurrentLocation.setOnClickListener(v -> requestCurrentLocation());
         binding.btnOpenMap.setOnClickListener(v -> openMapPicker());
         binding.btnSave.setOnClickListener(v -> save());
@@ -82,13 +114,12 @@ public class FormularioHotelActivity extends AppCompatActivity {
         binding.etName.setText(hotel.name);
         binding.etAddress.setText(hotel.address);
         binding.actvDistrict.setText(hotel.district, false);
-        binding.actvCity.setText(SampleData.findById(hotel.id).city, false);
-        binding.etPhone.setText("+51 1 445 6210");
-        binding.etEmail.setText("contacto@hotelsol.pe");
-        binding.etDescription.setText(
-                "Hotel conectado con servicios inteligentes para una estadía cómoda y segura.");
-        selectedLatitude = -12.1211;
-        selectedLongitude = -77.0302;
+        binding.actvCity.setText(hotel.city, false);
+        binding.etPhone.setText(hotel.phone);
+        binding.etEmail.setText(hotel.email);
+        binding.etDescription.setText(hotel.description);
+        selectedLatitude = hotel.latitude;
+        selectedLongitude = hotel.longitude;
         updateLocationSummary();
         binding.switchActive.setChecked(hotel.active);
     }
@@ -154,11 +185,19 @@ public class FormularioHotelActivity extends AppCompatActivity {
     }
 
     private void save() {
+        if (!formLoaded || Boolean.TRUE.equals(model.busy().getValue())) return;
         binding.tilName.setError(null);
         binding.tilAddress.setError(null);
         String name = String.valueOf(binding.etName.getText()).trim();
         String address = String.valueOf(binding.etAddress.getText()).trim();
         String email = String.valueOf(binding.etEmail.getText()).trim();
+        String district = binding.actvDistrict.getText().toString().trim();
+        String city = binding.actvCity.getText().toString().trim();
+        String phone = String.valueOf(binding.etPhone.getText()).trim();
+        binding.actvDistrict.setError(null);
+        binding.actvCity.setError(null);
+        binding.etEmail.setError(null);
+        binding.etPhone.setError(null);
         boolean valid = true;
         if (name.isEmpty()) {
             binding.tilName.setError(getString(R.string.superadmin_required_field));
@@ -172,6 +211,19 @@ public class FormularioHotelActivity extends AppCompatActivity {
             binding.etEmail.setError("Correo no válido");
             valid = false;
         }
+        if (district.isEmpty()) {
+            binding.actvDistrict.setError(getString(R.string.superadmin_required_field));
+            valid = false;
+        }
+        if (city.isEmpty()) {
+            binding.actvCity.setError(getString(R.string.superadmin_required_field));
+            valid = false;
+        }
+        int phoneDigits = phone.replaceAll("\\D", "").length();
+        if (!phone.isEmpty() && (!phone.matches("[+0-9() .-]{7,25}") || phoneDigits < 7 || phoneDigits > 15)) {
+            binding.etPhone.setError("Ingresa un teléfono válido");
+            valid = false;
+        }
         if (!hasSelectedLocation()) {
             binding.tvLocationStatus.setTextColor(ContextCompat.getColor(this,
                     com.google.android.material.R.color.design_default_color_error));
@@ -180,8 +232,27 @@ public class FormularioHotelActivity extends AppCompatActivity {
             valid = false;
         }
         if (!valid) return;
-        Snackbar.make(binding.getRoot(), R.string.superadmin_hotel_saved, Snackbar.LENGTH_LONG)
-                .setAction(R.string.btn_volver_inicio, v -> finish())
-                .show();
+        ManagedHotel value = new ManagedHotel(hotelId, name, address, district,
+                existing == null ? "Sin asignar" : existing.administrator,
+                existing == null ? 0 : existing.rooms, existing == null ? 0 : existing.reservations,
+                existing == null ? R.drawable.superadmin_hotel_hero : existing.imageRes,
+                binding.switchActive.isChecked());
+        value.city = city;
+        value.phone = phone;
+        value.email = email;
+        value.description = String.valueOf(binding.etDescription.getText()).trim();
+        value.latitude = selectedLatitude;
+        value.longitude = selectedLongitude;
+        model.saveHotel(value);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle out) {
+        out.putBoolean("form_loaded", formLoaded);
+        if (hasSelectedLocation()) {
+            out.putDouble("latitude", selectedLatitude);
+            out.putDouble("longitude", selectedLongitude);
+        }
+        super.onSaveInstanceState(out);
     }
 }

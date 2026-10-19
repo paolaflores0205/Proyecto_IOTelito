@@ -9,7 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SuperadminSampleData;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.proyecto_iotelito.ui.superadmin.SuperadminViewModel;
 import com.example.proyecto_iotelito.databinding.ActivitySuperadminDetalleUsuarioBinding;
 import com.example.proyecto_iotelito.model.superadmin.AdminUser;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -19,16 +20,27 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
     public static final String EXTRA_USER_ID = "user_id";
     private ActivitySuperadminDetalleUsuarioBinding binding;
     private AdminUser user;
+    private SuperadminViewModel model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminDetalleUsuarioBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        user = SuperadminSampleData.user(getIntent().getIntExtra(EXTRA_USER_ID, 1));
         binding.toolbar.setNavigationOnClickListener(v -> finish());
-        binding.btnToggleUser.setOnClickListener(v -> confirmStatusChange());
-        render();
+        binding.btnToggleUser.setEnabled(false);
+        binding.btnToggleUser.setOnClickListener(v -> { if (user != null) confirmStatusChange(); });
+        model = new ViewModelProvider(this).get(SuperadminViewModel.class);
+        model.user(getIntent().getIntExtra(EXTRA_USER_ID, -1)).observe(this, row -> {
+            user = row;
+            binding.btnToggleUser.setEnabled(row != null && !Boolean.TRUE.equals(model.busy().getValue()));
+            if (row != null) render();
+        });
+        model.busy().observe(this, busy -> binding.btnToggleUser.setEnabled(user != null && !busy));
+        model.result().observe(this, result -> {
+            if (result.consume()) Snackbar.make(binding.getRoot(), result.error == null
+                    ? getString(R.string.superadmin_user_status_updated) : result.error, Snackbar.LENGTH_LONG).show();
+        });
     }
 
     private void render() {
@@ -51,21 +63,19 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
     }
 
     private void confirmStatusChange() {
+        EditText reason = new EditText(this);
+        reason.setHint(R.string.superadmin_reason_hint);
+        reason.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        int padding = (int) (20 * getResources().getDisplayMetrics().density);
+        reason.setPadding(padding, 0, padding, 0);
         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
                 .setTitle(user.active ? R.string.superadmin_deactivate_question : R.string.superadmin_activate_question)
                 .setMessage(getString(user.active ? R.string.superadmin_deactivate_message : R.string.superadmin_activate_message, user.name))
                 .setNegativeButton(R.string.superadmin_cancel, null)
                 .setPositiveButton(R.string.superadmin_confirm, (d, which) -> {
-                    user.active = !user.active;
-                    render();
-                    Snackbar.make(binding.getRoot(), R.string.superadmin_user_status_updated, Snackbar.LENGTH_SHORT).show();
+                    model.userStatus(user.id, !user.active, reason.getText().toString());
                 });
         if (user.active) {
-            EditText reason = new EditText(this);
-            reason.setHint(R.string.superadmin_reason_hint);
-            reason.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-            int padding = (int) (20 * getResources().getDisplayMetrics().density);
-            reason.setPadding(padding, 0, padding, 0);
             dialog.setView(reason);
         }
         dialog.show();

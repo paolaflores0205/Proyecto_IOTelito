@@ -6,7 +6,9 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SuperadminSampleData;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.proyecto_iotelito.ui.superadmin.SuperadminViewModel;
+import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.databinding.ActivitySuperadminDetalleHotelBinding;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -17,20 +19,43 @@ public class DetalleHotelAdminActivity extends AppCompatActivity {
     private ActivitySuperadminDetalleHotelBinding binding;
     private ManagedHotel hotel;
     private boolean changingSwitchProgrammatically;
+    private SuperadminViewModel model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminDetalleHotelBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        hotel = SuperadminSampleData.hotel(getIntent().getIntExtra(EXTRA_HOTEL_ID, 1));
-
         binding.toolbar.setNavigationOnClickListener(v -> finish());
-        binding.tvHotelName.setText(hotel.name);
-        binding.tvAddress.setText(hotel.address);
-        binding.tvAdmin.setText(hotel.administrator);
-        binding.tvRooms.setText(hotel.rooms + "\n" + getString(R.string.superadmin_rooms));
-        binding.switchIot.setChecked(hotel.active);
+        binding.btnEdit.setEnabled(false);
+        binding.btnChangeAdmin.setEnabled(false);
+        binding.switchIot.setEnabled(false);
+        model = new ViewModelProvider(this).get(SuperadminViewModel.class);
+        model.hotel(getIntent().getIntExtra(EXTRA_HOTEL_ID, -1)).observe(this, row -> {
+            hotel = row;
+            if (row == null) return;
+            binding.tvHotelName.setText(row.name);
+            binding.tvAddress.setText(row.address);
+            binding.tvAdmin.setText(row.administrator);
+            binding.tvRooms.setText(row.rooms + "\n" + getString(R.string.superadmin_rooms));
+            binding.ivHero.setImageResource(row.imageRes);
+            binding.tvContactPhone.setText(row.phone.isEmpty() ? "Sin teléfono registrado" : row.phone);
+            binding.tvContactEmail.setText(row.email.isEmpty() ? "Sin correo registrado" : row.email);
+            setSwitchWithoutDialog(row.active);
+            binding.btnEdit.setEnabled(true);
+            binding.btnChangeAdmin.setEnabled(true);
+            binding.switchIot.setEnabled(!Boolean.TRUE.equals(model.busy().getValue()));
+        });
+        model.busy().observe(this, busy -> binding.switchIot.setEnabled(hotel != null && !busy));
+        model.result().observe(this, result -> {
+            if (!result.consume()) return;
+            if (hotel != null) setSwitchWithoutDialog(hotel.active);
+            Snackbar.make(binding.getRoot(), result.error == null
+                    ? getString(R.string.superadmin_hotel_status_updated) : result.error, Snackbar.LENGTH_LONG).show();
+        });
+        if (getIntent().getBooleanExtra("admin_alert", false)) {
+            SuperadminRepository.getInstance(this).markAlertsRead(getIntent().getIntExtra(EXTRA_HOTEL_ID, -1));
+        }
 
         binding.btnEdit.setOnClickListener(v -> {
             Intent intent = new Intent(this, FormularioHotelActivity.class);
@@ -54,8 +79,7 @@ public class DetalleHotelAdminActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.superadmin_cancel, (dialog, which) -> setSwitchWithoutDialog(!requestedStatus))
                 .setOnCancelListener(dialog -> setSwitchWithoutDialog(!requestedStatus))
                 .setPositiveButton(R.string.superadmin_confirm, (dialog, which) -> {
-                    hotel.active = requestedStatus;
-                    Snackbar.make(binding.getRoot(), R.string.superadmin_hotel_status_updated, Snackbar.LENGTH_SHORT).show();
+                    model.hotelStatus(hotel.id, requestedStatus);
                 })
                 .show();
     }

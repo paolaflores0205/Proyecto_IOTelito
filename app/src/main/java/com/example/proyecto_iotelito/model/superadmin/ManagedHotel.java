@@ -10,6 +10,13 @@ public class ManagedHotel {
     public final int reservations;
     public final int imageRes;
     public boolean active;
+    public String city = "";
+    public String phone = "";
+    public String email = "";
+    public String description = "";
+    public Double latitude;
+    public Double longitude;
+    public Integer administratorId;
 
     public ManagedHotel(int id, String name, String address, String district,
                         String administrator, int rooms, int reservations,

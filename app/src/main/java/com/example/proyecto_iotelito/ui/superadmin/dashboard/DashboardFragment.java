@@ -11,7 +11,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SuperadminSampleData;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.proyecto_iotelito.ui.superadmin.SuperadminViewModel;
+import java.util.ArrayList;
+import java.util.List;
 import com.example.proyecto_iotelito.databinding.FragmentSuperadminDashboardBinding;
 import com.example.proyecto_iotelito.model.superadmin.AdminUser;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
@@ -21,6 +24,8 @@ import com.example.proyecto_iotelito.ui.superadmin.perfil.PerfilSuperadminActivi
 
 public class DashboardFragment extends Fragment {
     private FragmentSuperadminDashboardBinding binding;
+    private List<AdminUser> users = new ArrayList<>();
+    private List<ManagedHotel> hotels = new ArrayList<>();
 
     @Nullable
     @Override
@@ -42,26 +47,39 @@ public class DashboardFragment extends Fragment {
                 startActivity(new Intent(requireContext(), PerfilSuperadminActivity.class)));
         binding.cardInactiveAlert.setOnClickListener(v -> host.openTab(R.id.nav_superadmin_users));
         binding.cardUnassignedAlert.setOnClickListener(v -> host.openTab(R.id.nav_superadmin_hotels));
+        SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
+        model.users().observe(getViewLifecycleOwner(), rows -> { users = rows; renderSummary(); });
+        model.hotels().observe(getViewLifecycleOwner(), rows -> { hotels = rows; renderSummary(); });
+        model.logs().observe(getViewLifecycleOwner(), rows -> {
+            android.widget.TextView[] recent = {binding.tvRecentOne, binding.tvRecentTwo, binding.tvRecentThree};
+            for (int i = 0; i < recent.length; i++) {
+                recent[i].setVisibility(i < rows.size() ? View.VISIBLE : View.GONE);
+                if (i < rows.size()) {
+                    com.example.proyecto_iotelito.model.superadmin.ActivityLog log = rows.get(i);
+                    recent[i].setText(log.title + "\n" + log.detail + "\n" + log.time);
+                }
+            }
+        });
     }
 
     private void renderSummary() {
         int activeUsers = 0;
         int inactiveUsers = 0;
         int administrators = 0;
-        for (AdminUser user : SuperadminSampleData.users()) {
+        for (AdminUser user : users) {
             if (user.active) activeUsers++; else inactiveUsers++;
             if ("Administrador".equals(user.role)) administrators++;
         }
 
         int unassignedHotels = 0;
         int bookings = 0;
-        for (ManagedHotel hotel : SuperadminSampleData.hotels()) {
+        for (ManagedHotel hotel : hotels) {
             bookings += hotel.reservations;
-            if ("Sin asignar".equalsIgnoreCase(hotel.administrator)) unassignedHotels++;
+            if (hotel.administratorId == null) unassignedHotels++;
         }
 
         binding.tvDashboardUsers.setText(String.valueOf(activeUsers));
-        binding.tvDashboardHotels.setText(String.valueOf(SuperadminSampleData.hotels().size()));
+        binding.tvDashboardHotels.setText(String.valueOf(hotels.size()));
         binding.tvDashboardAdmins.setText(String.valueOf(administrators));
         binding.tvDashboardBookings.setText(String.valueOf(bookings));
         binding.tvInactiveAlert.setText(getResources().getQuantityString(

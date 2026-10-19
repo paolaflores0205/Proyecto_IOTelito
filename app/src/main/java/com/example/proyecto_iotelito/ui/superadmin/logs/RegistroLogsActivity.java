@@ -8,7 +8,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SuperadminSampleData;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.proyecto_iotelito.ui.superadmin.SuperadminViewModel;
+import java.util.ArrayList;
+import java.util.List;
 import com.example.proyecto_iotelito.databinding.ActivitySuperadminRegistroLogsBinding;
 import com.example.proyecto_iotelito.databinding.ItemSuperadminLogBinding;
 import com.example.proyecto_iotelito.model.superadmin.ActivityLog;
@@ -17,6 +20,7 @@ import java.util.Locale;
 
 public class RegistroLogsActivity extends AppCompatActivity {
     private ActivitySuperadminRegistroLogsBinding binding;
+    private List<ActivityLog> logs = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +34,10 @@ public class RegistroLogsActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) { renderLogs(); }
         });
         binding.chipGroupType.setOnCheckedStateChangeListener((group, checkedIds) -> renderLogs());
+        new ViewModelProvider(this).get(SuperadminViewModel.class).logs().observe(this, rows -> {
+            logs = rows;
+            renderLogs();
+        });
         renderLogs();
     }
 
@@ -37,7 +45,7 @@ public class RegistroLogsActivity extends AppCompatActivity {
         String query = String.valueOf(binding.etSearch.getText()).trim().toLowerCase(Locale.ROOT);
         String filter = selectedFilter();
         binding.logListContainer.removeAllViews();
-        for (ActivityLog log : SuperadminSampleData.logs()) {
+        for (ActivityLog log : logs) {
             String searchable = (log.type + " " + log.title + " " + log.detail).toLowerCase(Locale.ROOT);
             if (!query.isEmpty() && !searchable.contains(query)) continue;
             if (filter != null && !filter.equals(log.type)) continue;

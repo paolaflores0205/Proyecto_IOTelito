@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".IoTelitoApplication"
@@ -202,6 +203,10 @@
             android:exported="false" />
 
         <!-- Superadmin -->
+        <activity
+            android:name=".ui.superadmin.notificaciones.AvisosSuperadminActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
         <activity
             android:name=".ui.superadmin.SuperadminMainActivity"
             android:exported="false" />

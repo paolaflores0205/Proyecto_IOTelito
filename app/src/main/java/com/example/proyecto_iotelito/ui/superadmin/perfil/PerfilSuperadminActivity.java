@@ -21,6 +21,8 @@ public class PerfilSuperadminActivity extends AppCompatActivity {
 
         binding.toolbar.setNavigationOnClickListener(v -> finish());
         binding.btnLogout.setOnClickListener(v -> confirmLogout());
+        binding.btnAdminAlerts.setOnClickListener(v -> startActivity(new Intent(this,
+                com.example.proyecto_iotelito.ui.superadmin.notificaciones.AvisosSuperadminActivity.class)));
     }
 
     private void confirmLogout() {
