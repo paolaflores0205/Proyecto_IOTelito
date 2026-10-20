@@ -23,16 +23,23 @@
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    let lastReportedCenter = null;
     function reportCenter() {
         const center = map.getCenter();
+        // Redimensionar el mapa no significa que el usuario haya elegido otro punto.
+        if (lastReportedCenter && map.distance(lastReportedCenter, center) < 2) return;
         if (window.Android && window.Android.onMapMoved) {
+            lastReportedCenter = [center.lat, center.lng];
             window.Android.onMapMoved(center.lat, center.lng);
         }
     }
 
     map.on('moveend', reportCenter);
     map.on('click', event => map.panTo(event.latlng));
-    window.selectPoint = function(lat, lng) { map.setView([lat, lng], 17); reportCenter(); };
+    window.selectPoint = function(lat, lng) {
+        map.setView([lat, lng], 17, { animate: false });
+        reportCenter();
+    };
     reportCenter();
 </script>
 </body>

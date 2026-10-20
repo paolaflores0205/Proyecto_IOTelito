@@ -44,19 +44,6 @@
                 android:textColor="@color/io_text_secondary"
                 android:textSize="12sp" />
 
-            <TextView
-                style="@style/TextAppearance.IoTelito.SectionTitle"
-                android:layout_marginTop="20dp"
-                android:text="@string/superadmin_section_identity" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="@string/superadmin_section_identity_help"
-                android:textColor="@color/io_text_secondary"
-                android:textSize="12sp" />
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_name"
                 style="@style/Widget.IoTelito.Input"

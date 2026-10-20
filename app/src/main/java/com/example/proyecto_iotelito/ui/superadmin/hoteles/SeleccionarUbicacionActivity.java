@@ -24,6 +24,8 @@ public class SeleccionarUbicacionActivity extends AppCompatActivity {
     private boolean destroyed;
     private boolean pageLoaded;
     private Double pendingLatitude, pendingLongitude;
+    private boolean hasRequestedPoint;
+    private double requestedLatitude, requestedLongitude;
     private Geocoder geocoder;
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -69,7 +71,7 @@ public class SeleccionarUbicacionActivity extends AppCompatActivity {
                         if (token != generation) return;
                         Address found = results.get(which);
                         moveMap(found.getLatitude(), found.getLongitude());
-                    }).setNegativeButton("Cancelar", (dialog, which) -> resolve(latitude, longitude)).show();
+                    }).setNegativeButton("Cancelar", (dialog, which) -> resolve(latitude, longitude, true)).show();
             }); }
             @Override public void onError(String message) { fail(token, "No se pudo buscar. Comprueba tu conexión e intenta otra vez."); }
         });
@@ -77,9 +79,20 @@ public class SeleccionarUbicacionActivity extends AppCompatActivity {
     private void moveMap(double lat, double lng) {
         latitude = lat; longitude = lng;
         if (!pageLoaded) { pendingLatitude = lat; pendingLongitude = lng; return; }
+        // Una búsqueda explícita sí permite reintentar la misma dirección.
+        resolve(lat, lng, true);
         binding.mapWebView.evaluateJavascript(String.format(Locale.US, "window.selectPoint(%f,%f)", lat, lng), null);
     }
     private void resolve(double lat, double lng) {
+        resolve(lat, lng, false);
+    }
+    private void resolve(double lat, double lng, boolean force) {
+        // Leaflet también notifica moveend cuando el WebView cambia de tamaño.
+        // No borrar una dirección válida ni cancelar su consulta por ese evento.
+        if (!force && hasRequestedPoint
+                && MapPoint.same(requestedLatitude, requestedLongitude, lat, lng)) return;
+        hasRequestedPoint = true;
+        requestedLatitude = lat; requestedLongitude = lng;
         latitude = lat; longitude = lng;
         int token = ++generation;
         address = ""; district = ""; city = "";
@@ -119,6 +132,7 @@ public class SeleccionarUbicacionActivity extends AppCompatActivity {
         map.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) { return true; }
             @Override public void onPageFinished(WebView view, String url) {
+                if (destroyed || pageLoaded) return;
                 pageLoaded = true;
                 if (pendingLatitude != null) { moveMap(pendingLatitude, pendingLongitude); pendingLatitude = null; }
                 else resolve(latitude, longitude);
