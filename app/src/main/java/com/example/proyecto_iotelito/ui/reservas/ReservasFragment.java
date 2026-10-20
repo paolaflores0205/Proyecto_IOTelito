@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.ReservaRepository;
+import com.example.proyecto_iotelito.data.TaxiRepository;
+import com.example.proyecto_iotelito.ui.taxi.TaxistaAsignadoActivity;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.google.android.material.tabs.TabLayout;
 
@@ -36,6 +38,8 @@ public class ReservasFragment extends Fragment {
     private ReservaAdapter reservaAdapter;
     private TextView vacioView;
     private ReservaRepository reservaRepository;
+    private static final java.util.concurrent.ExecutorService EJEMPLOS_EXECUTOR =
+            java.util.concurrent.Executors.newSingleThreadExecutor();
 
     @Nullable
     @Override
@@ -55,6 +59,9 @@ public class ReservasFragment extends Fragment {
         reservaAdapter = new ReservaAdapter(reserva -> abrirDetalle(reserva.id));
         rvReservas.setAdapter(reservaAdapter);
         vacioView = view.findViewById(R.id.tv_reservas_vacio);
+        if ((requireContext().getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            cargarEjemplos();
+        }
 
         configurarTabs();
 
@@ -80,6 +87,37 @@ public class ReservasFragment extends Fragment {
         // refresca por si cambió algo (ej. el estado de una reserva) mientras el usuario estaba en otra pantalla
         configurarTabs();
         renderReservas(tabLayout.getSelectedTabPosition() == 0);
+    }
+
+    private void cargarEjemplos() {
+        androidx.lifecycle.MutableLiveData<Boolean> resultado = new androidx.lifecycle.MutableLiveData<>();
+        androidx.lifecycle.LifecycleOwner owner = getViewLifecycleOwner();
+        resultado.observe(owner, correcto -> {
+            resultado.removeObservers(owner);
+            if (correcto) {
+                configurarTabs();
+                renderReservas(tabLayout.getSelectedTabPosition() == 0);
+            }
+        });
+        ReservaRepository repository = reservaRepository;
+        EJEMPLOS_EXECUTOR.execute(() -> {
+            try {
+                repository.asegurarEjemplosPrueba();
+                resultado.postValue(true);
+            } catch (RuntimeException exception) {
+                android.util.Log.e("ReservasFragment", "No se pudieron crear ejemplos", exception);
+                resultado.postValue(false);
+            }
+        });
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden && getView() != null && tabLayout != null) {
+            configurarTabs();
+            renderReservas(tabLayout.getSelectedTabPosition() == 0);
+        }
     }
 
     private void configurarTabs() {
@@ -159,8 +197,17 @@ public class ReservasFragment extends Fragment {
     }
 
     private void abrirDetalle(int reservaId) {
-        Intent intent = new Intent(getActivity(), DetalleReservaActivity.class);
-        intent.putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reservaId);
-        startActivity(intent);
+        android.content.Context app = requireContext().getApplicationContext();
+        TaxiRepository.ejecutar(app, getViewLifecycleOwner(), () -> TaxiRepository.porReserva(app, reservaId), solicitudId -> {
+            Intent intent;
+            if (solicitudId >= 0) {
+                intent = new Intent(requireContext(), TaxistaAsignadoActivity.class)
+                        .putExtra(TaxiRepository.EXTRA_ID, solicitudId);
+            } else {
+                intent = new Intent(requireContext(), DetalleReservaActivity.class)
+                        .putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reservaId);
+            }
+            startActivity(intent);
+        });
     }
 }

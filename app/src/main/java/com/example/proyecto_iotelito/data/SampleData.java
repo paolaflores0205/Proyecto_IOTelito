@@ -71,7 +71,19 @@ public final class SampleData {
                 "Habitación Superior", "2 adultos, 1 niño", "35 m²",
                 new String[]{"Cama King Size", "Vista al volcán Misti", "Minibar", "Smart TV 43\" con domótica integrada"}
         ));
+        add(hotelDeEjemplo(4, "Hotel Costa Azul", "Miraflores, Lima", 380.0, "Habitación Superior"));
+        add(hotelDeEjemplo(5, "Jardines de San Isidro", "San Isidro, Lima", 450.0, "Suite Ejecutiva"));
+        add(hotelDeEjemplo(6, "Malecón Boutique", "Magdalena del Mar, Lima", 520.0, "Habitación Superior"));
+        add(hotelDeEjemplo(7, "Barranco Art Hotel", "Barranco, Lima", 450.0, "Suite Deluxe"));
     }});
+
+    private static Hotel hotelDeEjemplo(int id, String nombre, String direccion, double precio, String habitacion) {
+        return new Hotel(id, "Lima", nombre, direccion, 4.6, 85,
+                "Una estadía confortable con espacios para descansar y disfrutar de la ciudad.", precio,
+                new String[]{"Wi-Fi", "Desayuno incluido", "Recepción 24 horas"},
+                new Attraction[0], habitacion, "2 adultos, 1 niño", "38 m²",
+                new String[]{"Cama King Size", "Smart TV", "Minibar", "Aire acondicionado"});
+    }
 
     public static Hotel findById(int id) {
         for (Hotel hotel : HOTELS) {

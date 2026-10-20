@@ -1,0 +1,27 @@
+<resources>
+    <string name="taxi_seguimiento_titulo">Tu solicitud de taxi</string>
+    <string name="taxi_seguimiento_folio">Solicitud # %1$d</string>
+    <string name="taxi_hero_solicitado">Estamos buscando tu taxi</string>
+    <string name="taxi_hero_asignado">Tu conductor está listo</string>
+    <string name="taxi_hero_camino">Tu taxi está en camino</string>
+    <string name="taxi_hero_finalizado">¡Llegaste a tu destino!</string>
+    <string name="taxi_desc_solicitado">Recibimos tu solicitud. Te avisaremos cuando un taxista acepte tu traslado.</string>
+    <string name="taxi_desc_asignado">Un taxista aceptó tu solicitud. Te avisaremos cuando inicie el recorrido.</string>
+    <string name="taxi_desc_camino">Tu conductor inició el recorrido. Mantente atento a las novedades del viaje.</string>
+    <string name="taxi_desc_finalizado">El traslado ha finalizado. Gracias por viajar con IoTelito.</string>
+    <string name="taxi_seguimiento_ruta">Tu traslado</string>
+    <string name="taxi_seguimiento_origen">Punto de recojo</string>
+    <string name="taxi_seguimiento_destino">Destino</string>
+    <string name="taxi_seguimiento_hora">Hora de recojo</string>
+    <string name="taxi_seguimiento_pasajeros">Pasajeros</string>
+    <string name="taxi_seguimiento_maletas">Maletas</string>
+    <string name="taxi_seguimiento_progreso">Estado de tu viaje</string>
+    <string name="taxi_seguimiento_conductor">Tu conductor</string>
+    <string name="taxi_seguimiento_aviso">Puedes volver al inicio. Tu solicitud seguirá guardada y te avisaremos si cambia de estado.</string>
+    <string name="taxi_seguimiento_cerrado">El estado final de tu viaje queda guardado en tu solicitud.</string>
+    <string name="taxi_seguimiento_volver">Volver al inicio</string>
+    <string name="taxi_paso_accesibilidad">%1$s: %2$s</string>
+    <string name="taxi_paso_completo">completado</string>
+    <string name="taxi_paso_actual">estado actual</string>
+    <string name="taxi_paso_pendiente">pendiente</string>
+</resources>

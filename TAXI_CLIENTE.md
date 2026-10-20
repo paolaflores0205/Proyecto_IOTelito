@@ -27,6 +27,12 @@ actualizan exclusivamente en Room.
 
 Flujo de comprobación en una misma instalación:
 
+En la versión de desarrollo, al abrir `Mis reservas` se agregan automáticamente
+7 ejemplos, cada uno en un hotel diferente: 3 con salida el día de la carga y monto
+elegible para taxi, 1 en curso, 1 próxima, 1 finalizada y 1 cancelada. No hay botones
+de prueba. Sus códigos estables evitan duplicarlos al volver a entrar o reiniciar
+la app; las reservas anteriores y sus estados se conservan.
+
 1. Entrar como cliente, abrir una reserva y solicitar taxi: aparece «Solicitado».
 2. Cerrar sesión y entrar como taxista. En Solicitudes aparece el pedido del cliente.
 3. Aceptar: se guarda «Taxista asignado» y se genera un aviso.

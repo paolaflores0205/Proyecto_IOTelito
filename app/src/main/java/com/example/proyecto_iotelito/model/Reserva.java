@@ -65,7 +65,7 @@ public class Reserva implements Serializable {
 
     /** Hoy es el día de salida de una estadía en curso: ya se puede hacer el checkout. */
     public boolean puedeHacerCheckout() {
-        return estaEnCurso() && fechaSalida.isEqual(LocalDate.now());
+        return esActiva() && estaEnCurso() && fechaSalida.isEqual(LocalDate.now());
     }
 
     public String rangoFechasTexto() {

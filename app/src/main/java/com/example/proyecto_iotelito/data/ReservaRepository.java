@@ -17,9 +17,11 @@ public final class ReservaRepository {
 
     private static volatile ReservaRepository instance;
     private final ReservaDao reservaDao;
+    private final IoTelitoDatabase database;
 
     private ReservaRepository(Context context) {
-        reservaDao = IoTelitoDatabase.getInstance(context).reservaDao();
+        database = IoTelitoDatabase.getInstance(context);
+        reservaDao = database.reservaDao();
         cargarDatosInicialesSiHaceFalta();
     }
 
@@ -71,6 +73,18 @@ public final class ReservaRepository {
 
     public void actualizarEstado(int reservaId, Reserva.Estado estado) {
         reservaDao.actualizarEstado(reservaId, estado.name());
+    }
+
+    @androidx.annotation.WorkerThread
+    public void asegurarEjemplosPrueba() {
+        database.runInTransaction(() -> {
+            if (reservaDao.contarPorPrefijoCodigo(ReservasPrueba.PREFIJO_CODIGO) > 0) return;
+            List<ReservaEntity> ejemplos = new ArrayList<>();
+            for (Reserva reserva : ReservasPrueba.crear(LocalDate.now(), reservaDao.obtenerIdMaximo() + 1)) {
+                ejemplos.add(toEntity(reserva));
+            }
+            reservaDao.guardarTodas(ejemplos);
+        });
     }
 
     private void cargarDatosInicialesSiHaceFalta() {

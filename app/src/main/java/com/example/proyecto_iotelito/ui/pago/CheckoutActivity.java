@@ -12,6 +12,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
+import com.example.proyecto_iotelito.data.TaxiRepository;
+import com.example.proyecto_iotelito.ui.taxi.TaxistaAsignadoActivity;
+import com.example.proyecto_iotelito.ui.reservas.DetalleReservaActivity;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.ui.taxi.BeneficioTaxiActivity;
@@ -43,6 +46,10 @@ public class CheckoutActivity extends AppCompatActivity {
             finish();
             return;
         }
+        if (!reserva.puedeHacerCheckout()) {
+            abrirSolicitudODetalle();
+            return;
+        }
         Hotel hotel = SampleData.findById(reserva.hotelId);
 
         View subHeader = findViewById(R.id.sub_header);
@@ -69,6 +76,14 @@ public class CheckoutActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_confirmar_checkout).setOnClickListener(v -> onConfirmarCheckout());
         findViewById(R.id.btn_cancelar_checkout).setOnClickListener(v -> finish());
+        findViewById(R.id.btn_confirmar_checkout).setEnabled(false);
+        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), solicitudId -> {
+            if (solicitudId >= 0) {
+                abrirSolicitud(solicitudId);
+            } else {
+                findViewById(R.id.btn_confirmar_checkout).setEnabled(true);
+            }
+        });
     }
 
     private void configurarEstrellas() {
@@ -97,6 +112,11 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void onConfirmarCheckout() {
+        Reserva actual = reservaRepository.buscarPorId(reserva.id);
+        if (actual == null || !actual.puedeHacerCheckout()) {
+            abrirSolicitudODetalle();
+            return;
+        }
         if (calificacion == 0) {
             Toast.makeText(this, R.string.toast_calificacion_requerida, Toast.LENGTH_SHORT).show();
             return;
@@ -110,6 +130,24 @@ public class CheckoutActivity extends AppCompatActivity {
         } else {
             irACobroConfirmado();
         }
+    }
+
+    private void abrirSolicitudODetalle() {
+        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), solicitudId -> {
+            if (solicitudId >= 0) {
+                abrirSolicitud(solicitudId);
+            } else {
+                startActivity(new Intent(this, DetalleReservaActivity.class)
+                        .putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id));
+                finish();
+            }
+        });
+    }
+
+    private void abrirSolicitud(int solicitudId) {
+        if (isFinishing()) return;
+        startActivity(new Intent(this, TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID, solicitudId));
+        finish();
     }
 
     private void mostrarOfertaTaxi() {

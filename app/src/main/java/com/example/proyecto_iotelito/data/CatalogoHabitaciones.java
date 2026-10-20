@@ -46,14 +46,27 @@ public final class CatalogoHabitaciones {
 
     private CatalogoHabitaciones() { }
 
+    private static final java.util.Map<Integer, List<Habitacion>> ADICIONALES = new java.util.HashMap<>();
+
     public static List<Habitacion> porHotel(int hotelId) {
         List<Habitacion> origen;
         if (hotelId == HotelAdminSampleData.HOTEL_ID) {
             origen = HotelAdminSampleData.habitaciones();
         } else if (hotelId == 2) {
             origen = CUSCO;
-        } else {
+        } else if (hotelId == 3) {
             origen = AREQUIPA;
+        } else {
+            origen = ADICIONALES.computeIfAbsent(hotelId, id -> {
+                com.example.proyecto_iotelito.model.Hotel hotel = SampleData.findById(id);
+                if (hotel.id != id) return new ArrayList<>();
+                return new ArrayList<>(Arrays.asList(
+                        new Habitacion(id * 100 + 1, id, hotel.roomName, "Hab. 310", 38, 2, 1,
+                                hotel.pricePerNight, hotel.description, HotelMedia.hotelImage(id), true),
+                        new Habitacion(id * 100 + 2, id, "Habitación Doble", "Hab. 405", 32, 2, 0,
+                                hotel.pricePerNight - 60, "Dos camas y espacio de trabajo.",
+                                HotelMedia.galleryImage(id, 1), true)));
+            });
         }
 
         List<Habitacion> resultado = new ArrayList<>();

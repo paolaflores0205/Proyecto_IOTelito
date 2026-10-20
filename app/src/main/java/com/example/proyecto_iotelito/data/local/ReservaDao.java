@@ -22,6 +22,9 @@ public interface ReservaDao {
     @Query("SELECT COUNT(*) FROM reservas_cliente")
     int contar();
 
+    @Query("SELECT COUNT(*) FROM reservas_cliente WHERE codigo LIKE :prefijo || '%'")
+    int contarPorPrefijoCodigo(String prefijo);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void guardar(ReservaEntity reserva);
 

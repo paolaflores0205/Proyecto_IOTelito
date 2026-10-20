@@ -13,6 +13,8 @@ import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.NotificacionRepository;
 import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
+import com.example.proyecto_iotelito.data.TaxiRepository;
+import com.example.proyecto_iotelito.ui.taxi.TaxistaAsignadoActivity;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity;
@@ -73,7 +75,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         View btnCheckout = findViewById(R.id.btn_realizar_checkout);
         View btnVerHotel = findViewById(R.id.btn_ver_hotel);
 
-        btnCheckout.setVisibility(reserva.puedeHacerCheckout() ? View.VISIBLE : View.GONE);
+        btnCheckout.setVisibility(View.GONE);
         btnCheckout.setOnClickListener(v -> {
             Intent intent = new Intent(this, CheckoutActivity.class);
             intent.putExtra(CheckoutActivity.EXTRA_RESERVA_ID, reserva.id);
@@ -91,6 +93,27 @@ public class DetalleReservaActivity extends AppCompatActivity {
             Intent intent = new Intent(this, DetalleHotelActivity.class);
             intent.putExtra(DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
             startActivity(intent);
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        View checkout = findViewById(R.id.btn_realizar_checkout);
+        checkout.setVisibility(View.GONE);
+        int id = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, id), solicitudId -> {
+            if (isFinishing()) return;
+            if (solicitudId >= 0) {
+                startActivity(new Intent(this, TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID, solicitudId));
+                finish();
+                return;
+            }
+            Reserva actual = ReservaRepository.getInstance(this).buscarPorId(id);
+            if (actual != null) {
+                checkout.setVisibility(actual.puedeHacerCheckout() ? View.VISIBLE : View.GONE);
+                ((TextView) findViewById(R.id.tv_mensaje_estado)).setText(mensajeEstado(actual));
+            }
         });
     }
 
