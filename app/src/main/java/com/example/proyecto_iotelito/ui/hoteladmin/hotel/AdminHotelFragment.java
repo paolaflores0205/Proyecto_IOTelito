@@ -14,6 +14,9 @@ import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.databinding.FragmentHoteladminHotelBinding;
+import com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin;
+import com.example.proyecto_iotelito.ui.hoteladmin.reservas.CobroCheckoutActivity;
+import com.example.proyecto_iotelito.ui.hoteladmin.reservas.EstadoTaxiActivity;
 
 import java.util.Locale;
 
@@ -24,6 +27,7 @@ import java.util.Locale;
  */
 public class AdminHotelFragment extends Fragment {
 
+    private static final int ALERTA_CHECKOUT_RESERVA_ID = 101;
     private FragmentHoteladminHotelBinding binding;
 
     @Nullable
@@ -51,6 +55,8 @@ public class AdminHotelFragment extends Fragment {
 
         binding.cardDatos.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), DatosHotelActivity.class)));
+        binding.cardAlertaTaxi.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), EstadoTaxiActivity.class)));
     }
 
     @Override
@@ -68,6 +74,29 @@ public class AdminHotelFragment extends Fragment {
         binding.tvSalidas.setText(String.valueOf(resumen.salidasHoy));
         binding.tvIngresos.setText(getString(R.string.hoteladmin_moneda,
                 String.format(Locale.US, "%,.0f", resumen.ingresosHoy)));
+        actualizarAlertaCheckout();
+    }
+
+    private void actualizarAlertaCheckout() {
+        ReservaAdmin pendiente = null;
+        for (ReservaAdmin reserva : HotelAdminSampleData.reservas()) {
+            if (reserva.id == ALERTA_CHECKOUT_RESERVA_ID
+                    && reserva.estado == ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE) {
+                pendiente = reserva;
+                break;
+            }
+        }
+        binding.cardAlertaCheckout.setVisibility(pendiente == null ? View.GONE : View.VISIBLE);
+        binding.tvAlertas.setText(getString(R.string.hoteladmin_alertas,
+                pendiente == null ? 1 : 2));
+        if (pendiente != null) {
+            int reservaId = pendiente.id;
+            binding.cardAlertaCheckout.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), CobroCheckoutActivity.class);
+                intent.putExtra(CobroCheckoutActivity.EXTRA_RESERVA_ID, reservaId);
+                startActivity(intent);
+            });
+        }
     }
 
     @Override

@@ -751,7 +751,7 @@
     <string name="hoteladmin_stat_listas">Listas para check-in</string>
     <string name="hoteladmin_stat_pendientes">Pendientes por revisar</string>
     <string name="hoteladmin_stat_vs_ayer" formatted="false">+15% vs ayer</string>
-    <string name="hoteladmin_alertas">Alertas pendientes (2)</string>
+    <string name="hoteladmin_alertas">Alertas pendientes (%1$d)</string>
     <string name="hoteladmin_alerta_checkout_titulo">Check-out retrasado: Hab 402</string>
     <string name="hoteladmin_alerta_checkout_desc">Debió salir hace 45 minutos. Huésped no responde.</string>
     <string name="hoteladmin_alerta_taxi_titulo">Taxi activo solicitado</string>
