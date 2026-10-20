@@ -45,8 +45,12 @@ public class IoTelitoApplication extends Application implements Application.Acti
         if (bottomNavigation == null) {
             bottomNavigation = superadminBottomNavigation;
         }
+        if (bottomNavigation == null) {
+            bottomNavigation = activity.findViewById(R.id.hoteladmin_bottom_nav);
+        }
         boolean hasBottomNavigation = bottomNavigation != null;
         View navigationView = bottomNavigation;
+        boolean hasAdminChat = activity.findViewById(R.id.hoteladmin_chat_root) != null;
 
         ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
             Insets safeInsets = windowInsets.getInsets(
@@ -56,6 +60,11 @@ public class IoTelitoApplication extends Application implements Application.Acti
             // Las pantallas con menú inferior gestionan su inset como margen del
             // propio menú. Aplicarlo también aquí generaba la franja vacía del A55.
             int bottomInset = hasBottomNavigation ? 0 : safeInsets.bottom;
+            if (hasAdminChat) {
+                // El IME ya incluye la zona inferior: no sumar también la barra de navegación.
+                bottomInset = Math.max(safeInsets.bottom,
+                        windowInsets.getInsets(WindowInsetsCompat.Type.ime()).bottom);
+            }
             view.setPadding(
                     initialLeft + safeInsets.left,
                     initialTop + safeInsets.top,

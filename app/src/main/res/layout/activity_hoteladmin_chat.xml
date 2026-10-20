@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/hoteladmin_chat_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/io_background"
@@ -27,9 +28,9 @@
         <LinearLayout android:id="@+id/ll_mensajes" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" />
     </ScrollView>
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@color/white" android:elevation="4dp" android:gravity="center_vertical" android:orientation="horizontal" android:padding="10dp">
+    <LinearLayout android:id="@+id/hoteladmin_chat_composer" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@color/white" android:elevation="4dp" android:gravity="center_vertical" android:orientation="horizontal" android:padding="10dp">
         <ImageButton android:id="@+id/btn_adjuntar" android:layout_width="42dp" android:layout_height="42dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/hoteladmin_adjuntar" android:padding="10dp" android:src="@drawable/ic_add" android:tint="@color/io_text_secondary" />
-        <EditText android:id="@+id/et_mensaje" android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1" android:background="@drawable/bg_input_field" android:hint="@string/hoteladmin_escribe_mensaje" android:imeOptions="actionSend" android:inputType="textCapSentences|textMultiLine" android:maxLines="3" android:paddingHorizontal="14dp" android:textColor="@color/io_text_primary" android:textColorHint="@color/io_text_muted" android:textSize="14sp" />
+        <EditText android:id="@+id/et_mensaje" android:layout_width="0dp" android:layout_height="wrap_content" android:minHeight="46dp" android:layout_weight="1" android:background="@drawable/bg_input_field" android:hint="@string/hoteladmin_escribe_mensaje" android:imeOptions="actionSend" android:inputType="textCapSentences|textMultiLine" android:minLines="1" android:maxLines="3" android:paddingHorizontal="14dp" android:textColor="@color/io_text_primary" android:textColorHint="@color/io_text_muted" android:textSize="14sp" />
         <ImageButton android:id="@+id/btn_enviar" android:layout_width="44dp" android:layout_height="44dp" android:layout_marginStart="8dp" android:background="@drawable/bg_avatar_circle" android:contentDescription="@string/cd_enviar" android:padding="11dp" android:src="@drawable/ic_send" android:tint="@color/white" />
     </LinearLayout>
 </LinearLayout>

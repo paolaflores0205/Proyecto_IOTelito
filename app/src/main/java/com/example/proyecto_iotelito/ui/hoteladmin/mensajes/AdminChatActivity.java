@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
@@ -35,6 +36,8 @@ public class AdminChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // En edge-to-edge, el padding del IME lo aplica IoTelitoApplication.
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         binding = ActivityHoteladminChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         conversacion = HotelAdminSampleData.conversacion(
@@ -49,6 +52,12 @@ public class AdminChatActivity extends AppCompatActivity {
         binding.btnAdjuntar.setOnClickListener(v -> Toast.makeText(
                 this, R.string.hoteladmin_adjuntos_posterior, Toast.LENGTH_SHORT).show());
         binding.btnEnviar.setOnClickListener(v -> enviarMensaje());
+        binding.scrollMensajes.addOnLayoutChangeListener((v, left, top, right, bottom,
+                oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (bottom - top < oldBottom - oldTop) {
+                binding.scrollMensajes.post(() -> binding.scrollMensajes.fullScroll(View.FOCUS_DOWN));
+            }
+        });
         binding.etMensaje.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 enviarMensaje();

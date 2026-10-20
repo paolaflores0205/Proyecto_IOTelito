@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.core.view.WindowCompat;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
@@ -44,6 +45,8 @@ public class HotelAdminMainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Los espacios seguros los aplica IoTelitoApplication una sola vez.
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         binding = ActivityHoteladminMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
