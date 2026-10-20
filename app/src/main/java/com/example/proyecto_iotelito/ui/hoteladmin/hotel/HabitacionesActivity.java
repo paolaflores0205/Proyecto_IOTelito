@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminHabitacionesBinding;
 import com.example.proyecto_iotelito.model.hoteladmin.Habitacion;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -76,15 +77,18 @@ public class HabitacionesActivity extends AppCompatActivity {
                 .setMessage(R.string.hoteladmin_confirmar_eliminar_hab_msg)
                 .setNegativeButton(R.string.btn_cancelar, null)
                 .setPositiveButton(R.string.hoteladmin_eliminar, (dialog, which) -> {
-                    List<Habitacion> habitaciones = HotelAdminSampleData.habitaciones();
-                    for (int i = 0; i < habitaciones.size(); i++) {
-                        if (habitaciones.get(i).id == habitacion.id) {
-                            habitaciones.remove(i);
-                            break;
+                    HotelAdminLocalStore.get(this).deleteHabitacion(habitacion.id, error -> {
+                        if (error != null) {
+                            Toast.makeText(this, R.string.hoteladmin_error_guardado_local,
+                                    Toast.LENGTH_LONG).show();
+                            return;
                         }
-                    }
-                    renderList();
-                    Toast.makeText(this, R.string.hoteladmin_habitacion_eliminada, Toast.LENGTH_SHORT).show();
+                        List<Habitacion> habitaciones = HotelAdminSampleData.habitaciones();
+                        habitaciones.removeIf(item -> item.id == habitacion.id);
+                        renderList();
+                        Toast.makeText(this, R.string.hoteladmin_habitacion_eliminada,
+                                Toast.LENGTH_SHORT).show();
+                    });
                 })
                 .show();
     }

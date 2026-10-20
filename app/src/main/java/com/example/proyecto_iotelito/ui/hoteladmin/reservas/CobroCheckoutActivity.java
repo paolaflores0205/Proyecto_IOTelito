@@ -11,15 +11,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminCobroCheckoutBinding;
 import com.example.proyecto_iotelito.databinding.ItemHoteladminConsumoBinding;
 import com.example.proyecto_iotelito.model.hoteladmin.ItemConsumo;
 import com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin;
+import com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminNotifications;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.Locale;
 
-/** Pantalla adm-cobro-checkout. Registra el cobro por daños y finaliza en memoria. */
+/** Pantalla adm-cobro-checkout. Persiste el cobro y avisa con una notificación local. */
 public class CobroCheckoutActivity extends AppCompatActivity {
     public static final String EXTRA_RESERVA_ID = "reserva_id";
 
@@ -103,14 +105,30 @@ public class CobroCheckoutActivity extends AppCompatActivity {
     }
 
     private void confirmar() {
+        int consumosAntes = reserva.consumos.size();
+        ReservaAdmin.EstadoCheckout estadoAntes = reserva.estado;
         if (binding.switchDanos.isChecked()) {
             reserva.consumos.add(new ItemConsumo(
                     getString(R.string.hoteladmin_cobro_dano_concepto), montoDano(),
                     texto(binding.etMotivoDano), texto(binding.etObservacionDano)));
         }
         reserva.estado = ReservaAdmin.EstadoCheckout.FINALIZADA;
-        Toast.makeText(this, R.string.hoteladmin_checkout_confirmado, Toast.LENGTH_LONG).show();
-        finish();
+        binding.btnConfirmar.setEnabled(false);
+        HotelAdminLocalStore.get(this).saveCheckout(reserva, error -> {
+            if (error != null) {
+                reserva.estado = estadoAntes;
+                while (reserva.consumos.size() > consumosAntes) {
+                    reserva.consumos.remove(reserva.consumos.size() - 1);
+                }
+                binding.btnConfirmar.setEnabled(true);
+                Toast.makeText(this, R.string.hoteladmin_error_guardado_local,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            Toast.makeText(this, R.string.hoteladmin_checkout_confirmado, Toast.LENGTH_LONG).show();
+            HotelAdminNotifications.cancelCheckout(this, reserva.id);
+            finish();
+        });
     }
 
     private double montoDano() {

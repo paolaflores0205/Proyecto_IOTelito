@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminServiciosBinding;
 import com.example.proyecto_iotelito.model.hoteladmin.Servicio;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -71,15 +72,18 @@ public class ServiciosActivity extends AppCompatActivity {
                 .setMessage(R.string.hoteladmin_confirmar_eliminar_serv_msg)
                 .setNegativeButton(R.string.btn_cancelar, null)
                 .setPositiveButton(R.string.hoteladmin_eliminar, (dialog, which) -> {
-                    List<Servicio> servicios = HotelAdminSampleData.servicios();
-                    for (int i = 0; i < servicios.size(); i++) {
-                        if (servicios.get(i).id == servicio.id) {
-                            servicios.remove(i);
-                            break;
+                    HotelAdminLocalStore.get(this).deleteServicio(servicio.id, error -> {
+                        if (error != null) {
+                            Toast.makeText(this, R.string.hoteladmin_error_guardado_local,
+                                    Toast.LENGTH_LONG).show();
+                            return;
                         }
-                    }
-                    renderList();
-                    Toast.makeText(this, R.string.hoteladmin_servicio_eliminado, Toast.LENGTH_SHORT).show();
+                        List<Servicio> servicios = HotelAdminSampleData.servicios();
+                        servicios.removeIf(item -> item.id == servicio.id);
+                        renderList();
+                        Toast.makeText(this, R.string.hoteladmin_servicio_eliminado,
+                                Toast.LENGTH_SHORT).show();
+                    });
                 })
                 .show();
     }

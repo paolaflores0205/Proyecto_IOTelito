@@ -10,12 +10,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminChatBinding;
 import com.example.proyecto_iotelito.model.Mensaje;
 import com.example.proyecto_iotelito.model.hoteladmin.Conversacion;
@@ -23,16 +23,14 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 
-/** Pantalla adm-chat-cliente. Los mensajes se conservan al rotar mediante Bundle. */
+/** Pantalla adm-chat-cliente. Las respuestas se guardan localmente con fecha y hora. */
 public class AdminChatActivity extends AppCompatActivity {
     public static final String EXTRA_CONVERSACION_ID = "conversacion_id";
-    private static final String KEY_MENSAJES = "mensajes";
 
     private ActivityHoteladminChatBinding binding;
     private Conversacion conversacion;
     private ArrayList<Mensaje> mensajes;
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,12 +38,7 @@ public class AdminChatActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         conversacion = HotelAdminSampleData.conversacion(
                 getIntent().getIntExtra(EXTRA_CONVERSACION_ID, 1));
-        if (savedInstanceState != null) {
-            Object guardados = savedInstanceState.getSerializable(KEY_MENSAJES);
-            mensajes = guardados instanceof ArrayList ? (ArrayList<Mensaje>) guardados : historialInicial();
-        } else {
-            mensajes = historialInicial();
-        }
+        mensajes = historialInicial();
 
         binding.ivBack.setOnClickListener(v -> finish());
         binding.tvNombre.setText(conversacion.clienteNombre);
@@ -63,6 +56,16 @@ public class AdminChatActivity extends AppCompatActivity {
             return false;
         });
         renderMensajes();
+        binding.btnEnviar.setEnabled(false);
+        HotelAdminLocalStore.get(this).loadMessages(conversacion.id, saved -> {
+            if (isFinishing() || isDestroyed()) return;
+            mensajes.addAll(saved);
+            binding.btnEnviar.setEnabled(true);
+            renderMensajes();
+        }, error -> {
+            if (isFinishing() || isDestroyed()) return;
+            Toast.makeText(this, R.string.hoteladmin_error_carga_local, Toast.LENGTH_LONG).show();
+        });
     }
 
     private ArrayList<Mensaje> historialInicial() {
@@ -70,14 +73,27 @@ public class AdminChatActivity extends AppCompatActivity {
     }
 
     private void enviarMensaje() {
+        if (!binding.btnEnviar.isEnabled()) return;
         String texto = String.valueOf(binding.etMensaje.getText()).trim();
         if (TextUtils.isEmpty(texto)) {
             binding.etMensaje.setError(getString(R.string.hoteladmin_escribe_mensaje_error));
             return;
         }
-        mensajes.add(new Mensaje(texto, false, getString(R.string.hoteladmin_hora_ahora)));
-        binding.etMensaje.setText("");
-        renderMensajes();
+        binding.btnEnviar.setEnabled(false);
+        HotelAdminLocalStore.get(this).saveMessage(conversacion.id, texto, error -> {
+            if (isFinishing() || isDestroyed()) return;
+            binding.btnEnviar.setEnabled(true);
+            if (error != null) {
+                Toast.makeText(this, R.string.hoteladmin_error_guardado_local,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            mensajes.add(new Mensaje(texto, false, java.text.DateFormat.getDateTimeInstance(
+                    java.text.DateFormat.SHORT, java.text.DateFormat.SHORT)
+                    .format(new java.util.Date())));
+            binding.etMensaje.setText("");
+            renderMensajes();
+        });
     }
 
     private void renderMensajes() {
@@ -127,12 +143,6 @@ public class AdminChatActivity extends AppCompatActivity {
                         conversacion.clienteNombre, conversacion.habitacion))
                 .setPositiveButton(R.string.hoteladmin_entendido, null)
                 .show();
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putSerializable(KEY_MENSAJES, mensajes);
     }
 
     private int dp(int value) {

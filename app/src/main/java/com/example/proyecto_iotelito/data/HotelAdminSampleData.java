@@ -16,10 +16,10 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Data set estático del módulo Administrador de hotel (rol HOTEL_ADMIN), espejo de
- * {@link SuperadminSampleData}. Se usa mientras no exista la persistencia
- * NoSQL/Firebase (Lab 6). Las listas son mutables para que los formularios puedan
- * crear/editar/eliminar en memoria y reflejarse al volver (patrón onResume).
+ * Datos iniciales del módulo Administrador de hotel (rol HOTEL_ADMIN), espejo de
+ * {@link SuperadminSampleData}. HotelAdminLocalStore los carga una sola vez y después
+ * recupera las modificaciones guardadas en el dispositivo. Las listas siguen siendo
+ * mutables para que las pantallas reflejen los cambios al volver (onResume).
  *
  * El hotel administrado es el "Hotel Miraflores Park" (id 1). Las fotografías
  * reutilizan drawables existentes como placeholders realistas.

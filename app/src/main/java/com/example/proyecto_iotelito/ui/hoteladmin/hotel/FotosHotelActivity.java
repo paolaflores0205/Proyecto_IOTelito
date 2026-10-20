@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminFotosHotelBinding;
 import com.example.proyecto_iotelito.databinding.ItemHoteladminFotoBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -30,8 +31,7 @@ public class FotosHotelActivity extends AppCompatActivity {
         binding.toolbar.tvTitle.setText(R.string.hoteladmin_titulo_fotos_hotel);
         binding.toolbar.ivBack.setOnClickListener(v -> finish());
         binding.boxAgregarFoto.setOnClickListener(v -> agregarFoto());
-        binding.btnGuardar.setOnClickListener(v ->
-                Toast.makeText(this, R.string.hoteladmin_fotografias_guardadas, Toast.LENGTH_SHORT).show());
+        binding.btnGuardar.setOnClickListener(v -> guardarFotos());
         renderFotos();
     }
 
@@ -79,6 +79,7 @@ public class FotosHotelActivity extends AppCompatActivity {
                 R.drawable.superadmin_hotel_barranco};
         HotelAdminSampleData.FOTOS.add(recursos[HotelAdminSampleData.FOTOS.size() % recursos.length]);
         renderFotos();
+        guardarFotosSilencioso();
         Toast.makeText(this, R.string.hoteladmin_foto_agregada, Toast.LENGTH_SHORT).show();
     }
 
@@ -88,6 +89,7 @@ public class FotosHotelActivity extends AppCompatActivity {
                 ? R.drawable.superadmin_hotel_barranco : R.drawable.superadmin_hotel_sol;
         HotelAdminSampleData.FOTOS.set(position, reemplazo);
         renderFotos();
+        guardarFotosSilencioso();
         Toast.makeText(this, R.string.hoteladmin_foto_reemplazada, Toast.LENGTH_SHORT).show();
     }
 
@@ -102,8 +104,22 @@ public class FotosHotelActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.hoteladmin_eliminar, (dialog, which) -> {
                     HotelAdminSampleData.FOTOS.remove(position);
                     renderFotos();
+                    guardarFotosSilencioso();
                 })
                 .show();
+    }
+
+    private void guardarFotos() {
+        HotelAdminLocalStore.get(this).saveFotos(error -> Toast.makeText(this,
+                error == null ? R.string.hoteladmin_fotografias_guardadas
+                        : R.string.hoteladmin_error_guardado_local, Toast.LENGTH_SHORT).show());
+    }
+
+    private void guardarFotosSilencioso() {
+        HotelAdminLocalStore.get(this).saveFotos(error -> {
+            if (error != null) Toast.makeText(this, R.string.hoteladmin_error_guardado_local,
+                    Toast.LENGTH_LONG).show();
+        });
     }
 
     private int dp(int value) {

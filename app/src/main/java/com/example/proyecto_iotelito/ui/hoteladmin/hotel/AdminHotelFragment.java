@@ -35,11 +35,22 @@ public class AdminHotelFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        HotelAdminSampleData.ResumenHoy resumen = HotelAdminSampleData.resumenHoy();
+        binding.cardHabitaciones.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), HabitacionesActivity.class)));
+        binding.cardServicios.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), ServiciosActivity.class)));
 
+        binding.cardDatos.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), DatosHotelActivity.class)));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (binding == null) return;
+        HotelAdminSampleData.ResumenHoy resumen = HotelAdminSampleData.resumenHoy();
         binding.tvSaludo.setText(getString(R.string.hoteladmin_saludo, HotelAdminSampleData.adminNombre));
         binding.tvSubtitulo.setText(getString(R.string.hoteladmin_panel_control, HotelAdminSampleData.hotelNombre));
-
         binding.tvOcupadas.setText(String.valueOf(resumen.ocupadas));
         int totalHab = resumen.ocupadas + resumen.disponibles;
         int ocupacionPct = totalHab > 0 ? Math.round(resumen.ocupadas * 100f / totalHab) : 0;
@@ -48,14 +59,6 @@ public class AdminHotelFragment extends Fragment {
         binding.tvSalidas.setText(String.valueOf(resumen.salidasHoy));
         binding.tvIngresos.setText(getString(R.string.hoteladmin_moneda,
                 String.format(Locale.US, "%,.0f", resumen.ingresosHoy)));
-
-        binding.cardHabitaciones.setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), HabitacionesActivity.class)));
-        binding.cardServicios.setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), ServiciosActivity.class)));
-
-        binding.cardDatos.setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), DatosHotelActivity.class)));
     }
 
     @Override

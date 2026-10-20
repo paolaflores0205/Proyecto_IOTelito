@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminDatosHotelBinding;
 
 /** Consulta y edición de los datos generales del hotel (adm-datos-hotel). */
@@ -41,6 +42,12 @@ public class DatosHotelActivity extends AppCompatActivity {
     }
 
     private void guardar() {
+        if (!guardarLocalmente()) return;
+        Toast.makeText(this, R.string.hoteladmin_datos_guardados, Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    private boolean guardarLocalmente() {
         String nombre = valor(binding.etNombre.getText());
         String direccion = valor(binding.etDireccion.getText());
         String email = valor(binding.etEmail.getText());
@@ -61,7 +68,7 @@ public class DatosHotelActivity extends AppCompatActivity {
             binding.etEmail.setError(getString(R.string.hoteladmin_email_invalido));
             valido = false;
         }
-        if (!valido) return;
+        if (!valido) return false;
 
         HotelAdminSampleData.hotelNombre = nombre;
         HotelAdminSampleData.hotelDireccion = direccion;
@@ -69,8 +76,8 @@ public class DatosHotelActivity extends AppCompatActivity {
         HotelAdminSampleData.hotelAtracciones = valor(binding.etAtracciones.getText());
         HotelAdminSampleData.hotelTelefono = valor(binding.etTelefono.getText());
         HotelAdminSampleData.hotelEmail = email;
-        Toast.makeText(this, R.string.hoteladmin_datos_guardados, Toast.LENGTH_SHORT).show();
-        finish();
+        HotelAdminLocalStore.get(this).savePerfil();
+        return true;
     }
 
     private String valor(CharSequence text) {
