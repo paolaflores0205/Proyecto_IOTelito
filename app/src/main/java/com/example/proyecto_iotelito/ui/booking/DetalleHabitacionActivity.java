@@ -38,7 +38,8 @@ public class DetalleHabitacionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detalle_habitacion);
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
-        Hotel hotel = SampleData.findById(hotelId);
+        com.example.proyecto_iotelito.data.ClientDataLoader.hotel(this, hotelId, hotel -> {
+        if (!hotel.active || !hotel.hasInventory) { finish(); return; }
         boolean modoCatalogo = getIntent().getBooleanExtra(
                 OpcionesHabitacionesActivity.EXTRA_MODO_CATALOGO,
                 !BookingSelection.isPresent(getIntent()));
@@ -110,6 +111,7 @@ public class DetalleHabitacionActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+        });
     }
 
     private void poblarCaracteristicas(OpcionHabitaciones opcion) {

@@ -52,7 +52,7 @@ public class ListaHotelesActivity extends AppCompatActivity {
     private static final int ORDEN_MENOR_A_MAYOR = 1;
     private static final int ORDEN_MAYOR_A_MENOR = 2;
 
-    private final List<Hotel> todosLosHoteles = new ArrayList<>(SampleData.HOTELS);
+    private final List<Hotel> todosLosHoteles = new ArrayList<>();
 
     private EditText etBuscar;
     private MaterialButton btnFiltros;
@@ -121,10 +121,20 @@ public class ListaHotelesActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) { }
         });
 
-        aplicarFiltros();
+        com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(this).observe(this, hoteles -> {
+            boolean rangoCompleto = precioMinimo == dominioPrecioMin && precioMaximo == dominioPrecioMax;
+            todosLosHoteles.clear();
+            for (Hotel hotel : hoteles) if (hotel.active) todosLosHoteles.add(hotel);
+            double[] nuevoDominio = calcularDominioPrecio();
+            dominioPrecioMin = nuevoDominio[0];
+            dominioPrecioMax = nuevoDominio[1];
+            if (rangoCompleto) { precioMinimo = dominioPrecioMin; precioMaximo = dominioPrecioMax; }
+            aplicarFiltros();
+        });
     }
 
     private double[] calcularDominioPrecio() {
+        if (todosLosHoteles.isEmpty()) return new double[]{0, 1000};
         double min = Double.MAX_VALUE;
         double max = 0;
         for (Hotel hotel : todosLosHoteles) {

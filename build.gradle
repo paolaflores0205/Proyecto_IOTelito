@@ -2,3 +2,19 @@
 plugins {
     alias(libs.plugins.android.application) apply false
 }
+
+// Ruta opcional de salidas generadas. Cada integrante puede definirla en su
+// local.properties (ignorado por Git), sin cambiar la ubicación del proyecto.
+def localBuildProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localBuildProperties.load(it) }
+}
+def localBuildRoot = localBuildProperties.getProperty('iotelito.buildRoot')
+if (localBuildRoot != null && !localBuildRoot.trim().isEmpty()) {
+    allprojects { currentProject ->
+        def moduleDirectory = currentProject.path == ':'
+                ? 'root' : currentProject.path.substring(1).replace(':', '/')
+        currentProject.layout.buildDirectory.set(new File(localBuildRoot, moduleDirectory))
+    }
+}

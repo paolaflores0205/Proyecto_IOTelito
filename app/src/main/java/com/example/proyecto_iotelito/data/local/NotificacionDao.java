@@ -9,6 +9,8 @@ import java.util.List;
 
 @Dao
 public interface NotificacionDao {
+    @Query("SELECT * FROM notificaciones_cliente ORDER BY creadaEn DESC")
+    androidx.lifecycle.LiveData<List<NotificacionEntity>> observarTodas();
 
     @Query("SELECT * FROM notificaciones_cliente ORDER BY creadaEn DESC")
     List<NotificacionEntity> obtenerTodas();

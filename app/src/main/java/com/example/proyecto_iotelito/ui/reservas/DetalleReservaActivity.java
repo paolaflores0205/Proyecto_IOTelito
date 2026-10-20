@@ -36,19 +36,13 @@ public class DetalleReservaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalle_reserva);
 
-        ReservaRepository reservaRepository = ReservaRepository.getInstance(this);
-        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
         int notificacionId = getIntent().getIntExtra(EXTRA_NOTIFICACION_ID, -1);
         if (notificacionId != -1) {
             NotificacionRepository.getInstance(this).marcarLeida(notificacionId);
         }
-        Reserva reserva = reservaRepository.buscarPorId(reservaId);
-        if (reserva == null) {
-            finish();
-            return;
-        }
-        Hotel hotel = SampleData.findById(reserva.hotelId);
+    }
 
+    private void pintarReserva(Reserva reserva, Hotel hotel) {
         View subHeader = findViewById(R.id.sub_header);
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         ((TextView) subHeader.findViewById(R.id.tv_title)).setText(hotel.name);
@@ -75,7 +69,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         View btnCheckout = findViewById(R.id.btn_realizar_checkout);
         View btnVerHotel = findViewById(R.id.btn_ver_hotel);
 
-        btnCheckout.setVisibility(View.GONE);
+        btnCheckout.setVisibility(reserva.puedeHacerCheckout() ? View.VISIBLE : View.GONE);
         btnCheckout.setOnClickListener(v -> {
             Intent intent = new Intent(this, CheckoutActivity.class);
             intent.putExtra(CheckoutActivity.EXTRA_RESERVA_ID, reserva.id);
@@ -109,11 +103,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-            Reserva actual = ReservaRepository.getInstance(this).buscarPorId(id);
-            if (actual != null) {
-                checkout.setVisibility(actual.puedeHacerCheckout() ? View.VISIBLE : View.GONE);
-                ((TextView) findViewById(R.id.tv_mensaje_estado)).setText(mensajeEstado(actual));
-            }
+            com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, id, this::pintarReserva);
         });
     }
 

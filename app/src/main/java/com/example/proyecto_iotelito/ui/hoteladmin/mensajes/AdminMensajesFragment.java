@@ -11,18 +11,21 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.databinding.FragmentHoteladminMensajesBinding;
-import com.example.proyecto_iotelito.databinding.ItemHoteladminConversacionBinding;
 import com.example.proyecto_iotelito.model.hoteladmin.Conversacion;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
-/** Pantalla adm-bandeja-mensajes, implementada con inflado manual de vistas. */
+/** Pantalla adm-bandeja-mensajes con RecyclerView. */
 public class AdminMensajesFragment extends Fragment {
     private FragmentHoteladminMensajesBinding binding;
+    private ConversacionesAdapter adapter;
 
     @Nullable
     @Override
@@ -34,6 +37,9 @@ public class AdminMensajesFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        adapter = new ConversacionesAdapter(this::abrirChat);
+        binding.rvConversaciones.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvConversaciones.setAdapter(adapter);
         binding.etBuscar.addTextChangedListener(new SimpleTextWatcher(this::renderConversaciones));
         binding.chipGroupFiltro.setOnCheckedStateChangeListener((group, ids) -> renderConversaciones());
         binding.chipTodos.setChecked(true);
@@ -49,28 +55,17 @@ public class AdminMensajesFragment extends Fragment {
     private void renderConversaciones() {
         String query = String.valueOf(binding.etBuscar.getText()).trim().toLowerCase(Locale.ROOT);
         boolean soloHospedados = binding.chipHospedados.isChecked();
-        binding.llConversaciones.removeAllViews();
-        int visibles = 0;
+        List<Conversacion> visibles = new ArrayList<>();
         for (Conversacion conversacion : HotelAdminSampleData.conversaciones()) {
             String searchable = (conversacion.clienteNombre + " " + conversacion.habitacion + " "
                     + conversacion.ultimoMensaje).toLowerCase(Locale.ROOT);
             if (!query.isEmpty() && !searchable.contains(query)) continue;
             if (soloHospedados && !conversacion.hospedado) continue;
 
-            ItemHoteladminConversacionBinding item = ItemHoteladminConversacionBinding.inflate(
-                    getLayoutInflater(), binding.llConversaciones, false);
-            item.tvInicial.setText(conversacion.inicial);
-            item.tvNombre.setText(conversacion.clienteNombre);
-            item.tvHabitacion.setText(conversacion.habitacion);
-            item.tvMensaje.setText(conversacion.ultimoMensaje);
-            item.tvHora.setText(conversacion.hora);
-            item.tvNoLeidos.setText(String.valueOf(conversacion.noLeidos));
-            item.tvNoLeidos.setVisibility(conversacion.noLeidos > 0 ? View.VISIBLE : View.GONE);
-            item.getRoot().setOnClickListener(v -> abrirChat(conversacion));
-            binding.llConversaciones.addView(item.getRoot());
-            visibles++;
+            visibles.add(conversacion);
         }
-        binding.tvSinConversaciones.setVisibility(visibles == 0 ? View.VISIBLE : View.GONE);
+        adapter.setConversaciones(visibles);
+        binding.tvSinConversaciones.setVisibility(visibles.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void abrirChat(Conversacion conversacion) {
@@ -83,6 +78,8 @@ public class AdminMensajesFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        binding.rvConversaciones.setAdapter(null);
+        adapter = null;
         binding = null;
     }
 

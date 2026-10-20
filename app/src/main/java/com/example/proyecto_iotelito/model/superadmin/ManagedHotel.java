@@ -1,6 +1,7 @@
 package com.example.proyecto_iotelito.model.superadmin;
 
 public class ManagedHotel {
+    public java.util.List<String> photos = new java.util.ArrayList<>();
     public final int id;
     public final String name;
     public final String address;
@@ -10,6 +11,15 @@ public class ManagedHotel {
     public final int reservations;
     public final int imageRes;
     public boolean active;
+    public String city = "";
+    public String phone = "";
+    public String email = "";
+    public String description = "";
+    /** null: catálogo anterior sin configurar; vacío: el administrador quitó todas. */
+    public String attractions;
+    public Double latitude;
+    public Double longitude;
+    public Integer administratorId;
 
     public ManagedHotel(int id, String name, String address, String district,
                         String administrator, int rooms, int reservations,

@@ -23,7 +23,7 @@
         android:id="@+id/superadmin_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="64dp"
-        android:background="@color/io_navy"
+        android:background="@color/white"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"

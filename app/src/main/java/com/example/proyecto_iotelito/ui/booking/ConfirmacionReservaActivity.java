@@ -49,7 +49,9 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         setContentView(R.layout.activity_confirmacion_reserva);
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
-        hotel = SampleData.findById(hotelId);
+        com.example.proyecto_iotelito.data.ClientDataLoader.hotel(this, hotelId, loadedHotel -> {
+        hotel = loadedHotel;
+        if (!hotel.active || !hotel.hasInventory) { finish(); return; }
         bookingSelection = BookingSelection.from(getIntent());
         opcionHabitaciones = (OpcionHabitaciones) getIntent().getSerializableExtra(
                 OpcionesHabitacionesActivity.EXTRA_OPCION);
@@ -90,6 +92,7 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         configurarTeclado(findViewById(R.id.scroll_confirmacion), etNumero, etVencimiento, etCvv);
 
         findViewById(R.id.btn_confirmar_reserva).setOnClickListener(v -> onConfirmar());
+        });
     }
 
     /** Mantiene el campo activo visible incluso en dispositivos con teclado flotante o edge-to-edge. */
@@ -233,7 +236,15 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         String codigo = String.format(Locale.getDefault(), "IOT-%04d-%04d",
                 hotel.id, new Random().nextInt(9000) + 1000);
 
-        Reserva reserva = ReservaRepository.getInstance(this).agregarReserva(
+        if (hotel == null) return;
+        findViewById(R.id.btn_confirmar_reserva).setEnabled(false);
+        ReservaRepository repository = ReservaRepository.getInstance(this);
+        com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this, () -> {
+        Hotel current = com.example.proyecto_iotelito.data.HotelCatalogRepository.buscar(this, hotel.id);
+        if (current == null || !current.active || !current.hasInventory) {
+            throw new IllegalArgumentException("El hotel ya no tiene disponibilidad para reservar.");
+        }
+        return repository.agregarReserva(
                 hotel,
                 bookingSelection.fechaEntrada(),
                 bookingSelection.fechaSalida(),
@@ -242,6 +253,7 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
                 codigo,
                 opcionHabitaciones.resumenTipos(),
                 opcionHabitaciones.resumenCodigos());
+        }, reserva -> {
 
         findViewById(R.id.btn_confirmar_reserva).setEnabled(false);
 
@@ -253,6 +265,8 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         intent.putExtra(OpcionesHabitacionesActivity.EXTRA_OPCION, opcionHabitaciones);
         bookingSelection.putInto(intent);
         startActivity(intent);
+        finish();
+        }, () -> findViewById(R.id.btn_confirmar_reserva).setEnabled(true));
     }
 
     private String formatMoney(double amount) {

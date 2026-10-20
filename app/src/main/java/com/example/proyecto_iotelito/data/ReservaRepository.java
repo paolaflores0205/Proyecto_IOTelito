@@ -22,7 +22,7 @@ public final class ReservaRepository {
     private ReservaRepository(Context context) {
         database = IoTelitoDatabase.getInstance(context);
         reservaDao = database.reservaDao();
-        cargarDatosInicialesSiHaceFalta();
+        ClientLocalTasks.execute(() -> database.runInTransaction(this::cargarDatosInicialesSiHaceFalta));
     }
 
     public static ReservaRepository getInstance(Context context) {
@@ -36,6 +36,15 @@ public final class ReservaRepository {
         return instance;
     }
 
+    public androidx.lifecycle.LiveData<List<Reserva>> observarTodas() {
+        return androidx.lifecycle.Transformations.map(reservaDao.observarTodas(), rows -> {
+            List<Reserva> result = new ArrayList<>();
+            for (ReservaEntity row : rows) result.add(toModel(row));
+            return result;
+        });
+    }
+
+    @androidx.annotation.WorkerThread
     public List<Reserva> obtenerTodas() {
         List<Reserva> reservas = new ArrayList<>();
         for (ReservaEntity entity : reservaDao.obtenerTodas()) {
@@ -44,18 +53,19 @@ public final class ReservaRepository {
         return reservas;
     }
 
+    @androidx.annotation.WorkerThread
     public Reserva buscarPorId(int id) {
         ReservaEntity entity = reservaDao.buscarPorId(id);
         if (entity != null) {
             return toModel(entity);
         }
-        List<Reserva> reservas = obtenerTodas();
-        return reservas.isEmpty() ? null : reservas.get(0);
+        return null;
     }
 
     public Reserva agregarReserva(Hotel hotel, LocalDate fechaEntrada, LocalDate fechaSalida,
                                    String huespedes, double precioTotal, String codigo,
                                    String habitaciones, String codigosHabitaciones) {
+        return database.runInTransaction((java.util.concurrent.Callable<Reserva>) () -> {
         Reserva reserva = new Reserva(
                 reservaDao.obtenerIdMaximo() + 1,
                 hotel.id,
@@ -69,6 +79,7 @@ public final class ReservaRepository {
                 codigo);
         reservaDao.guardar(toEntity(reserva));
         return reserva;
+        });
     }
 
     public void actualizarEstado(int reservaId, Reserva.Estado estado) {

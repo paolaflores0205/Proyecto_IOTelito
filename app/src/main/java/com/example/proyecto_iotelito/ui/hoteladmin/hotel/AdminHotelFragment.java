@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.databinding.FragmentHoteladminHotelBinding;
 
 import java.util.Locale;
@@ -35,19 +36,14 @@ public class AdminHotelFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        HotelAdminSampleData.ResumenHoy resumen = HotelAdminSampleData.resumenHoy();
-
-        binding.tvSaludo.setText(getString(R.string.hoteladmin_saludo, HotelAdminSampleData.adminNombre));
-        binding.tvSubtitulo.setText(getString(R.string.hoteladmin_panel_control, HotelAdminSampleData.hotelNombre));
-
-        binding.tvOcupadas.setText(String.valueOf(resumen.ocupadas));
-        int totalHab = resumen.ocupadas + resumen.disponibles;
-        int ocupacionPct = totalHab > 0 ? Math.round(resumen.ocupadas * 100f / totalHab) : 0;
-        binding.tvOcupacion.setText(getString(R.string.hoteladmin_stat_ocupacion, ocupacionPct));
-        binding.tvDisponibles.setText(String.valueOf(resumen.disponibles));
-        binding.tvSalidas.setText(String.valueOf(resumen.salidasHoy));
-        binding.tvIngresos.setText("S/ " + String.format(Locale.US, "%,.0f", resumen.ingresosHoy));
-
+        SuperadminRepository.getInstance(requireContext()).hotel(HotelAdminSampleData.HOTEL_ID)
+                .observe(getViewLifecycleOwner(), hotel -> {
+                    HotelAdminSampleData.aplicarHotelCompartido(hotel);
+                    if (hotel != null && binding != null) {
+                        binding.tvSubtitulo.setText(getString(
+                                R.string.hoteladmin_panel_control, hotel.name));
+                    }
+                });
         binding.cardHabitaciones.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), HabitacionesActivity.class)));
         binding.cardServicios.setOnClickListener(v ->
@@ -55,6 +51,23 @@ public class AdminHotelFragment extends Fragment {
 
         binding.cardDatos.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), DatosHotelActivity.class)));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (binding == null) return;
+        HotelAdminSampleData.ResumenHoy resumen = HotelAdminSampleData.resumenHoy();
+        binding.tvSaludo.setText(getString(R.string.hoteladmin_saludo, HotelAdminSampleData.adminNombre));
+        binding.tvSubtitulo.setText(getString(R.string.hoteladmin_panel_control, HotelAdminSampleData.hotelNombre));
+        binding.tvOcupadas.setText(String.valueOf(resumen.ocupadas));
+        int totalHab = resumen.ocupadas + resumen.disponibles;
+        int ocupacionPct = totalHab > 0 ? Math.round(resumen.ocupadas * 100f / totalHab) : 0;
+        binding.tvOcupacion.setText(getString(R.string.hoteladmin_stat_ocupacion, ocupacionPct));
+        binding.tvDisponibles.setText(String.valueOf(resumen.disponibles));
+        binding.tvSalidas.setText(String.valueOf(resumen.salidasHoy));
+        binding.tvIngresos.setText(getString(R.string.hoteladmin_moneda,
+                String.format(Locale.US, "%,.0f", resumen.ingresosHoy)));
     }
 
     @Override

@@ -37,9 +37,6 @@ public abstract class IoTelitoDatabase extends RoomDatabase {
                                     IoTelitoDatabase.class,
                                     "iotelito_local.db")
                             .addMigrations(MIGRATION_1_2)
-                            // El dataset del curso es pequeño y las pantallas actuales son síncronas.
-                            // En la integración con Firebase estas consultas deben moverse a un Executor.
-                            .allowMainThreadQueries()
                             .build();
                 }
             }

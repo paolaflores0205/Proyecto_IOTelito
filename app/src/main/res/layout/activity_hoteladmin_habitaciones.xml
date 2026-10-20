@@ -51,20 +51,31 @@
                 app:drawableTint="@color/io_teal" />
         </LinearLayout>
 
-        <ScrollView
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-            <LinearLayout
-                android:id="@+id/ll_habitaciones"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_habitaciones"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
                 android:paddingHorizontal="16dp"
                 android:paddingTop="8dp"
                 android:paddingBottom="88dp" />
-        </ScrollView>
+
+            <TextView
+                android:id="@+id/tv_sin_habitaciones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="32dp"
+                android:text="@string/hoteladmin_sin_habitaciones"
+                android:textColor="@color/io_text_secondary"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

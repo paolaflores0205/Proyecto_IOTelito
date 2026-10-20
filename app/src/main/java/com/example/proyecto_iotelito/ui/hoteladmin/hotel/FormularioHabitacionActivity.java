@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminFormularioHabitacionBinding;
 import com.example.proyecto_iotelito.model.hoteladmin.Habitacion;
 
@@ -18,7 +19,7 @@ import java.util.Locale;
 /**
  * Formulario para registrar o editar una habitación (adm-formulario-habitacion).
  * Si recibe {@link #EXTRA_HABITACION_ID} funciona en modo edición (precarga los
- * datos); si no, crea una nueva. Guarda en memoria en {@link HotelAdminSampleData}.
+ * datos); si no, crea una nueva. Guarda en Room y actualiza la lista en memoria.
  */
 public class FormularioHabitacionActivity extends AppCompatActivity {
 
@@ -95,25 +96,37 @@ public class FormularioHabitacionActivity extends AppCompatActivity {
         String descripcion = binding.etDescripcion.getText().toString().trim();
         boolean disponible = binding.swDisponible.isChecked();
 
-        List<Habitacion> habitaciones = HotelAdminSampleData.habitaciones();
+        Habitacion guardada;
         if (habitacionId != -1) {
             Habitacion actual = HotelAdminSampleData.habitacion(habitacionId);
-            Habitacion editada = new Habitacion(habitacionId, actual.hotelId, tipo, codigo, area,
+            guardada = new Habitacion(habitacionId, actual.hotelId, tipo, codigo, area,
                     adultos, ninos, precio, descripcion, actual.fotoRes, disponible);
-            for (int i = 0; i < habitaciones.size(); i++) {
-                if (habitaciones.get(i).id == habitacionId) {
-                    habitaciones.set(i, editada);
-                    break;
-                }
-            }
         } else {
             int nuevoId = HotelAdminSampleData.nextHabitacionId();
-            habitaciones.add(new Habitacion(nuevoId, HotelAdminSampleData.HOTEL_ID, tipo, codigo,
-                    area, adultos, ninos, precio, descripcion, R.drawable.superadmin_hotel_sol, disponible));
+            guardada = new Habitacion(nuevoId, HotelAdminSampleData.HOTEL_ID, tipo, codigo,
+                    area, adultos, ninos, precio, descripcion, R.drawable.superadmin_hotel_sol, disponible);
         }
-
-        Toast.makeText(this, R.string.hoteladmin_habitacion_guardada, Toast.LENGTH_SHORT).show();
-        finish();
+        binding.btnGuardar.setEnabled(false);
+        HotelAdminLocalStore.get(this).saveHabitacion(guardada, error -> {
+            if (error != null) {
+                binding.btnGuardar.setEnabled(true);
+                Toast.makeText(this, R.string.hoteladmin_error_guardado_local, Toast.LENGTH_LONG).show();
+                return;
+            }
+            List<Habitacion> habitaciones = HotelAdminSampleData.habitaciones();
+            if (habitacionId == -1) {
+                habitaciones.add(guardada);
+            } else {
+                for (int i = 0; i < habitaciones.size(); i++) {
+                    if (habitaciones.get(i).id == habitacionId) {
+                        habitaciones.set(i, guardada);
+                        break;
+                    }
+                }
+            }
+            Toast.makeText(this, R.string.hoteladmin_habitacion_guardada, Toast.LENGTH_SHORT).show();
+            finish();
+        });
     }
 
     private int parseInt(String value, int fallback) {

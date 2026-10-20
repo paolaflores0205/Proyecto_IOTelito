@@ -34,7 +34,7 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_opciones_habitaciones);
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
-        Hotel hotel = SampleData.findById(hotelId);
+        com.example.proyecto_iotelito.data.ClientDataLoader.hotel(this, hotelId, hotel -> {
         boolean modoReserva = BookingSelection.isPresent(getIntent());
         BookingSelection seleccion = modoReserva ? BookingSelection.from(getIntent()) : null;
 
@@ -54,7 +54,7 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
             explicacion.setText(R.string.catalogo_habitaciones_explicacion);
         }
 
-        List<OpcionHabitaciones> opciones = modoReserva
+        List<OpcionHabitaciones> opciones = !hotel.active || !hotel.hasInventory ? Collections.emptyList() : modoReserva
                 ? GeneradorOpcionesHabitaciones.generar(hotelId, seleccion.adultos, seleccion.ninos)
                 : opcionesDeCatalogo(hotelId);
 
@@ -73,6 +73,7 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
         vacio.setText(modoReserva
                 ? R.string.sin_combinaciones_habitaciones : R.string.sin_habitaciones_disponibles);
         recyclerView.setVisibility(sinOpciones ? View.GONE : View.VISIBLE);
+        });
     }
 
     private List<OpcionHabitaciones> opcionesDeCatalogo(int hotelId) {

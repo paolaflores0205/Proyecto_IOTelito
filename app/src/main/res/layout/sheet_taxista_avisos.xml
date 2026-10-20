@@ -1,0 +1,7 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:background="@color/io_background">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/taxista_local_avisos" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/io_text_primary" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/taxista_local_avisos_desc" android:textColor="@color/io_text_secondary" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/taxista_configurar_avisos" style="@style/Widget.IoTelito.Button.Outline" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/taxista_local_configurar" />
+    <TextView android:id="@+id/taxista_avisos_vacio" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:text="@string/taxista_local_sin_avisos" android:textColor="@color/io_text_secondary" />
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/taxista_lista_avisos" android:layout_width="match_parent" android:layout_height="360dp" android:clipToPadding="false" />
+</LinearLayout>

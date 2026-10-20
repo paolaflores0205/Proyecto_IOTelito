@@ -41,16 +41,12 @@ public class CheckoutActivity extends AppCompatActivity {
 
         reservaRepository = ReservaRepository.getInstance(this);
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
-        reserva = reservaRepository.buscarPorId(reservaId);
-        if (reserva == null) {
-            finish();
-            return;
-        }
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, hotel) -> {
+        reserva = value;
         if (!reserva.puedeHacerCheckout()) {
             abrirSolicitudODetalle();
             return;
         }
-        Hotel hotel = SampleData.findById(reserva.hotelId);
 
         View subHeader = findViewById(R.id.sub_header);
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
@@ -84,6 +80,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 findViewById(R.id.btn_confirmar_checkout).setEnabled(true);
             }
         });
+        });
     }
 
     private void configurarEstrellas() {
@@ -112,24 +109,30 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void onConfirmarCheckout() {
-        Reserva actual = reservaRepository.buscarPorId(reserva.id);
-        if (actual == null || !actual.puedeHacerCheckout()) {
-            abrirSolicitudODetalle();
-            return;
-        }
         if (calificacion == 0) {
             Toast.makeText(this, R.string.toast_calificacion_requerida, Toast.LENGTH_SHORT).show();
             return;
         }
 
+        findViewById(R.id.btn_confirmar_checkout).setEnabled(false);
+        com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this, () -> {
+            Reserva actual = reservaRepository.buscarPorId(reserva.id);
+            if (actual == null || !actual.puedeHacerCheckout()
+                    || TaxiRepository.porReserva(this, reserva.id) >= 0) return false;
+            reservaRepository.actualizarEstado(reserva.id, Reserva.Estado.COMPLETADA);
+            return true;
+        }, saved -> {
+        if (!saved) {
+            abrirSolicitudODetalle();
+            return;
+        }
         reserva.estado = Reserva.Estado.COMPLETADA;
-        reservaRepository.actualizarEstado(reserva.id, reserva.estado);
-
         if (elegibleTaxi) {
             mostrarOfertaTaxi();
         } else {
             irACobroConfirmado();
         }
+        }, () -> findViewById(R.id.btn_confirmar_checkout).setEnabled(true));
     }
 
     private void abrirSolicitudODetalle() {

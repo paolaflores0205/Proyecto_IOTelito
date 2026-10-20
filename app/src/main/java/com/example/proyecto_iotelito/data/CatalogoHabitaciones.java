@@ -46,7 +46,7 @@ public final class CatalogoHabitaciones {
 
     private CatalogoHabitaciones() { }
 
-    private static final java.util.Map<Integer, List<Habitacion>> ADICIONALES = new java.util.HashMap<>();
+    private static final java.util.Map<Integer, List<Habitacion>> ADICIONALES = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static List<Habitacion> porHotel(int hotelId) {
         List<Habitacion> origen;

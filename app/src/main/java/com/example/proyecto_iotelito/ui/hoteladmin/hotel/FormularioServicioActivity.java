@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminFormularioServicioBinding;
 import com.example.proyecto_iotelito.model.hoteladmin.Servicio;
 
@@ -72,25 +73,37 @@ public class FormularioServicioActivity extends AppCompatActivity {
         double precio = parseDouble(precioStr);
         boolean activo = binding.swDisponible.isChecked();
 
-        List<Servicio> servicios = HotelAdminSampleData.servicios();
+        Servicio guardado;
         if (servicioId != -1) {
             Servicio actual = HotelAdminSampleData.servicio(servicioId);
-            Servicio editado = new Servicio(servicioId, actual.hotelId, nombre, descripcion,
+            guardado = new Servicio(servicioId, actual.hotelId, nombre, descripcion,
                     precio, actual.unidad, actual.fotoRes, activo);
-            for (int i = 0; i < servicios.size(); i++) {
-                if (servicios.get(i).id == servicioId) {
-                    servicios.set(i, editado);
-                    break;
-                }
-            }
         } else {
             int nuevoId = HotelAdminSampleData.nextServicioId();
-            servicios.add(new Servicio(nuevoId, HotelAdminSampleData.HOTEL_ID, nombre, descripcion,
-                    precio, "servicio", R.drawable.superadmin_hotel_sol, activo));
+            guardado = new Servicio(nuevoId, HotelAdminSampleData.HOTEL_ID, nombre, descripcion,
+                    precio, "servicio", R.drawable.superadmin_hotel_sol, activo);
         }
-
-        Toast.makeText(this, R.string.hoteladmin_servicio_guardado, Toast.LENGTH_SHORT).show();
-        finish();
+        binding.btnGuardar.setEnabled(false);
+        HotelAdminLocalStore.get(this).saveServicio(guardado, error -> {
+            if (error != null) {
+                binding.btnGuardar.setEnabled(true);
+                Toast.makeText(this, R.string.hoteladmin_error_guardado_local, Toast.LENGTH_LONG).show();
+                return;
+            }
+            List<Servicio> servicios = HotelAdminSampleData.servicios();
+            if (servicioId == -1) {
+                servicios.add(guardado);
+            } else {
+                for (int i = 0; i < servicios.size(); i++) {
+                    if (servicios.get(i).id == servicioId) {
+                        servicios.set(i, guardado);
+                        break;
+                    }
+                }
+            }
+            Toast.makeText(this, R.string.hoteladmin_servicio_guardado, Toast.LENGTH_SHORT).show();
+            finish();
+        });
     }
 
     private double parseDouble(String value) {

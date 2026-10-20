@@ -34,12 +34,9 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
         setContentView(R.layout.activity_solicitud_taxi);
 
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
-        reserva = ReservaRepository.getInstance(this).buscarPorId(reservaId);
-        if (reserva == null) {
-            finish();
-            return;
-        }
-        hotel = SampleData.findById(reserva.hotelId);
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, loadedHotel) -> {
+        reserva = value;
+        hotel = loadedHotel;
         TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), existente -> {
             if (existente >= 0) abrirSolicitud(existente);
         });
@@ -53,6 +50,7 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
         setupHoraRecojo();
         setupSteppers();
         setupConfirmButton();
+        });
     }
 
     private void setupHeader() {

@@ -12,10 +12,11 @@ public final class ReservasPrueba {
     public static List<Reserva> crear(LocalDate hoy, int primerId) {
         List<Reserva> reservas = new ArrayList<>();
         for (int indice = 0; indice < 3; indice++) {
+            com.example.proyecto_iotelito.model.Hotel hotel = SampleData.findById(indice + 4);
             reservas.add(new Reserva(primerId + indice, indice + 4,
-                    indice == 1 ? "Suite Ejecutiva" : "Habitación Superior", "" + (310 + indice),
-                    hoy.minusDays(3), hoy, indice == 2 ? "2 adultos, 1 niño" : "2 adultos",
-                    1140 + indice * 210, Reserva.Estado.CONFIRMADA, PREFIJO_CODIGO + indice));
+                    hotel.roomName, "310",
+                    hoy.minusDays(4), hoy, indice == 2 ? "2 adultos, 1 niño" : "2 adultos",
+                    hotel.pricePerNight * 4, Reserva.Estado.CONFIRMADA, PREFIJO_CODIGO + indice));
         }
         reservas.add(new Reserva(primerId + 3, 7, "Suite Deluxe", "405",
                 hoy.minusDays(1), hoy.plusDays(2), "2 adultos", 1350,

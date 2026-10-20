@@ -1,0 +1,35 @@
+<resources>
+    <string name="taxista_local_canal">Servicios del taxista</string>
+    <string name="taxista_local_canal_desc">Solicitudes pendientes y servicios finalizados en este dispositivo</string>
+    <string name="taxista_local_error">No se pudo completar la operación. Comprueba tu sesión y el almacenamiento e inténtalo de nuevo.</string>
+    <string name="taxista_local_nueva">Solicitud de taxi pendiente</string>
+    <string name="taxista_local_fin">Servicio finalizado</string>
+    <string name="taxista_local_continuar">Continuar servicio · %1$s</string>
+    <string name="taxista_local_continuar_simple">Continuar servicio</string>
+    <string name="taxista_local_avisos">Notificaciones</string>
+    <string name="taxista_local_avisos_desc">Solicitudes y servicios finalizados. Toca un aviso para ver sus detalles.</string>
+    <string name="taxista_local_configurar">Configurar notificaciones</string>
+    <string name="taxista_local_sin_avisos">No tienes notificaciones.</string>
+    <string name="taxista_local_transicion">El servicio cambió de estado. Vuelve a Inicio para continuarlo.</string>
+    <string name="taxista_local_ocupado">No se pudo aceptar. Comprueba tu disponibilidad y que no tengas otro servicio activo.</string>
+    <string name="taxista_local_sin_dato">No disponible</string>
+    <string name="taxista_local_sin_tarifa">Tarifa no informada</string>
+    <string name="taxista_local_ruta_simulada">Ruta de demostración · sin medición GPS</string>
+    <string name="taxista_local_mapa_demo">Mapa de demostración. El seguimiento GPS se integrará posteriormente.</string>
+    <string name="taxista_local_codigo">Demostración: %1$s</string>
+    <string name="taxista_local_codigo_error">Para esta demostración ingresa %1$s</string>
+    <string name="taxista_local_validacion_demo">Finalización de demostración</string>
+    <string name="taxista_local_validacion_desc">Se guardará el servicio como finalizado en este dispositivo. La lectura y validación del QR real están pendientes de integración.</string>
+    <string name="taxista_local_confirmar">Finalizar servicio</string>
+    <string name="taxista_local_chat_demo">Chat de demostración: los mensajes y las respuestas automáticas se guardan solo en este dispositivo.</string>
+    <string name="taxista_local_foto">Foto de perfil del taxista</string>
+    <string name="taxista_local_no_disponible">Estás como no disponible. Activa tu disponibilidad en Inicio o Perfil para aceptar servicios.</string>
+    <string name="taxista_ux_viaje_activo">TU VIAJE EN CURSO</string>
+    <string name="taxista_ux_ruta">%1$s → %2$s</string>
+    <string name="taxista_ux_pedido">%1$s · %2$s</string>
+    <string name="taxista_ux_avisos_pendientes">Notificaciones, %1$d sin leer</string>
+    <plurals name="taxista_ux_solicitudes">
+        <item quantity="one">%d solicitud disponible</item>
+        <item quantity="other">%d solicitudes disponibles</item>
+    </plurals>
+</resources>

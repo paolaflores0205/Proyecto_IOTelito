@@ -31,12 +31,9 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
         setContentView(R.layout.activity_beneficio_taxi);
 
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
-        reserva = ReservaRepository.getInstance(this).buscarPorId(reservaId);
-        if (reserva == null) {
-            finish();
-            return;
-        }
-        hotel = SampleData.findById(reserva.hotelId);
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, loadedHotel) -> {
+        reserva = value;
+        hotel = loadedHotel;
 
         TextView tvDescripcion = findViewById(R.id.tv_desc_taxi_gratuito);
         tvDescripcion.setText(getString(R.string.desc_taxi_gratuito_dinamico, hotel.name));
@@ -52,6 +49,7 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
         });
 
         btnNoGracias.setOnClickListener(v -> finish());
+        });
     }
 
     private void setupBeneficiosList() {

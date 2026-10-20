@@ -49,13 +49,13 @@ public class ReservaConfirmadaActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reserva_confirmada);
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
-        Hotel hotel = SampleData.findById(hotelId);
+        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, hotel) -> {
+        reserva = value;
         BookingSelection bookingSelection = BookingSelection.from(getIntent());
         double total = getIntent().getDoubleExtra(
                 EXTRA_TOTAL, hotel.pricePerNight * bookingSelection.noches());
         String codigo = getIntent().getStringExtra(EXTRA_CODIGO);
-        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
-        reserva = ReservaRepository.getInstance(this).buscarPorId(reservaId);
 
         ((ImageView) findViewById(R.id.iv_resumen_hotel))
                 .setImageResource(HotelMedia.galleryImage(hotel.id, 1));
@@ -77,6 +77,7 @@ public class ReservaConfirmadaActivity extends AppCompatActivity {
         if (savedInstanceState == null && reserva != null) {
             mostrarNotificacionReserva();
         }
+        });
     }
 
     private void mostrarNotificacionReserva() {

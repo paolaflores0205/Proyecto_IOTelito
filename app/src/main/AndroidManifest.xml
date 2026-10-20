@@ -209,6 +209,10 @@
 
         <!-- Superadmin -->
         <activity
+            android:name=".ui.superadmin.notificaciones.AvisosSuperadminActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
+        <activity
             android:name=".ui.superadmin.SuperadminMainActivity"
             android:exported="false" />
 

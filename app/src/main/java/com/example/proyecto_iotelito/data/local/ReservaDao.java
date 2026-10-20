@@ -9,6 +9,8 @@ import java.util.List;
 
 @Dao
 public interface ReservaDao {
+    @Query("SELECT * FROM reservas_cliente ORDER BY fechaEntrada ASC")
+    androidx.lifecycle.LiveData<List<ReservaEntity>> observarTodas();
 
     @Query("SELECT * FROM reservas_cliente ORDER BY fechaEntrada ASC")
     List<ReservaEntity> obtenerTodas();

@@ -43,7 +43,7 @@ public class DetalleHotelActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detalle_hotel);
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
-        Hotel hotel = SampleData.findById(hotelId);
+        com.example.proyecto_iotelito.data.ClientDataLoader.hotel(this, hotelId, hotel -> {
         boolean desdeBusqueda = BookingSelection.isPresent(getIntent());
         BookingSelection bookingSelection = desdeBusqueda ? BookingSelection.from(getIntent()) : null;
 
@@ -56,7 +56,10 @@ public class DetalleHotelActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_rating)).setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
         ((TextView) findViewById(R.id.tv_opiniones)).setText(getString(R.string.opiniones, hotel.reviews));
         ((TextView) findViewById(R.id.tv_direccion)).setText(hotel.address);
-        ((TextView) findViewById(R.id.tv_descripcion)).setText(hotel.description);
+        String contact = hotel.description;
+        if (!hotel.contactPhone.isEmpty()) contact += "\n\nTeléfono: " + hotel.contactPhone;
+        if (!hotel.contactEmail.isEmpty()) contact += "\nCorreo: " + hotel.contactEmail;
+        ((TextView) findViewById(R.id.tv_descripcion)).setText(contact);
 
         findViewById(R.id.card_mapa).setOnClickListener(v -> abrirUbicacionEnMapa(hotel));
 
@@ -70,16 +73,26 @@ public class DetalleHotelActivity extends AppCompatActivity {
             if (bookingSelection != null) bookingSelection.putInto(intent);
             startActivity(intent);
         });
+        TextView habitaciones = findViewById(R.id.btn_ver_habitaciones);
+        habitaciones.setEnabled(hotel.active && hotel.hasInventory);
+        if (!hotel.active || !hotel.hasInventory) habitaciones.setText("Sin habitaciones disponibles");
+        });
     }
 
     private void poblarGaleria(Hotel hotel) {
         LinearLayout galleryRow = findViewById(R.id.gallery_row);
+        galleryRow.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < (hotel.photos.isEmpty() ? 4 : hotel.photos.size()); i++) {
             View photo = inflater.inflate(R.layout.item_gallery_photo, galleryRow, false);
             ((ImageView) photo.findViewById(R.id.iv_gallery_photo))
                     .setImageResource(HotelMedia.galleryImage(hotel.id, i));
             galleryRow.addView(photo);
+            photo.findViewById(R.id.tv_photo_illustrative).setVisibility(!hotel.photos.isEmpty()
+                    && com.example.proyecto_iotelito.data.SampleHotelGalleries.isIllustrative(hotel.photos.get(i))
+                    ? View.VISIBLE : View.GONE);
+            if (!hotel.photos.isEmpty()) ((ImageView) photo.findViewById(R.id.iv_gallery_photo))
+                    .setImageURI(Uri.parse(hotel.photos.get(i)));
         }
     }
 
@@ -133,8 +146,9 @@ public class DetalleHotelActivity extends AppCompatActivity {
      * el SDK de Maps (API key, Play Services) para datos que aún son estáticos.
      */
     private void abrirUbicacionEnMapa(Hotel hotel) {
-        Uri uri = Uri.parse("https://www.google.com/maps/search/?api=1&query="
-                + Uri.encode(hotel.address));
+        String location = hotel.latitude != null && hotel.longitude != null
+                ? hotel.latitude + "," + hotel.longitude : hotel.address;
+        Uri uri = Uri.parse("https://www.google.com/maps/search/?api=1&query=" + Uri.encode(location));
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, uri));
         } catch (ActivityNotFoundException e) {

@@ -12,32 +12,30 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- header oscuro -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/io_text_primary"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:paddingBottom="20dp">
-
-            <TextView
-                android:id="@+id/tv_saludo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                tools:text="Hola, Miguel 👋" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/io_teal"
-                android:textSize="12sp"
-                android:text="@string/taxi_subtitulo_saludo" />
+        <!-- Acceso directo a avisos y prioridad al viaje activo. -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@color/io_navy" android:orientation="horizontal" android:gravity="center_vertical" android:padding="16dp">
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView android:id="@+id/tv_saludo" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/white" android:textSize="18sp" android:textStyle="bold" tools:text="Hola, Miguel" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/io_teal" android:textSize="12sp" android:text="@string/taxi_subtitulo_saludo" />
+            </LinearLayout>
+            <FrameLayout android:layout_width="52dp" android:layout_height="52dp">
+                <ImageButton android:id="@+id/taxista_abrir_avisos" android:layout_width="48dp" android:layout_height="48dp" android:padding="12dp" android:src="@drawable/ic_notifications" android:tint="@color/white" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/taxista_local_avisos" />
+                <TextView android:id="@+id/taxista_badge_avisos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="20dp" android:minHeight="20dp" android:layout_gravity="top|end" android:gravity="center" android:paddingHorizontal="4dp" android:background="@drawable/bg_badge_teal" android:textColor="@color/io_navy" android:textSize="11sp" android:textStyle="bold" android:visibility="gone" />
+            </FrameLayout>
         </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView android:id="@+id/taxista_card_activo"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="16dp"
+            android:visibility="gone" app:cardCornerRadius="16dp" app:cardBackgroundColor="@color/io_navy" app:strokeWidth="0dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/taxista_ux_viaje_activo" android:textColor="@color/io_teal" android:textStyle="bold" android:textSize="13sp" />
+                <TextView android:id="@+id/taxista_activo_pasajero" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textColor="@color/white" android:textStyle="bold" android:textSize="21sp" />
+                <TextView android:id="@+id/taxista_activo_ruta" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textColor="@color/white" android:textSize="13sp" />
+                <TextView android:id="@+id/taxista_activo_estado" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="@color/io_teal" android:textStyle="bold" android:textSize="13sp" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/taxista_continuar" style="@style/Widget.IoTelito.Button.Primary" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:layout_marginTop="12dp" android:text="@string/taxista_local_continuar_simple" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- tarjeta de perfil, debajo del header oscuro -->
         <com.google.android.material.card.MaterialCardView
@@ -292,7 +290,8 @@
                     android:textColor="@color/io_text_primary"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:text="@string/taxi_alerta_nueva_solicitud" />
+                    android:id="@+id/taxista_banner_titulo"
+                    tools:text="Solicitudes disponibles" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -300,7 +299,8 @@
                     android:layout_marginTop="2dp"
                     android:textColor="@color/io_text_secondary"
                     android:textSize="12sp"
-                    android:text="@string/taxi_alerta_nueva_solicitud_desc" />
+                    android:id="@+id/taxista_banner_detalle"
+                    tools:text="Hotel y pasajero del pedido disponible" />
             </LinearLayout>
 
             <ImageView

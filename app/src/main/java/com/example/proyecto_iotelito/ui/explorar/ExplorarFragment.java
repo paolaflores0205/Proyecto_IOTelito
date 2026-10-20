@@ -112,7 +112,12 @@ public class ExplorarFragment extends Fragment {
                     startActivity(intent);
                 });
         rvRecomendados.setAdapter(recomendadosAdapter);
-        recomendadosAdapter.submitList(SampleData.HOTELS);
+        com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(requireContext())
+                .observe(getViewLifecycleOwner(), hoteles -> {
+                    List<com.example.proyecto_iotelito.model.Hotel> activos = new ArrayList<>();
+                    for (com.example.proyecto_iotelito.model.Hotel hotel : hoteles) if (hotel.active) activos.add(hotel);
+                    recomendadosAdapter.submitList(activos);
+                });
 
         view.findViewById(R.id.tv_ver_todos).setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ListaHotelesActivity.class);

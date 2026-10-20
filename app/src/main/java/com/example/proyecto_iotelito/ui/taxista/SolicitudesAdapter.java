@@ -63,7 +63,7 @@ public class SolicitudesAdapter extends RecyclerView.Adapter<SolicitudesAdapter.
             binding.tvTiempoPill.setText(solicitud.minutosEspera < 5
                     ? itemView.getContext().getString(R.string.taxi_tag_menos_5_min)
                     : itemView.getContext().getString(R.string.taxi_pill_minutos, solicitud.minutosEspera));
-            binding.tvTarifa.setText(itemView.getContext().getString(R.string.taxi_tarifa_monto, solicitud.tarifa));
+            binding.tvTarifa.setText(solicitud.id>=100000?itemView.getContext().getString(R.string.taxista_local_sin_tarifa):itemView.getContext().getString(R.string.taxi_tarifa_monto, solicitud.tarifa));
             binding.tvHotelNombre.setText(solicitud.hotel);
             binding.tvDestino.setText(solicitud.destino);
             binding.tvFechaHora.setText(solicitud.fechaHora);

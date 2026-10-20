@@ -39,12 +39,8 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cobro_confirmado);
 
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
-        reserva = ReservaRepository.getInstance(this).buscarPorId(reservaId);
-        if (reserva == null) {
-            finish();
-            return;
-        }
-        Hotel hotel = SampleData.findById(reserva.hotelId);
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, hotel) -> {
+        reserva = value;
 
         bindRow(R.id.row_hotel, R.string.label_hotel, hotel.name);
         bindRow(R.id.row_habitacion, R.string.label_habitacion,
@@ -61,6 +57,7 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             mostrarNotificacionPago();
         }
+        });
     }
 
     private void mostrarNotificacionPago() {

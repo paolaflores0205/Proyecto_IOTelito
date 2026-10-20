@@ -49,7 +49,10 @@ public final class ClienteNotificationManager {
     }
 
     public static void mostrarReservaConfirmada(Context context, Reserva reserva) {
-        Hotel hotel = SampleData.findById(reserva.hotelId);
+        com.example.proyecto_iotelito.data.ClientLocalTasks.execute(() -> {
+        try {
+        Hotel hotel = com.example.proyecto_iotelito.data.HotelCatalogRepository.buscar(context, reserva.hotelId);
+        if (hotel == null) return;
         publicar(
                 context,
                 10_000 + reserva.id,
@@ -57,6 +60,10 @@ public final class ClienteNotificationManager {
                 reserva.id,
                 context.getString(R.string.notif_reserva_confirmada_titulo),
                 context.getString(R.string.notif_reserva_confirmada_texto, hotel.name, reserva.rangoFechasTexto()));
+        } catch (Exception error) {
+            android.util.Log.e("ClienteNotification", "No se pudo preparar el aviso de reserva", error);
+        }
+        });
     }
 
     public static void mostrarPagoRealizado(Context context, Reserva reserva) {
@@ -81,6 +88,14 @@ public final class ClienteNotificationManager {
 
     @SuppressLint("MissingPermission")
     private static void publicar(Context context, int notificationId,
+                                 NotificacionCliente.Tipo tipo, int reservaId,
+                                 String titulo, String texto) {
+        Context app = context.getApplicationContext();
+        com.example.proyecto_iotelito.data.ClientLocalTasks.execute(() ->
+                publicarEnHilo(app, notificationId, tipo, reservaId, titulo, texto));
+    }
+
+    private static void publicarEnHilo(Context context, int notificationId,
                                  NotificacionCliente.Tipo tipo, int reservaId,
                                  String titulo, String texto) {
         NotificacionRepository.getInstance(context).guardarSiNoExiste(

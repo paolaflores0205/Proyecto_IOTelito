@@ -42,18 +42,16 @@ public class NotificacionesActivity extends AppCompatActivity {
         marcarLeidas = findViewById(R.id.tv_marcar_leidas);
         marcarLeidas.setOnClickListener(v -> {
             repository.marcarTodasLeidas();
-            cargarNotificaciones();
         });
+        repository.observarTodas().observe(this, this::cargarNotificaciones);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        cargarNotificaciones();
     }
 
-    private void cargarNotificaciones() {
-        List<NotificacionCliente> notificaciones = repository.obtenerTodas();
+    private void cargarNotificaciones(List<NotificacionCliente> notificaciones) {
         adapter.submitList(notificaciones);
         boolean sinNotificaciones = notificaciones.isEmpty();
         boolean hayNoLeidas = false;

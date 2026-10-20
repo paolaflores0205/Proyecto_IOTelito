@@ -35,6 +35,9 @@ public class TaxistaMainActivity extends AppCompatActivity {
     private Fragment activeFragment;
 
     private BottomNavigationView bottomNav;
+    private TaxistaViewModel vm;
+    private final androidx.activity.result.ActivityResultLauncher<String> permiso=registerForActivityResult(
+        new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),granted->{if(vm!=null)vm.repo.refrescar();});
 
     private interface FragmentFactory {
         Fragment create();
@@ -43,7 +46,10 @@ public class TaxistaMainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(!TaxistaFlujo.sesion(this))return;
         setContentView(R.layout.activity_taxista_main);
+        vm=TaxistaFlujo.model(this);
+        TaxistaNotificaciones.canal(this);
 
         FragmentManager fm = getSupportFragmentManager();
         inicioFragment = findOrCreate(fm, TAG_INICIO, InicioTaxistaFragment::new);
@@ -70,9 +76,15 @@ public class TaxistaMainActivity extends AppCompatActivity {
             return false;
         });
 
-        if (savedInstanceState == null) {
-            int tabToOpen = getIntent().getIntExtra(EXTRA_OPEN_TAB, R.id.nav_taxi_inicio);
-            bottomNav.setSelectedItemId(tabToOpen);
+        int tabToOpen=savedInstanceState==null?getIntent().getIntExtra(EXTRA_OPEN_TAB,R.id.nav_taxi_inicio)
+                :savedInstanceState.getInt(EXTRA_OPEN_TAB,R.id.nav_taxi_inicio);
+        for(Fragment f:new Fragment[]{inicioFragment,solicitudesFragment,historialFragment,perfilFragment})
+            getSupportFragmentManager().beginTransaction().hide(f).commitNow();
+        bottomNav.setSelectedItemId(tabToOpen);
+        procesarAviso(getIntent());
+        android.content.SharedPreferences prefs=com.example.proyecto_iotelito.data.taxista.ConductorPreferencias.get(this,vm.repo.cuenta);
+        if(!TaxistaNotificaciones.permiso(this)&&!prefs.getBoolean("permission_asked",false)){
+            prefs.edit().putBoolean("permission_asked",true).apply();permiso.launch(android.Manifest.permission.POST_NOTIFICATIONS);
         }
     }
 
@@ -82,6 +94,22 @@ public class TaxistaMainActivity extends AppCompatActivity {
         setIntent(intent);
         int tabToOpen = intent.getIntExtra(EXTRA_OPEN_TAB, R.id.nav_taxi_inicio);
         bottomNav.setSelectedItemId(tabToOpen);
+        procesarAviso(intent);
+    }
+
+    @Override protected void onResume(){super.onResume();if(vm!=null)vm.repo.refrescar();}
+    @Override protected void onSaveInstanceState(@NonNull Bundle state){
+        if(bottomNav!=null)state.putInt(EXTRA_OPEN_TAB,bottomNav.getSelectedItemId());super.onSaveInstanceState(state);
+    }
+    private void procesarAviso(Intent intent){
+        String clave=intent.getStringExtra("taxista_aviso_clave");if(clave==null||vm==null)return;
+        String cuenta=intent.getStringExtra("taxista_aviso_cuenta");
+        if(!vm.repo.cuenta.equals(cuenta))return;
+        int id=intent.getIntExtra("taxista_aviso_id",0);
+        String tipo=intent.getStringExtra("taxista_aviso_tipo");
+        intent.removeExtra("taxista_aviso_clave");vm.repo.leer(clave);
+        if("finalizado".equals(tipo)){bottomNav.setSelectedItemId(R.id.nav_taxi_historial);}
+        else vm.repo.ejecutar(this,()->vm.repo.buscar(id),e->{if(e!=null)TaxistaFlujo.abrir(this,e);});
     }
 
     /** Permite que un fragment hijo (ej. Inicio) cambie de pestaña sin pasar por un Intent. */

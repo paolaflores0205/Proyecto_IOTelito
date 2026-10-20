@@ -45,6 +45,15 @@ public final class NotificacionRepository {
         return resultado;
     }
 
+    public androidx.lifecycle.LiveData<List<NotificacionCliente>> observarTodas() {
+        return androidx.lifecycle.Transformations.map(dao.observarTodas(), rows -> {
+            List<NotificacionCliente> result = new ArrayList<>();
+            for (NotificacionEntity row : rows) result.add(new NotificacionCliente(row.id,
+                    NotificacionCliente.Tipo.valueOf(row.tipo), row.titulo, row.creadaEn, row.leida, row.reservaId));
+            return result;
+        });
+    }
+
     public void guardarSiNoExiste(int id, NotificacionCliente.Tipo tipo,
                                   String titulo, int reservaId) {
         NotificacionEntity entity = new NotificacionEntity();
@@ -58,10 +67,10 @@ public final class NotificacionRepository {
     }
 
     public void marcarLeida(int id) {
-        dao.marcarLeida(id);
+        ClientLocalTasks.execute(() -> dao.marcarLeida(id));
     }
 
     public void marcarTodasLeidas() {
-        dao.marcarTodasLeidas();
+        ClientLocalTasks.execute(() -> dao.marcarTodasLeidas());
     }
 }

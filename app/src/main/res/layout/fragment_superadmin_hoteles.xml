@@ -58,6 +58,7 @@
             <com.google.android.material.chip.Chip android:id="@+id/chip_barranco" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_barranco" />
         </com.google.android.material.chip.ChipGroup>
 
+        <com.google.android.material.chip.Chip android:id="@+id/chip_unassigned" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:checkable="true" android:text="Sin administrador asignado" />
         <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_hotels"

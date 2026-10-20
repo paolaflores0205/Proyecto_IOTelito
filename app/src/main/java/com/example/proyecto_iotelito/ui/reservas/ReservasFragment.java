@@ -38,8 +38,7 @@ public class ReservasFragment extends Fragment {
     private ReservaAdapter reservaAdapter;
     private TextView vacioView;
     private ReservaRepository reservaRepository;
-    private static final java.util.concurrent.ExecutorService EJEMPLOS_EXECUTOR =
-            java.util.concurrent.Executors.newSingleThreadExecutor();
+    private List<Reserva> reservas = new ArrayList<>();
 
     @Nullable
     @Override
@@ -64,6 +63,13 @@ public class ReservasFragment extends Fragment {
         }
 
         configurarTabs();
+        reservaRepository.observarTodas().observe(getViewLifecycleOwner(), rows -> {
+            reservas = rows;
+            configurarTabs();
+            renderReservas(tabLayout.getSelectedTabPosition() == 0);
+        });
+        com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(requireContext())
+                .observe(getViewLifecycleOwner(), reservaAdapter::setHotels);
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -100,7 +106,7 @@ public class ReservasFragment extends Fragment {
             }
         });
         ReservaRepository repository = reservaRepository;
-        EJEMPLOS_EXECUTOR.execute(() -> {
+        com.example.proyecto_iotelito.data.ClientLocalTasks.execute(() -> {
             try {
                 repository.asegurarEjemplosPrueba();
                 resultado.postValue(true);
@@ -123,7 +129,7 @@ public class ReservasFragment extends Fragment {
     private void configurarTabs() {
         int activas = 0;
         int finalizadas = 0;
-        for (Reserva reserva : reservaRepository.obtenerTodas()) {
+        for (Reserva reserva : reservas) {
             if (reserva.esActiva()) {
                 activas++;
             } else {
@@ -145,7 +151,7 @@ public class ReservasFragment extends Fragment {
         if (activas) {
             List<Reserva> proximas = new ArrayList<>();
             List<Reserva> enCurso = new ArrayList<>();
-            for (Reserva reserva : reservaRepository.obtenerTodas()) {
+            for (Reserva reserva : reservas) {
                 if (!reserva.esActiva()) {
                     continue;
                 }
@@ -172,7 +178,7 @@ public class ReservasFragment extends Fragment {
             }
         } else {
             List<Reserva> pasadas = new ArrayList<>();
-            for (Reserva reserva : reservaRepository.obtenerTodas()) {
+            for (Reserva reserva : reservas) {
                 if (!reserva.esActiva()) {
                     pasadas.add(reserva);
                 }
