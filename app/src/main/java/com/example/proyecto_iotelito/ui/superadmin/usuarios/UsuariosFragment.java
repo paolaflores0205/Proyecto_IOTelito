@@ -14,7 +14,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SuperadminSampleData;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.proyecto_iotelito.ui.superadmin.SuperadminViewModel;
 import com.example.proyecto_iotelito.databinding.FragmentSuperadminUsuariosBinding;
 import com.example.proyecto_iotelito.model.superadmin.AdminUser;
 
@@ -25,6 +26,7 @@ import java.util.List;
 public class UsuariosFragment extends Fragment {
     private FragmentSuperadminUsuariosBinding binding;
     private UsuariosAdapter adapter;
+    private List<AdminUser> users = new ArrayList<>();
 
     @Nullable
     @Override
@@ -43,13 +45,24 @@ public class UsuariosFragment extends Fragment {
         binding.etUserSearch.addTextChangedListener(new SimpleTextWatcher(this::renderUsers));
         binding.chipGroupRoles.setOnCheckedStateChangeListener((group, checkedIds) -> renderUsers());
         binding.chipGroupStatus.setOnCheckedStateChangeListener((group, checkedIds) -> renderUsers());
+        if (savedInstanceState == null && getArguments() != null
+                && "inactive".equals(getArguments().getString("alert_filter"))) {
+            binding.chipGroupRoles.clearCheck();
+            binding.chipGroupStatus.check(R.id.chip_inactive);
+        }
+        SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
+        model.users().observe(getViewLifecycleOwner(), rows -> {
+            users = rows;
+            updateSummary();
+            renderUsers();
+        });
         renderUsers();
     }
 
     private void updateSummary() {
-        int total = SuperadminSampleData.users().size();
+        int total = users.size();
         int active = 0;
-        for (AdminUser user : SuperadminSampleData.users()) {
+        for (AdminUser user : users) {
             if (user.active) active++;
         }
         binding.tvUsersTotal.setText(String.valueOf(total));
@@ -72,7 +85,7 @@ public class UsuariosFragment extends Fragment {
         Boolean active = selectedStatus();
         List<AdminUser> filtered = new ArrayList<>();
 
-        for (AdminUser user : SuperadminSampleData.users()) {
+        for (AdminUser user : users) {
             String searchable = (user.name + " " + user.email + " " + user.document).toLowerCase(Locale.ROOT);
             if (!query.isEmpty() && !searchable.contains(query)) continue;
             if (role != null && !role.equals(user.role)) continue;
@@ -97,7 +110,7 @@ public class UsuariosFragment extends Fragment {
         if (id == R.id.chip_client) return "Cliente";
         if (id == R.id.chip_admin) return "Administrador";
         if (id == R.id.chip_driver) return "Taxista";
-        if (id == R.id.chip_superadmin) return "Superadministrador";
+        if (id == R.id.chip_superadmin) return "Superadmin";
         return null;
     }
 

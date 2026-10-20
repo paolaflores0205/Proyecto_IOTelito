@@ -88,6 +88,8 @@
                     <include layout="@layout/item_summary_row" android:id="@+id/row_destino" android:layout_marginTop="8dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_distancia" android:layout_marginTop="8dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_tiempo" android:layout_marginTop="8dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_tarifa" android:layout_marginTop="8dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_pagado_por" android:layout_marginTop="8dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

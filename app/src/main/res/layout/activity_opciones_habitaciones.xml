@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/sub_header"
+        layout="@layout/item_sub_header" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/tv_hotel_opciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/io_text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Hotel Miraflores Park" />
+
+        <TextView
+            android:id="@+id/tv_busqueda_opciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/io_text_secondary"
+            android:textSize="13sp"
+            tools:text="4 adultos, 2 niños · 15 – 18 ago (3 noches)" />
+
+        <TextView
+            android:id="@+id/tv_explicacion_opciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_info_box_teal"
+            android:padding="10dp"
+            android:text="@string/opciones_explicacion"
+            android:textColor="@color/io_text_primary"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_opciones_habitaciones"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="20dp"
+        tools:listitem="@layout/item_opcion_habitaciones" />
+
+    <TextView
+        android:id="@+id/tv_sin_opciones"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:padding="32dp"
+        android:text="@string/sin_combinaciones_habitaciones"
+        android:textColor="@color/io_text_secondary"
+        android:textSize="15sp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+</LinearLayout>

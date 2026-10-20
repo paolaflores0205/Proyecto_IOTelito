@@ -24,13 +24,15 @@ public class ServicioFinalizadoActivity extends AppCompatActivity {
         View rowPasajero = findViewById(R.id.row_pasajero);
         ((TextView) rowPasajero.findViewById(R.id.tv_avatar_inicial)).setText("MG");
         ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_nombre)).setText("María García");
-        ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_detalle)).setText("Huésped");
+        ((TextView) rowPasajero.findViewById(R.id.tv_pasajero_detalle)).setText(R.string.taxi_pasajero_huesped);
         rowPasajero.findViewById(R.id.iv_chat).setVisibility(View.GONE);
 
         bindRow(R.id.row_origen, R.string.taxi_label_origen, "Hotel Miraflores Park");
         bindRow(R.id.row_destino, R.string.taxi_label_destino, "Aeropuerto Jorge Chávez (Callao)");
         bindRow(R.id.row_distancia, R.string.label_distancia, "18.2 km");
         bindRow(R.id.row_tiempo, R.string.label_tiempo, "25 min");
+        bindRow(R.id.row_tarifa, R.string.taxi_label_tarifa, getString(R.string.taxi_tarifa_monto, 45.50));
+        bindRow(R.id.row_pagado_por, R.string.taxi_label_pagado_por, getString(R.string.taxi_valor_hotel));
 
         findViewById(R.id.btn_volver_inicio).setOnClickListener(v -> irAlShell(R.id.nav_taxi_inicio));
         findViewById(R.id.btn_ver_historial).setOnClickListener(v -> irAlShell(R.id.nav_taxi_historial));

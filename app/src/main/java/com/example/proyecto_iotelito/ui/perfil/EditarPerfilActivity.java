@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.MainActivity;
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SampleData;
+import com.example.proyecto_iotelito.data.PerfilRepository;
 import com.example.proyecto_iotelito.model.UserProfile;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -40,7 +40,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
         // Header back icon
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
 
-        UserProfile perfil = SampleData.PERFIL;
+        UserProfile perfil = PerfilRepository.cargar(this);
         ((TextView) findViewById(R.id.tv_avatar_inicial)).setText(perfil.initials());
 
         etNombre = findViewById(R.id.et_nombre);
@@ -112,13 +112,11 @@ public class EditarPerfilActivity extends AppCompatActivity {
             return;
         }
 
-        UserProfile perfil = SampleData.PERFIL;
-        perfil.name = nombre;
-        perfil.tipoDocumento = tipoDoc;
-        perfil.numeroDocumento = numDoc;
-        perfil.email = email;
-        perfil.phone = telefono;
-        perfil.domicilio = domicilio;
+        UserProfile actual = PerfilRepository.cargar(this);
+        UserProfile perfil = new UserProfile(
+                nombre, email, telefono, tipoDoc, numDoc,
+                actual.fechaNacimiento, domicilio);
+        PerfilRepository.guardar(this, perfil);
 
         Toast.makeText(this, R.string.toast_perfil_actualizado, Toast.LENGTH_SHORT).show();
         finish();

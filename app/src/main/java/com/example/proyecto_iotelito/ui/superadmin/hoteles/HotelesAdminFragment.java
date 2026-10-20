@@ -14,7 +14,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SuperadminSampleData;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.proyecto_iotelito.ui.superadmin.SuperadminViewModel;
 import com.example.proyecto_iotelito.databinding.FragmentSuperadminHotelesBinding;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 
@@ -25,6 +26,7 @@ import java.util.List;
 public class HotelesAdminFragment extends Fragment {
     private FragmentSuperadminHotelesBinding binding;
     private HotelesAdapter adapter;
+    private List<ManagedHotel> hotels = new ArrayList<>();
 
     @Nullable
     @Override
@@ -46,16 +48,28 @@ public class HotelesAdminFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) { renderHotels(); }
         });
         binding.chipGroupDistricts.setOnCheckedStateChangeListener((group, checkedIds) -> renderHotels());
+        binding.chipUnassigned.setOnCheckedChangeListener((button, checked) -> renderHotels());
+        if (savedInstanceState == null && getArguments() != null
+                && "unassigned".equals(getArguments().getString("alert_filter"))) {
+            binding.chipGroupDistricts.clearCheck();
+            binding.chipUnassigned.setChecked(true);
+        }
         binding.fabAddHotel.setOnClickListener(v -> startActivity(new Intent(requireContext(), FormularioHotelActivity.class)));
+        SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
+        model.hotels().observe(getViewLifecycleOwner(), rows -> {
+            hotels = rows;
+            updateSummary();
+            renderHotels();
+        });
         renderHotels();
     }
 
     private void updateSummary() {
         int unassigned = 0;
-        for (ManagedHotel hotel : SuperadminSampleData.hotels()) {
-            if ("Sin asignar".equalsIgnoreCase(hotel.administrator)) unassigned++;
+        for (ManagedHotel hotel : hotels) {
+            if (hotel.administratorId == null) unassigned++;
         }
-        binding.tvHotelsTotal.setText(String.valueOf(SuperadminSampleData.hotels().size()));
+        binding.tvHotelsTotal.setText(String.valueOf(hotels.size()));
         binding.tvHotelsUnassigned.setText(String.valueOf(unassigned));
     }
 
@@ -72,10 +86,11 @@ public class HotelesAdminFragment extends Fragment {
         String query = String.valueOf(binding.etHotelSearch.getText()).trim().toLowerCase(Locale.ROOT);
         String district = selectedDistrict();
         List<ManagedHotel> filtered = new ArrayList<>();
-        for (ManagedHotel hotel : SuperadminSampleData.hotels()) {
+        for (ManagedHotel hotel : hotels) {
             String searchable = (hotel.name + " " + hotel.address).toLowerCase(Locale.ROOT);
             if (!query.isEmpty() && !searchable.contains(query)) continue;
             if (district != null && !district.equals(hotel.district)) continue;
+            if (binding.chipUnassigned.isChecked() && hotel.administratorId != null) continue;
 
             filtered.add(hotel);
         }

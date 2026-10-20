@@ -5,17 +5,19 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.HotelMedia;
+import com.example.proyecto_iotelito.data.CatalogoHabitaciones;
+import com.example.proyecto_iotelito.data.GeneradorOpcionesHabitaciones;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
+import com.example.proyecto_iotelito.ui.hoteles.HotelAdapter;
 import com.example.proyecto_iotelito.util.ServicioIconos;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -30,7 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
+import java.text.Normalizer;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -50,8 +52,10 @@ public class ResultadosActivity extends AppCompatActivity {
     public static final String EXTRA_DESTINO = "extra_destino";
     public static final String EXTRA_RESUMEN = "extra_resumen";
 
-    private final List<Hotel> todosLosHoteles = new ArrayList<>(SampleData.HOTELS);
-    private LinearLayout listContainer;
+    private final List<Hotel> todosLosHoteles = new ArrayList<>();
+    private HotelAdapter hotelAdapter;
+    private BookingSelection bookingSelection;
+    private String destinoBusqueda;
 
     private MaterialButton btnFiltros;
     private TextView tvLimpiarFiltros;
@@ -68,6 +72,7 @@ public class ResultadosActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resultados);
+        bookingSelection = BookingSelection.from(getIntent());
 
         double[] dominio = calcularDominioPrecio();
         dominioPrecioMin = dominio[0];
@@ -75,11 +80,11 @@ public class ResultadosActivity extends AppCompatActivity {
         precioMinimo = dominioPrecioMin;
         precioMaximo = dominioPrecioMax;
 
-        String destino = getIntent().getStringExtra(EXTRA_DESTINO);
-        if (destino == null) {
-            destino = "Lima, Perú";
+        destinoBusqueda = getIntent().getStringExtra(EXTRA_DESTINO);
+        if (destinoBusqueda == null || destinoBusqueda.trim().isEmpty()) {
+            destinoBusqueda = "Lima, Perú";
         }
-        ((TextView) findViewById(R.id.tv_destino)).setText(destino);
+        ((TextView) findViewById(R.id.tv_destino)).setText(destinoBusqueda);
 
         String resumen = getIntent().getStringExtra(EXTRA_RESUMEN);
         if (resumen != null) {
@@ -88,22 +93,41 @@ public class ResultadosActivity extends AppCompatActivity {
 
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
 
-        listContainer = findViewById(R.id.hotel_list_container);
+        RecyclerView rvHoteles = findViewById(R.id.rv_hoteles_resultados);
+        rvHoteles.setLayoutManager(new LinearLayoutManager(this));
+        hotelAdapter = new HotelAdapter(HotelAdapter.TipoTarjeta.VERTICAL, hotel -> {
+            Intent intent = new Intent(this, DetalleHotelActivity.class);
+            intent.putExtra(DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
+            bookingSelection.putInto(intent);
+            startActivity(intent);
+        });
+        rvHoteles.setAdapter(hotelAdapter);
 
         btnFiltros = findViewById(R.id.btn_filtros);
         tvLimpiarFiltros = findViewById(R.id.tv_limpiar_filtros);
         btnFiltros.setOnClickListener(v -> mostrarFiltros());
         tvLimpiarFiltros.setOnClickListener(v -> limpiarFiltros());
 
-        aplicarFiltros();
+        com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(this).observe(this, hoteles -> {
+            boolean rangoCompleto = precioMinimo == dominioPrecioMin && precioMaximo == dominioPrecioMax;
+            todosLosHoteles.clear();
+            for (Hotel hotel : hoteles) if (hotel.active) todosLosHoteles.add(hotel);
+            double[] nuevoDominio = calcularDominioPrecio();
+            dominioPrecioMin = nuevoDominio[0];
+            dominioPrecioMax = nuevoDominio[1];
+            if (rangoCompleto) { precioMinimo = dominioPrecioMin; precioMaximo = dominioPrecioMax; }
+            aplicarFiltros();
+        });
     }
 
     private double[] calcularDominioPrecio() {
+        if (todosLosHoteles.isEmpty()) return new double[]{0, 1000};
         double min = Double.MAX_VALUE;
         double max = 0;
         for (Hotel hotel : todosLosHoteles) {
-            min = Math.min(min, hotel.pricePerNight);
-            max = Math.max(max, hotel.pricePerNight);
+            double precioDesde = precioDesde(hotel);
+            min = Math.min(min, precioDesde);
+            max = Math.max(max, precioDesde);
         }
         double desde = Math.max(0, Math.floor(min / 50.0) * 50 - 50);
         double hasta = Math.ceil(max / 50.0) * 50 + 50;
@@ -277,10 +301,18 @@ public class ResultadosActivity extends AppCompatActivity {
     private void aplicarFiltros() {
         List<Hotel> resultado = new ArrayList<>();
         for (Hotel hotel : todosLosHoteles) {
+            if (!coincideConDestino(hotel, destinoBusqueda)) {
+                continue;
+            }
+            if (hotel.hasInventory && GeneradorOpcionesHabitaciones.generar(
+                    hotel.id, bookingSelection.adultos, bookingSelection.ninos).isEmpty()) {
+                continue;
+            }
             if (hotel.rating < calificacionMinima) {
                 continue;
             }
-            if (hotel.pricePerNight < precioMinimo || hotel.pricePerNight > precioMaximo) {
+            double precioDesde = precioDesde(hotel);
+            if (precioDesde < precioMinimo || precioDesde > precioMaximo) {
                 continue;
             }
             if (!serviciosSeleccionados.isEmpty()
@@ -291,9 +323,9 @@ public class ResultadosActivity extends AppCompatActivity {
         }
 
         if (modoOrden == ORDEN_MENOR_A_MAYOR) {
-            Collections.sort(resultado, Comparator.comparingDouble(h -> h.pricePerNight));
+            Collections.sort(resultado, Comparator.comparingDouble(this::precioDesde));
         } else if (modoOrden == ORDEN_MAYOR_A_MENOR) {
-            Collections.sort(resultado, (a, b) -> Double.compare(b.pricePerNight, a.pricePerNight));
+            Collections.sort(resultado, (a, b) -> Double.compare(precioDesde(b), precioDesde(a)));
         }
 
         int filtrosActivos = contarFiltrosActivos();
@@ -305,37 +337,41 @@ public class ResultadosActivity extends AppCompatActivity {
         renderHoteles(resultado);
     }
 
-    private void renderHoteles(List<Hotel> hoteles) {
-        listContainer.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(this);
-        for (Hotel hotel : hoteles) {
-            View card = inflater.inflate(R.layout.item_hotel_card_vertical, listContainer, false);
-            bindHotelCard(card, hotel);
-            if (listContainer.getChildCount() > 0) {
-                ((LinearLayout.LayoutParams) card.getLayoutParams()).topMargin = dp(16);
+    /**
+     * Relaciona distritos de Lima Metropolitana con los hoteles de Lima.
+     * Para otras ciudades o textos, compara directamente nombre, ciudad y
+     * dirección del hotel. Esto mantiene el ejemplo coherente con la pequeña
+     * colección estática disponible en este entregable.
+     */
+    private boolean coincideConDestino(Hotel hotel, String destino) {
+        String consulta = normalizar(destino);
+        String[] distritosLima = {
+                "lima", "san miguel", "miraflores", "barranco", "san isidro",
+                "surco", "santiago de surco", "magdalena", "pueblo libre",
+                "jesus maria", "la molina", "san borja", "chorrillos"
+        };
+        for (String distrito : distritosLima) {
+            if (consulta.contains(distrito)) {
+                return normalizar(hotel.city).equals("lima");
             }
-            listContainer.addView(card);
         }
+
+        String datosHotel = normalizar(hotel.name + " " + hotel.city + " " + hotel.address);
+        return datosHotel.contains(consulta);
     }
 
-    private void bindHotelCard(View card, Hotel hotel) {
-        ((ImageView) card.findViewById(R.id.iv_photo)).setImageResource(HotelMedia.hotelImage(hotel.id));
-        ((TextView) card.findViewById(R.id.tv_location)).setText(hotel.address);
-        ((TextView) card.findViewById(R.id.tv_rating)).setText(String.format(Locale.getDefault(), "%.1f", hotel.rating));
-        ((TextView) card.findViewById(R.id.tv_name)).setText(hotel.name);
-        ((TextView) card.findViewById(R.id.tv_price)).setText(
-                getString(R.string.desde_precio, String.format(Locale.getDefault(), "S/ %.0f", hotel.pricePerNight)));
-
-        MaterialButton btnVerDetalle = card.findViewById(R.id.btn_ver_detalle);
-        btnVerDetalle.setOnClickListener(v -> {
-            Intent intent = new Intent(this, DetalleHotelActivity.class);
-            intent.putExtra(DetalleHotelActivity.EXTRA_HOTEL_ID, hotel.id);
-            startActivity(intent);
-        });
+    private String normalizar(String texto) {
+        String sinTildes = Normalizer.normalize(texto, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+        return sinTildes.trim().toLowerCase(java.util.Locale.ROOT);
     }
 
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
+    private void renderHoteles(List<Hotel> hoteles) {
+        hotelAdapter.submitList(hoteles);
+    }
+
+    private double precioDesde(Hotel hotel) {
+        return CatalogoHabitaciones.precioMinimoDisponible(hotel.id, hotel.pricePerNight);
     }
 
     private float dpF(int value) {

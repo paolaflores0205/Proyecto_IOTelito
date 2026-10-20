@@ -68,7 +68,13 @@ public final class HotelAdminSampleData {
                     R.drawable.superadmin_hotel_hero, true),
             new Habitacion(5, HOTEL_ID, "Habitación Superior", "Hab. 308", 35, 2, 1, 380.0,
                     "Vista a la ciudad, calefacción inteligente y balcón.",
-                    R.drawable.superadmin_hotel_sol, false)
+                    R.drawable.superadmin_hotel_sol, false),
+            new Habitacion(6, HOTEL_ID, "Habitación Doble", "Hab. 306", 31, 2, 0, 330.0,
+                    "Dos camas dobles, escritorio y vista interior silenciosa.",
+                    R.drawable.superadmin_hotel_sol, true),
+            new Habitacion(7, HOTEL_ID, "Habitación Superior", "Hab. 309", 36, 2, 1, 390.0,
+                    "Cama King Size, balcón y control inteligente de iluminación.",
+                    R.drawable.superadmin_hotel_barranco, true)
     ));
 
     // ---- Servicios adicionales ----

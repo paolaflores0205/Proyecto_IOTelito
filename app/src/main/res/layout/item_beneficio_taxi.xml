@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingVertical="6dp">
+
+    <FrameLayout
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@drawable/bg_circle_teal_light">
+
+        <ImageView
+            android:id="@+id/iv_icono_beneficio"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            app:tint="@color/io_teal"
+            tools:src="@drawable/ic_check" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tv_titulo_beneficio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:textColor="@color/io_text_primary"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        tools:text="Válido para salidas al Aeropuerto Jorge Chávez" />
+</LinearLayout>

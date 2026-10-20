@@ -101,12 +101,13 @@
 
             <!-- Body text -->
             <TextView
+                android:id="@+id/tv_desc_taxi_gratuito"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:text="¡Felicitaciones! Tu reserva de estadía superó el monto mínimo de consumo acumulado y has desbloqueado un traslado privado 100% cubierto."
+                android:text="@string/desc_taxi_gratuito"
                 android:textColor="@color/io_text_secondary"
                 android:textSize="14sp"
                 android:lineSpacingMultiplier="1.4" />
@@ -128,52 +129,20 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:text="@string/taxi_beneficios_listado_titulo"
+                        android:textColor="@color/io_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_check_circle"
-                            android:tint="@color/io_teal"
-                            android:contentDescription="@null" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="12dp"
-                            android:text="@string/item_valido_aeropuerto"
-                            android:textColor="@color/io_text_primary"
-                            android:textSize="13sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_beneficios_taxi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="14dp">
-
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_check_circle"
-                            android:tint="@color/io_teal"
-                            android:contentDescription="@null" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="12dp"
-                            android:text="@string/item_monitoreo_satelital"
-                            android:textColor="@color/io_text_primary"
-                            android:textSize="13sp" />
-                    </LinearLayout>
+                        android:layout_marginTop="4dp"
+                        android:nestedScrollingEnabled="false" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

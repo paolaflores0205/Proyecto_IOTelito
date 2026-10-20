@@ -49,21 +49,23 @@
                 android:padding="14dp">
 
                 <TextView
+                    android:id="@+id/tv_stat_completados"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textColor="@color/io_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:text="@string/taxi_stat_completados" />
+                    tools:text="5 servicios completados" />
 
                 <TextView
+                    android:id="@+id/tv_stat_cuota"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/io_teal"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:text="@string/taxi_stat_cuota" />
+                    tools:text="S/ 245.50 Cuota" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
@@ -83,17 +85,17 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/taxi_tab_todos" />
+            tools:text="@string/taxi_tab_todos" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/taxi_tab_completados" />
+            tools:text="@string/taxi_tab_completados" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/taxi_tab_cancelados" />
+            tools:text="@string/taxi_tab_cancelados" />
     </com.google.android.material.tabs.TabLayout>
 
     <View
@@ -101,49 +103,41 @@
         android:layout_height="1dp"
         android:background="@color/io_border" />
 
-    <ScrollView
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="10dp"
+        android:textColor="@color/io_text_muted"
+        android:textSize="11sp"
+        android:textAllCaps="true"
+        android:text="@string/taxi_historial_recientes" />
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_historial"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp"
+            tools:listitem="@layout/item_historial_card" />
+
+        <TextView
+            android:id="@+id/tv_historial_vacio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/io_text_muted"
-                android:textSize="11sp"
-                android:textAllCaps="true"
-                android:text="@string/taxi_historial_recientes" />
-
-            <include
-                android:id="@+id/card_historial_1"
-                layout="@layout/item_historial_card" />
-
-            <include
-                android:id="@+id/card_historial_2"
-                layout="@layout/item_historial_card" />
-
-            <include
-                android:id="@+id/card_historial_3"
-                layout="@layout/item_historial_card" />
-
-            <TextView
-                android:id="@+id/tv_historial_vacio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center"
-                android:textColor="@color/io_text_muted"
-                android:textSize="13sp"
-                android:text="@string/taxi_historial_vacio"
-                android:visibility="gone" />
-
-        </LinearLayout>
-    </ScrollView>
+            android:layout_gravity="center"
+            android:layout_margin="24dp"
+            android:gravity="center"
+            android:textColor="@color/io_text_muted"
+            android:textSize="13sp"
+            android:text="@string/taxi_historial_vacio"
+            android:visibility="gone" />
+    </FrameLayout>
 </LinearLayout>

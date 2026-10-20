@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
@@ -26,6 +27,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private static final double MONTO_MINIMO_TAXI_GRATIS = 1000.0;
 
     private Reserva reserva;
+    private ReservaRepository reservaRepository;
     private boolean elegibleTaxi;
     private int calificacion = 0;
 
@@ -34,9 +36,10 @@ public class CheckoutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checkout);
 
-        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, SampleData.RESERVAS.get(0).id);
-        reserva = SampleData.findReservaById(reservaId);
-        Hotel hotel = SampleData.findById(reserva.hotelId);
+        reservaRepository = ReservaRepository.getInstance(this);
+        int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, hotel) -> {
+        reserva = value;
 
         View subHeader = findViewById(R.id.sub_header);
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
@@ -62,6 +65,7 @@ public class CheckoutActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_confirmar_checkout).setOnClickListener(v -> onConfirmarCheckout());
         findViewById(R.id.btn_cancelar_checkout).setOnClickListener(v -> finish());
+        });
     }
 
     private void configurarEstrellas() {
@@ -95,13 +99,18 @@ public class CheckoutActivity extends AppCompatActivity {
             return;
         }
 
+        findViewById(R.id.btn_confirmar_checkout).setEnabled(false);
+        com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this, () -> {
+            reservaRepository.actualizarEstado(reserva.id, Reserva.Estado.COMPLETADA);
+            return true;
+        }, saved -> {
         reserva.estado = Reserva.Estado.COMPLETADA;
-
         if (elegibleTaxi) {
             mostrarOfertaTaxi();
         } else {
             irACobroConfirmado();
         }
+        }, () -> findViewById(R.id.btn_confirmar_checkout).setEnabled(true));
     }
 
     private void mostrarOfertaTaxi() {
@@ -112,7 +121,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
         sheetView.findViewById(R.id.btn_aceptar_taxi).setOnClickListener(v -> {
             sheet.dismiss();
-            startActivity(new Intent(this, BeneficioTaxiActivity.class));
+            Intent intent = new Intent(this, BeneficioTaxiActivity.class);
+            intent.putExtra(BeneficioTaxiActivity.EXTRA_RESERVA_ID, reserva.id);
+            startActivity(intent);
             finish();
         });
 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/io_text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="@string/taxi_resumen_servicio_titulo" />
+
+        <TextView
+            android:id="@+id/tv_estado_pill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_pill"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="FINALIZADO" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/row_pasajero"
+        layout="@layout/item_pasajero_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="14dp"
+        android:background="@color/io_border" />
+
+    <include layout="@layout/item_summary_row" android:id="@+id/row_hora" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" />
+    <include layout="@layout/item_summary_row" android:id="@+id/row_origen" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    <include layout="@layout/item_summary_row" android:id="@+id/row_destino" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    <include layout="@layout/item_summary_row" android:id="@+id/row_distancia" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    <include layout="@layout/item_summary_row" android:id="@+id/row_tiempo" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    <include layout="@layout/item_summary_row" android:id="@+id/row_motivo" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    <include layout="@layout/item_summary_row" android:id="@+id/row_tarifa" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    <include layout="@layout/item_summary_row" android:id="@+id/row_pagado_por" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_cerrar"
+        style="@style/Widget.IoTelito.Button.Outline"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/taxi_btn_cerrar" />
+</LinearLayout>

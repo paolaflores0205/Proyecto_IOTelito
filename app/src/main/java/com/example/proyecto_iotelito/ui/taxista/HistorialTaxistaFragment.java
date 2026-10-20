@@ -1,64 +1,55 @@
 package com.example.proyecto_iotelito.ui.taxista;
 
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.TaxistaSampleData;
+import com.example.proyecto_iotelito.databinding.FragmentHistorialTaxistaBinding;
+import com.example.proyecto_iotelito.model.taxista.ServicioHistorial;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Pestaña "Historial": traslados pasados del conductor, agrupados por
- * pestañas (Todos / Completados / Cancelados). Tarjetas con contenido de
- * ejemplo; el listado dinámico llega en el siguiente incremento.
+ * Pestaña "Historial": traslados pasados del conductor en un RecyclerView,
+ * filtrados por pestañas (Todos / Completados / Cancelados).
  */
 public class HistorialTaxistaFragment extends Fragment {
 
-    private final EstadoServicio[] cardEstados = new EstadoServicio[3];
-    private View[] cardViews = new View[3];
-    private View emptyView;
+    private FragmentHistorialTaxistaBinding binding;
+    private HistorialAdapter adapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                               @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_historial_taxista, container, false);
+        binding = FragmentHistorialTaxistaBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        bindHistorial(0, view.findViewById(R.id.card_historial_1), "14:10",
-                EstadoServicio.FINALIZADO,
-                "Hotel Miraflores Park → Aeropuerto Jorge Chávez",
-                "María García · Toyota Corolla", "18.2 km · 25 min");
+        adapter = new HistorialAdapter(servicio -> ResumenServicioSheet.newInstance(servicio.id)
+                .show(getChildFragmentManager(), ResumenServicioSheet.TAG));
+        binding.rvHistorial.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvHistorial.setAdapter(adapter);
 
-        bindHistorial(1, view.findViewById(R.id.card_historial_2), "10:45",
-                EstadoServicio.FINALIZADO,
-                "Dazzler Miraflores → Aeropuerto Callao",
-                "Juan Pérez · Toyota Corolla", "15 km · 32 min");
-
-        bindHistorial(2, view.findViewById(R.id.card_historial_3), "ayer, 19:30",
-                EstadoServicio.CANCELADO,
-                "Casa Andina Premium → Aeropuerto Jorge Chávez",
-                "Lucía Fernández · Toyota Corolla", "Cancelado por el pasajero");
-
-        emptyView = view.findViewById(R.id.tv_historial_vacio);
-
-        TabLayout tabLayout = view.findViewById(R.id.tab_layout_historial);
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        actualizarResumen();
+        binding.tabLayoutHistorial.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                filtrarPorPestaña(tab.getPosition());
+                filtrarPorPestana(tab.getPosition());
             }
 
             @Override
@@ -69,36 +60,47 @@ public class HistorialTaxistaFragment extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
-        filtrarPorPestaña(0);
+        filtrarPorPestana(binding.tabLayoutHistorial.getSelectedTabPosition());
     }
 
-    private void filtrarPorPestaña(int posicion) {
-        boolean hayVisibles = false;
-        for (int i = 0; i < cardViews.length; i++) {
-            boolean visible = posicion == 0
-                    || (posicion == 1 && cardEstados[i] == EstadoServicio.FINALIZADO)
-                    || (posicion == 2 && cardEstados[i] == EstadoServicio.CANCELADO);
-            cardViews[i].setVisibility(visible ? View.VISIBLE : View.GONE);
-            hayVisibles |= visible;
+    /** Contadores de las pestañas y resumen de servicios/cuota, calculados desde la data. */
+    private void actualizarResumen() {
+        int completados = 0;
+        int cancelados = 0;
+        double cuota = 0;
+        for (ServicioHistorial servicio : TaxistaSampleData.historial()) {
+            if (servicio.estado == EstadoServicio.FINALIZADO) {
+                completados++;
+                cuota += servicio.monto;
+            } else if (servicio.estado == EstadoServicio.CANCELADO) {
+                cancelados++;
+            }
         }
-        emptyView.setVisibility(hayVisibles ? View.GONE : View.VISIBLE);
+        binding.tabLayoutHistorial.getTabAt(0).setText(
+                getString(R.string.taxi_tab_todos, TaxistaSampleData.historial().size()));
+        binding.tabLayoutHistorial.getTabAt(1).setText(getString(R.string.taxi_tab_completados, completados));
+        binding.tabLayoutHistorial.getTabAt(2).setText(getString(R.string.taxi_tab_cancelados, cancelados));
+        binding.tvStatCompletados.setText(getString(R.string.taxi_stat_completados, completados));
+        binding.tvStatCuota.setText(getString(R.string.taxi_stat_cuota, cuota));
     }
 
-    private void bindHistorial(int index, View card, String hora, EstadoServicio estado,
-                                String ruta, String pasajero, String distanciaTiempo) {
-        ((TextView) card.findViewById(R.id.tv_hora)).setText(hora);
+    private void filtrarPorPestana(int posicion) {
+        List<ServicioHistorial> filtrados = new ArrayList<>();
+        for (ServicioHistorial servicio : TaxistaSampleData.historial()) {
+            if (posicion == 0
+                    || (posicion == 1 && servicio.estado == EstadoServicio.FINALIZADO)
+                    || (posicion == 2 && servicio.estado == EstadoServicio.CANCELADO)) {
+                filtrados.add(servicio);
+            }
+        }
+        adapter.setServicios(filtrados);
+        binding.tvHistorialVacio.setVisibility(filtrados.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.rvHistorial.setVisibility(filtrados.isEmpty() ? View.GONE : View.VISIBLE);
+    }
 
-        TextView tvEstado = card.findViewById(R.id.tv_estado_pill);
-        tvEstado.setText(EstadoServicioUi.texto(requireContext(), estado));
-        tvEstado.setBackgroundTintList(ColorStateList.valueOf(
-                ContextCompat.getColor(requireContext(), EstadoServicioUi.colorFondo(estado))));
-        tvEstado.setTextColor(ContextCompat.getColor(requireContext(), EstadoServicioUi.colorTexto(estado)));
-
-        ((TextView) card.findViewById(R.id.tv_ruta)).setText(ruta);
-        ((TextView) card.findViewById(R.id.tv_pasajero)).setText(pasajero);
-        ((TextView) card.findViewById(R.id.tv_distancia_tiempo)).setText(distanciaTiempo);
-
-        cardViews[index] = card;
-        cardEstados[index] = estado;
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

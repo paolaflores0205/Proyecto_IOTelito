@@ -1,5 +1,8 @@
 package com.example.proyecto_iotelito.data;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import androidx.annotation.Nullable;
 
 import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
@@ -11,6 +14,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
 public final class LocalAuthRepository {
+
+    private static final String PREFS_NAME = "local_auth_overrides";
 
     private static final LocalAccount[] ACCOUNTS = {
             new LocalAccount("cliente@iotelito.pe", "Carlos", UserRole.CLIENT,
@@ -27,16 +32,52 @@ public final class LocalAuthRepository {
 
     @Nullable
     public static AuthenticatedUser authenticate(String email, String password) {
+        return authenticate(null, email, password);
+    }
+
+    @Nullable
+    public static AuthenticatedUser authenticate(@Nullable Context context, String email, String password) {
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
         String passwordHash = sha256(password);
 
         for (LocalAccount account : ACCOUNTS) {
+            String validHash = getPasswordHash(context, account);
             if (account.email.equals(normalizedEmail)
-                    && account.passwordHash.equals(passwordHash)) {
+                    && validHash.equals(passwordHash)) {
                 return new AuthenticatedUser(account.email, account.displayName, account.role);
             }
         }
         return null;
+    }
+
+    public static boolean exists(String email) {
+        String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
+        for (LocalAccount account : ACCOUNTS) {
+            if (account.email.equals(normalizedEmail)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean updatePassword(Context context, String email, String password) {
+        String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
+        if (!exists(normalizedEmail)) {
+            return false;
+        }
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putString(normalizedEmail, sha256(password))
+                .apply();
+        return true;
+    }
+
+    private static String getPasswordHash(@Nullable Context context, LocalAccount account) {
+        if (context == null) {
+            return account.passwordHash;
+        }
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(account.email, account.passwordHash);
     }
 
     private static String sha256(String value) {

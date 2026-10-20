@@ -1,0 +1,14 @@
+<resources>
+    <string name="cliente_recordarme">Recordarme</string>
+    <string name="login_recordar_error">No se pudieron recordar tus datos. Intenta ingresar sin marcar Recordarme.</string>
+    <string name="login_autocompletar_error">No se pudo recuperar la contraseña guardada. Escríbela nuevamente.</string>
+    <string name="cliente_taxi_estado_solicitado">Solicitado</string>
+    <string name="cliente_taxi_estado_asignado">Taxista asignado</string>
+    <string name="taxi_estado_camino">En camino</string>
+    <string name="cliente_taxi_estado_finalizado">Finalizado</string>
+    <string name="taxi_estado_detalle">%1$s\n%2$s\nRecojo: %3$s\nPasajeros: %4$d · Maletas: %5$d</string>
+    <string name="taxi_volver">Volver</string>
+    <string name="taxi_guardar_error">No se pudo guardar la solicitud. Intenta nuevamente.</string>
+    <string name="taxi_canal_notificaciones">Estado del taxi</string>
+    <string name="taxi_permiso_notificaciones">Para ver los avisos del taxi, permite las notificaciones en Ajustes → Aplicaciones → IoTelito → Notificaciones.</string>
+</resources>
