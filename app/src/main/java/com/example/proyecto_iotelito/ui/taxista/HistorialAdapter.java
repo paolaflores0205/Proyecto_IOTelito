@@ -66,9 +66,10 @@ public class HistorialAdapter extends RecyclerView.Adapter<HistorialAdapter.Hist
             binding.tvRuta.setText(servicio.ruta());
             binding.tvPasajero.setText(itemView.getContext().getString(
                     R.string.taxi_pasajero_vehiculo, servicio.pasajero, servicio.vehiculo));
-            binding.tvDistanciaTiempo.setText(servicio.detalle());
+            boolean sinRuta=!servicio.fueCancelado()&&(servicio.distancia==null||servicio.distancia.isEmpty());
+            binding.tvDistanciaTiempo.setText(sinRuta?itemView.getContext().getString(R.string.taxista_local_sin_dato):servicio.detalle());
             binding.tvMonto.setVisibility(servicio.fueCancelado() ? View.GONE : View.VISIBLE);
-            binding.tvMonto.setText(itemView.getContext().getString(R.string.taxi_tarifa_monto, servicio.monto));
+            binding.tvMonto.setText(servicio.id>=100000?itemView.getContext().getString(R.string.taxista_local_sin_tarifa):itemView.getContext().getString(R.string.taxi_tarifa_monto, servicio.monto));
             binding.getRoot().setOnClickListener(v -> listener.onServicioClick(servicio));
         }
     }

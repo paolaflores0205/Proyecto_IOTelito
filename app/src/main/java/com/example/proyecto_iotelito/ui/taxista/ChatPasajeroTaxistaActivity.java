@@ -37,6 +37,8 @@ public class ChatPasajeroTaxistaActivity extends AppCompatActivity {
         return intent;
     }
 
+    private TaxistaViewModel vm;
+    private int servicio;
     private LinearLayout mensajesContainer;
     private ScrollView scrollMensajes;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -44,7 +46,9 @@ public class ChatPasajeroTaxistaActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(!TaxistaFlujo.sesion(this))return;
         setContentView(R.layout.activity_chat_pasajero_taxista);
+        vm=TaxistaFlujo.model(this);servicio=getIntent().getIntExtra(TaxistaFlujo.ID,0);
 
         String nombre = getIntent().getStringExtra(EXTRA_NOMBRE_PASAJERO);
         if (TextUtils.isEmpty(nombre)) {
@@ -62,9 +66,15 @@ public class ChatPasajeroTaxistaActivity extends AppCompatActivity {
         mensajesContainer = findViewById(R.id.mensajes_container);
         scrollMensajes = findViewById(R.id.scroll_mensajes);
 
-        agregarBurbuja(getString(R.string.taxi_msg_pasajero_1), false);
-        agregarBurbuja(getString(R.string.taxi_msg_taxista_1), true);
-        scrollAlFinal();
+        vm.repo.mensajes(servicio).observe(this,rows->{
+            mensajesContainer.removeAllViews();
+            agregarBurbuja(getString(R.string.taxista_local_chat_demo),false);
+            for(com.example.proyecto_iotelito.data.taxista.local.MensajeConductorEntity m:rows){
+                String hora=java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT,java.text.DateFormat.SHORT).format(new java.util.Date(m.fecha));
+                agregarBurbuja(m.texto+"\n"+hora,m.mio);
+            }
+            scrollAlFinal();
+        });
 
         EditText etMensaje = findViewById(R.id.et_mensaje);
         etMensaje.setOnEditorActionListener((v, actionId, event) -> {
@@ -82,14 +92,13 @@ public class ChatPasajeroTaxistaActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(texto)) {
             return;
         }
-        agregarBurbuja(texto, true);
-        etMensaje.setText("");
-        scrollAlFinal();
-
-        handler.postDelayed(() -> {
-            agregarBurbuja(getString(R.string.taxi_respuesta_automatica_pasajero), false);
-            scrollAlFinal();
-        }, 1200);
+        android.view.View enviar=findViewById(R.id.btn_enviar);enviar.setEnabled(false);
+        vm.repo.ejecutar(this,()->{
+            vm.repo.mensaje(servicio,texto,true);
+            vm.repo.mensaje(servicio,getString(R.string.taxi_respuesta_automatica_pasajero),false);
+            return true;
+        },ok->{etMensaje.setText("");enviar.setEnabled(true);});
+        vm.repo.error.observe(this,error->{if(error!=null)enviar.setEnabled(true);});
     }
 
     private void agregarBurbuja(String texto, boolean esMia) {

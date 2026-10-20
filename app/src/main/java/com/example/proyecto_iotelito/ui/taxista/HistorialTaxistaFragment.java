@@ -27,6 +27,7 @@ public class HistorialTaxistaFragment extends Fragment {
 
     private FragmentHistorialTaxistaBinding binding;
     private HistorialAdapter adapter;
+    private List<ServicioHistorial> datos=new ArrayList<>();
 
     @Nullable
     @Override
@@ -45,7 +46,13 @@ public class HistorialTaxistaFragment extends Fragment {
         binding.rvHistorial.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvHistorial.setAdapter(adapter);
 
-        actualizarResumen();
+        TaxistaViewModel vm=new androidx.lifecycle.ViewModelProvider(requireActivity()).get(TaxistaViewModel.class);
+        vm.repo.servicios.observe(getViewLifecycleOwner(),rows->{
+            datos=new ArrayList<>();
+            for(com.example.proyecto_iotelito.data.taxista.local.ServicioConductorEntity e:rows)
+                if("FINALIZADO".equals(e.estado)||"CANCELADO".equals(e.estado)) datos.add(e.historial());
+            actualizarResumen();filtrarPorPestana(binding.tabLayoutHistorial.getSelectedTabPosition());
+        });
         binding.tabLayoutHistorial.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -68,7 +75,7 @@ public class HistorialTaxistaFragment extends Fragment {
         int completados = 0;
         int cancelados = 0;
         double cuota = 0;
-        for (ServicioHistorial servicio : TaxistaSampleData.historial()) {
+        for (ServicioHistorial servicio : datos) {
             if (servicio.estado == EstadoServicio.FINALIZADO) {
                 completados++;
                 cuota += servicio.monto;
@@ -77,7 +84,7 @@ public class HistorialTaxistaFragment extends Fragment {
             }
         }
         binding.tabLayoutHistorial.getTabAt(0).setText(
-                getString(R.string.taxi_tab_todos, TaxistaSampleData.historial().size()));
+                getString(R.string.taxi_tab_todos, datos.size()));
         binding.tabLayoutHistorial.getTabAt(1).setText(getString(R.string.taxi_tab_completados, completados));
         binding.tabLayoutHistorial.getTabAt(2).setText(getString(R.string.taxi_tab_cancelados, cancelados));
         binding.tvStatCompletados.setText(getString(R.string.taxi_stat_completados, completados));
@@ -86,7 +93,7 @@ public class HistorialTaxistaFragment extends Fragment {
 
     private void filtrarPorPestana(int posicion) {
         List<ServicioHistorial> filtrados = new ArrayList<>();
-        for (ServicioHistorial servicio : TaxistaSampleData.historial()) {
+        for (ServicioHistorial servicio : datos) {
             if (posicion == 0
                     || (posicion == 1 && servicio.estado == EstadoServicio.FINALIZADO)
                     || (posicion == 2 && servicio.estado == EstadoServicio.CANCELADO)) {

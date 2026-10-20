@@ -257,6 +257,8 @@
                     android:layout_marginStart="50dp"
                     android:background="@color/io_border" />
 
+                <include android:id="@+id/taxista_row_avisos" layout="@layout/item_perfil_menu_row" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/io_border" />
                 <include
                     android:id="@+id/row_soporte"
                     layout="@layout/item_perfil_menu_row" />

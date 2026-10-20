@@ -27,6 +27,8 @@ public class SolicitudesTaxistaFragment extends Fragment {
 
     private FragmentSolicitudesTaxistaBinding binding;
     private SolicitudesAdapter adapter;
+    private TaxistaViewModel vm;
+    private List<SolicitudServicio> datos=new ArrayList<>();
 
     @Nullable
     @Override
@@ -46,6 +48,13 @@ public class SolicitudesTaxistaFragment extends Fragment {
 
         binding.chipTodas.setChecked(true);
         binding.chipGroupFiltros.setOnCheckedStateChangeListener((group, checkedIds) -> renderSolicitudes());
+        vm=new androidx.lifecycle.ViewModelProvider(requireActivity()).get(TaxistaViewModel.class);
+        vm.repo.servicios.observe(getViewLifecycleOwner(),rows->{
+            datos=new ArrayList<>();
+            for(com.example.proyecto_iotelito.data.taxista.local.ServicioConductorEntity e:rows)
+                if("SOLICITADO".equals(e.estado)) datos.add(e.solicitud());
+            pintarSolicitudes(datos);
+        });
         renderSolicitudes();
     }
 
@@ -65,17 +74,15 @@ public class SolicitudesTaxistaFragment extends Fragment {
     }
 
     private void renderSolicitudes() {
-        android.content.Context app = requireContext().getApplicationContext();
-        TaxiRepository.ejecutar(app, getViewLifecycleOwner(), () -> TaxiRepository.disponibles(app),
-                this::pintarSolicitudes);
+        if(vm!=null) vm.repo.refrescar();
+        if(binding!=null) pintarSolicitudes(datos);
     }
 
     private void pintarSolicitudes(List<SolicitudServicio> persistidas) {
         if (binding == null) return;
         int chipActivo = binding.chipGroupFiltros.getCheckedChipId();
         List<SolicitudServicio> filtradas = new ArrayList<>();
-        List<SolicitudServicio> disponibles = new ArrayList<>(TaxistaSampleData.solicitudes());
-        disponibles.addAll(persistidas);
+        List<SolicitudServicio> disponibles = new ArrayList<>(persistidas);
         for (SolicitudServicio solicitud : disponibles) {
             if (chipActivo == R.id.chip_menos_10_min && solicitud.minutosEspera >= 10) continue;
             filtradas.add(solicitud);

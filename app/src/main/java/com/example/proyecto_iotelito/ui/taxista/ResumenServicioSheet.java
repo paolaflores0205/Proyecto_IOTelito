@@ -47,8 +47,11 @@ public class ResumenServicioSheet extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ServicioHistorial servicio = TaxistaSampleData.historialPorId(
-                requireArguments().getInt(ARG_SERVICIO_ID, -1));
+        TaxistaViewModel vm=new androidx.lifecycle.ViewModelProvider(requireActivity()).get(TaxistaViewModel.class);
+        int id=requireArguments().getInt(ARG_SERVICIO_ID,-1);
+        vm.repo.ejecutar(getViewLifecycleOwner(),()->vm.repo.buscar(id),e->{
+        if(binding==null)return;
+        ServicioHistorial servicio=e==null?null:e.historial();
         if (servicio == null) {
             dismiss();
             return;
@@ -76,15 +79,18 @@ public class ResumenServicioSheet extends BottomSheetDialogFragment {
         if (cancelado) {
             fila(binding.rowMotivo, R.string.taxi_label_motivo, servicio.motivoCancelacion);
         } else {
-            fila(binding.rowDistancia, R.string.label_distancia, servicio.distancia);
-            fila(binding.rowTiempo, R.string.label_tiempo, servicio.duracion);
+            fila(binding.rowDistancia, R.string.label_distancia, valor(servicio.distancia));
+            fila(binding.rowTiempo, R.string.label_tiempo, valor(servicio.duracion));
             fila(binding.rowTarifa, R.string.taxi_label_tarifa,
-                    getString(R.string.taxi_tarifa_monto, servicio.monto));
+                    e.cliente?getString(R.string.taxista_local_sin_tarifa):getString(R.string.taxi_tarifa_monto, servicio.monto));
             fila(binding.rowPagadoPor, R.string.taxi_label_pagado_por, getString(R.string.taxi_valor_hotel));
         }
 
         binding.btnCerrar.setOnClickListener(v -> dismiss());
+        });
     }
+
+    private String valor(String s){return s==null||s.isEmpty()?getString(R.string.taxista_local_sin_dato):s;}
 
     private void fila(ItemSummaryRowBinding fila, int etiquetaRes, String valor) {
         fila.tvLabel.setText(etiquetaRes);

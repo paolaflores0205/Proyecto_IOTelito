@@ -22,6 +22,7 @@ import com.google.android.material.materialswitch.MaterialSwitch;
  * la edición real llega en el siguiente incremento.
  */
 public class PerfilTaxistaFragment extends Fragment {
+    private TaxistaViewModel vm;
 
     @Nullable
     @Override
@@ -45,12 +46,12 @@ public class PerfilTaxistaFragment extends Fragment {
         bindRow(view, R.id.row_placa, R.string.taxi_label_placa, "ABC-123");
         bindRow(view, R.id.row_color, R.string.taxi_label_color, "Gris Metálico");
 
-        TextView tvEstadoDisponibilidad = view.findViewById(R.id.tv_estado_disponibilidad_perfil);
-        MaterialSwitch switchDisponibilidad = view.findViewById(R.id.switch_disponibilidad_perfil);
-        switchDisponibilidad.setOnCheckedChangeListener((buttonView, isChecked) ->
-                tvEstadoDisponibilidad.setText(isChecked
-                        ? R.string.taxi_disponible_desc
-                        : R.string.taxi_no_disponible_desc));
+        vm=new androidx.lifecycle.ViewModelProvider(requireActivity()).get(TaxistaViewModel.class);
+        ConductorUi.disponibilidad(this,view,R.id.switch_disponibilidad_perfil,R.id.tv_estado_disponibilidad_perfil,vm);
+        View avisos=view.findViewById(R.id.taxista_row_avisos);
+        ((ImageView)avisos.findViewById(R.id.iv_icono)).setImageResource(R.drawable.ic_notifications);
+        ((TextView)avisos.findViewById(R.id.tv_label)).setText(R.string.taxista_local_avisos);
+        avisos.setOnClickListener(v->new TaxistaAvisosSheet().show(getParentFragmentManager(),"taxista_avisos"));
 
         View rowEditarFoto = view.findViewById(R.id.row_editar_foto);
         ((ImageView) rowEditarFoto.findViewById(R.id.iv_icono)).setImageResource(R.drawable.ic_edit);
@@ -69,6 +70,9 @@ public class PerfilTaxistaFragment extends Fragment {
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         });
     }
+
+    @Override public void onResume(){super.onResume();if(vm!=null)ConductorUi.foto(this,requireView(),vm);}
+    @Override public void onHiddenChanged(boolean hidden){super.onHiddenChanged(hidden);if(!hidden&&vm!=null&&getView()!=null)ConductorUi.foto(this,requireView(),vm);}
 
     private void bindRow(View parent, int rowId, int labelRes, String value) {
         View row = parent.findViewById(rowId);
