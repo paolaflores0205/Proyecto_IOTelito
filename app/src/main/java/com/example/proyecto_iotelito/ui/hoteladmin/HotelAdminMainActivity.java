@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
+import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminMainBinding;
 import com.example.proyecto_iotelito.ui.hoteladmin.hotel.AdminHotelFragment;
 import com.example.proyecto_iotelito.ui.hoteladmin.mensajes.AdminMensajesFragment;
@@ -52,6 +53,8 @@ public class HotelAdminMainActivity extends AppCompatActivity {
             if (error != null) {
                 Toast.makeText(this, R.string.hoteladmin_error_carga_local, Toast.LENGTH_LONG).show();
             }
+            SuperadminRepository.getInstance(this).hotel(HotelAdminSampleData.HOTEL_ID)
+                    .observe(this, HotelAdminSampleData::aplicarHotelCompartido);
             configurarNavegacion(savedInstanceState);
             if (HotelAdminNotifications.hasPermission(this)) {
                 HotelAdminNotifications.showPendingCheckouts(this, HotelAdminSampleData.reservas());

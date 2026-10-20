@@ -84,10 +84,11 @@ public class SampleHotelGalleriesTest {
         try (android.database.sqlite.SQLiteDatabase old = android.database.sqlite.SQLiteDatabase.openDatabase(
                 context.getDatabasePath(name).getPath(), null, android.database.sqlite.SQLiteDatabase.OPEN_READWRITE)) {
             old.execSQL("ALTER TABLE admin_hotels DROP COLUMN galleryInitialized");
+            old.execSQL("ALTER TABLE admin_hotels DROP COLUMN attractions");
             old.setVersion(3);
         }
         db = Room.databaseBuilder(context, SuperadminDatabase.class, name)
-                .addMigrations(SuperadminDatabase.MIGRATION_3_4).build();
+                .addMigrations(SuperadminDatabase.MIGRATION_3_4, SuperadminDatabase.MIGRATION_4_5).build();
         assertEquals("file:///foto-guardada.jpg", db.dao().hotel(1).toModel().photos.get(0));
         assertFalse(db.dao().hotel(1).galleryInitialized);
         seed();

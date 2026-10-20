@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.databinding.FragmentHoteladminHotelBinding;
 
 import java.util.Locale;
@@ -35,6 +36,14 @@ public class AdminHotelFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        SuperadminRepository.getInstance(requireContext()).hotel(HotelAdminSampleData.HOTEL_ID)
+                .observe(getViewLifecycleOwner(), hotel -> {
+                    HotelAdminSampleData.aplicarHotelCompartido(hotel);
+                    if (hotel != null && binding != null) {
+                        binding.tvSubtitulo.setText(getString(
+                                R.string.hoteladmin_panel_control, hotel.name));
+                    }
+                });
         binding.cardHabitaciones.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), HabitacionesActivity.class)));
         binding.cardServicios.setOnClickListener(v ->

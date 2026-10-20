@@ -8,6 +8,7 @@ import com.example.proyecto_iotelito.model.hoteladmin.ItemConsumo;
 import com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin;
 import com.example.proyecto_iotelito.model.hoteladmin.Servicio;
 import com.example.proyecto_iotelito.model.hoteladmin.ServicioTaxi;
+import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,17 @@ public final class HotelAdminSampleData {
             "Huaca Pucllana (1.5 km), Parque Kennedy (1.2 km), Malecón de Miraflores (0.1 km)";
     public static String hotelTelefono = "+51 1 610 4000";
     public static String hotelEmail = "contacto@miraflorespark.pe";
+
+    /** Caché de lectura para las pantallas de admin; Room de superadmin es la fuente. */
+    public static void aplicarHotelCompartido(ManagedHotel hotel) {
+        if (hotel == null || hotel.id != HOTEL_ID) return;
+        hotelNombre = hotel.name;
+        hotelDireccion = hotel.address;
+        hotelDescripcion = hotel.description == null ? "" : hotel.description;
+        hotelAtracciones = hotel.attractions == null ? "" : hotel.attractions;
+        hotelTelefono = hotel.phone == null ? "" : hotel.phone;
+        hotelEmail = hotel.email == null ? "" : hotel.email;
+    }
 
     /** Fotos del hotel (mín. 4). El índice 0 es la foto principal. */
     public static final List<Integer> FOTOS = new ArrayList<>(Arrays.asList(

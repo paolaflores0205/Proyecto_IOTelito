@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase;
 
 /** Base propia del rol para no alterar la base ni las pantallas del cliente. */
 @Database(entities = {AdminHotelEntity.class, AdminUserEntity.class,
-        AdminLogEntity.class, AdminAlertEntity.class, ReportDemoBookingEntity.class}, version = 4, exportSchema = false)
+        AdminLogEntity.class, AdminAlertEntity.class, ReportDemoBookingEntity.class}, version = 5, exportSchema = false)
 public abstract class SuperadminDatabase extends RoomDatabase {
     private static volatile SuperadminDatabase instance;
     public abstract SuperadminDao dao();
@@ -33,13 +33,19 @@ public abstract class SuperadminDatabase extends RoomDatabase {
                     db.execSQL("ALTER TABLE admin_hotels ADD COLUMN galleryInitialized INTEGER NOT NULL DEFAULT 0");
                 }
             };
+    public static final androidx.room.migration.Migration MIGRATION_4_5 =
+            new androidx.room.migration.Migration(4, 5) {
+                @Override public void migrate(androidx.sqlite.db.SupportSQLiteDatabase db) {
+                    db.execSQL("ALTER TABLE admin_hotels ADD COLUMN attractions TEXT");
+                }
+            };
 
     public static SuperadminDatabase getInstance(Context context) {
         if (instance == null) {
             synchronized (SuperadminDatabase.class) {
                 if (instance == null) {
                     instance = Room.databaseBuilder(context.getApplicationContext(),
-                            SuperadminDatabase.class, "iotelito_superadmin.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build();
+                            SuperadminDatabase.class, "iotelito_superadmin.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build();
                 }
             }
         }

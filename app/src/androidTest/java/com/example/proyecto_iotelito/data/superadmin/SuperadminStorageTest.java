@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SampleData;
+import com.example.proyecto_iotelito.data.HotelCatalogRepository;
 import com.example.proyecto_iotelito.data.superadmin.local.*;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 import com.example.proyecto_iotelito.notification.SuperadminNotifications;
@@ -76,6 +77,87 @@ public class SuperadminStorageTest {
         return hotel;
     }
 
+    private ManagedHotel loadProfile(SuperadminRepository.HotelDetails legacy) throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        ManagedHotel[] hotel = {null};
+        String[] error = {null};
+        repository.loadHotelDetailsForAdmin(1, legacy, (value, message) -> {
+            hotel[0] = value; error[0] = message; latch.countDown();
+        });
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        assertNull(error[0]);
+        return hotel[0];
+    }
+
+    @Test public void perfilAdminUsaLaBaseCompartidaSinPisarCambiosDeSuperadmin() throws Exception {
+        AdminHotelEntity before = db.dao().hotel(1);
+        before.name = "Nombre de superadmin";
+        before.email = "superadmin@example.com";
+        before.latitude = -12.12;
+        before.longitude = -77.03;
+        db.dao().updateHotel(before);
+
+        SuperadminRepository.HotelDetails legacy = new SuperadminRepository.HotelDetails(
+                "Nombre antiguo de admin", "Av. Admin 321", "Descripción antigua",
+                "Parque cercano", "999888777", "admin@example.com");
+        ManagedHotel migrated = loadProfile(legacy);
+        assertEquals("Nombre de superadmin", migrated.name);
+        assertEquals("superadmin@example.com", migrated.email);
+        assertEquals("Av. Admin 321", migrated.address);
+        assertEquals("Descripción antigua", migrated.description);
+        assertEquals("Parque cercano", migrated.attractions);
+        assertEquals("999888777", migrated.phone);
+
+        SuperadminRepository.HotelDetails edited = new SuperadminRepository.HotelDetails(
+                "Hotel actualizado por admin", "Av. Compartida 123", "Descripción compartida",
+                "Museo cercano", "912345678", "contacto@example.com");
+        success(callback -> repository.updateHotelDetailsFromAdmin(1, edited, callback));
+        AdminHotelEntity saved = db.dao().hotel(1);
+        assertEquals("Hotel actualizado por admin", saved.name);
+        assertEquals("Museo cercano", saved.attractions);
+        assertEquals(-12.12, saved.latitude, 0.00001);
+        assertEquals(-77.03, saved.longitude, 0.00001);
+        assertEquals(before.administratorId, saved.administratorId);
+        assertEquals("Hotel actualizado por admin", HotelCatalogRepository.combinar(saved.toModel()).name);
+        assertEquals("Descripción compartida", HotelCatalogRepository.combinar(saved.toModel()).description);
+        assertEquals("Museo cercano", HotelCatalogRepository.combinar(saved.toModel()).attractions[0].name);
+        close();
+        open();
+        assertEquals("Hotel actualizado por admin", db.dao().hotel(1).name);
+        assertEquals("Museo cercano", db.dao().hotel(1).attractions);
+        success(callback -> repository.updateHotelDetailsFromAdmin(1,
+                new SuperadminRepository.HotelDetails(edited.name, edited.address,
+                        edited.description, "", edited.phone, edited.email), callback));
+        assertEquals(0, HotelCatalogRepository.combinar(db.dao().hotel(1).toModel()).attractions.length);
+    }
+
+    @Test public void migracionCuatroACincoConservaHotelYAgregaAtracciones() throws Exception {
+        String name = "profile-migration-test-" + UUID.randomUUID() + ".db";
+        SuperadminDatabase isolated = Room.databaseBuilder(context, SuperadminDatabase.class, name).build();
+        try {
+            AdminHotelEntity hotel = new AdminHotelEntity();
+            hotel.id = 77;
+            hotel.name = "Hotel conservado";
+            hotel.photosJson = "[\"file:///foto.jpg\"]";
+            isolated.dao().insertHotel(hotel);
+            isolated.close();
+            try (android.database.sqlite.SQLiteDatabase old = android.database.sqlite.SQLiteDatabase.openDatabase(
+                    context.getDatabasePath(name).getPath(), null,
+                    android.database.sqlite.SQLiteDatabase.OPEN_READWRITE)) {
+                old.execSQL("ALTER TABLE admin_hotels DROP COLUMN attractions");
+                old.setVersion(4);
+            }
+            isolated = Room.databaseBuilder(context, SuperadminDatabase.class, name)
+                    .addMigrations(SuperadminDatabase.MIGRATION_4_5).build();
+            assertEquals("Hotel conservado", isolated.dao().hotel(77).name);
+            assertEquals("file:///foto.jpg", isolated.dao().hotel(77).toModel().photos.get(0));
+            assertNull(isolated.dao().hotel(77).attractions);
+        } finally {
+            if (isolated.isOpen()) isolated.close();
+            context.deleteDatabase(name);
+        }
+    }
+
     private int count(String table) {
         try (Cursor cursor = db.getOpenHelper().getReadableDatabase().query("SELECT COUNT(*) FROM " + table)) {
             assertTrue(cursor.moveToFirst());
@@ -99,6 +181,8 @@ public class SuperadminStorageTest {
     @Test public void registraEditaAsignaYConservaCoordenadasYEstado() throws Exception {
         int id = success(callback -> repository.saveHotel(newHotel("Hotel nuevo"), callback));
         ManagedHotel edit = db.dao().hotel(id).toModel();
+        edit.attractions = "Museo del barrio";
+        db.dao().updateHotel(AdminHotelEntity.from(edit));
         ManagedHotel renamed = new ManagedHotel(id, "Hotel editado", edit.address, edit.district,
                 edit.administrator, edit.rooms, edit.reservations, edit.imageRes, true);
         renamed.city = edit.city;
@@ -120,6 +204,7 @@ public class SuperadminStorageTest {
         assertEquals(-12.13, saved.latitude, 0.00001);
         assertEquals(-77.04, saved.longitude, 0.00001);
         assertEquals("prueba@example.com", saved.email);
+        assertEquals("Museo del barrio", saved.attractions);
         assertFalse(saved.active);
     }
 

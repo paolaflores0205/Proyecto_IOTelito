@@ -8,6 +8,7 @@ import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 public class AdminHotelEntity {
     @PrimaryKey(autoGenerate = true) public int id;
     public String name, address, district, administrator, city, phone, email, description;
+    public String attractions;
     public int rooms, reservations, imageRes;
     public boolean active;
     public Double latitude, longitude;
@@ -30,6 +31,7 @@ public class AdminHotelEntity {
         row.phone = hotel.phone;
         row.email = hotel.email;
         row.description = hotel.description;
+        row.attractions = hotel.attractions;
         row.latitude = hotel.latitude;
         row.longitude = hotel.longitude;
         row.administratorId = hotel.administratorId;
@@ -44,6 +46,7 @@ public class AdminHotelEntity {
         hotel.phone = phone;
         hotel.email = email;
         hotel.description = description;
+        hotel.attractions = attractions;
         hotel.latitude = latitude;
         hotel.longitude = longitude;
         hotel.administratorId = administratorId;

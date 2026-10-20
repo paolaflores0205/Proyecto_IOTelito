@@ -44,9 +44,16 @@ public final class SuperadminSampleData {
         List<ManagedHotel> hoteles = new ArrayList<>();
         for (Hotel hotel : SampleData.HOTELS) {
             int posicion = hotel.id - 1;
-            hoteles.add(new ManagedHotel(hotel.id, hotel.name, hotel.address,
+            ManagedHotel managed = new ManagedHotel(hotel.id, hotel.name, hotel.address,
                     distritos[posicion], administradores[posicion], habitaciones[posicion],
-                    reservas[posicion], HotelMedia.hotelImage(hotel.id), true));
+                    reservas[posicion], HotelMedia.hotelImage(hotel.id), true);
+            if (hotel.id == HotelAdminSampleData.HOTEL_ID) {
+                managed.description = HotelAdminSampleData.hotelDescripcion;
+                managed.attractions = HotelAdminSampleData.hotelAtracciones;
+                managed.phone = HotelAdminSampleData.hotelTelefono;
+                managed.email = HotelAdminSampleData.hotelEmail;
+            }
+            hoteles.add(managed);
         }
         return hoteles;
     }

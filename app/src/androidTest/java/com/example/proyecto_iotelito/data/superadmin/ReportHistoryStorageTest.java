@@ -55,10 +55,12 @@ public class ReportHistoryStorageTest {
                     context.getDatabasePath(name).getPath(), null, android.database.sqlite.SQLiteDatabase.OPEN_READWRITE)) {
                 old.execSQL("DROP TABLE report_demo_bookings");
                 old.execSQL("ALTER TABLE admin_hotels DROP COLUMN galleryInitialized");
+                old.execSQL("ALTER TABLE admin_hotels DROP COLUMN attractions");
                 old.setVersion(2);
             }
             db = Room.databaseBuilder(context, SuperadminDatabase.class, name)
-                    .addMigrations(SuperadminDatabase.MIGRATION_2_3, SuperadminDatabase.MIGRATION_3_4).build();
+                    .addMigrations(SuperadminDatabase.MIGRATION_2_3, SuperadminDatabase.MIGRATION_3_4,
+                            SuperadminDatabase.MIGRATION_4_5).build();
             assertEquals("Hotel existente", db.dao().hotel(88).name);
             assertEquals("file:///foto-existente.jpg", db.dao().hotel(88).toModel().photos.get(0));
             assertEquals(0, db.dao().countReportHistory());

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -23,6 +24,20 @@ import java.util.concurrent.Executors;
 /** Todas las lecturas síncronas y escrituras ocurren en un único hilo de trabajo. */
 public final class SuperadminRepository {
     public interface Callback { void complete(int id, String error); }
+    public interface HotelDetailsCallback { void complete(ManagedHotel hotel, String error); }
+    /** Los campos que el administrador del hotel puede editar sin alterar su asignación o ubicación. */
+    public static final class HotelDetails {
+        public final String name, address, description, attractions, phone, email;
+        public HotelDetails(String name, String address, String description,
+                            String attractions, String phone, String email) {
+            this.name = name;
+            this.address = address;
+            this.description = description;
+            this.attractions = attractions;
+            this.phone = phone;
+            this.email = email;
+        }
+    }
     private interface Write { int execute(); }
     private static volatile SuperadminRepository instance;
     private final Context context;
@@ -195,11 +210,88 @@ public final class SuperadminRepository {
                 row.administrator = current.administrator;
                 row.rooms = current.rooms;
                 row.reservations = current.reservations;
+                row.attractions = current.attractions;
                 dao.updateHotel(row);
             }
             syncAlert(row);
             addLog("Hotel", creating ? "Hotel registrado" : "Hotel actualizado", row.name);
             return row.id;
+        }, callback);
+    }
+
+    /** Importa solo los campos antiguos cuyo valor compartido todavía es el inicial. */
+    public void loadHotelDetailsForAdmin(int id, @Nullable HotelDetails legacy,
+                                         HotelDetailsCallback callback) {
+        worker.execute(() -> {
+            try {
+                database.runInTransaction(() -> {
+                    AdminHotelEntity row = requireHotel(id);
+                    if (legacy == null) return;
+                    com.example.proyecto_iotelito.model.Hotel initial = SampleData.findById(id);
+                    ManagedHotel initialManaged = SuperadminSampleData.hotel(id);
+                    boolean changed = false;
+                    if (legacy.name != null && initial != null && initial.name.equals(row.name)
+                            && !legacy.name.trim().isEmpty() && !legacy.name.equals(row.name)) {
+                        row.name = legacy.name;
+                        changed = true;
+                    }
+                    if (legacy.address != null && initial != null && initial.address.equals(row.address)
+                            && !legacy.address.trim().isEmpty() && !legacy.address.equals(row.address)) {
+                        row.address = legacy.address;
+                        changed = true;
+                    }
+                    if (legacy.description != null && isInitial(row.description, initialManaged.description)
+                            && !legacy.description.equals(row.description)) {
+                        row.description = legacy.description;
+                        changed = true;
+                    }
+                    if (legacy.attractions != null && isInitial(row.attractions, initialManaged.attractions)
+                            && !legacy.attractions.equals(row.attractions)) {
+                        row.attractions = legacy.attractions;
+                        changed = true;
+                    }
+                    if (legacy.phone != null && isInitial(row.phone, initialManaged.phone)
+                            && !legacy.phone.equals(row.phone)) {
+                        row.phone = legacy.phone;
+                        changed = true;
+                    }
+                    if (legacy.email != null && isInitial(row.email, initialManaged.email)
+                            && !legacy.email.equals(row.email)) {
+                        row.email = legacy.email;
+                        changed = true;
+                    }
+                    if (changed) dao.updateHotel(row);
+                });
+                ManagedHotel hotel = requireHotel(id).toModel();
+                main.post(() -> callback.complete(hotel, null));
+            } catch (Exception exception) {
+                Log.e("SuperadminStorage", "No se pudo cargar el perfil compartido", exception);
+                main.post(() -> callback.complete(null, "No se pudo cargar el perfil del hotel."));
+            }
+        });
+    }
+
+    private static boolean isInitial(String current, String initial) {
+        return current == null || current.isEmpty() || current.equals(initial);
+    }
+
+    public void updateHotelDetailsFromAdmin(int id, HotelDetails details, Callback callback) {
+        write(() -> {
+            if (details.name.trim().isEmpty() || details.address.trim().isEmpty()
+                    || details.email.trim().isEmpty()) {
+                throw new IllegalArgumentException("Completa los datos obligatorios del hotel.");
+            }
+            AdminHotelEntity row = requireHotel(id);
+            row.name = details.name;
+            row.address = details.address;
+            row.description = details.description;
+            row.attractions = details.attractions;
+            row.phone = details.phone;
+            row.email = details.email;
+            dao.updateHotel(row);
+            syncAlert(row);
+            addLog("Hotel", "Datos actualizados por administrador", row.name);
+            return id;
         }, callback);
     }
 

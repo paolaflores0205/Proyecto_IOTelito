@@ -118,22 +118,23 @@ public class SuperadminEnhancementsTest {
             for (String photo : photos) assertTrue(new File(Uri.parse(photo).getPath()).isFile());
             ManagedHotel hotel = new ManagedHotel(77, "Fotos persistentes", "Calle", "Distrito", "Sin asignar", 0, 0, R.drawable.superadmin_hotel_hero, true);
             hotel.photos.addAll(photos);
-            db = Room.databaseBuilder(context, SuperadminDatabase.class, dbName).addMigrations(SuperadminDatabase.MIGRATION_1_2, SuperadminDatabase.MIGRATION_2_3, SuperadminDatabase.MIGRATION_3_4).build();
+            db = Room.databaseBuilder(context, SuperadminDatabase.class, dbName).addMigrations(SuperadminDatabase.MIGRATION_1_2, SuperadminDatabase.MIGRATION_2_3, SuperadminDatabase.MIGRATION_3_4, SuperadminDatabase.MIGRATION_4_5).build();
             db.dao().insertHotel(AdminHotelEntity.from(hotel));
             db.close();
-            db = Room.databaseBuilder(context, SuperadminDatabase.class, dbName).addMigrations(SuperadminDatabase.MIGRATION_1_2, SuperadminDatabase.MIGRATION_2_3, SuperadminDatabase.MIGRATION_3_4).build();
+            db = Room.databaseBuilder(context, SuperadminDatabase.class, dbName).addMigrations(SuperadminDatabase.MIGRATION_1_2, SuperadminDatabase.MIGRATION_2_3, SuperadminDatabase.MIGRATION_3_4, SuperadminDatabase.MIGRATION_4_5).build();
             assertEquals(photos, db.dao().hotel(77).toModel().photos);
             db.close();
             // Reconstruye la estructura de la versión anterior, solo en esta base temporal.
             try (SQLiteDatabase legacy = SQLiteDatabase.openDatabase(context.getDatabasePath(dbName).getPath(), null, SQLiteDatabase.OPEN_READWRITE)) {
                 legacy.execSQL("ALTER TABLE admin_hotels DROP COLUMN photosJson");
                 legacy.execSQL("ALTER TABLE admin_hotels DROP COLUMN galleryInitialized");
+                legacy.execSQL("ALTER TABLE admin_hotels DROP COLUMN attractions");
                 legacy.setVersion(1);
             }
-            db = Room.databaseBuilder(context, SuperadminDatabase.class, dbName).addMigrations(SuperadminDatabase.MIGRATION_1_2, SuperadminDatabase.MIGRATION_2_3, SuperadminDatabase.MIGRATION_3_4).build();
+            db = Room.databaseBuilder(context, SuperadminDatabase.class, dbName).addMigrations(SuperadminDatabase.MIGRATION_1_2, SuperadminDatabase.MIGRATION_2_3, SuperadminDatabase.MIGRATION_3_4, SuperadminDatabase.MIGRATION_4_5).build();
             assertEquals("Fotos persistentes", db.dao().hotel(77).name);
             assertTrue(db.dao().hotel(77).toModel().photos.isEmpty());
-            assertEquals(4, db.getOpenHelper().getReadableDatabase().getVersion());
+            assertEquals(5, db.getOpenHelper().getReadableDatabase().getVersion());
             form = open(FormularioHotelActivity.class);
             final Activity screen = form;
             final List<String> galleryPhotos = new ArrayList<>(photos);

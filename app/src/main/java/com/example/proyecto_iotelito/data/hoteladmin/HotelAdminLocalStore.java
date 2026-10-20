@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
+import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.model.Mensaje;
 import com.example.proyecto_iotelito.model.hoteladmin.Habitacion;
 import com.example.proyecto_iotelito.model.hoteladmin.ItemConsumo;
@@ -30,8 +31,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-/** Persistencia local del módulo: Room para datos estructurados, preferencias para
- * datos generales y un archivo interno JSON para la galería de fotos de muestra. */
+/** Persistencia local de habitaciones, servicios, checkout, mensajes y galería.
+ * El perfil compartido del hotel vive en Room de superadmin. */
 public final class HotelAdminLocalStore {
     private static final String PREFS = "hoteladmin_local";
     private static final String PHOTOS_FILE = "hoteladmin_fotos.json";
@@ -98,13 +99,22 @@ public final class HotelAdminLocalStore {
                     HotelAdminSampleData.habitaciones().addAll(habitaciones);
                     HotelAdminSampleData.servicios().clear();
                     HotelAdminSampleData.servicios().addAll(servicios);
-                    aplicarPerfil();
                     if (fotos != null && fotos.size() >= 4) {
                         HotelAdminSampleData.FOTOS.clear();
                         HotelAdminSampleData.FOTOS.addAll(fotos);
                     }
                     aplicarCheckouts(checkouts);
-                    finishLoad(null);
+                    SuperadminRepository.HotelDetails legacy = legacyProfile();
+                    SuperadminRepository.getInstance(context).loadHotelDetailsForAdmin(
+                            HotelAdminSampleData.HOTEL_ID, legacy, (hotel, profileError) -> {
+                                if (profileError == null) {
+                                    HotelAdminSampleData.aplicarHotelCompartido(hotel);
+                                    if (legacy != null) prefs.edit()
+                                            .putBoolean("profile_migrated_to_superadmin", true).apply();
+                                }
+                                finishLoad(profileError == null ? null
+                                        : new IllegalStateException(profileError));
+                            });
                 });
             } catch (Exception error) {
                 main.post(() -> finishLoad(error));
@@ -185,18 +195,6 @@ public final class HotelAdminLocalStore {
         write(() -> dao.guardarMensaje(entity), callback);
     }
 
-    /** Las preferencias contienen solo campos pequeños del perfil, no listas. */
-    public void savePerfil() {
-        prefs.edit()
-                .putString("nombre", HotelAdminSampleData.hotelNombre)
-                .putString("direccion", HotelAdminSampleData.hotelDireccion)
-                .putString("descripcion", HotelAdminSampleData.hotelDescripcion)
-                .putString("atracciones", HotelAdminSampleData.hotelAtracciones)
-                .putString("telefono", HotelAdminSampleData.hotelTelefono)
-                .putString("email", HotelAdminSampleData.hotelEmail)
-                .apply();
-    }
-
     public void saveFotos(Consumer<Exception> callback) {
         JSONArray photos = new JSONArray();
         for (int photo : HotelAdminSampleData.FOTOS) {
@@ -226,13 +224,13 @@ public final class HotelAdminLocalStore {
         });
     }
 
-    private void aplicarPerfil() {
-        HotelAdminSampleData.hotelNombre = prefs.getString("nombre", HotelAdminSampleData.hotelNombre);
-        HotelAdminSampleData.hotelDireccion = prefs.getString("direccion", HotelAdminSampleData.hotelDireccion);
-        HotelAdminSampleData.hotelDescripcion = prefs.getString("descripcion", HotelAdminSampleData.hotelDescripcion);
-        HotelAdminSampleData.hotelAtracciones = prefs.getString("atracciones", HotelAdminSampleData.hotelAtracciones);
-        HotelAdminSampleData.hotelTelefono = prefs.getString("telefono", HotelAdminSampleData.hotelTelefono);
-        HotelAdminSampleData.hotelEmail = prefs.getString("email", HotelAdminSampleData.hotelEmail);
+    private SuperadminRepository.HotelDetails legacyProfile() {
+        if (prefs.getBoolean("profile_migrated_to_superadmin", false)
+                || !prefs.contains("nombre")) return null;
+        return new SuperadminRepository.HotelDetails(
+                prefs.getString("nombre", null), prefs.getString("direccion", null),
+                prefs.getString("descripcion", null), prefs.getString("atracciones", null),
+                prefs.getString("telefono", null), prefs.getString("email", null));
     }
 
     private List<Integer> leerFotos() throws IOException, JSONException {

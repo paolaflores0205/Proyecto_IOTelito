@@ -15,6 +15,8 @@ public class ManagedHotel {
     public String phone = "";
     public String email = "";
     public String description = "";
+    /** null: catálogo anterior sin configurar; vacío: el administrador quitó todas. */
+    public String attractions;
     public Double latitude;
     public Double longitude;
     public Integer administratorId;

@@ -38,7 +38,7 @@ public final class HotelCatalogRepository {
                         : row.description,
                 base == null ? 0 : base.pricePerNight,
                 base == null ? new String[0] : base.services,
-                base == null ? new Attraction[0] : base.attractions,
+                attractions(row.attractions, base == null ? new Attraction[0] : base.attractions),
                 base == null ? "" : base.roomName, base == null ? "" : base.roomCapacity,
                 base == null ? "" : base.roomSize, base == null ? new String[0] : base.roomFeatures);
         hotel.active = row.active;
@@ -49,5 +49,22 @@ public final class HotelCatalogRepository {
         hotel.contactEmail = row.email;
         hotel.photos = new ArrayList<>(row.photos);
         return hotel;
+    }
+
+    private static Attraction[] attractions(String text, Attraction[] fallback) {
+        if (text == null) return fallback;
+        List<Attraction> parsed = new ArrayList<>();
+        for (String entry : text.split(",")) {
+            String value = entry.trim();
+            if (value.isEmpty()) continue;
+            int distanceStart = value.lastIndexOf('(');
+            if (distanceStart > 0 && value.endsWith(")")) {
+                parsed.add(new Attraction(value.substring(0, distanceStart).trim(),
+                        value.substring(distanceStart + 1, value.length() - 1).trim()));
+            } else {
+                parsed.add(new Attraction(value, ""));
+            }
+        }
+        return parsed.toArray(new Attraction[0]);
     }
 }
