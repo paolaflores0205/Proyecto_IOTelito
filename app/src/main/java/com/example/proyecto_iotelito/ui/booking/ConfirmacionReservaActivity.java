@@ -233,10 +233,10 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
             return;
         }
 
+        if (hotel == null) return;
         String codigo = String.format(Locale.getDefault(), "IOT-%04d-%04d",
                 hotel.id, new Random().nextInt(9000) + 1000);
 
-        if (hotel == null) return;
         findViewById(R.id.btn_confirmar_reserva).setEnabled(false);
         ReservaRepository repository = ReservaRepository.getInstance(this);
         com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this, () -> {
@@ -252,7 +252,10 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
                 total,
                 codigo,
                 opcionHabitaciones.resumenTipos(),
-                opcionHabitaciones.resumenCodigos());
+                opcionHabitaciones.resumenCodigos(),
+                opcionHabitaciones.habitaciones().stream()
+                        .map(habitacion -> habitacion.id)
+                        .collect(java.util.stream.Collectors.toList()));
         }, reserva -> {
 
         findViewById(R.id.btn_confirmar_reserva).setEnabled(false);

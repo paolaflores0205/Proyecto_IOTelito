@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.example.proyecto_iotelito.model.UserProfile;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 /** Persiste los datos editables del perfil del cliente en SharedPreferences. */
 public final class PerfilRepository {
@@ -19,9 +21,18 @@ public final class PerfilRepository {
 
     private PerfilRepository() { }
 
+    private static SharedPreferences preferencias(Context context) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String fileName = user == null ? PREFS : PREFS + "_" + user.getUid();
+        return context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+    }
+
     public static UserProfile cargar(Context context) {
-        UserProfile valoresIniciales = SampleData.PERFIL;
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        UserProfile valoresIniciales = user == null ? SampleData.PERFIL
+                : new UserProfile(user.getDisplayName() == null ? "" : user.getDisplayName(),
+                user.getEmail() == null ? "" : user.getEmail(), "", "", "", "", "");
+        SharedPreferences prefs = preferencias(context);
         return new UserProfile(
                 prefs.getString(NOMBRE, valoresIniciales.name),
                 prefs.getString(EMAIL, valoresIniciales.email),
@@ -33,7 +44,7 @@ public final class PerfilRepository {
     }
 
     public static void guardar(Context context, UserProfile perfil) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        preferencias(context)
                 .edit()
                 .putString(NOMBRE, perfil.name)
                 .putString(EMAIL, perfil.email)

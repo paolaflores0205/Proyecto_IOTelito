@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "658966922105",
+    "project_id": "iot-telito",
+    "storage_bucket": "iot-telito.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658966922105:android:6f89a14188e0a1915965a8",
+        "android_client_info": {
+          "package_name": "com.example.proyecto_iotelito"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf3ns5Wxzgh9HgMO9X4JX6wyr64b1gesg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

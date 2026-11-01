@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Pestaña "Reservas": segmented control Activas/Finalizadas (Clase 2.3 -
@@ -39,6 +41,8 @@ public class ReservasFragment extends Fragment {
     private TextView vacioView;
     private ReservaRepository reservaRepository;
     private List<Reserva> reservas = new ArrayList<>();
+    private LiveData<List<Reserva>> reservasSource;
+    private String observedUid;
 
     @Nullable
     @Override
@@ -58,16 +62,14 @@ public class ReservasFragment extends Fragment {
         reservaAdapter = new ReservaAdapter(reserva -> abrirDetalle(reserva.id));
         rvReservas.setAdapter(reservaAdapter);
         vacioView = view.findViewById(R.id.tv_reservas_vacio);
-        if ((requireContext().getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null
+                && (requireContext().getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             cargarEjemplos();
         }
 
         configurarTabs();
-        reservaRepository.observarTodas().observe(getViewLifecycleOwner(), rows -> {
-            reservas = rows;
-            configurarTabs();
-            renderReservas(tabLayout.getSelectedTabPosition() == 0);
-        });
+        vincularReservas();
         com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(requireContext())
                 .observe(getViewLifecycleOwner(), reservaAdapter::setHotels);
 
@@ -90,9 +92,18 @@ public class ReservasFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        vincularReservas();
         // refresca por si cambió algo (ej. el estado de una reserva) mientras el usuario estaba en otra pantalla
         configurarTabs();
         renderReservas(tabLayout.getSelectedTabPosition() == 0);
+    }
+
+    @Override
+    public void onDestroyView() {
+        reservasSource = null;
+        observedUid = null;
+        tabLayout = null;
+        super.onDestroyView();
     }
 
     private void cargarEjemplos() {
@@ -121,9 +132,29 @@ public class ReservasFragment extends Fragment {
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         if (!hidden && getView() != null && tabLayout != null) {
+            vincularReservas();
             configurarTabs();
             renderReservas(tabLayout.getSelectedTabPosition() == 0);
         }
+    }
+
+    private void vincularReservas() {
+        if (reservaRepository == null || tabLayout == null) return;
+        com.google.firebase.auth.FirebaseUser user =
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user == null ? null : user.getUid();
+        if (reservasSource != null && Objects.equals(observedUid, uid)) return;
+        if (reservasSource != null) reservasSource.removeObservers(getViewLifecycleOwner());
+        observedUid = uid;
+        reservas = new ArrayList<>();
+        reservasSource = reservaRepository.observarTodas();
+        reservasSource.observe(getViewLifecycleOwner(), rows -> {
+            reservas = rows;
+            configurarTabs();
+            renderReservas(tabLayout.getSelectedTabPosition() == 0);
+        });
+        configurarTabs();
+        renderReservas(tabLayout.getSelectedTabPosition() == 0);
     }
 
     private void configurarTabs() {
