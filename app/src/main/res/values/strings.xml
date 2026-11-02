@@ -653,7 +653,12 @@
     <string name="register_address">Domicilio</string>
     <string name="register_address_hint">Av. Larco 123, Miraflores</string>
     <string name="register_button">Registrarme</string>
-    <string name="register_success_demo">Cuenta registrada en modo demo. Ya puedes iniciar sesión cuando se conecte la base de datos.</string>
+    <string name="register_success_demo">Cuenta creada. Ya puedes iniciar sesión.</string>
+    <string name="register_password_hint">Mínimo 6 caracteres</string>
+    <string name="register_error_password">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="register_error_network">No se pudo conectar con Firebase. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="register_error_generic">No se pudo crear la cuenta. Inténtalo de nuevo.</string>
+    <string name="login_error_network">No se pudo conectar con Firebase. Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="register_error_name">Ingresa tus nombres</string>
     <string name="register_error_lastname">Ingresa tus apellidos</string>
     <string name="register_error_document">El DNI debe tener 8 dígitos</string>
@@ -662,6 +667,7 @@
     <string name="register_error_email_exists">Este correo ya existe</string>
     <string name="register_error_phone">El teléfono debe tener 9 dígitos</string>
     <string name="register_error_address">Ingresa un domicilio válido</string>
+    <string name="disponibilidad_sin_verificar">No se pudo verificar la disponibilidad en línea. Se comprobará al confirmar la reserva.</string>
 
     <string name="recover_title">Recuperar contraseña</string>
     <string name="recover_subtitle">Ingresa tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.</string>

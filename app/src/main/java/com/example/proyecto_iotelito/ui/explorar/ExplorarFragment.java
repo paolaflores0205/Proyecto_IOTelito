@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.SampleData;
+import com.example.proyecto_iotelito.data.PerfilRepository;
 import com.example.proyecto_iotelito.ui.booking.DetalleHotelActivity;
 import com.example.proyecto_iotelito.ui.booking.ResultadosActivity;
 import com.example.proyecto_iotelito.ui.hoteles.HotelAdapter;
@@ -74,8 +74,7 @@ public class ExplorarFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TextView tvSaludo = view.findViewById(R.id.tv_saludo);
-        tvSaludo.setText(getString(R.string.saludo, SampleData.PERFIL.firstName()));
+        actualizarSaludo(view);
 
         etDestino = view.findViewById(R.id.et_destino);
         etDestino.setOnEditorActionListener((v, actionId, event) -> {
@@ -123,6 +122,18 @@ public class ExplorarFragment extends Fragment {
             Intent intent = new Intent(getActivity(), ListaHotelesActivity.class);
             startActivity(intent);
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getView() != null) actualizarSaludo(getView());
+    }
+
+    private void actualizarSaludo(View view) {
+        TextView tvSaludo = view.findViewById(R.id.tv_saludo);
+        tvSaludo.setText(getString(R.string.saludo,
+                PerfilRepository.cargar(requireContext()).firstName()));
     }
 
     private void inicializarFechasPorDefecto() {

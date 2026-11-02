@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /hotels/{hotelId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /rooms/{roomId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+
+    match /reservations/{reservationId} {
+      allow get: if request.auth != null
+        && (resource == null || resource.data.clientUid == request.auth.uid);
+      allow list: if request.auth != null
+        && resource.data.clientUid == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.clientUid == request.auth.uid
+        && request.resource.data.estado == 'CONFIRMADA'
+        && request.resource.data.roomIds is list
+        && request.resource.data.roomIds.size() > 0
+        && request.resource.data.fechaEntrada is string
+        && request.resource.data.fechaSalida is string
+        && request.resource.data.fechaEntrada < request.resource.data.fechaSalida;
+      allow update: if request.auth != null
+        && resource.data.clientUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
+        && resource.data.estado == 'CONFIRMADA'
+        && request.resource.data.estado == 'COMPLETADA';
+      allow delete: if false;
+    }
+
+    match /clientNights/{nightId} {
+      allow get: if request.auth != null
+        && nightId.matches(request.auth.uid + '_.*');
+      allow list: if false;
+      allow create: if request.auth != null
+        && nightId.matches(request.auth.uid + '_.*')
+        && request.resource.data.clientUid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId))
+             .data.clientUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /roomNights/{nightId} {
+      allow get: if request.auth != null;
+      allow list: if false;
+      allow create: if request.auth != null
+        && getAfter(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId))
+             .data.clientUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

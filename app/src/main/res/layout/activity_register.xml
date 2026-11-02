@@ -167,7 +167,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="@string/register_birthdate_hint"
-                    android:inputType="date"
+                    android:inputType="number"
+                    android:maxLength="10"
                     android:textSize="14sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -191,6 +192,30 @@
                     android:layout_height="48dp"
                     android:hint="@string/login_email_hint"
                     android:inputType="textEmailAddress"
+                    android:textSize="14sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/TextAppearance.IoTelito.FieldLabel"
+                android:layout_marginTop="14dp"
+                android:text="@string/login_password"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/register_password_layout"
+                style="@style/Widget.IoTelito.Input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:endIconMode="password_toggle"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/register_password_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/register_password_hint"
+                    android:inputType="textPassword"
                     android:textSize="14sp" />
             </com.google.android.material.textfield.TextInputLayout>
 

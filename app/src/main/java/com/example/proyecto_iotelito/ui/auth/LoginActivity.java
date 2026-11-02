@@ -19,11 +19,15 @@ import com.example.proyecto_iotelito.data.RememberedCredentialsRepository;
 import com.example.proyecto_iotelito.data.SessionRepository;
 import com.example.proyecto_iotelito.databinding.ActivityLoginBinding;
 import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
+import com.example.proyecto_iotelito.model.auth.UserRole;
 import com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminMainActivity;
 import com.example.proyecto_iotelito.ui.superadmin.SuperadminMainActivity;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import com.example.proyecto_iotelito.ui.taxista.TaxistaMainActivity;
+import com.google.firebase.FirebaseNetworkException;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -103,12 +107,35 @@ public class LoginActivity extends AppCompatActivity {
         }
         if (hasError) return;
 
-        AuthenticatedUser user = LocalAuthRepository.authenticate(this, email, password);
-        if (user == null) {
-            binding.passwordLayout.setError(getString(R.string.login_error_credentials));
+        AuthenticatedUser demoUser = LocalAuthRepository.authenticate(this, email, password);
+        if (demoUser != null && demoUser.getRole() != UserRole.CLIENT) {
+            FirebaseAuth.getInstance().signOut();
+            completarLogin(demoUser, password);
             return;
         }
 
+        binding.loginButton.setEnabled(false);
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    binding.loginButton.setEnabled(true);
+                    if (!task.isSuccessful()) {
+                        binding.passwordLayout.setError(getString(task.getException()
+                                instanceof FirebaseNetworkException
+                                ? R.string.login_error_network : R.string.login_error_credentials));
+                        return;
+                    }
+                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                    if (firebaseUser == null) {
+                        binding.passwordLayout.setError(getString(R.string.login_error_credentials));
+                        return;
+                    }
+                    String name = firebaseUser.getDisplayName();
+                    completarLogin(new AuthenticatedUser(firebaseUser.getEmail(),
+                            name == null || name.isEmpty() ? email : name, UserRole.CLIENT), password);
+                });
+    }
+
+    private void completarLogin(AuthenticatedUser user, String password) {
         if (binding.rememberMe.isChecked()) {
             try {
                 RememberedCredentialsRepository.guardar(this, user.getEmail(), password);
@@ -149,7 +176,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private String valueOf(@Nullable CharSequence value) {
-        return value == null ? "" : value.toString();
+        return value == null ? "" : value.toString().trim();
     }
 
 }

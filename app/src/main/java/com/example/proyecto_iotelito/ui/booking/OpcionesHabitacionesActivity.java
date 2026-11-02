@@ -58,6 +58,7 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
                 ? GeneradorOpcionesHabitaciones.generar(hotelId, seleccion.adultos, seleccion.ninos)
                 : opcionesDeCatalogo(hotelId);
 
+        java.util.function.Consumer<List<OpcionHabitaciones>> mostrarOpciones = disponibles -> {
         RecyclerView recyclerView = findViewById(R.id.rv_opciones_habitaciones);
         TextView vacio = findViewById(R.id.tv_sin_opciones);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -65,14 +66,27 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
                 hotelId,
                 modoReserva ? seleccion.noches() : 0,
                 modoReserva,
-                opciones,
+                disponibles,
                 opcion -> abrirDetalle(hotelId, seleccion, opcion, !modoReserva)));
 
-        boolean sinOpciones = opciones.isEmpty();
+        boolean sinOpciones = disponibles.isEmpty();
         vacio.setVisibility(sinOpciones ? View.VISIBLE : View.GONE);
         vacio.setText(modoReserva
                 ? R.string.sin_combinaciones_habitaciones : R.string.sin_habitaciones_disponibles);
         recyclerView.setVisibility(sinOpciones ? View.GONE : View.VISIBLE);
+        };
+        if (modoReserva && !opciones.isEmpty()) {
+            com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this,
+                    () -> com.example.proyecto_iotelito.data.ReservaRepository.getInstance(this)
+                            .filtrarDisponibles(hotelId, seleccion.fechaEntrada(),
+                                    seleccion.fechaSalida(), opciones),
+                    mostrarOpciones, () -> {
+                        explicacion.setText(R.string.disponibilidad_sin_verificar);
+                        mostrarOpciones.accept(opciones);
+                    });
+        } else {
+            mostrarOpciones.accept(opciones);
+        }
         });
     }
 
