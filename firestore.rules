@@ -8,6 +8,43 @@ service cloud.firestore {
         && profile().role in ['CLIENT', 'HOTEL_ADMIN', 'TAXISTA', 'SUPERADMIN'];
     }
     function superadmin() { return activeUser() && profile().role == 'SUPERADMIN'; }
+    function nextHotelId() {
+      return exists(/databases/$(database)/documents/system/hotelIds)
+        ? get(/databases/$(database)/documents/system/hotelIds).data.nextId : 1000000;
+    }
+    function validHotel(data, hotelId) {
+      return data.id is int && data.id > 0 && string(data.id) == hotelId
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 160
+        && data.address is string && data.address.size() > 0 && data.address.size() <= 500
+        && data.city is string && data.city.size() > 0 && data.city.size() <= 120
+        && data.district is string && data.district.size() > 0 && data.district.size() <= 120
+        && data.active is bool && data.photos is list && data.photos.size() <= 8
+        && ((data.latitude is number && data.longitude is number
+          && data.latitude >= -90 && data.latitude <= 90 && data.longitude >= -180 && data.longitude <= 180)
+          || (data.get('dataOrigin', '') == 'LOCAL_IMPORT' && data.latitude == null && data.longitude == null));
+    }
+    function auditUpdate(data) { return data.updatedAt == request.time && data.updatedByUid == request.auth.uid; }
+    function consistentUserHotel(uid) {
+      let before = resource.data.get('hotelId', null);
+      let after = request.resource.data.get('hotelId', null);
+      return resource.data.role == 'HOTEL_ADMIN'
+        && (after == null || (after is int && after > 0 && resource.data.active == true
+          && getAfter(/databases/$(database)/documents/hotels/$(string(after))).data.administratorUid == uid))
+        && (before == null || before == after
+          || getAfter(/databases/$(database)/documents/hotels/$(string(before))).data.administratorUid != uid);
+    }
+    function consistentHotelAdmin() {
+      let before = resource.data.get('administratorUid', null);
+      let after = request.resource.data.get('administratorUid', null);
+      return ((after == null && request.resource.data.administratorName == null)
+        || (after is string && getAfter(/databases/$(database)/documents/users/$(after)).data.uid == after
+          && getAfter(/databases/$(database)/documents/users/$(after)).data.role == 'HOTEL_ADMIN'
+          && getAfter(/databases/$(database)/documents/users/$(after)).data.active == true
+          && getAfter(/databases/$(database)/documents/users/$(after)).data.hotelId == resource.data.id
+          && request.resource.data.administratorName == getAfter(/databases/$(database)/documents/users/$(after)).data.name))
+        && (before == null || before == after || !exists(/databases/$(database)/documents/users/$(before))
+          || getAfter(/databases/$(database)/documents/users/$(before)).data.hotelId == null);
+    }
 
     match /users/{uid} {
       // El perfil propio debe poder leerse para informar que la cuenta está inactiva.
@@ -42,18 +79,66 @@ service cloud.firestore {
           && (request.resource.data.active == true || request.resource.data.statusReason.size() > 0)
           && request.resource.data.updatedAt == request.time
           && request.resource.data.updatedByUid == request.auth.uid)
+        || (superadmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hotelId', 'updatedAt', 'updatedByUid'])
+          && auditUpdate(request.resource.data) && consistentUserHotel(uid))
       );
       allow delete: if false;
     }
 
     match /hotels/{hotelId} {
       allow read: if activeUser();
-      allow write: if false;
+      allow create: if superadmin() && validHotel(request.resource.data, hotelId)
+        && request.resource.data.keys().hasOnly(['id', 'name', 'address', 'district', 'city', 'phone', 'email',
+          'description', 'active', 'latitude', 'longitude', 'photos', 'administratorUid', 'administratorName',
+          'rooms', 'reservations', 'hasInventory', 'pricePerNight', 'rating', 'reviews', 'services', 'attractions',
+          'dataOrigin', 'createdAt', 'createdByUid', 'updatedAt', 'updatedByUid'])
+        && request.resource.data.administratorUid == null && request.resource.data.administratorName == null
+        && request.resource.data.createdAt == request.time && request.resource.data.createdByUid == request.auth.uid
+        && auditUpdate(request.resource.data)
+        && ((request.resource.data.dataOrigin == 'LOCAL_IMPORT' && request.resource.data.id < 1000000)
+          || (request.resource.data.dataOrigin == 'APP' && request.resource.data.id >= 1000000
+            && request.resource.data.id == nextHotelId()
+            && getAfter(/databases/$(database)/documents/system/hotelIds).data.nextId == request.resource.data.id + 1
+            && getAfter(/databases/$(database)/documents/system/hotelIds).data.updatedAt == request.time));
+      allow update: if superadmin() && auditUpdate(request.resource.data) && (
+        (validHotel(request.resource.data, hotelId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'address', 'district', 'city',
+            'phone', 'email', 'description', 'active', 'latitude', 'longitude', 'photos', 'updatedAt', 'updatedByUid']))
+        || (request.resource.data.active is bool
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'updatedAt', 'updatedByUid']))
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'administratorUid', 'administratorName', 'updatedAt', 'updatedByUid']) && consistentHotelAdmin())
+      );
+      allow delete: if false;
 
       match /rooms/{roomId} {
         allow read: if activeUser();
-        allow write: if false;
+        allow create: if superadmin() && request.resource.data.id is int && request.resource.data.id > 0
+          && string(request.resource.data.id) == roomId && request.resource.data.hotelId == int(hotelId)
+          && getAfter(/databases/$(database)/documents/hotels/$(hotelId)).data.id == int(hotelId)
+          && request.resource.data.keys().hasOnly(['id', 'hotelId', 'tipo', 'nombreCodigo', 'areaM2', 'adultos',
+            'ninos', 'precioNoche', 'descripcion', 'disponible'])
+          && request.resource.data.tipo is string && request.resource.data.nombreCodigo is string
+          && request.resource.data.areaM2 is int && request.resource.data.areaM2 > 0
+          && request.resource.data.adultos is int && request.resource.data.adultos > 0
+          && request.resource.data.ninos is int && request.resource.data.ninos >= 0
+          && request.resource.data.precioNoche is number && request.resource.data.precioNoche >= 0
+          && request.resource.data.descripcion is string && request.resource.data.disponible is bool;
+        allow update, delete: if false;
       }
+    }
+
+    match /system/hotelIds {
+      allow get: if superadmin();
+      allow create, update: if superadmin()
+        && request.resource.data.keys().hasOnly(['nextId', 'updatedAt', 'updatedByUid'])
+        && request.resource.data.nextId is int && request.resource.data.nextId > 1000000
+        && request.resource.data.nextId <= 2147483647 && request.resource.data.nextId == nextHotelId() + 1
+        && auditUpdate(request.resource.data)
+        && !exists(/databases/$(database)/documents/hotels/$(string(nextHotelId())))
+        && getAfter(/databases/$(database)/documents/hotels/$(string(nextHotelId()))).data.id == nextHotelId();
+      allow list, delete: if false;
     }
 
     match /reservations/{reservationId} {
@@ -62,6 +147,8 @@ service cloud.firestore {
       allow list: if activeUser()
         && resource.data.clientUid == request.auth.uid;
       allow create: if activeUser() && profile().role == 'CLIENT'
+        && get(/databases/$(database)/documents/hotels/$(string(request.resource.data.hotelId))).data.active == true
+        && get(/databases/$(database)/documents/hotels/$(string(request.resource.data.hotelId))).data.hasInventory == true
         && request.resource.data.clientUid == request.auth.uid
         && request.resource.data.estado == 'CONFIRMADA'
         && request.resource.data.roomIds is list

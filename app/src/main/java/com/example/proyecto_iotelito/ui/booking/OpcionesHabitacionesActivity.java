@@ -54,9 +54,10 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
             explicacion.setText(R.string.catalogo_habitaciones_explicacion);
         }
 
+        List<Habitacion> inventory = hotel.remote ? hotel.inventory : CatalogoHabitaciones.disponiblesPorHotel(hotelId);
         List<OpcionHabitaciones> opciones = !hotel.active || !hotel.hasInventory ? Collections.emptyList() : modoReserva
-                ? GeneradorOpcionesHabitaciones.generar(hotelId, seleccion.adultos, seleccion.ninos)
-                : opcionesDeCatalogo(hotelId);
+                ? GeneradorOpcionesHabitaciones.generar(inventory, seleccion.adultos, seleccion.ninos)
+                : opcionesDeCatalogo(inventory);
 
         java.util.function.Consumer<List<OpcionHabitaciones>> mostrarOpciones = disponibles -> {
         RecyclerView recyclerView = findViewById(R.id.rv_opciones_habitaciones);
@@ -90,9 +91,9 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
         });
     }
 
-    private List<OpcionHabitaciones> opcionesDeCatalogo(int hotelId) {
+    private List<OpcionHabitaciones> opcionesDeCatalogo(List<Habitacion> inventory) {
         List<OpcionHabitaciones> opciones = new ArrayList<>();
-        for (Habitacion habitacion : CatalogoHabitaciones.disponiblesPorHotel(hotelId)) {
+        for (Habitacion habitacion : inventory) {
             opciones.add(new OpcionHabitaciones(Collections.singletonList(habitacion)));
         }
         return opciones;

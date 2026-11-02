@@ -48,7 +48,7 @@ public class DetalleHabitacionActivity extends AppCompatActivity {
                 OpcionesHabitacionesActivity.EXTRA_OPCION);
         if (opcion == null) {
             if (modoCatalogo) {
-                List<Habitacion> habitaciones = CatalogoHabitaciones.disponiblesPorHotel(hotelId);
+                List<Habitacion> habitaciones = hotel.remote ? hotel.inventory : CatalogoHabitaciones.disponiblesPorHotel(hotelId);
                 if (habitaciones.isEmpty()) {
                     finish();
                     return;
@@ -56,7 +56,8 @@ public class DetalleHabitacionActivity extends AppCompatActivity {
                 opcion = new OpcionHabitaciones(java.util.Collections.singletonList(habitaciones.get(0)));
             } else {
                 List<OpcionHabitaciones> opciones = GeneradorOpcionesHabitaciones.generar(
-                        hotelId, bookingSelection.adultos, bookingSelection.ninos);
+                        hotel.remote ? hotel.inventory : CatalogoHabitaciones.disponiblesPorHotel(hotelId),
+                        bookingSelection.adultos, bookingSelection.ninos);
                 if (opciones.isEmpty()) {
                     finish();
                     return;

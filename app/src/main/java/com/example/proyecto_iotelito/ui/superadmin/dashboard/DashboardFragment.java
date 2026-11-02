@@ -75,7 +75,7 @@ public class DashboardFragment extends Fragment {
         int bookings = 0;
         for (ManagedHotel hotel : hotels) {
             bookings += hotel.reservations;
-            if (hotel.administratorId == null) unassignedHotels++;
+            if (!hotel.hasAdministrator()) unassignedHotels++;
         }
 
         binding.tvDashboardUsers.setText(String.valueOf(activeUsers));

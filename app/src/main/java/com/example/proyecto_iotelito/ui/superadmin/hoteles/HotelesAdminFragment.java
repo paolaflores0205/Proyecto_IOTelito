@@ -27,6 +27,8 @@ public class HotelesAdminFragment extends Fragment {
     private FragmentSuperadminHotelesBinding binding;
     private HotelesAdapter adapter;
     private List<ManagedHotel> hotels = new ArrayList<>();
+    private boolean loading = true;
+    private String syncError;
 
     @Nullable
     @Override
@@ -61,13 +63,30 @@ public class HotelesAdminFragment extends Fragment {
             updateSummary();
             renderHotels();
         });
+        model.hotelsState().observe(getViewLifecycleOwner(), state -> {
+            loading = state.loading; syncError = state.error;
+            binding.tvHotelsSyncState.setText(state.loading ? "Cargando hoteles de Firebase…"
+                    : state.error == null ? "Catálogo Firebase · cambios en tiempo real" : state.error);
+            renderHotels();
+        });
+        binding.btnImportLocal.setOnClickListener(v -> new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Publicar catálogo local de ejemplo")
+                .setMessage("Se crearán únicamente los hoteles y habitaciones que no existan en Firestore. No se sobrescribirán hoteles remotos, no se crearán cuentas ni se subirán reservas simuladas. Las asignaciones deben hacerse por UID. Las fotos privadas siguen solo en este teléfono.")
+                .setNegativeButton(R.string.superadmin_cancel, null)
+                .setPositiveButton("Importar", (dialog, which) -> model.importLocalCatalog()).show());
+        model.busy().observe(getViewLifecycleOwner(), busy -> binding.btnImportLocal.setEnabled(!busy));
+        model.importResult().observe(getViewLifecycleOwner(), result -> {
+            if (result.consume()) com.google.android.material.snackbar.Snackbar.make(binding.getRoot(),
+                    result.error == null ? "Importación terminada: " + result.id + " hoteles nuevos; los existentes se conservaron."
+                            : result.error, com.google.android.material.snackbar.Snackbar.LENGTH_LONG).show();
+        });
         renderHotels();
     }
 
     private void updateSummary() {
         int unassigned = 0;
         for (ManagedHotel hotel : hotels) {
-            if (hotel.administratorId == null) unassigned++;
+            if (!hotel.hasAdministrator()) unassigned++;
         }
         binding.tvHotelsTotal.setText(String.valueOf(hotels.size()));
         binding.tvHotelsUnassigned.setText(String.valueOf(unassigned));
@@ -90,12 +109,12 @@ public class HotelesAdminFragment extends Fragment {
             String searchable = (hotel.name + " " + hotel.address).toLowerCase(Locale.ROOT);
             if (!query.isEmpty() && !searchable.contains(query)) continue;
             if (district != null && !district.equals(hotel.district)) continue;
-            if (binding.chipUnassigned.isChecked() && hotel.administratorId != null) continue;
+            if (binding.chipUnassigned.isChecked() && hotel.hasAdministrator()) continue;
 
             filtered.add(hotel);
         }
         adapter.setHotels(filtered);
-        binding.cardHotelsEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.cardHotelsEmpty.setVisibility(filtered.isEmpty() && !loading && syncError == null ? View.VISIBLE : View.GONE);
         binding.rvHotels.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
     }
 

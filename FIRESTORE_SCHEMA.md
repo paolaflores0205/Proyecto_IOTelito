@@ -1,6 +1,6 @@
 # Contrato compartido Firestore - Cliente y Superadmin
 
-Revisión: 02/11/2026, pasos 1 a 4. Este documento define el contrato de integración;
+Revisión: 02/11/2026, pasos 1 a 5. Este documento define el contrato de integración;
 **no crea colecciones, cuentas, índices ni publica reglas en Firebase**. Conserva
 los nombres y campos que ya usa el módulo cliente. Las ampliaciones de
 superadmin se marcan como pendientes hasta que se implementen y prueben.
@@ -13,11 +13,16 @@ firestore.rules incorpora permisos de usuarios y gates por active. Esto está pr
 localmente, **no desplegado**. Antes de usarlo hay que provisionar cuentas/perfiles
 existentes y revisar/publicar las reglas: ver GUIA_FIREBASE_SUPERADMIN_PASOS_3_4.md.
 
+Actualización paso 5: hoteles, estado y asignaciones de superadmin ya usan Firestore.
+El cliente autenticado lee el mismo catálogo e inventario remoto. La importación
+desde Room es explícita y omite documentos existentes. Ver
+GUIA_FIREBASE_HOTELES_PASO_5.md para la preparación y los límites de esta etapa.
+
 | Área | Implementado en el código integrado | Pendiente |
 |---|---|---|
 | Authentication | Login Firebase de los cuatro roles, resolución por UID/rol/active | Configuración de cuentas y perfiles en consola y prueba remota |
 | Perfil cliente | Registro de users/{uid} y perfil adicional local por UID | Migración de cuentas Auth antiguas sin perfil y prueba remota |
-| Hoteles y habitaciones | Catálogo local compartido, esquema remoto documentado | Lectura/escritura remota de catálogo y asignaciones |
+| Hoteles y habitaciones | CRUD sin borrado, asignaciones atómicas, lectura remota e importación explícita de ejemplos | Despliegue y prueba remota; gestión de inventario por hotel-admin |
 | Reservas | Firestore para cliente autenticado, Room sin sesión Firebase | Consultas administrativas autorizadas y reportes remotos |
 | Usuarios superadmin | Listado, detalle y activación Firestore; reglas locales verificadas | Despliegue de reglas y prueba con cuentas reales |
 | Logs, alertas y reportes superadmin | Room y datos de demostración | Repositorios Firestore y reglas específicas |
@@ -25,7 +30,7 @@ existentes y revisar/publicar las reglas: ver GUIA_FIREBASE_SUPERADMIN_PASOS_3_4
 
 El contrato no implica que las reglas de este repositorio estén desplegadas ni
 que se haya comprobado la consola del proyecto. Las reglas locales habilitan users
-con restricciones y mantienen cerradas las escrituras de hoteles y logs. No se abren
+y hoteles con restricciones de rol y mantienen cerrados los logs. No se abren
 provisionalmente a cualquier usuario.
 
 Base: `(default)` del proyecto `iot-telito`. Las claves de documento de hotel
@@ -33,15 +38,12 @@ conservan los IDs numéricos usados por la aplicación Android: `hotels/1`, etc.
 
 ## Datos que el cliente consulta
 
-La creación y edición de hoteles y habitaciones corresponde al módulo de
-administración del equipo. El cliente solo los lee. Mientras ese módulo no
-publique datos en Firestore, el catálogo del cliente conserva su fuente local
-para que la búsqueda siga funcionando.
-
-En el código actual, HotelCatalogRepository y CatalogoHabitaciones continúan
-leyendo datos locales: publicar hoteles en la consola por sí solo todavía no
-cambia lo que ve el cliente. La sustitución de esa fuente se coordinará con su
-responsable y no se implementa en estos pasos.
+La creación y edición de hoteles corresponde a superadmin; el cliente los lee.
+Con sesión Firebase, HotelCatalogRepository usa Firestore para catálogo, detalle
+e inventario: no sustituye un error remoto por ejemplos locales. El catálogo sin
+sesión se conserva para consumidores locales y pruebas, pero el login público
+requiere Firebase. CatalogoHabitaciones aporta el inventario de ejemplo durante
+la importación explícita; no sustituye el inventario remoto al reservar.
 
 `hotels/{hotelId}`:
 
@@ -54,11 +56,13 @@ responsable y no se implementa en estos pasos.
 | `reviews` | número entero | Detalle |
 | `services` | arreglo de textos | Servicios del hotel |
 
-`hotels/{hotelId}/rooms/{roomId}` (contrato definido, implementación pendiente): `id`, `hotelId`,
+`hotels/{hotelId}/rooms/{roomId}` (lectura e importación implementadas): `id`, `hotelId`,
 `tipo`, `nombreCodigo`, `areaM2`, `adultos`, `ninos`, `precioNoche`,
 `descripcion`, `disponible`. El ID de habitación representa una unidad física,
 no solo un tipo. El filtrado por fechas ya consulta los bloqueos roomNights en
-FirebaseReservaStore; el inventario base de habitaciones todavía es local.
+FirebaseReservaStore; el inventario del cliente autenticado también es remoto.
+Las altas ordinarias de hoteles comienzan sin habitaciones y sin disponibilidad
+para reservar. La gestión remota del inventario por HOTEL_ADMIN sigue pendiente.
 
 ## Datos que el cliente crea y consulta
 
@@ -76,9 +80,9 @@ elimina.
 Las imágenes del catálogo siguen siendo recursos locales de demostración.
 
 `firestore.rules` permite leer el catálogo con una cuenta autenticada y crear
-reservas propias, pero mantiene cerradas las escrituras de hoteles. Antes de que el módulo
-administrador escriba en Firestore, el equipo tendrá que integrar sus reglas
-de rol con estas reglas compartidas.
+reservas propias. Solo SUPERADMIN activo puede crear/editar hoteles y efectuar
+asignaciones. La reserva verifica de nuevo hotel activo, inventario y habitaciones
+disponibles en la transacción. Las reglas también exigen hotel activo con inventario.
 
 ## Identificadores y convenciones compartidas
 
@@ -130,12 +134,12 @@ El flujo futuro deberá rechazar el acceso funcional y las reglas deberán consu
 su estado para impedir lecturas/escrituras protegidas, incluso con una sesión previa.
 Solo cambiar la etiqueta o guardar una variable local no cumple esta restricción.
 
-La relación administrador-hotel se guardará de forma consistente: hotel.administratorUid
-y user.hotelId se actualizarán juntos mediante una operación atómica autorizada.
+La relación administrador-hotel ya se guarda de forma consistente: hotel.administratorUid
+y user.hotelId se actualizan juntos mediante una transacción autorizada.
 Para este contrato se mantiene un administrador por hotel y un hotel por administrador.
 Un nombre visible o un hotelId proporcionado por el cliente no otorga permisos.
 
-## Ampliaciones de hotels/{hotelId} (pendientes)
+## Ampliaciones de hotels/{hotelId} (paso 5 implementado)
 
 Se conservan los campos del catálogo cliente descritos arriba y se añaden:
 
@@ -149,22 +153,31 @@ Se conservan los campos del catálogo cliente descritos arriba y se añaden:
 | attractions | texto o null | Conserva el formato actual de lugares cercanos |
 | createdAt, updatedAt | Timestamp | Auditoría |
 | createdByUid, updatedByUid | texto | Responsable autenticado |
+| dataOrigin | APP o LOCAL_IMPORT | Alta normal o importación explícita de ejemplos |
 
 Los contadores rooms/reservations visibles hoy se calculan de inventario y reservas
 o se mantienen como resúmenes controlados; no convertir los números de demostración
 en estadísticas reales. hasInventory debe corresponder al inventario real publicado,
 no activarse solo porque existe un hotel en Firestore.
 
-Los IDs nuevos de hoteles y habitaciones no pueden obtenerse con max(local)+1:
-antes de habilitar altas remotas se implementará una asignación global atómica.
-La carga inicial se hará una sola vez, será explícita, idempotente y no sobrescribirá
-documentos remotos existentes. No se crean cuentas Auth ficticias al importar ejemplos.
+Los IDs nuevos de hoteles no se obtienen con max(local)+1. La transacción lee
+system/hotelIds.nextId (inicialmente 1000000), crea el hotel y avanza el contador
+juntos; registra updatedAt y updatedByUid. Los IDs 1..999999 se reservan para
+importación del catálogo antiguo, conservando también los IDs de sus habitaciones.
+La carga inicial es explícita, repetible y no sobrescribe documentos existentes.
+Cada hotel y sus habitaciones se publican atómicamente, pero el conjunto completo
+puede quedar parcial si falla la conexión; repetir omite hoteles ya existentes.
+No se crean cuentas Auth ficticias ni se importan reservas/estadísticas simuladas.
 Los hoteles cuyo administrador local no tenga cuenta real quedan sin asignar hasta
 resolver su UID; no se inventa un UID a partir de su nombre o correo.
 
 Las fotos android.resource son demostración empaquetada. Las URI content:// de un
 teléfono no son referencias compartidas: no se tratarán como URLs accesibles desde
 otro dispositivo. No se publican imageRes/fotoRes de Android como IDs remotos estables.
+El campo photos guarda referencias HTTPS o recursos android.resource con nombre.
+Las fotos file/content se conservan aparte en el dispositivo por UID e ID de hotel
+(hotel_private_galleries); la carga compartida y su visualización completa por URL
+corresponden al paso 6. No se considera una copia local como foto ya subida.
 
 ## logs/{logId} - Eventos administrativos (pendiente)
 
@@ -192,7 +205,13 @@ de users y hotels, evitando colecciones duplicadas innecesarias. Los contadores
 y reportes reales se derivarán de datos remotos; DemoBookingHistory seguirá siendo
 un conjunto de demostración separado. No subirlo a reservations como actividad real.
 
-## Matriz objetivo de permisos (no implementada todavía)
+## Matriz objetivo de permisos (implementación parcial hasta el paso 5)
+
+Actualmente HOTEL_ADMIN no escribe hoteles ni habitaciones. SUPERADMIN puede
+importar/crear habitaciones, pero actualizar/borrar inventario permanece cerrado.
+Las consultas administrativas de reservas y los logs de la tabla son objetivos
+pendientes, no permisos ya desplegados. La pantalla hotel-admin debe adaptarse
+por su responsable a users.hotelId; no se migró su repositorio local en este paso.
 
 | Recurso | CLIENT activo | HOTEL_ADMIN activo | SUPERADMIN activo |
 |---|---|---|---|
@@ -218,6 +237,6 @@ web de taxistas sigue pasando por su API REST: este contrato no la sustituye.
    de pruebas antes de publicar en el proyecto compartido.
 6. Reportes: mostrar reservas reales, sin mezclar las de demostración.
 
-Son criterios de aceptación para la integración completa. Los pasos 3 y 4 tienen
+Son criterios de aceptación para la integración completa. Los pasos 3 a 5 tienen
 pruebas locales de contrato, reglas y rechazo del acceso sin cuenta; no se declara
-superado el recorrido remoto de aceptación. La guía de pasos 3 y 4 detalla sus límites.
+superado el recorrido remoto de aceptación. Las guías de pasos 3/4 y 5 detallan sus límites.

@@ -143,6 +143,13 @@ public final class SuperadminRepository {
     }
 
     public LiveData<List<ManagedHotel>> hotels() { return hotels; }
+    @androidx.annotation.WorkerThread
+    public List<ManagedHotel> localHotelsForImport() throws InterruptedException {
+        awaitInitialization();
+        List<ManagedHotel> result = new ArrayList<>();
+        for (AdminHotelEntity row : dao.hotels()) result.add(row.toModel());
+        return result;
+    }
     public LiveData<List<com.example.proyecto_iotelito.model.Reserva>> reportHistory() {
         // El mismo worker garantiza que el catálogo inicial ya esté listo.
         worker.execute(() -> {

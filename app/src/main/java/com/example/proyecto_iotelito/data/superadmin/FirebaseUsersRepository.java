@@ -56,6 +56,7 @@ public final class FirebaseUsersRepository {
                                                 RemoteUserProfile.text(doc.get("phone")), p.label(),
                                                 date(doc.getTimestamp("createdAt")), date(doc.getTimestamp("lastAccessAt")), p.active);
                                         user.uid = p.uid;
+                                        if (doc.get("hotelId") != null) user.hotelId = HotelFirestoreCodec.integer(doc.get("hotelId"));
                                         users.add(user);
                                     } catch (RuntimeException malformed) { invalid++; }
                                 }

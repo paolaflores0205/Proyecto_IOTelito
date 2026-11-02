@@ -13,10 +13,21 @@ import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Une los datos administrativos persistidos con las tarifas y servicios del cliente. */
+/** Comparte catálogo e inventario de Firestore con sesión; conserva ejemplos para uso local sin sesión. */
 public final class HotelCatalogRepository {
     private HotelCatalogRepository() { }
     public static LiveData<List<Hotel>> observar(Context context) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+            String[] lastError = {null};
+            return Transformations.map(new com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository(context, false).observe(), state -> {
+                if (state.error != null && !state.error.equals(lastError[0]))
+                    android.widget.Toast.makeText(context.getApplicationContext(), state.error, android.widget.Toast.LENGTH_LONG).show();
+                lastError[0] = state.error;
+                List<Hotel> result = new ArrayList<>();
+                for (ManagedHotel row : state.hotels) result.add(combinar(row));
+                return result;
+            });
+        }
         return Transformations.map(SuperadminRepository.getInstance(context).hotels(), rows -> {
             List<Hotel> result = new ArrayList<>();
             for (ManagedHotel row : rows) result.add(combinar(row));
@@ -24,11 +35,31 @@ public final class HotelCatalogRepository {
         });
     }
     @WorkerThread public static Hotel buscar(Context context, int id) throws InterruptedException {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+            com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository remote =
+                    new com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository(context, false);
+            ManagedHotel row = remote.find(id);
+            if (row == null) return null;
+            Hotel hotel = combinar(row);
+            hotel.inventory = remote.rooms(id);
+            hotel.hasInventory = row.hasInventory && !hotel.inventory.isEmpty();
+            return hotel;
+        }
         SuperadminRepository.getInstance(context).awaitInitialization();
         AdminHotelEntity row = SuperadminDatabase.getInstance(context).dao().hotel(id);
         return row == null ? null : combinar(row.toModel());
     }
     public static Hotel combinar(ManagedHotel row) {
+        if (row.remote) {
+            Hotel remote = new Hotel(row.id, row.city, row.name, row.address, row.rating, row.reviews,
+                    row.description, row.pricePerNight, row.services.toArray(new String[0]),
+                    attractions(row.attractions, new Attraction[0]), "Habitaciones del hotel", "", "", new String[0]);
+            remote.remote = true; remote.active = row.active; remote.hasInventory = row.hasInventory;
+            remote.latitude = row.latitude; remote.longitude = row.longitude;
+            remote.contactPhone = row.phone; remote.contactEmail = row.email;
+            remote.photos = new ArrayList<>(row.photos);
+            return remote;
+        }
         Hotel base = null;
         for (Hotel candidate : SampleData.HOTELS) if (candidate.id == row.id) { base = candidate; break; }
         Hotel hotel = new Hotel(row.id, row.city, row.name, row.address,

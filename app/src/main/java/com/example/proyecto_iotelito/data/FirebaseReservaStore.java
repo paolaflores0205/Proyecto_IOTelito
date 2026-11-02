@@ -118,6 +118,16 @@ final class FirebaseReservaStore {
 
         try {
             return Tasks.await(DB.runTransaction(transaction -> {
+                DocumentSnapshot currentHotel = transaction.get(DB.collection("hotels").document(String.valueOf(hotel.id)));
+                if (!currentHotel.exists() || !Boolean.TRUE.equals(currentHotel.getBoolean("active"))
+                        || !Boolean.TRUE.equals(currentHotel.getBoolean("hasInventory")))
+                    throw new IllegalArgumentException("El hotel ya no está disponible.");
+                for (int roomId : roomIds) {
+                    DocumentSnapshot room = transaction.get(DB.collection("hotels").document(String.valueOf(hotel.id))
+                            .collection("rooms").document(String.valueOf(roomId)));
+                    if (!room.exists() || !Boolean.TRUE.equals(room.getBoolean("disponible")))
+                        throw new IllegalArgumentException("Una habitación ya no está disponible.");
+                }
                 if (transaction.get(reservaRef).exists()) {
                     throw new IllegalArgumentException("Intenta confirmar la reserva nuevamente.");
                 }

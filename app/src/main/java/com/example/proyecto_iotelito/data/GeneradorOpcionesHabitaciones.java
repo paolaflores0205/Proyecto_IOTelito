@@ -15,8 +15,12 @@ public final class GeneradorOpcionesHabitaciones {
     private GeneradorOpcionesHabitaciones() { }
 
     public static List<OpcionHabitaciones> generar(int hotelId, int adultos, int ninos) {
+        return generar(CatalogoHabitaciones.porHotel(hotelId), adultos, ninos);
+    }
+
+    public static List<OpcionHabitaciones> generar(List<Habitacion> inventario, int adultos, int ninos) {
         List<Habitacion> disponibles = new ArrayList<>();
-        for (Habitacion habitacion : CatalogoHabitaciones.porHotel(hotelId)) {
+        for (Habitacion habitacion : inventario) {
             if (habitacion.disponible) disponibles.add(habitacion);
         }
 

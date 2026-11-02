@@ -11,7 +11,7 @@ import com.example.proyecto_iotelito.model.superadmin.AdminUser;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 import java.util.List;
 
-/** Conserva el estado de la operación al girar la pantalla y observa Room. */
+/** Conserva operaciones al girar; observa usuarios/hoteles remotos e historial local. */
 public class SuperadminViewModel extends AndroidViewModel {
     public static class Result {
         public final int id;
@@ -25,6 +25,10 @@ public class SuperadminViewModel extends AndroidViewModel {
         }
     }
     private final SuperadminRepository repository;
+    private final com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository remoteHotels =
+            new com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository(getApplication(), true);
+    private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository.State> remoteHotelsState = remoteHotels.observe();
+    private final MutableLiveData<Result> importResult = new MutableLiveData<>();
     private final com.example.proyecto_iotelito.data.superadmin.FirebaseUsersRepository remoteUsers =
             new com.example.proyecto_iotelito.data.superadmin.FirebaseUsersRepository();
     private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseUsersRepository.State> remoteUsersState =
@@ -65,7 +69,26 @@ public class SuperadminViewModel extends AndroidViewModel {
         super(app);
         repository = SuperadminRepository.getInstance(app);
     }
-    public LiveData<List<ManagedHotel>> hotels() { return repository.hotels(); }
+    public LiveData<List<ManagedHotel>> hotels() {
+        return androidx.lifecycle.Transformations.map(remoteHotelsState, state -> state.hotels);
+    }
+    public LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository.State> hotelsState() { return remoteHotelsState; }
+    public LiveData<Result> importResult() { return importResult; }
+    public void importLocalCatalog() {
+        if (!start()) return;
+        com.example.proyecto_iotelito.data.ClientLocalTasks.execute(() -> {
+            try {
+                List<ManagedHotel> local = repository.localHotelsForImport();
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> remoteHotels.importLocal(local, (count, error) -> {
+                    busy.setValue(false); importResult.setValue(new Result(count, error));
+                }));
+            } catch (Exception error) {
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                    busy.setValue(false); importResult.setValue(new Result(0, "No se pudo leer el catálogo local."));
+                });
+            }
+        });
+    }
     public LiveData<List<com.example.proyecto_iotelito.model.Reserva>> reportHistory() { return repository.reportHistory(); }
     public LiveData<List<AdminUser>> users() {
         return androidx.lifecycle.Transformations.map(remoteUsersState, state -> state.users);
@@ -73,13 +96,16 @@ public class SuperadminViewModel extends AndroidViewModel {
     public LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseUsersRepository.State> usersState() {
         return remoteUsersState;
     }
-    /** Solo para la asignación local de hoteles, pendiente del paso 5. */
-    public LiveData<List<AdminUser>> localUsers() { return repository.users(); }
     public void remoteUserStatus(String uid, boolean active, String reason) {
         if (start()) remoteUsers.setActive(uid, active, reason, callback);
     }
     public LiveData<List<ActivityLog>> logs() { return repository.logs(); }
-    public LiveData<ManagedHotel> hotel(int id) { return repository.hotel(id); }
+    public LiveData<ManagedHotel> hotel(int id) {
+        return androidx.lifecycle.Transformations.map(hotels(), rows -> {
+            for (ManagedHotel hotel : rows) if (hotel.id == id) return hotel;
+            return null;
+        });
+    }
     public LiveData<AdminUser> user(int id) { return repository.user(id); }
     public LiveData<Boolean> ready() { return repository.ready(); }
     public LiveData<String> error() { return repository.error(); }
@@ -94,10 +120,10 @@ public class SuperadminViewModel extends AndroidViewModel {
         busy.setValue(false);
         result.setValue(new Result(id, error));
     };
-    public void saveHotel(ManagedHotel hotel) { if (start()) repository.saveHotel(hotel, callback); }
-    public void assign(int hotel, int user) { if (start()) repository.assignAdministrator(hotel, user, callback); }
+    public void saveHotel(ManagedHotel hotel) { if (start()) remoteHotels.save(hotel, callback); }
+    public void assign(int hotel, String uid) { if (start()) remoteHotels.assign(hotel, uid, callback); }
     public void userStatus(int id, boolean active, String reason) {
         if (start()) repository.setUserActive(id, active, reason, callback);
     }
-    public void hotelStatus(int id, boolean active) { if (start()) repository.setHotelActive(id, active, callback); }
+    public void hotelStatus(int id, boolean active) { if (start()) remoteHotels.active(id, active, callback); }
 }

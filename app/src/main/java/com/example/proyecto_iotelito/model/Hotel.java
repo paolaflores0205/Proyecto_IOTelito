@@ -11,6 +11,8 @@ public class Hotel implements Serializable {
     public java.util.List<String> photos = new java.util.ArrayList<>();
     public boolean active = true;
     public boolean hasInventory = true;
+    public boolean remote;
+    public java.util.List<com.example.proyecto_iotelito.model.hoteladmin.Habitacion> inventory = new java.util.ArrayList<>();
     public Double latitude, longitude;
     public String contactPhone = "", contactEmail = "";
 

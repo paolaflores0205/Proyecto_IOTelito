@@ -26,11 +26,9 @@
                 <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_search" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <RadioGroup android:id="@+id/radio_group_admins" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
-                <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/radio_admin_one" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@color/io_surface" android:padding="12dp" android:text="Ana Torres Salazar\nana.torres@iotelito.pe · DNI 72845016" android:textColor="@color/io_text_primary" />
-                <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/radio_admin_two" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@color/io_surface" android:padding="12dp" android:text="Diego Flores Ríos\ndiego.flores@iotelito.pe · DNI 60481732" android:textColor="@color/io_text_primary" />
-                <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/radio_admin_three" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@color/io_surface" android:padding="12dp" android:text="Valeria Campos León\nvaleria.campos@iotelito.pe · DNI 71523904" android:textColor="@color/io_text_primary" />
-            </RadioGroup>
+            <TextView android:id="@+id/tv_assignment_state" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textColor="@color/io_text_secondary" android:textSize="12sp" />
+            <RadioGroup android:id="@+id/radio_group_admins" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_unassign" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Desvincular administrador actual" android:enabled="false" />
 
             <com.google.android.material.button.MaterialButton android:id="@+id/btn_assign" style="@style/Widget.IoTelito.Button.Primary" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="24dp" android:text="@string/superadmin_assign_admin_button" android:enabled="false" />
         </LinearLayout>

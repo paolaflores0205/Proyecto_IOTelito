@@ -33,6 +33,7 @@ public class FormularioHotelActivity extends AppCompatActivity {
     private int hotelId;
     private ManagedHotel existing;
     private boolean formLoaded;
+    private boolean remoteAvailable;
     private final java.util.ArrayList<String> photos = new java.util.ArrayList<>();
     private boolean importingPhotos;
     private final ActivityResultLauncher<String[]> photoPicker = registerForActivityResult(
@@ -47,7 +48,7 @@ public class FormularioHotelActivity extends AppCompatActivity {
 
     private void renderPhotos() {
         binding.photoGallery.show(photos, existing == null ? R.drawable.superadmin_hotel_hero : existing.imageRes, this::renderPhotos);
-        binding.btnAddPhotos.setEnabled(formLoaded && !importingPhotos && photos.size() < 8);
+        binding.btnAddPhotos.setEnabled(formLoaded && remoteAvailable && !importingPhotos && photos.size() < 8);
         binding.btnAddPhotos.setText("Añadir fotos (" + photos.size() + "/8)");
     }
 
@@ -98,6 +99,7 @@ public class FormularioHotelActivity extends AppCompatActivity {
         hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 0);
         model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         formLoaded = hotelId == 0;
+        remoteAvailable = hotelId == 0;
         if (savedInstanceState != null) {
             java.util.ArrayList<String> restored = savedInstanceState.getStringArrayList("hotel_photos");
             if (restored != null) photos.addAll(restored);
@@ -114,18 +116,22 @@ public class FormularioHotelActivity extends AppCompatActivity {
             binding.toolbar.setTitle(R.string.superadmin_edit_hotel);
             model.hotel(hotelId).observe(this, hotel -> {
                 existing = hotel;
-                if (hotel == null) return;
+                remoteAvailable = hotel != null;
+                if (hotel == null) { binding.btnSave.setEnabled(false); return; }
                 if (!formLoaded && !restoreExistingForm) fillHotel(hotel);
                 formLoaded = true;
                 renderPhotos();
                 binding.btnSave.setEnabled(!importingPhotos && !Boolean.TRUE.equals(model.busy().getValue()));
             });
         }
-        model.busy().observe(this, busy -> binding.btnSave.setEnabled(formLoaded && !busy && !importingPhotos));
+        model.busy().observe(this, busy -> binding.btnSave.setEnabled(formLoaded && remoteAvailable && !busy && !importingPhotos));
+        model.hotelsState().observe(this, state -> {
+            if (state.error != null && hotelId != 0) Snackbar.make(binding.getRoot(), state.error, Snackbar.LENGTH_LONG).show();
+        });
         model.photoBusy().observe(this, busy -> {
             importingPhotos = busy;
             renderPhotos();
-            binding.btnSave.setEnabled(formLoaded && !busy && !Boolean.TRUE.equals(model.busy().getValue()));
+            binding.btnSave.setEnabled(formLoaded && remoteAvailable && !busy && !Boolean.TRUE.equals(model.busy().getValue()));
         });
         model.photoResult().observe(this, result -> {
             if (!result.consume()) return;
@@ -228,7 +234,7 @@ public class FormularioHotelActivity extends AppCompatActivity {
     }
 
     private void save() {
-        if (!formLoaded || importingPhotos || Boolean.TRUE.equals(model.busy().getValue())) return;
+        if (!formLoaded || !remoteAvailable || importingPhotos || Boolean.TRUE.equals(model.busy().getValue())) return;
         binding.tilName.setError(null);
         binding.tilAddress.setError(null);
         String name = String.valueOf(binding.etName.getText()).trim();

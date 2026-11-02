@@ -29,8 +29,8 @@ public class AsignarAdministradorActivity extends AppCompatActivity {
     private ActivitySuperadminAsignarAdministradorBinding binding;
     private SuperadminViewModel model;
     private List<AdminUser> users = new ArrayList<>();
-    private final Map<Integer, Integer> radioUserIds = new HashMap<>();
-    private int selectedUserId = -1;
+    private final Map<Integer, String> radioUserIds = new HashMap<>();
+    private String selectedUserUid;
     private ManagedHotel hotel;
 
     @Override
@@ -40,7 +40,7 @@ public class AsignarAdministradorActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         binding.toolbar.setNavigationOnClickListener(v -> finish());
 
-        if (savedInstanceState != null) selectedUserId = savedInstanceState.getInt("selected_admin", -1);
+        if (savedInstanceState != null) selectedUserUid = savedInstanceState.getString("selected_admin_uid");
         model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         model.hotel(getIntent().getIntExtra(EXTRA_HOTEL_ID, -1)).observe(this, row -> {
             hotel = row;
@@ -49,8 +49,15 @@ public class AsignarAdministradorActivity extends AppCompatActivity {
                 binding.tvCurrentAdmin.setText(row.administrator);
             }
             updateButton();
+            renderAdmins();
         });
-        model.localUsers().observe(this, rows -> { users = rows; renderAdmins(); });
+        model.users().observe(this, rows -> { users = rows; renderAdmins(); });
+        model.usersState().observe(this, state -> binding.tvAssignmentState.setText(state.loading
+                ? "Cargando administradores Firebase…" : state.error == null
+                ? "Solo administradores activos sin otro hotel asignado." : state.error));
+        model.hotelsState().observe(this, state -> {
+            if (state.error != null) binding.tvAssignmentState.setText(state.error);
+        });
         model.busy().observe(this, busy -> updateButton());
         model.result().observe(this, result -> {
             if (!result.consume()) return;
@@ -66,6 +73,14 @@ public class AsignarAdministradorActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) { renderAdmins(); }
         });
         binding.btnAssign.setOnClickListener(v -> confirmAssignment());
+        binding.btnUnassign.setOnClickListener(v -> {
+            if (hotel == null) return;
+            final int id = hotel.id;
+            new MaterialAlertDialogBuilder(this).setTitle("Desvincular administrador")
+                    .setMessage("El hotel quedará sin administrador y la cuenta quedará disponible para otra asignación.")
+                    .setNegativeButton(R.string.superadmin_cancel, null)
+                    .setPositiveButton(R.string.superadmin_confirm, (dialog, which) -> model.assign(id, null)).show();
+        });
         renderAdmins();
     }
 
@@ -76,51 +91,55 @@ public class AsignarAdministradorActivity extends AppCompatActivity {
         String query = binding.etSearch.getText().toString().trim().toLowerCase(Locale.ROOT);
         boolean selectedVisible = false;
         for (AdminUser user : users) {
-            if (!user.active || !"Administrador".equals(user.role)) continue;
+            if (!user.active || user.uid == null || !"Administrador".equals(user.role)) continue;
+            if (user.hotelId != null && (hotel == null || user.hotelId != hotel.id)) continue;
             if (!(user.name + " " + user.email + " " + user.document).toLowerCase(Locale.ROOT).contains(query)) continue;
             MaterialRadioButton radio = new MaterialRadioButton(this);
             radio.setId(View.generateViewId());
             radio.setText(user.name + "\n" + user.email + " · " + user.document);
             int padding = (int) (12 * getResources().getDisplayMetrics().density);
             radio.setPadding(padding, padding, padding, padding);
-            radioUserIds.put(radio.getId(), user.id);
+            radioUserIds.put(radio.getId(), user.uid);
             binding.radioGroupAdmins.addView(radio);
-            if (user.id == selectedUserId) {
+            if (user.uid.equals(selectedUserUid)) {
                 binding.radioGroupAdmins.check(radio.getId());
                 selectedVisible = true;
             }
         }
-        if (!selectedVisible && !users.isEmpty()) selectedUserId = -1;
+        if (!selectedVisible && !users.isEmpty()) selectedUserUid = null;
         binding.radioGroupAdmins.setOnCheckedChangeListener((group, checkedId) -> {
-            selectedUserId = radioUserIds.containsKey(checkedId) ? radioUserIds.get(checkedId) : -1;
+            selectedUserUid = radioUserIds.get(checkedId);
             updateButton();
         });
         updateButton();
     }
 
     private void updateButton() {
-        binding.btnAssign.setEnabled(hotel != null && selectedUserId > 0
+        binding.btnAssign.setEnabled(hotel != null && selectedUserUid != null
+                && !Boolean.TRUE.equals(model.busy().getValue()));
+        binding.btnUnassign.setEnabled(hotel != null && hotel.hasAdministrator()
                 && !Boolean.TRUE.equals(model.busy().getValue()));
     }
 
     private void confirmAssignment() {
-        if (hotel == null || selectedUserId < 0) return;
+        if (hotel == null || selectedUserUid == null) return;
         int checkedId = binding.radioGroupAdmins.getCheckedRadioButtonId();
         RadioButton selected = findViewById(checkedId);
         if (selected == null) return;
-        int adminId = selectedUserId;
+        String adminUid = selectedUserUid;
+        int selectedHotelId = hotel.id;
         String selectedName = selected.getText().toString().split("\n")[0];
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.superadmin_assign_question)
                 .setMessage(selectedName + "\n\n" + getString(R.string.superadmin_assign_message))
                 .setNegativeButton(R.string.superadmin_cancel, null)
                 .setPositiveButton(R.string.superadmin_confirm, (dialog, which) ->
-                        model.assign(hotel.id, adminId))
+                        model.assign(selectedHotelId, adminUid))
                 .show();
     }
 
     @Override protected void onSaveInstanceState(Bundle out) {
-        out.putInt("selected_admin", selectedUserId);
+        out.putString("selected_admin_uid", selectedUserUid);
         super.onSaveInstanceState(out);
     }
 }

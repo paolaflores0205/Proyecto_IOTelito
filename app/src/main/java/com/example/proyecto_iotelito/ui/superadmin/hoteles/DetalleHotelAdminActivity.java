@@ -33,7 +33,14 @@ public class DetalleHotelAdminActivity extends AppCompatActivity {
         model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         model.hotel(getIntent().getIntExtra(EXTRA_HOTEL_ID, -1)).observe(this, row -> {
             hotel = row;
-            if (row == null) return;
+            binding.btnEdit.setEnabled(row != null);
+            binding.btnChangeAdmin.setEnabled(row != null);
+            binding.switchIot.setEnabled(row != null && !Boolean.TRUE.equals(model.busy().getValue()));
+            if (row == null) {
+                binding.tvHotelName.setText("Hotel remoto no disponible");
+                binding.tvAddress.setText(""); binding.tvAdmin.setText("");
+                return;
+            }
             binding.tvHotelName.setText(row.name);
             binding.tvAddress.setText(row.address);
             binding.tvAdmin.setText(row.administrator);
@@ -47,6 +54,9 @@ public class DetalleHotelAdminActivity extends AppCompatActivity {
             binding.switchIot.setEnabled(!Boolean.TRUE.equals(model.busy().getValue()));
         });
         model.busy().observe(this, busy -> binding.switchIot.setEnabled(hotel != null && !busy));
+        model.hotelsState().observe(this, state -> {
+            if (state.error != null) Snackbar.make(binding.getRoot(), state.error, Snackbar.LENGTH_LONG).show();
+        });
         model.result().observe(this, result -> {
             if (!result.consume()) return;
             if (hotel != null) setSwitchWithoutDialog(hotel.active);
@@ -73,13 +83,15 @@ public class DetalleHotelAdminActivity extends AppCompatActivity {
     }
 
     private void confirmStatus(boolean requestedStatus) {
+        if (hotel == null) return;
+        final int id = hotel.id;
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.superadmin_change_hotel_status)
                 .setMessage(R.string.superadmin_change_hotel_status_message)
                 .setNegativeButton(R.string.superadmin_cancel, (dialog, which) -> setSwitchWithoutDialog(!requestedStatus))
                 .setOnCancelListener(dialog -> setSwitchWithoutDialog(!requestedStatus))
                 .setPositiveButton(R.string.superadmin_confirm, (dialog, which) -> {
-                    model.hotelStatus(hotel.id, requestedStatus);
+                    model.hotelStatus(id, requestedStatus);
                 })
                 .show();
     }

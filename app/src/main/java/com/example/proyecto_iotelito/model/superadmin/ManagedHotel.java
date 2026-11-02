@@ -20,6 +20,16 @@ public class ManagedHotel {
     public Double latitude;
     public Double longitude;
     public Integer administratorId;
+    public String administratorUid;
+    public boolean remote;
+    public double pricePerNight, rating;
+    public int reviews;
+    public boolean hasInventory;
+    public java.util.List<String> services = new java.util.ArrayList<>();
+
+    public boolean hasAdministrator() {
+        return remote ? administratorUid != null : administratorId != null;
+    }
 
     public ManagedHotel(int id, String name, String address, String district,
                         String administrator, int rooms, int reservations,

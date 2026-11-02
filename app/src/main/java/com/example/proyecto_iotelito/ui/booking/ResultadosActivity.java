@@ -371,7 +371,7 @@ public class ResultadosActivity extends AppCompatActivity {
     }
 
     private double precioDesde(Hotel hotel) {
-        return CatalogoHabitaciones.precioMinimoDisponible(hotel.id, hotel.pricePerNight);
+        return hotel.remote ? hotel.pricePerNight : CatalogoHabitaciones.precioMinimoDisponible(hotel.id, hotel.pricePerNight);
     }
 
     private float dpF(int value) {

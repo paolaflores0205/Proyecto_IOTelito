@@ -13,7 +13,7 @@ function token(uid) {
 function field(value) {
   if (value === null) return { nullValue: null };
   if (typeof value === 'boolean') return { booleanValue: value };
-  if (typeof value === 'number') return { integerValue: String(value) };
+  if (typeof value === 'number') return Number.isInteger(value) ? { integerValue: String(value) } : { doubleValue: value };
   if (Array.isArray(value)) return { arrayValue: { values: value.map(field) } };
   return { stringValue: value };
 }
@@ -44,7 +44,7 @@ async function status(target, active, actor, extra = {}) {
   const data = { active, statusReason: active ? '' : 'Prueba de desactivación', updatedByUid: actor, ...extra };
   return commit([write(`users/${target}`, data, [...Object.keys(data), 'updatedAt'], ['updatedAt'])], actor);
 }
-(async () => {
+async function runAuthRules() {
   // El borrado solo afecta al proyecto demo del emulador efímero.
   const cleared = await fetch(`http://127.0.0.1:8180/emulator/v1/projects/${project}/databases/(default)/documents`, { method: 'DELETE' });
   assert.ok(cleared.ok, 'Inicia el emulador en 127.0.0.1:8180 antes de ejecutar estas pruebas.');
@@ -56,7 +56,7 @@ async function status(target, active, actor, extra = {}) {
   const mismatched = await call('PATCH', '/users/mismatched', { fields: fields({ uid: 'another-uid',
     role: 'SUPERADMIN', active: true, name: 'Perfil incorrecto', email: 'mismatched@example.test' }) }, 'owner');
   assert.ok(mismatched.ok);
-  const hotel = await call('PATCH', '/hotels/1', { fields: fields({ id: 1, name: 'Hotel de prueba' }) }, 'owner');
+  const hotel = await call('PATCH', '/hotels/1', { fields: fields({ id: 1, name: 'Hotel de prueba', active: true, hasInventory: true }) }, 'owner');
   assert.ok(hotel.ok);
   await expect(await call('GET', '/users/sa', undefined), false, 'Sin sesión no puede leer usuarios');
   await expect(await call('GET', '/users/client', undefined, 'client'), true, 'Perfil propio');
@@ -106,4 +106,6 @@ async function status(target, active, actor, extra = {}) {
   await expect(await commit([write('reservations/1001', { estado: 'COMPLETADA' }, ['estado'])], 'client'), true, 'Conserva checkout propio');
   await expect(await commit([write('reservations/1001', { precioTotal: 0 }, ['precioTotal'])], 'client'), false, 'No altera precio de reserva existente');
   console.log(`Reglas de autenticación/usuarios: ${checks} comprobaciones correctas, solo emulador.`);
-})().catch(error => { console.error(error); process.exitCode = 1; });
+}
+if (require.main === module) runAuthRules().catch(error => { console.error(error); process.exitCode = 1; });
+module.exports = { root, project, fields, call, expect, seed, write, commit, runAuthRules, countChecks: () => checks };

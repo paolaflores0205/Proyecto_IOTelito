@@ -2,6 +2,11 @@
 
 Fecha: 02/11/2026. Rama: superadmin. No se hizo push ni se publicaron cambios en Firebase.
 
+Nota de continuidad: `GUIA_FIREBASE_HOTELES_PASO_5.md` documenta la integración
+posterior de hoteles y asignaciones. Sus cambios y reglas sustituyen las
+referencias de esta guía a hoteles todavía locales o con escrituras cerradas.
+La preparación de cuentas y perfiles de los pasos 3 y 4 sigue siendo necesaria.
+
 ## Resultado y requisito antes de ejecutar
 
 El código usa Firebase Authentication para el login y users/{uid} para resolver rol
