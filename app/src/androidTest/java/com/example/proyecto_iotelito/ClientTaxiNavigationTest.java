@@ -51,7 +51,8 @@ public class ClientTaxiNavigationTest {
         barrera();
         Hotel hotel = SampleData.findById(4);
         reserva = repository.agregarReserva(hotel, LocalDate.now().minusDays(4), LocalDate.now(),
-                "2 adultos", 1280, "TEST-TAXI-" + UUID.randomUUID(), hotel.roomName, "310");
+                "2 adultos", 1280, "TEST-TAXI-" + UUID.randomUUID(), hotel.roomName, "310",
+                java.util.Collections.singletonList(CatalogoHabitaciones.disponiblesPorHotel(hotel.id).get(0).id));
         solicitudId = TaxiRepository.crear(context, reserva, hotel.name, hotel.address, "15:30", 2, 1);
         assertTrue(solicitudId >= 0);
         repository.actualizarEstado(reserva.id, Reserva.Estado.COMPLETADA);
