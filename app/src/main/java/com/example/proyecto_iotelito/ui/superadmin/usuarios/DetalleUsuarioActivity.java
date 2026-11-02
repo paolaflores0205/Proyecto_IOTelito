@@ -18,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 public class DetalleUsuarioActivity extends AppCompatActivity {
     public static final String EXTRA_USER_ID = "user_id";
+    public static final String EXTRA_USER_UID = "user_uid";
     private ActivitySuperadminDetalleUsuarioBinding binding;
     private AdminUser user;
     private SuperadminViewModel model;
@@ -31,12 +32,21 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
         binding.btnToggleUser.setEnabled(false);
         binding.btnToggleUser.setOnClickListener(v -> { if (user != null) confirmStatusChange(); });
         model = new ViewModelProvider(this).get(SuperadminViewModel.class);
-        model.user(getIntent().getIntExtra(EXTRA_USER_ID, -1)).observe(this, row -> {
-            user = row;
-            binding.btnToggleUser.setEnabled(row != null && !Boolean.TRUE.equals(model.busy().getValue()));
-            if (row != null) render();
+        String uid = getIntent().getStringExtra(EXTRA_USER_UID);
+        model.usersState().observe(this, state -> {
+            user = null;
+            for (AdminUser row : state.users) if (row.uid != null && row.uid.equals(uid)) user = row;
+            binding.btnToggleUser.setEnabled(canChange() && !Boolean.TRUE.equals(model.busy().getValue()));
+            if (user != null) render();
+            else {
+                binding.tvName.setText(state.loading ? "Cargando usuario…" : "Usuario no disponible");
+                binding.tvEmail.setText(state.error == null ? "No se encontró un perfil con ese UID." : state.error);
+                binding.tvDocument.setText(""); binding.tvPhone.setText(""); binding.tvRole.setText("");
+                binding.tvRegistered.setText(""); binding.tvLastAccess.setText(""); binding.tvStatus.setText("");
+                binding.tvInitials.setText("?");
+            }
         });
-        model.busy().observe(this, busy -> binding.btnToggleUser.setEnabled(user != null && !busy));
+        model.busy().observe(this, busy -> binding.btnToggleUser.setEnabled(canChange() && !busy));
         model.result().observe(this, result -> {
             if (result.consume()) Snackbar.make(binding.getRoot(), result.error == null
                     ? getString(R.string.superadmin_user_status_updated) : result.error, Snackbar.LENGTH_LONG).show();
@@ -44,7 +54,7 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
     }
 
     private void render() {
-        String[] names = user.name.split(" ");
+        String[] names = user.name.trim().split("\\s+");
         String initials = names[0].substring(0, 1) + names[Math.min(1, names.length - 1)].substring(0, 1);
         binding.tvInitials.setText(initials);
         binding.tvName.setText(user.name);
@@ -63,21 +73,27 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
     }
 
     private void confirmStatusChange() {
+        final AdminUser selected = user;
+        if (selected == null) return;
         EditText reason = new EditText(this);
         reason.setHint(R.string.superadmin_reason_hint);
         reason.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         int padding = (int) (20 * getResources().getDisplayMetrics().density);
         reason.setPadding(padding, 0, padding, 0);
         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(user.active ? R.string.superadmin_deactivate_question : R.string.superadmin_activate_question)
-                .setMessage(getString(user.active ? R.string.superadmin_deactivate_message : R.string.superadmin_activate_message, user.name))
+                .setTitle(selected.active ? R.string.superadmin_deactivate_question : R.string.superadmin_activate_question)
+                .setMessage(getString(selected.active ? R.string.superadmin_deactivate_message : R.string.superadmin_activate_message, selected.name))
                 .setNegativeButton(R.string.superadmin_cancel, null)
                 .setPositiveButton(R.string.superadmin_confirm, (d, which) -> {
-                    model.userStatus(user.id, !user.active, reason.getText().toString());
+                    model.remoteUserStatus(selected.uid, !selected.active, reason.getText().toString());
                 });
-        if (user.active) {
+        if (selected.active) {
             dialog.setView(reason);
         }
         dialog.show();
+    }
+
+    private boolean canChange() {
+        return user != null && user.uid != null && !"Superadmin".equals(user.role);
     }
 }

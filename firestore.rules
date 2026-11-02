@@ -1,22 +1,67 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function activeUser() {
+      return signedIn() && profile().uid == request.auth.uid && profile().active == true
+        && profile().role in ['CLIENT', 'HOTEL_ADMIN', 'TAXISTA', 'SUPERADMIN'];
+    }
+    function superadmin() { return activeUser() && profile().role == 'SUPERADMIN'; }
+
+    match /users/{uid} {
+      // El perfil propio debe poder leerse para informar que la cuenta está inactiva.
+      allow get: if signedIn() && (request.auth.uid == uid || superadmin());
+      allow list: if superadmin();
+      // Ningún registro público puede crear roles administrativos ni asignarse hotel.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'email', 'firstNames', 'lastNames',
+          'documentType', 'documentNumber', 'birthDate', 'phone', 'address', 'photoUrl',
+          'role', 'active', 'hotelId', 'createdAt', 'updatedAt'])
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.name is string && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 160
+        && request.resource.data.role == 'CLIENT'
+        && request.resource.data.active == true
+        && request.resource.data.get('hotelId', null) == null
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if signedIn() && (
+        (request.auth.uid == uid && activeUser()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'name', 'firstNames', 'lastNames', 'documentType', 'documentNumber', 'birthDate',
+            'phone', 'address', 'photoUrl', 'updatedAt', 'lastAccessAt'])
+          && request.resource.data.updatedAt == request.time)
+        || (superadmin() && request.auth.uid != uid && resource.data.role != 'SUPERADMIN'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'active', 'statusReason', 'updatedAt', 'updatedByUid'])
+          && request.resource.data.active is bool
+          && request.resource.data.statusReason is string
+          && request.resource.data.statusReason.size() <= 500
+          && (request.resource.data.active == true || request.resource.data.statusReason.size() > 0)
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.updatedByUid == request.auth.uid)
+      );
+      allow delete: if false;
+    }
+
     match /hotels/{hotelId} {
-      allow read: if request.auth != null;
+      allow read: if activeUser();
       allow write: if false;
 
       match /rooms/{roomId} {
-        allow read: if request.auth != null;
+        allow read: if activeUser();
         allow write: if false;
       }
     }
 
     match /reservations/{reservationId} {
-      allow get: if request.auth != null
+      allow get: if activeUser()
         && (resource == null || resource.data.clientUid == request.auth.uid);
-      allow list: if request.auth != null
+      allow list: if activeUser()
         && resource.data.clientUid == request.auth.uid;
-      allow create: if request.auth != null
+      allow create: if activeUser() && profile().role == 'CLIENT'
         && request.resource.data.clientUid == request.auth.uid
         && request.resource.data.estado == 'CONFIRMADA'
         && request.resource.data.roomIds is list
@@ -24,7 +69,7 @@ service cloud.firestore {
         && request.resource.data.fechaEntrada is string
         && request.resource.data.fechaSalida is string
         && request.resource.data.fechaEntrada < request.resource.data.fechaSalida;
-      allow update: if request.auth != null
+      allow update: if activeUser()
         && resource.data.clientUid == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
         && resource.data.estado == 'CONFIRMADA'
@@ -33,10 +78,10 @@ service cloud.firestore {
     }
 
     match /clientNights/{nightId} {
-      allow get: if request.auth != null
+      allow get: if activeUser()
         && nightId.matches(request.auth.uid + '_.*');
       allow list: if false;
-      allow create: if request.auth != null
+      allow create: if activeUser() && profile().role == 'CLIENT'
         && nightId.matches(request.auth.uid + '_.*')
         && request.resource.data.clientUid == request.auth.uid
         && getAfter(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId))
@@ -45,9 +90,9 @@ service cloud.firestore {
     }
 
     match /roomNights/{nightId} {
-      allow get: if request.auth != null;
+      allow get: if activeUser();
       allow list: if false;
-      allow create: if request.auth != null
+      allow create: if activeUser() && profile().role == 'CLIENT'
         && getAfter(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId))
              .data.clientUid == request.auth.uid;
       allow update, delete: if false;

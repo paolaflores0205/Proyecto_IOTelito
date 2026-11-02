@@ -10,7 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.LocalAuthRepository;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -34,13 +34,23 @@ public class RecoverPasswordActivity extends AppCompatActivity {
                 emailLayout.setError(getString(R.string.login_error_required));
                 return;
             }
-            if (!LocalAuthRepository.exists(email)) {
-                emailLayout.setError(getString(R.string.recover_error_unknown_email));
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                emailLayout.setError("Ingresa un correo válido.");
                 return;
             }
-            Intent intent = new Intent(this, RecoverPasswordSentActivity.class);
-            intent.putExtra(EXTRA_EMAIL, email);
-            startActivity(intent);
+            v.setEnabled(false);
+            FirebaseAuth.getInstance().setLanguageCode("es");
+            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                    .addOnCompleteListener(this, task -> {
+                        v.setEnabled(true);
+                        if (!task.isSuccessful()) {
+                            emailLayout.setError("No se pudo solicitar el correo. Revisa la conexión e inténtalo nuevamente.");
+                            return;
+                        }
+                        Intent intent = new Intent(this, RecoverPasswordSentActivity.class);
+                        intent.putExtra(EXTRA_EMAIL, email);
+                        startActivity(intent);
+                    });
         });
     }
 

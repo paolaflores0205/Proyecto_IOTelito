@@ -1,6 +1,8 @@
 package com.example.proyecto_iotelito.model.superadmin;
 
 public class AdminUser {
+    /** UID remoto; null únicamente para el catálogo local de demostración. */
+    public String uid;
     public final int id;
     public final String name;
     public final String email;

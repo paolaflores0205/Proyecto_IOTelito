@@ -18,6 +18,12 @@ public class PerfilSuperadminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminPerfilBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        com.example.proyecto_iotelito.model.auth.AuthenticatedUser account =
+                com.example.proyecto_iotelito.data.SessionRepository.obtener(this);
+        if (account != null) {
+            binding.tvAccountName.setText(account.getDisplayName());
+            binding.tvAccountEmail.setText(account.getEmail());
+        }
 
         binding.toolbar.setNavigationOnClickListener(v -> finish());
         binding.btnLogout.setOnClickListener(v -> confirmLogout());

@@ -72,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
         String document = valueOf(documentEditText.getText());
         String birthdate = valueOf(birthdateEditText.getText());
         String email = valueOf(emailEditText.getText());
-        String password = valueOf(passwordEditText.getText());
+        String password = passwordEditText.getText() == null ? "" : passwordEditText.getText().toString();
         String phone = valueOf(phoneEditText.getText()).replace(" ", "");
         String address = valueOf(addressEditText.getText());
         boolean hasError = false;
@@ -100,7 +100,6 @@ public class RegisterActivity extends AppCompatActivity {
         if (password.length() < 6) {
             passwordLayout.setError(getString(R.string.register_error_password));
             hasError = true;
-            hasError = true;
         }
         if (!phone.matches("\\d{9}")) {
             phoneLayout.setError(getString(R.string.register_error_phone));
@@ -117,8 +116,8 @@ public class RegisterActivity extends AppCompatActivity {
         submitButton.setEnabled(false);
         FirebaseAuth auth = FirebaseAuth.getInstance();
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
-            submitButton.setEnabled(true);
             if (!task.isSuccessful()) {
+                submitButton.setEnabled(true);
                 Exception error = task.getException();
                 if (error instanceof FirebaseAuthUserCollisionException) {
                     emailLayout.setError(getString(R.string.register_error_email_exists));
@@ -132,18 +131,42 @@ public class RegisterActivity extends AppCompatActivity {
 
             FirebaseUser user = auth.getCurrentUser();
             if (user == null) {
+                submitButton.setEnabled(true);
                 Toast.makeText(this, R.string.register_error_generic, Toast.LENGTH_LONG).show();
                 return;
             }
             String fullName = names + " " + lastnames;
             PerfilRepository.guardar(this, new UserProfile(fullName, email, phone,
                     "DNI", document, birthdate, address));
-            user.updateProfile(new UserProfileChangeRequest.Builder()
-                    .setDisplayName(fullName).build()).addOnCompleteListener(this, profileTask -> {
-                auth.signOut();
-                Toast.makeText(this, R.string.register_success_demo, Toast.LENGTH_LONG).show();
-                finish();
-            });
+            java.util.Map<String, Object> profile = new java.util.HashMap<>();
+            profile.put("uid", user.getUid());
+            profile.put("name", fullName);
+            profile.put("firstNames", names);
+            profile.put("lastNames", lastnames);
+            profile.put("email", user.getEmail());
+            profile.put("phone", phone);
+            profile.put("documentType", "DNI");
+            profile.put("documentNumber", document);
+            profile.put("birthDate", LocalDate.parse(birthdate, BIRTHDATE_FORMATTER).toString());
+            profile.put("address", address);
+            profile.put("role", "CLIENT");
+            profile.put("active", true);
+            profile.put("hotelId", null);
+            profile.put("createdAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+            profile.put("updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+            com.example.proyecto_iotelito.data.FirebaseProfileRepository.createClient(user.getUid(), profile)
+                    .addOnSuccessListener(unused -> user.updateProfile(new UserProfileChangeRequest.Builder()
+                            .setDisplayName(fullName).build()).addOnCompleteListener(this, profileTask -> {
+                        auth.signOut();
+                        Toast.makeText(this, R.string.register_success_demo, Toast.LENGTH_LONG).show();
+                        finish();
+                    }))
+                    .addOnFailureListener(error -> {
+                        auth.signOut();
+                        submitButton.setEnabled(true);
+                        Toast.makeText(this, "Se creó la cuenta, pero no su perfil. Solicita al administrador completar users; no vuelvas a crear la cuenta.",
+                                Toast.LENGTH_LONG).show();
+                    });
         });
     }
 

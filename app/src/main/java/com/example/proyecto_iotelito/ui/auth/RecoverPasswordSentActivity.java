@@ -24,11 +24,8 @@ public class RecoverPasswordSentActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_recover_sent_email)).setText(
                 getString(R.string.recover_sent_email, email));
 
-        findViewById(R.id.btn_crear_nueva_contrasena).setOnClickListener(v -> {
-            Intent intent = new Intent(this, NewPasswordActivity.class);
-            intent.putExtra(RecoverPasswordActivity.EXTRA_EMAIL, email);
-            startActivity(intent);
-        });
+        // Firebase valida el enlace de recuperación: nunca cambiar contraseña solo por conocer el correo.
+        findViewById(R.id.btn_crear_nueva_contrasena).setVisibility(android.view.View.GONE);
         findViewById(R.id.btn_volver_login).setOnClickListener(v -> finish());
     }
 }

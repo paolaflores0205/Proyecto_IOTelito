@@ -27,6 +27,8 @@ public class UsuariosFragment extends Fragment {
     private FragmentSuperadminUsuariosBinding binding;
     private UsuariosAdapter adapter;
     private List<AdminUser> users = new ArrayList<>();
+    private boolean syncLoading = true;
+    private String syncError;
 
     @Nullable
     @Override
@@ -55,6 +57,16 @@ public class UsuariosFragment extends Fragment {
             users = rows;
             updateSummary();
             renderUsers();
+        });
+        model.usersState().observe(getViewLifecycleOwner(), state -> {
+            syncLoading = state.loading;
+            syncError = state.error;
+            binding.tvUsersSyncState.setText(state.loading ? "Cargando usuarios de Firebase…"
+                    : state.error == null ? "Usuarios de Firebase · actualizados en tiempo real" : state.error);
+            binding.tvUsersSyncState.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(),
+                    state.error == null ? R.color.io_text_secondary : R.color.io_danger_text));
+            binding.cardUsersEmpty.setVisibility(!state.loading && state.error == null && adapter.getItemCount() == 0
+                    ? View.VISIBLE : View.GONE);
         });
         renderUsers();
     }
@@ -95,13 +107,14 @@ public class UsuariosFragment extends Fragment {
         }
         adapter.setUsers(filtered);
         binding.tvUserCount.setText(getString(R.string.superadmin_showing_users, filtered.size()));
-        binding.cardUsersEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.cardUsersEmpty.setVisibility(filtered.isEmpty() && !syncLoading && syncError == null ? View.VISIBLE : View.GONE);
         binding.rvUsers.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     private void openUserDetail(AdminUser user) {
         Intent intent = new Intent(requireContext(), DetalleUsuarioActivity.class);
         intent.putExtra(DetalleUsuarioActivity.EXTRA_USER_ID, user.id);
+        intent.putExtra(DetalleUsuarioActivity.EXTRA_USER_UID, user.uid);
         startActivity(intent);
     }
 

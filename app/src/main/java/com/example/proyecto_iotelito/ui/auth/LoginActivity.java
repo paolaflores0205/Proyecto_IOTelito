@@ -14,9 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.MainActivity;
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.LocalAuthRepository;
 import com.example.proyecto_iotelito.data.RememberedCredentialsRepository;
 import com.example.proyecto_iotelito.data.SessionRepository;
+import com.example.proyecto_iotelito.data.FirebaseProfileRepository;
 import com.example.proyecto_iotelito.databinding.ActivityLoginBinding;
 import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
 import com.example.proyecto_iotelito.model.auth.UserRole;
@@ -53,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(this, RecoverPasswordActivity.class)));
         binding.createAccountButton.setOnClickListener(view ->
                 startActivity(new Intent(this, RegisterActivity.class)));
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) resolverPerfil(null);
     }
 
     private void configurarRecordarme() {
@@ -90,11 +91,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void attemptLogin() {
+        if (!binding.loginButton.isEnabled()) return;
         binding.emailLayout.setError(null);
         binding.passwordLayout.setError(null);
 
         String email = valueOf(binding.emailEditText.getText());
-        String password = valueOf(binding.passwordEditText.getText());
+        String password = binding.passwordEditText.getText() == null ? "" : binding.passwordEditText.getText().toString();
         boolean hasError = false;
 
         if (TextUtils.isEmpty(email)) {
@@ -107,46 +109,53 @@ public class LoginActivity extends AppCompatActivity {
         }
         if (hasError) return;
 
-        AuthenticatedUser demoUser = LocalAuthRepository.authenticate(this, email, password);
-        if (demoUser != null && demoUser.getRole() != UserRole.CLIENT) {
-            FirebaseAuth.getInstance().signOut();
-            completarLogin(demoUser, password);
-            return;
-        }
-
         binding.loginButton.setEnabled(false);
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
-                    binding.loginButton.setEnabled(true);
                     if (!task.isSuccessful()) {
+                        binding.loginButton.setEnabled(true);
                         binding.passwordLayout.setError(getString(task.getException()
                                 instanceof FirebaseNetworkException
                                 ? R.string.login_error_network : R.string.login_error_credentials));
                         return;
                     }
-                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                    if (firebaseUser == null) {
-                        binding.passwordLayout.setError(getString(R.string.login_error_credentials));
-                        return;
-                    }
-                    String name = firebaseUser.getDisplayName();
-                    completarLogin(new AuthenticatedUser(firebaseUser.getEmail(),
-                            name == null || name.isEmpty() ? email : name, UserRole.CLIENT), password);
+                    resolverPerfil(password);
                 });
     }
 
+    private void resolverPerfil(String password) {
+        binding.loginButton.setEnabled(false);
+        FirebaseProfileRepository.loadCurrent((user, error) -> {
+            if (isFinishing() || isDestroyed()) return;
+            binding.loginButton.setEnabled(true);
+            if (user == null) {
+                SessionRepository.cerrar(this);
+                binding.passwordLayout.setError(error);
+                return;
+            }
+            completarLogin(user, password);
+        });
+    }
+
     private void completarLogin(AuthenticatedUser user, String password) {
-        if (binding.rememberMe.isChecked()) {
+        if (password != null && binding.rememberMe.isChecked()) {
             try {
                 RememberedCredentialsRepository.guardar(this, user.getEmail(), password);
             } catch (GeneralSecurityException | IOException exception) {
                 Toast.makeText(this, R.string.login_recordar_error, Toast.LENGTH_LONG).show();
                 return;
             }
-        } else {
+        } else if (password != null) {
             RememberedCredentialsRepository.olvidar(this, user.getEmail());
         }
         SessionRepository.guardar(this, user);
+        if (user.getUid() != null) {
+            java.util.Map<String, Object> access = new java.util.HashMap<>();
+            access.put("lastAccessAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+            access.put("updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users")
+                    .document(user.getUid()).update(access);
+        }
         Intent destination;
         switch (user.getRole()) {
             case CLIENT:

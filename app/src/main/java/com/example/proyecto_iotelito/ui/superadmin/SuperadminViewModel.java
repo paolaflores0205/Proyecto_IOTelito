@@ -25,6 +25,10 @@ public class SuperadminViewModel extends AndroidViewModel {
         }
     }
     private final SuperadminRepository repository;
+    private final com.example.proyecto_iotelito.data.superadmin.FirebaseUsersRepository remoteUsers =
+            new com.example.proyecto_iotelito.data.superadmin.FirebaseUsersRepository();
+    private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseUsersRepository.State> remoteUsersState =
+            remoteUsers.observeUsers();
     private final MutableLiveData<Boolean> busy = new MutableLiveData<>(false);
     private final MutableLiveData<Result> result = new MutableLiveData<>();
     private final MutableLiveData<Boolean> photoBusy = new MutableLiveData<>(false);
@@ -63,7 +67,17 @@ public class SuperadminViewModel extends AndroidViewModel {
     }
     public LiveData<List<ManagedHotel>> hotels() { return repository.hotels(); }
     public LiveData<List<com.example.proyecto_iotelito.model.Reserva>> reportHistory() { return repository.reportHistory(); }
-    public LiveData<List<AdminUser>> users() { return repository.users(); }
+    public LiveData<List<AdminUser>> users() {
+        return androidx.lifecycle.Transformations.map(remoteUsersState, state -> state.users);
+    }
+    public LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseUsersRepository.State> usersState() {
+        return remoteUsersState;
+    }
+    /** Solo para la asignación local de hoteles, pendiente del paso 5. */
+    public LiveData<List<AdminUser>> localUsers() { return repository.users(); }
+    public void remoteUserStatus(String uid, boolean active, String reason) {
+        if (start()) remoteUsers.setActive(uid, active, reason, callback);
+    }
     public LiveData<List<ActivityLog>> logs() { return repository.logs(); }
     public LiveData<ManagedHotel> hotel(int id) { return repository.hotel(id); }
     public LiveData<AdminUser> user(int id) { return repository.user(id); }

@@ -1,25 +1,32 @@
 # Contrato compartido Firestore - Cliente y Superadmin
 
-Revisión: 02/11/2026, pasos 1 y 2. Este documento define el contrato de integración;
+Revisión: 02/11/2026, pasos 1 a 4. Este documento define el contrato de integración;
 **no crea colecciones, cuentas, índices ni publica reglas en Firebase**. Conserva
 los nombres y campos que ya usa el módulo cliente. Las ampliaciones de
 superadmin se marcan como pendientes hasta que se implementen y prueben.
 
 ## Estado de la integración
 
+Actualización pasos 3 y 4: el código ya resuelve roles desde users/{uid}, registra
+perfiles CLIENT y conecta la vista Usuarios y sus cambios de estado a Firestore.
+firestore.rules incorpora permisos de usuarios y gates por active. Esto está probado
+localmente, **no desplegado**. Antes de usarlo hay que provisionar cuentas/perfiles
+existentes y revisar/publicar las reglas: ver GUIA_FIREBASE_SUPERADMIN_PASOS_3_4.md.
+
 | Área | Implementado en el código integrado | Pendiente |
 |---|---|---|
-| Authentication | Registro/login del cliente con Firebase | Autenticación real de superadmin, admin y taxista y resolución de rol |
-| Perfil cliente | Firebase Auth y datos adicionales locales por UID | Documento compartido users/{uid} |
+| Authentication | Login Firebase de los cuatro roles, resolución por UID/rol/active | Configuración de cuentas y perfiles en consola y prueba remota |
+| Perfil cliente | Registro de users/{uid} y perfil adicional local por UID | Migración de cuentas Auth antiguas sin perfil y prueba remota |
 | Hoteles y habitaciones | Catálogo local compartido, esquema remoto documentado | Lectura/escritura remota de catálogo y asignaciones |
 | Reservas | Firestore para cliente autenticado, Room sin sesión Firebase | Consultas administrativas autorizadas y reportes remotos |
-| Usuarios, logs, alertas y reportes superadmin | Room y datos de demostración | Repositorios Firestore y reglas por rol |
+| Usuarios superadmin | Listado, detalle y activación Firestore; reglas locales verificadas | Despliegue de reglas y prueba con cuentas reales |
+| Logs, alertas y reportes superadmin | Room y datos de demostración | Repositorios Firestore y reglas específicas |
 | Fotografías | Recursos de la app y fotos locales | Almacenamiento compartido de nuevas fotos |
 
 El contrato no implica que las reglas de este repositorio estén desplegadas ni
-que se haya comprobado la consola del proyecto. Las reglas actuales bloquean
-las nuevas colecciones y las escrituras de hoteles: se ampliarán antes de activar
-esas funciones, no se abrirán provisionalmente a cualquier usuario.
+que se haya comprobado la consola del proyecto. Las reglas locales habilitan users
+con restricciones y mantienen cerradas las escrituras de hoteles y logs. No se abren
+provisionalmente a cualquier usuario.
 
 Base: `(default)` del proyecto `iot-telito`. Las claves de documento de hotel
 conservan los IDs numéricos usados por la aplicación Android: `hotels/1`, etc.
@@ -93,7 +100,7 @@ de rol con estas reglas compartidas.
   precioTotal y pricePerNight como números para no romper el cliente integrado.
 - No guardar passwords, hashes de passwords, tarjetas completas ni CVV en Firestore.
 
-## users/{uid} - Perfil y autorización (pendiente)
+## users/{uid} - Perfil y autorización (código implementado; configuración remota pendiente)
 
 | Campo | Tipo | Significado |
 |---|---|---|
@@ -109,6 +116,8 @@ de rol con estas reglas compartidas.
 | photoUrl | texto o null | URL compartida cuando exista carga de fotos |
 | createdAt, updatedAt, lastAccessAt | Timestamp | Auditoría; lastAccessAt puede ser null al crear |
 | legacyLocalId | entero o null | Referencia de migración del catálogo local, no identidad Auth |
+| statusReason | texto | Motivo de la última desactivación; vacío al reactivar |
+| updatedByUid | texto | Superadmin que efectuó el cambio de estado |
 
 Firebase Auth valida credenciales; este documento aporta el perfil y rol de negocio.
 Crear un registro de Auth no crea automáticamente este documento: el registro
@@ -209,5 +218,6 @@ web de taxistas sigue pasando por su API REST: este contrato no la sustituye.
    de pruebas antes de publicar en el proyecto compartido.
 6. Reportes: mostrar reservas reales, sin mezclar las de demostración.
 
-Estos son criterios de aceptación futuros. En pasos 1 y 2 solo se verifica la
-integración de código, compilación y contrato; no se declaran superadas estas pruebas.
+Son criterios de aceptación para la integración completa. Los pasos 3 y 4 tienen
+pruebas locales de contrato, reglas y rechazo del acceso sin cuenta; no se declara
+superado el recorrido remoto de aceptación. La guía de pasos 3 y 4 detalla sus límites.

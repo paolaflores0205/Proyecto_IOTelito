@@ -15,3 +15,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+/.firebase/
+/firebase-debug.log*
+/firestore-debug.log*
+/ui-debug.log*

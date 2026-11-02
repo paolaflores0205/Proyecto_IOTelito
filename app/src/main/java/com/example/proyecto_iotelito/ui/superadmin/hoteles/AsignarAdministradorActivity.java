@@ -50,7 +50,7 @@ public class AsignarAdministradorActivity extends AppCompatActivity {
             }
             updateButton();
         });
-        model.users().observe(this, rows -> { users = rows; renderAdmins(); });
+        model.localUsers().observe(this, rows -> { users = rows; renderAdmins(); });
         model.busy().observe(this, busy -> updateButton());
         model.result().observe(this, result -> {
             if (!result.consume()) return;

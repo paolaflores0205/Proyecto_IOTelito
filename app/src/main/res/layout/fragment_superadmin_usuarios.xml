@@ -116,6 +116,15 @@
         android:textStyle="bold"
         tools:text="Mostrando 4 usuarios" />
 
+    <TextView
+        android:id="@+id/tv_users_sync_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="8dp"
+        android:textColor="@color/io_text_secondary"
+        android:textSize="12sp" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
