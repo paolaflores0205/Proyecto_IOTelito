@@ -16,10 +16,31 @@ release confirmó coincidencia exacta con el archivo local probado.
 - El respaldo de reglas anteriores quedó fuera del repositorio, en la carpeta
   local de herramientas `D:/IoTelitoFirebaseTools`.
 
-Falta ejecutar el recorrido Android con la cuenta real. La publicación y las
-lecturas administrativas no prueban por sí solas el login ni las escrituras de
-la app bajo Security Rules. No se hizo push a GitHub ni se incluyeron credenciales
-en el repositorio.
+En Android se verificaron el login de la cuenta real, la lectura del hotel y el
+guardado de su descripción. También se creó la habitación `LAB-ADMIN`, se cambió
+su precio de 150.50 a 175.75 y se retiró desde la app. Las lecturas posteriores
+en Firestore confirmaron los cambios y el UID del admin en el resumen del hotel.
+La habitación quedó archivada y el inventario volvió a 7 unidades.
+Los servicios de demostración se cargaron mediante la API administrativa y se
+comprobó su lectura en la app; ese alta inicial no prueba escrituras desde Android.
+No se hizo push a GitHub ni se incluyeron credenciales en el repositorio.
+
+## Datos preparados para la presentación
+
+Se conservaron las 7 habitaciones del ejemplo. La descripción temporal de
+validación se sustituyó por la descripción de `HotelAdminSampleData`; se completaron
+teléfono y atracciones cuando estaban vacíos. No se sustituyeron otros hoteles.
+Los servicios reutilizan los ejemplos existentes del mismo archivo:
+
+| Servicio | Precio S/ | Unidad | Estado |
+|---|---:|---|---|
+| Desayuno Buffet | 45.00 | persona | Activo |
+| Lavandería Express | 35.00 | carga | Activo |
+| Traslado Aeropuerto | 80.00 | servicio | Activo |
+| Spa & Masajes | 120.00 | sesión | Inactivo |
+
+Son datos de demostración. No se crearon reservas, cobros ni cifras de ocupación
+o ingresos para llenar las secciones que todavía no tienen integración remota.
 
 ## Alcance implementado
 
@@ -130,9 +151,10 @@ importes ficticios. Disponibles representa habitaciones habilitadas, no una
 consulta de ocupación por fechas. Las notificaciones de checkout de ejemplo no se
 generan en este recorrido remoto. La galería compartida es de consulta.
 
-Las reglas ya están desplegadas y la cuenta de prueba tiene hotel asignado;
-queda pendiente la prueba desde Android con Firebase real. Compilar y probar
-reglas en el emulador no sustituye ese recorrido con las credenciales del usuario.
+Las reglas ya están desplegadas y la cuenta de prueba tiene hotel asignado.
+El login, los datos del hotel y el alta/edición/retirada de habitaciones se
+comprobaron con la cuenta real. El CRUD de servicios en Android y las demás
+secciones remotas conservan los límites indicados en esta guía.
 
 ## Código para explicar
 
