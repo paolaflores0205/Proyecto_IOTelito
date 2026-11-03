@@ -53,6 +53,97 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /taxistas/{uid} {
+      allow get: if request.auth != null
+        && request.auth.uid == uid;
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && resource.data.activo == true
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['disponible'])
+        && request.resource.data.disponible is bool;
+    }
+
+    // Integración de taxi: estos permisos solo se aplican a las colecciones nuevas.
+    function taxiDriver() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/taxistas/$(request.auth.uid))
+        && get(/databases/$(database)/documents/taxistas/$(request.auth.uid)).data.activo == true;
+    }
+
+    match /taxiRequests/{requestId} {
+      function ownsReservation() {
+        return exists(/databases/$(database)/documents/reservations/$(requestId))
+          && get(/databases/$(database)/documents/reservations/$(requestId)).data.clientUid == request.auth.uid;
+      }
+      function driverLockAfter() {
+        return getAfter(/databases/$(database)/documents/taxiDrivers/$(request.auth.uid)).data.activeRequestId;
+      }
+      allow get: if request.auth != null && (
+        (resource == null && (ownsReservation() || taxiDriver()))
+        || (resource != null && (resource.data.clientUid == request.auth.uid
+          || (taxiDriver() && (resource.data.estado == 'SOLICITADO'
+            || resource.data.taxistaUid == request.auth.uid)))));
+      allow list: if request.auth != null && (resource.data.clientUid == request.auth.uid
+        || (taxiDriver() && (resource.data.estado == 'SOLICITADO'
+          || resource.data.taxistaUid == request.auth.uid)));
+      allow create: if request.auth != null && ownsReservation()
+        && request.resource.data.keys().hasOnly(['id','reserva','clientUid','cliente','nombre','hotel',
+             'origen','destino','hora','pasajeros','maletas','estado','creado','taxistaUid','taxista','conductor','finalizado'])
+        && request.resource.data.id is int && request.resource.data.id > 0
+        && requestId == string(request.resource.data.id)
+        && request.resource.data.reserva == request.resource.data.id
+        && request.resource.data.clientUid == request.auth.uid
+        && request.resource.data.cliente == request.auth.token.email
+        && request.resource.data.nombre is string && request.resource.data.nombre.size() > 0
+        && request.resource.data.hotel is string && request.resource.data.origen is string
+        && request.resource.data.destino == 'Aeropuerto Jorge Chávez'
+        && request.resource.data.hora is string
+        && request.resource.data.hora.matches('([01][0-9]|2[0-3]):[0-5][0-9]')
+        && request.resource.data.pasajeros is int && request.resource.data.pasajeros >= 1
+        && request.resource.data.maletas is int && request.resource.data.maletas >= 0
+        && request.resource.data.estado == 'SOLICITADO'
+        && request.resource.data.taxistaUid == '' && request.resource.data.taxista == ''
+        && request.resource.data.conductor == '' && request.resource.data.finalizado == null
+        && request.resource.data.creado == request.time;
+      allow update: if taxiDriver() && (
+        (resource.data.estado == 'SOLICITADO' && resource.data.taxistaUid == ''
+          && request.resource.data.estado == 'ASIGNADO'
+          && get(/databases/$(database)/documents/taxistas/$(request.auth.uid)).data.disponible == true
+          && request.resource.data.taxistaUid == request.auth.uid
+          && request.resource.data.taxista == request.auth.token.email
+          && request.resource.data.conductor is string && request.resource.data.conductor.size() > 0
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','taxistaUid','taxista','conductor'])
+          && driverLockAfter() == requestId)
+        || (resource.data.taxistaUid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
+          && ((resource.data.estado == 'ASIGNADO' && request.resource.data.estado == 'EN_CAMINO')
+            || (resource.data.estado == 'EN_CAMINO' && request.resource.data.estado == 'EN_TRASLADO'))
+          && driverLockAfter() == requestId)
+        || (resource.data.taxistaUid == request.auth.uid && resource.data.estado == 'EN_TRASLADO'
+          && request.resource.data.estado == 'FINALIZADO'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','finalizado'])
+          && request.resource.data.finalizado == request.time && driverLockAfter() == ''));
+      allow delete: if false;
+    }
+
+    match /taxiDrivers/{uid} {
+      function validLock() {
+        let id = request.resource.data.activeRequestId;
+        return request.resource.data.keys().hasOnly(['activeRequestId']) && id is string
+          && ((id != ''
+              && (!exists(/databases/$(database)/documents/taxiDrivers/$(uid))
+                  || resource.data.activeRequestId == '')
+              && getAfter(/databases/$(database)/documents/taxiRequests/$(id)).data.estado == 'ASIGNADO'
+              && getAfter(/databases/$(database)/documents/taxiRequests/$(id)).data.taxistaUid == uid)
+            || (id == '' && resource != null && resource.data.activeRequestId != ''
+              && getAfter(/databases/$(database)/documents/taxiRequests/$(resource.data.activeRequestId)).data.estado == 'FINALIZADO'
+              && getAfter(/databases/$(database)/documents/taxiRequests/$(resource.data.activeRequestId)).data.taxistaUid == uid));
+      }
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if taxiDriver() && request.auth.uid == uid && validLock();
+      allow list, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

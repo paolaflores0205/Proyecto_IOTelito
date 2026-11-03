@@ -23,23 +23,38 @@ public final class ConductorRepository {
     public final LiveData<List<ServicioConductorEntity>> servicios;
     public final LiveData<List<AvisoConductorEntity>> avisos;
     public final MutableLiveData<String> error=new MutableLiveData<>();
+    private final String firebaseUid;
+    private final MutableLiveData<List<ServicioConductorEntity>> remotos=new MutableLiveData<>(Collections.emptyList());
+    private final List<com.google.firebase.firestore.ListenerRegistration> listeners=new ArrayList<>();
+    private final Map<Integer,org.json.JSONObject> disponiblesRemotos=new HashMap<>(),propiosRemotos=new HashMap<>();
+    private final Set<Integer> idsRemotos=ConcurrentHashMap.newKeySet();
+    private boolean solicitudesListas,historialListo;
+    private volatile boolean cerrado;
     public ConductorRepository(Context context) {this(context,ConductorDatabase.get(context),true);}
     // Base inyectable para comprobar almacenamiento sin alterar los datos del usuario.
     ConductorRepository(Context context,ConductorDatabase database,boolean compartir) {
         this.context=context.getApplicationContext();
         AuthenticatedUser u=SessionRepository.obtener(context);
         cuenta=u!=null&&u.getRole()==UserRole.TAXISTA ? u.getEmail() : "";
+        firebaseUid=compartir&&!cuenta.isEmpty()&&FirebaseTaxiStore.usaFirebase(context)?FirebaseTaxiStore.uid():null;
         db=database; dao=db.dao();
-        servicios=dao.observar(cuenta); avisos=dao.avisos(cuenta);
-        if(!cuenta.isEmpty()) IO.execute(()->{try { seed(); if(compartir)sincronizar(); } catch(Exception e) {fallo(e);} });
+        servicios=firebaseUid==null?dao.observar(cuenta):remotos;
+        avisos=firebaseUid==null?dao.avisos(cuenta):Transformations.map(dao.avisos(cuenta),rows->{
+            List<AvisoConductorEntity> result=new ArrayList<>();
+            for(AvisoConductorEntity aviso:rows)if(idsRemotos.contains(aviso.servicio))result.add(aviso);
+            return result;
+        });
+        if(firebaseUid!=null) observarRemotos();
+        else if(!cuenta.isEmpty()) IO.execute(()->{try { seed(); if(compartir)sincronizar(); } catch(Exception e) {fallo(e);} });
     }
     private void autorizar() {
         AuthenticatedUser u=SessionRepository.obtener(context);
         if(u==null||u.getRole()!=UserRole.TAXISTA||!cuenta.equals(u.getEmail())) throw new IllegalStateException("Sesión de taxista requerida");
+        if(firebaseUid!=null&&!FirebaseTaxiStore.mismaSesion(firebaseUid))throw new IllegalStateException("La sesión Firebase cambió");
     }
     private void fallo(Exception e) {
         Log.e("TaxistaLocal","No se pudo completar la operación",e);
-        error.postValue(context.getString(R.string.taxista_local_error));
+        error.postValue(context.getString(firebaseUid==null?R.string.taxista_local_error:R.string.taxista_servicios_remotos_error));
     }
     public <T> void ejecutar(LifecycleOwner owner,Callable<T> tarea,Consumer<T> resultado) {
         MutableLiveData<Resultado<T>> live=new MutableLiveData<>();
@@ -63,7 +78,54 @@ public final class ConductorRepository {
             InicioConductorEntity inicio=new InicioConductorEntity(); inicio.cuenta=cuenta; dao.iniciar(inicio);
         });
     }
-    public void refrescar() { IO.execute(()->{try {autorizar(); sincronizar();} catch(Exception e){fallo(e);} }); }
+    public void refrescar() { IO.execute(()->{try {autorizar(); if(firebaseUid==null)sincronizar();else publicar();} catch(Exception e){fallo(e);} }); }
+
+    private void observarRemotos() {
+        com.google.firebase.firestore.Query[] queries={
+            FirebaseTaxiStore.db().collection("taxiRequests").whereEqualTo("estado","SOLICITADO"),
+            FirebaseTaxiStore.db().collection("taxiRequests").whereEqualTo("taxistaUid",firebaseUid)
+        };
+        for(int index=0;index<queries.length;index++) {
+            final boolean propios=index==1;
+            listeners.add(queries[index].addSnapshotListener(com.google.firebase.firestore.MetadataChanges.INCLUDE,(snapshot,e)->{
+                if(cerrado||!FirebaseTaxiStore.mismaSesion(firebaseUid))return;
+                if(e!=null){fallo(e);return;}
+                if(snapshot==null||snapshot.getMetadata().isFromCache()||snapshot.getMetadata().hasPendingWrites())return;
+                List<org.json.JSONObject> pedidos=new ArrayList<>();
+                for(com.google.firebase.firestore.DocumentSnapshot document:snapshot.getDocuments())pedidos.add(FirebaseTaxiStore.json(document,false));
+                IO.execute(()->{try {
+                    if(cerrado)return;autorizar();
+                    Map<Integer,org.json.JSONObject> destino=propios?propiosRemotos:disponiblesRemotos;
+                    destino.clear();for(org.json.JSONObject pedido:pedidos)destino.put(pedido.optInt("id"),pedido);
+                    if(propios)historialListo=true;else solicitudesListas=true;
+                    if(!solicitudesListas||!historialListo)return;
+                    Map<Integer,org.json.JSONObject> union=new HashMap<>(disponiblesRemotos);union.putAll(propiosRemotos);
+                    List<ServicioConductorEntity> rows=new ArrayList<>();
+                    db.runInTransaction(()->{
+                        for(org.json.JSONObject pedido:union.values()) {
+                            ServicioConductorEntity row=desdeRemoto(pedido);dao.guardar(row);rows.add(row);idsRemotos.add(row.id);
+                            if("SOLICITADO".equals(row.estado))aviso(row,"solicitud",context.getString(R.string.taxista_local_nueva),row.nombre+" · "+row.hotel);
+                            else dao.quitarSolicitud(cuenta,row.id);
+                            if("FINALIZADO".equals(row.estado))aviso(row,"finalizado",context.getString(R.string.taxista_local_fin),row.nombre+" · "+row.destino);
+                        }
+                        for(ServicioConductorEntity row:dao.todos(cuenta))if(row.cliente&&!union.containsKey(row.id)) {
+                            dao.quitarSolicitud(cuenta,row.id);TaxistaNotificaciones.cancelar(context,cuenta,row.id);
+                        }
+                    });
+                    rows.sort(Comparator.comparingLong((ServicioConductorEntity row)->row.finalizado).reversed().thenComparingInt(row->row.id));
+                    remotos.postValue(rows);publicar();
+                }catch(Exception error){fallo(error);} });
+            }));
+        }
+    }
+
+    private ServicioConductorEntity desdeRemoto(org.json.JSONObject pedido) {
+        ServicioConductorEntity row=ServicioConductorEntity.from(cuenta,TaxiRepository.convertir(pedido),true);
+        row.origen=pedido.optString("origen",row.hotel);row.estado=pedido.optString("estado");
+        row.finalizado=pedido.optLong("finalizado");return row;
+    }
+
+    public void close() {cerrado=true;for(com.google.firebase.firestore.ListenerRegistration listener:listeners)listener.remove();listeners.clear();}
     private void sincronizar() {
         // Los ejemplos se cargan primero: una falla del repositorio compartido no los oculta.
         for(ServicioConductorEntity e:dao.todos(cuenta)) {
@@ -91,11 +153,22 @@ public final class ConductorRepository {
             aviso(e,"solicitud",context.getString(R.string.taxista_local_nueva),e.nombre+" · "+e.hotel);
         publicar();
     }
-    public ServicioConductorEntity buscar(int id) {return dao.buscar(cuenta,id);}
+    public ServicioConductorEntity buscar(int id) {
+        if(firebaseUid==null)return dao.buscar(cuenta,id);
+        autorizar();org.json.JSONObject pedido=FirebaseTaxiStore.buscar(id,false);
+        if(pedido==null)return null;
+        ServicioConductorEntity row=desdeRemoto(pedido);dao.guardar(row);return row;
+    }
     public ServicioConductorEntity activo() {return dao.activo(cuenta);}
     public boolean aceptar(int id) {
         autorizar();
         if(!ConductorPreferencias.disponible(context,cuenta)) return false;
+        if(firebaseUid!=null) {
+            AuthenticatedUser user=SessionRepository.obtener(context);
+            boolean ok=FirebaseTaxiStore.avanzar(firebaseUid,id,"ASIGNADO",cuenta,user.getDisplayName());
+            if(ok){buscar(id);dao.quitarSolicitud(cuenta,id);TaxistaNotificaciones.cancelar(context,cuenta,id);}
+            return ok;
+        }
         ServicioConductorEntity e=buscar(id);
         if(e==null||!"SOLICITADO".equals(e.estado)||activo()!=null) return false;
         if(e.cliente&&!TaxiRepository.avanzar(context,id,TaxiRepository.Estado.ASIGNADO)) return false;
@@ -104,6 +177,12 @@ public final class ConductorRepository {
         return true;
     }
     public boolean avanzar(int id,EstadoServicio siguiente) {
+        if(firebaseUid!=null) {
+            autorizar();AuthenticatedUser user=SessionRepository.obtener(context);
+            boolean ok=FirebaseTaxiStore.avanzar(firebaseUid,id,siguiente.name(),cuenta,user.getDisplayName());
+            if(ok)buscar(id);
+            return ok;
+        }
         autorizar(); ServicioConductorEntity e=buscar(id);
         if(e==null) return false;
         boolean valido=("ASIGNADO".equals(e.estado)&&siguiente==EstadoServicio.EN_CAMINO)
@@ -130,6 +209,7 @@ public final class ConductorRepository {
     public void publicar() {
         autorizar();
         for(AvisoConductorEntity a:dao.pendientes(cuenta)) {
+            if(firebaseUid!=null&&!idsRemotos.contains(a.servicio))continue;
             if("solicitud".equals(a.tipo)&&!ConductorPreferencias.disponible(context,cuenta))continue;
             // Un fallo de notificación no revierte el servicio guardado.
             if(TaxistaNotificaciones.publicar(context,a)) dao.publicado(cuenta,a.clave);

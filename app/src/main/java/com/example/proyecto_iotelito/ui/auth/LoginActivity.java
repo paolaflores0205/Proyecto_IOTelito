@@ -17,6 +17,8 @@ import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.LocalAuthRepository;
 import com.example.proyecto_iotelito.data.RememberedCredentialsRepository;
 import com.example.proyecto_iotelito.data.SessionRepository;
+import com.example.proyecto_iotelito.data.taxista.TaxistaSessionProfile;
+import com.example.proyecto_iotelito.data.taxista.TaxistaAuthRepository;
 import com.example.proyecto_iotelito.databinding.ActivityLoginBinding;
 import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
 import com.example.proyecto_iotelito.model.auth.UserRole;
@@ -28,6 +30,7 @@ import com.example.proyecto_iotelito.ui.taxista.TaxistaMainActivity;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -53,6 +56,10 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(this, RecoverPasswordActivity.class)));
         binding.createAccountButton.setOnClickListener(view ->
                 startActivity(new Intent(this, RegisterActivity.class)));
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null && TaxistaAuthRepository.restaurar(this, firebaseUser) != null) {
+            resolverPerfil(null);
+        }
     }
 
     private void configurarRecordarme() {
@@ -90,6 +97,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void attemptLogin() {
+        if (!binding.loginButton.isEnabled()) return;
         binding.emailLayout.setError(null);
         binding.passwordLayout.setError(null);
 
@@ -117,8 +125,8 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginButton.setEnabled(false);
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
-                    binding.loginButton.setEnabled(true);
                     if (!task.isSuccessful()) {
+                        binding.loginButton.setEnabled(true);
                         binding.passwordLayout.setError(getString(task.getException()
                                 instanceof FirebaseNetworkException
                                 ? R.string.login_error_network : R.string.login_error_credentials));
@@ -126,24 +134,48 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                     if (firebaseUser == null) {
+                        binding.loginButton.setEnabled(true);
                         binding.passwordLayout.setError(getString(R.string.login_error_credentials));
                         return;
                     }
-                    String name = firebaseUser.getDisplayName();
-                    completarLogin(new AuthenticatedUser(firebaseUser.getEmail(),
-                            name == null || name.isEmpty() ? email : name, UserRole.CLIENT), password);
+                    resolverPerfil(password);
                 });
     }
 
+    private void resolverPerfil(@Nullable String password) {
+        binding.loginButton.setEnabled(false);
+        binding.createAccountButton.setEnabled(false);
+        binding.forgotPasswordButton.setEnabled(false);
+        TaxistaAuthRepository.resolver().addOnCompleteListener(this, task -> {
+            binding.loginButton.setEnabled(true);
+            binding.createAccountButton.setEnabled(true);
+            binding.forgotPasswordButton.setEnabled(true);
+            if (task.isSuccessful()) {
+                completarLogin(task.getResult(), password);
+                return;
+            }
+            Exception error = task.getException();
+            SessionRepository.cerrar(this);
+            int message = R.string.login_error_profile;
+            if (error instanceof TaxistaSessionProfile.TaxistaInactivoException) message = R.string.login_taxista_inactivo;
+            if (error instanceof FirebaseFirestoreException) {
+                FirebaseFirestoreException.Code code = ((FirebaseFirestoreException) error).getCode();
+                if (code == FirebaseFirestoreException.Code.PERMISSION_DENIED) message = R.string.login_error_profile_permissions;
+                else if (code == FirebaseFirestoreException.Code.UNAVAILABLE) message = R.string.login_error_network;
+            }
+            binding.passwordLayout.setError(getString(message));
+        });
+    }
+
     private void completarLogin(AuthenticatedUser user, String password) {
-        if (binding.rememberMe.isChecked()) {
+        if (password != null && binding.rememberMe.isChecked()) {
             try {
                 RememberedCredentialsRepository.guardar(this, user.getEmail(), password);
             } catch (GeneralSecurityException | IOException exception) {
                 Toast.makeText(this, R.string.login_recordar_error, Toast.LENGTH_LONG).show();
                 return;
             }
-        } else {
+        } else if (password != null) {
             RememberedCredentialsRepository.olvidar(this, user.getEmail());
         }
         SessionRepository.guardar(this, user);

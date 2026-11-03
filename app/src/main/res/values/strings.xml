@@ -627,6 +627,17 @@
     <string name="login_create_account">Crear cuenta</string>
     <string name="login_local_notice">Modo local: todavía no se utiliza una base de datos.</string>
     <string name="login_error_required">Completa este campo</string>
+    <string name="login_taxista_inactivo">Tu cuenta de taxista está inactiva. Contacta al administrador.</string>
+    <string name="taxista_disponibilidad_cargando">Consultando disponibilidad…</string>
+    <string name="taxista_servicios_remotos_error">No se pudieron consultar o guardar los servicios en Firebase. Revisa la conexión y los permisos; vuelve a abrir el panel para reintentar.</string>
+    <string name="taxista_disponibilidad_guardando">Guardando disponibilidad…</string>
+    <string name="taxista_disponibilidad_conexion">Esperando conexión para confirmar tu disponibilidad.</string>
+    <string name="taxista_disponibilidad_permisos">No se pudo actualizar la disponibilidad. Revisa los permisos de Firestore y vuelve a abrir el panel.</string>
+    <string name="taxista_disponibilidad_perfil">Tu perfil está inactivo o incompleto. Contacta al administrador.</string>
+    <string name="taxista_disponibilidad_sesion">La sesión cambió. Vuelve a iniciar sesión.</string>
+    <string name="taxista_disponibilidad_error">No se guardó el cambio. Se conserva el último estado confirmado; inténtalo de nuevo.</string>
+    <string name="login_error_profile">No se pudo verificar tu perfil. Inténtalo de nuevo.</string>
+    <string name="login_error_profile_permissions">No se pudo consultar tu perfil. Revisa las reglas de acceso a taxistas en Firestore.</string>
     <string name="login_error_credentials">El correo o la contraseña son incorrectos</string>
     <string name="login_recovery_pending">La recuperación estará disponible al conectar Firebase Authentication.</string>
     <string name="login_registration_pending">El registro se conectará en un siguiente incremento.</string>
