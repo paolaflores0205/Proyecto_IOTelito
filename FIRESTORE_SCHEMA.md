@@ -5,8 +5,9 @@
 Datos del hotel, habitaciones y servicios adicionales tienen lectura y escritura
 Firestore en `feat/hotel-admin-firebase`. La guía vigente para este alcance es
 `GUIA_FIREBASE_ADMIN.md`. Esto sustituye las notas anteriores de inventario admin
-pendiente, únicamente para esta rama; no significa que se hayan publicado reglas
-ni configurado o probado cuentas reales en el proyecto compartido.
+pendiente, únicamente para esta rama. El 03/11/2026 se publicaron las reglas de
+esta versión con autorización, y se verificó un perfil admin asignado al hotel 1.
+Queda pendiente el recorrido de lectura/escritura desde Android con la cuenta real.
 
 - Se usa el `hotelId` del perfil autenticado, y se verifica también
   `hotels/{id}.administratorUid` y el estado activo del hotel.
@@ -29,9 +30,11 @@ ni configurado o probado cuentas reales en el proyecto compartido.
   remota. El panel de cuentas Firebase bloquea esas secciones y no muestra sus
   ejemplos locales como datos reales. La galería remota se consulta sin edición.
 
-La preparación de Auth/perfiles, hoteles y asignaciones, y la publicación coordinada
-de las reglas siguen pendientes en Firebase real. Los fixtures explícitos locales
-de instrumentación mantienen el recorrido anterior con Room.
+Las reglas publicadas se verificaron por contenido después del despliegue;
+la configuración de prueba del hotel 1 ya existe. Para otras cuentas siguen siendo
+necesarios sus perfiles y asignaciones. Los fixtures explícitos locales de
+instrumentación mantienen el recorrido anterior con Room. Los estados históricos
+de superadmin que siguen describen la revisión original del 02/11/2026.
 
 Revisión: 02/11/2026, pasos 1 a 7. Este documento define el contrato de integración;
 **no crea colecciones, cuentas, índices ni publica reglas en Firebase**. Conserva

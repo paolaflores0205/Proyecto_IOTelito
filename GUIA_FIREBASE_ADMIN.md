@@ -2,6 +2,25 @@
 
 03/11/2026. Rama local `feat/hotel-admin-firebase`.
 
+## Configuración remota verificada
+
+El 03/11/2026 se creó y verificó el perfil de prueba HOTEL_ADMIN, y se asignó
+Hotel Miraflores Park (ID 1) actualizando ambos vínculos atómicamente.
+Con autorización del usuario se publicaron las reglas de esta rama en
+`iot-telito`, base `(default)`, a las 09:09 de Lima. La lectura posterior de la
+release confirmó coincidencia exacta con el archivo local probado.
+
+- Ruleset activo: `45c0efb0-ce35-4361-9a65-488f0db23e44`.
+- SHA-256: `3588862fab6d37ef4923c1bdda577b9894b3538944fb25137a65adf59de42104`.
+- Se conservaron las reglas de cliente, taxi y superadmin.
+- El respaldo de reglas anteriores quedó fuera del repositorio, en la carpeta
+  local de herramientas `D:/IoTelitoFirebaseTools`.
+
+Falta ejecutar el recorrido Android con la cuenta real. La publicación y las
+lecturas administrativas no prueban por sí solas el login ni las escrituras de
+la app bajo Security Rules. No se hizo push a GitHub ni se incluyeron credenciales
+en el repositorio.
+
 ## Alcance implementado
 
 El login compartido autentica por correo/contraseña y consulta `users/{UID}` en
@@ -40,9 +59,9 @@ La galería del hotel lee las fotos compartidas que administra superadmin.
 
 ## Preparación en la consola compartida
 
-Estos pasos no se ejecutaron automáticamente. No necesitas compartir contraseñas,
-tokens de acceso ni claves privadas. No basta con instalar el APK para crear datos
-o publicar las reglas del proyecto.
+Estos pasos quedan como referencia para nuevas cuentas o instalaciones. Para el
+perfil de prueba y el hotel 1 ya se verificó la configuración descrita arriba.
+No necesitas compartir contraseñas, tokens de acceso ni claves privadas.
 
 1. En Authentication de `iot-telito`, reutiliza tu cuenta real si ya existe; en otro
    caso crea una de prueba por correo/contraseña y conserva su contraseña privada.
@@ -111,9 +130,9 @@ importes ficticios. Disponibles representa habitaciones habilitadas, no una
 consulta de ocupación por fechas. Las notificaciones de checkout de ejemplo no se
 generan en este recorrido remoto. La galería compartida es de consulta.
 
-Esta guía no afirma una prueba real en la nube. Compilar y probar reglas en el
-emulador no verifica que el equipo haya configurado las cuentas, hotel o reglas
-en el proyecto `iot-telito`. Tampoco se realizó push o despliegue.
+Las reglas ya están desplegadas y la cuenta de prueba tiene hotel asignado;
+queda pendiente la prueba desde Android con Firebase real. Compilar y probar
+reglas en el emulador no sustituye ese recorrido con las credenciales del usuario.
 
 ## Código para explicar
 
