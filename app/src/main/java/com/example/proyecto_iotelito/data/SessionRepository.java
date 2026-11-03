@@ -51,6 +51,9 @@ public final class SessionRepository {
                         AuthenticatedUser verified = com.example.proyecto_iotelito.model.auth.RemoteUserProfile
                                 .parse(uid, doc.getData()).authenticated();
                         if (verified.getRole() != user.getRole()) throw new IllegalArgumentException();
+                        if (user.getRole() == UserRole.HOTEL_ADMIN
+                                && !java.util.Objects.equals(verified.getHotelId(), user.getHotelId()))
+                            throw new IllegalArgumentException();
                         current = verified;
                     } catch (IllegalArgumentException invalid) {
                         cerrar(context);

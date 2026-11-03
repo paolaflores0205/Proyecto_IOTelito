@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository;
+import com.example.proyecto_iotelito.data.SessionRepository;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
@@ -19,10 +21,12 @@ public class DatosHotelActivity extends AppCompatActivity {
 
     private ActivityHoteladminDatosHotelBinding binding;
     private boolean formLoaded;
+    private FirebaseHotelAdminRepository remote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminAccessGuard.allow(this)) return;
         binding = ActivityHoteladminDatosHotelBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -32,6 +36,23 @@ public class DatosHotelActivity extends AppCompatActivity {
                 startActivity(new Intent(this, FotosHotelActivity.class)));
         binding.btnGuardar.setOnClickListener(v -> guardar());
         binding.btnGuardar.setEnabled(false);
+        if (FirebaseHotelAdminRepository.remote(this)) {
+            remote = new FirebaseHotelAdminRepository(this);
+            remote.observeHotel().observe(this, state -> {
+                binding.btnGuardar.setEnabled(state.data != null);
+                if (state.error != null) Toast.makeText(this, state.error, Toast.LENGTH_LONG).show();
+                if (state.data != null && !formLoaded) {
+                    binding.etNombre.setText(state.data.name);
+                    binding.etDireccion.setText(state.data.address);
+                    binding.etDescripcion.setText(state.data.description);
+                    binding.etAtracciones.setText(state.data.attractions);
+                    binding.etTelefono.setText(state.data.phone);
+                    binding.etEmail.setText(state.data.email);
+                    formLoaded = true;
+                }
+            });
+            return;
+        }
         HotelAdminLocalStore.get(this).load(error -> {
             if (isFinishing() || isDestroyed()) return;
             if (error != null) {
@@ -87,6 +108,16 @@ public class DatosHotelActivity extends AppCompatActivity {
                 nombre, direccion, valor(binding.etDescripcion.getText()),
                 valor(binding.etAtracciones.getText()), valor(binding.etTelefono.getText()), email);
         binding.btnGuardar.setEnabled(false);
+        if (remote != null) {
+            remote.saveDetails(details, error -> {
+                if (isFinishing() || isDestroyed()) return;
+                binding.btnGuardar.setEnabled(true);
+                if (error != null) { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); return; }
+                Toast.makeText(this, R.string.hoteladmin_datos_guardados, Toast.LENGTH_SHORT).show();
+                finish();
+            });
+            return;
+        }
         SuperadminRepository.getInstance(this).updateHotelDetailsFromAdmin(
                 HotelAdminSampleData.HOTEL_ID, details, (id, error) -> {
                     if (isFinishing() || isDestroyed()) return;

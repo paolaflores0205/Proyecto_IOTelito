@@ -43,6 +43,15 @@
                 xmlns:tools="http://schemas.android.com/tools" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/btn_cerrar_sesion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/hoteladmin_cerrar_sesion"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+
         <include layout="@layout/view_hoteladmin_logo" />
     </LinearLayout>
 
@@ -246,6 +255,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:id="@+id/tv_comparacion_ingresos"
                             android:text="@string/hoteladmin_stat_vs_ayer"
                             android:textColor="@color/io_teal"
                             android:textSize="12sp" />

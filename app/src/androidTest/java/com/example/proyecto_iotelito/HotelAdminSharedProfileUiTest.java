@@ -22,6 +22,18 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class HotelAdminSharedProfileUiTest {
+    @org.junit.Before public void explicitLocalAdminFixture() {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        com.example.proyecto_iotelito.data.SessionRepository.cerrar(context);
+        com.example.proyecto_iotelito.data.SessionRepository.guardar(context,
+                new com.example.proyecto_iotelito.model.auth.AuthenticatedUser("admin@example.test", "Admin de prueba",
+                        com.example.proyecto_iotelito.model.auth.UserRole.HOTEL_ADMIN));
+    }
+
+    @org.junit.After public void clearFixture() {
+        com.example.proyecto_iotelito.data.SessionRepository.cerrar(
+                InstrumentationRegistry.getInstrumentation().getTargetContext());
+    }
     @Test public void datosAdminMuestraElPerfilDeLaBaseCompartida() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         Context context = instrumentation.getTargetContext();

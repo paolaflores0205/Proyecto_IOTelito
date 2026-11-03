@@ -74,6 +74,11 @@ class TaxiRulesTest(unittest.TestCase):
     def setUp(self):
         status, body = request("DELETE", f"/emulator/v1/projects/{PROJECT}/databases/(default)/documents")
         self.assertEqual(200, status, body)
+        # Contrato integrado: toda cuenta de la app tiene perfil users; taxistas es operativo.
+        for uid in ("client1", "client2", "driver1", "driver2"):
+            self.ok(commit([write("users/" + uid, {"uid": uid, "active": True,
+                "role": "TAXISTA" if uid.startswith("driver") else "CLIENT",
+                "name": uid, "email": uid + "@example.test"})], "owner"))
         for uid in ("driver1", "driver2"):
             self.ok(commit([write("taxistas/" + uid,
                 {"nombre": uid, "activo": True, "disponible": True})], "owner"))
@@ -211,7 +216,7 @@ if __name__ == "__main__":
     URL = f"http://127.0.0.1:{port}"
     with tempfile.TemporaryDirectory(prefix="iotelito-rules-") as directory:
         with open(Path(directory) / "emulator.log", "w+") as log:
-            process = subprocess.Popen([args.java, "-jar", str(Path(args.jar).resolve()),
+            process = subprocess.Popen([args.java, "-Duser.language=en", "-Duser.country=US", "-jar", str(Path(args.jar).resolve()),
                 "--host", "127.0.0.1", "--port", str(port), "--project_id", PROJECT,
                 "--rules", str(ROOT / "firestore.rules")], stdout=log, stderr=log, cwd=directory)
             try:
@@ -225,7 +230,7 @@ if __name__ == "__main__":
                     except OSError: time.sleep(0.2)
                 else: raise RuntimeError("El emulador no inició")
                 status, body = request("PUT", f"/emulator/v1/projects/{PROJECT}:securityRules",
-                    {"rules": {"files": [{"name": "firestore.rules", "content": (ROOT / "firestore.rules").read_text()}]}})
+                    {"rules": {"files": [{"name": "firestore.rules", "content": (ROOT / "firestore.rules").read_text(encoding="utf-8")}]}})
                 if status != 200: raise RuntimeError(body)
                 result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(TaxiRulesTest))
                 if not result.wasSuccessful(): raise SystemExit(1)

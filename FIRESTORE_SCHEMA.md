@@ -1,5 +1,38 @@
 # Contrato compartido Firestore - Cliente y Superadmin
 
+## Integración hotel-admin en esta rama (03/11/2026)
+
+Datos del hotel, habitaciones y servicios adicionales tienen lectura y escritura
+Firestore en `feat/hotel-admin-firebase`. La guía vigente para este alcance es
+`GUIA_FIREBASE_ADMIN.md`. Esto sustituye las notas anteriores de inventario admin
+pendiente, únicamente para esta rama; no significa que se hayan publicado reglas
+ni configurado o probado cuentas reales en el proyecto compartido.
+
+- Se usa el `hotelId` del perfil autenticado, y se verifica también
+  `hotels/{id}.administratorUid` y el estado activo del hotel.
+- `hotels/{id}/rooms/{roomId}` conserva el contrato existente y agrega
+  `archived` booleano, opcional en los documentos antiguos y falso al crear.
+  Retirar una habitación guarda `archived: true` y `disponible: false`.
+- El alta, edición o retirada de una habitación actualiza atómicamente `rooms`,
+  `hasInventory`, `pricePerNight`, `inventoryRevision`, `updatedAt` y `updatedByUid`
+  del hotel. `inventoryRevision` es entero, empieza implícitamente en 0 y aumenta
+  en 1 por cambio. Los resúmenes los mantiene la app; las reservas siguen validando
+  las habitaciones concretas. No representan ocupación histórica.
+- Los IDs nuevos de habitación y servicio son enteros aleatorios positivos y se
+  comprueba su ausencia en la transacción. Los existentes conservan su ID.
+- `hotels/{id}/services/{serviceId}` guarda `id` y `hotelId` enteros, `nombre`,
+  `descripcion` y `unidad` textos, `precio` número, `activo` y `archived` booleanos.
+  Es el detalle de los servicios adicionales del formulario admin. No sustituye
+  el arreglo `hotels.services` que usa el cliente para las comodidades del hotel.
+- No se borran físicamente habitaciones o servicios ni se reutilizan IDs retirados.
+- Reservas, checkout, mensajes y reportes de admin todavía no tienen adaptación
+  remota. El panel de cuentas Firebase bloquea esas secciones y no muestra sus
+  ejemplos locales como datos reales. La galería remota se consulta sin edición.
+
+La preparación de Auth/perfiles, hoteles y asignaciones, y la publicación coordinada
+de las reglas siguen pendientes en Firebase real. Los fixtures explícitos locales
+de instrumentación mantienen el recorrido anterior con Room.
+
 Revisión: 02/11/2026, pasos 1 a 7. Este documento define el contrato de integración;
 **no crea colecciones, cuentas, índices ni publica reglas en Firebase**. Conserva
 los nombres y campos que ya usa el módulo cliente. Las ampliaciones de

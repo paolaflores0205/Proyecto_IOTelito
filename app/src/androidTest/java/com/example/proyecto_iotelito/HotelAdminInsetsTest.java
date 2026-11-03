@@ -24,6 +24,17 @@ import static org.junit.Assert.*;
 public class HotelAdminInsetsTest {
     private final Instrumentation ins = InstrumentationRegistry.getInstrumentation();
 
+    @org.junit.Before public void explicitLocalAdminFixture() {
+        com.example.proyecto_iotelito.data.SessionRepository.cerrar(ins.getTargetContext());
+        com.example.proyecto_iotelito.data.SessionRepository.guardar(ins.getTargetContext(),
+                new com.example.proyecto_iotelito.model.auth.AuthenticatedUser("admin@example.test", "Admin de prueba",
+                        com.example.proyecto_iotelito.model.auth.UserRole.HOTEL_ADMIN));
+    }
+
+    @org.junit.After public void clearFixture() {
+        com.example.proyecto_iotelito.data.SessionRepository.cerrar(ins.getTargetContext());
+    }
+
     private Activity open(Class<? extends Activity> type) {
         ins.getUiAutomation().grantRuntimePermission(ins.getTargetContext().getPackageName(),
                 Manifest.permission.POST_NOTIFICATIONS);

@@ -8,6 +8,42 @@ service cloud.firestore {
         && profile().role in ['CLIENT', 'HOTEL_ADMIN', 'TAXISTA', 'SUPERADMIN'];
     }
     function superadmin() { return activeUser() && profile().role == 'SUPERADMIN'; }
+    function hotelAdmin(hotelId) {
+      return activeUser() && profile().role == 'HOTEL_ADMIN'
+        && profile().get('hotelId', null) == int(hotelId)
+        && exists(/databases/$(database)/documents/hotels/$(hotelId))
+        && get(/databases/$(database)/documents/hotels/$(hotelId)).data.id == int(hotelId)
+        && get(/databases/$(database)/documents/hotels/$(hotelId)).data.administratorUid == request.auth.uid
+        && get(/databases/$(database)/documents/hotels/$(hotelId)).data.active == true;
+    }
+    function validRoom(data, hotelId, roomId) {
+      return data.keys().hasOnly(['id', 'hotelId', 'tipo', 'nombreCodigo', 'areaM2', 'adultos',
+          'ninos', 'precioNoche', 'descripcion', 'disponible', 'archived'])
+        && data.id is int && data.id > 0 && string(data.id) == roomId && data.hotelId == int(hotelId)
+        && data.tipo is string && data.tipo.size() > 0 && data.tipo.size() <= 120
+        && data.nombreCodigo is string && data.nombreCodigo.size() > 0 && data.nombreCodigo.size() <= 80
+        && data.areaM2 is int && data.areaM2 > 0 && data.areaM2 <= 10000
+        && data.adultos is int && data.adultos > 0 && data.adultos <= 100
+        && data.ninos is int && data.ninos >= 0 && data.ninos <= 100
+        && data.precioNoche is number && data.precioNoche >= 0 && data.precioNoche <= 1000000
+        && data.descripcion is string && data.descripcion.size() <= 5000
+        && data.disponible is bool && data.archived is bool
+        && (data.archived == false || data.disponible == false);
+    }
+    function inventoryUpdate(hotelId) {
+      let before = get(/databases/$(database)/documents/hotels/$(hotelId)).data;
+      let after = getAfter(/databases/$(database)/documents/hotels/$(hotelId)).data;
+      return after.inventoryRevision == before.get('inventoryRevision', 0) + 1 && auditUpdate(after);
+    }
+    function validService(data, hotelId, serviceId) {
+      return data.keys().hasOnly(['id', 'hotelId', 'nombre', 'descripcion', 'precio', 'unidad', 'activo', 'archived'])
+        && data.id is int && data.id > 0 && string(data.id) == serviceId && data.hotelId == int(hotelId)
+        && data.nombre is string && data.nombre.size() > 0 && data.nombre.size() <= 160
+        && data.descripcion is string && data.descripcion.size() <= 5000
+        && data.precio is number && data.precio >= 0 && data.precio <= 1000000
+        && data.unidad is string && data.unidad.size() > 0 && data.unidad.size() <= 80
+        && data.activo is bool && data.archived is bool && (data.archived == false || data.activo == false);
+    }
     function nextHotelId() {
       return exists(/databases/$(database)/documents/system/hotelIds)
         ? get(/databases/$(database)/documents/system/hotelIds).data.nextId : 1000000;
@@ -126,6 +162,37 @@ service cloud.firestore {
           && request.resource.data.precioNoche is number && request.resource.data.precioNoche >= 0
           && request.resource.data.descripcion is string && request.resource.data.disponible is bool;
         allow update, delete: if false;
+        allow create: if hotelAdmin(hotelId) && inventoryUpdate(hotelId)
+          && validRoom(request.resource.data, hotelId, roomId) && request.resource.data.archived == false;
+        allow update: if hotelAdmin(hotelId) && inventoryUpdate(hotelId)
+          && resource.data.get('archived', false) == false && validRoom(request.resource.data, hotelId, roomId)
+          && request.resource.data.id == resource.data.id && request.resource.data.hotelId == resource.data.hotelId;
+      }
+      allow update: if hotelAdmin(hotelId) && auditUpdate(request.resource.data) && (
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'name', 'address', 'description', 'attractions', 'phone', 'email', 'updatedAt', 'updatedByUid'])
+          && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 160
+          && request.resource.data.address is string && request.resource.data.address.size() > 0 && request.resource.data.address.size() <= 500
+          && request.resource.data.description is string && request.resource.data.description.size() <= 5000
+          && request.resource.data.attractions is string && request.resource.data.attractions.size() <= 5000
+          && request.resource.data.phone is string && request.resource.data.phone.size() <= 80
+          && request.resource.data.email is string && request.resource.data.email.size() > 0 && request.resource.data.email.size() <= 320)
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'rooms', 'hasInventory', 'pricePerNight', 'inventoryRevision', 'updatedAt', 'updatedByUid'])
+          && request.resource.data.inventoryRevision is int
+          && request.resource.data.inventoryRevision == resource.data.get('inventoryRevision', 0) + 1
+          && request.resource.data.rooms is int && request.resource.data.rooms >= 0
+          && request.resource.data.hasInventory is bool && request.resource.data.pricePerNight is number
+          && request.resource.data.pricePerNight >= 0 && request.resource.data.pricePerNight <= 1000000)
+      );
+      match /services/{serviceId} {
+        allow read: if activeUser();
+        allow create: if hotelAdmin(hotelId) && validService(request.resource.data, hotelId, serviceId)
+          && request.resource.data.archived == false;
+        allow update: if hotelAdmin(hotelId) && resource.data.get('archived', false) == false
+          && validService(request.resource.data, hotelId, serviceId)
+          && request.resource.data.id == resource.data.id && request.resource.data.hotelId == resource.data.hotelId;
+        allow delete: if false;
       }
     }
 

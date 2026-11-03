@@ -111,6 +111,7 @@ public class IoTelitoApplication extends Application implements Application.Acti
     @Override public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) { }
     @Override public void onActivityStarted(@NonNull Activity activity) {
         com.example.proyecto_iotelito.ui.superadmin.SuperadminAccessGuard.verify(activity);
+        com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminAccessGuard.verify(activity);
     }
     @Override public void onActivityResumed(@NonNull Activity activity) { }
     @Override public void onActivityPaused(@NonNull Activity activity) { }

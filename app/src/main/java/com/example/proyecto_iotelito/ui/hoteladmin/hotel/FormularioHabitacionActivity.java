@@ -7,6 +7,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository;
+import com.example.proyecto_iotelito.data.SessionRepository;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
@@ -27,10 +29,13 @@ public class FormularioHabitacionActivity extends AppCompatActivity {
 
     private ActivityHoteladminFormularioHabitacionBinding binding;
     private int habitacionId = -1;
+    private FirebaseHotelAdminRepository remote;
+    private Habitacion remoteOriginal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminAccessGuard.allow(this)) return;
         binding = ActivityHoteladminFormularioHabitacionBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -43,10 +48,18 @@ public class FormularioHabitacionActivity extends AppCompatActivity {
         binding.boxFoto.setOnClickListener(v ->
                 Toast.makeText(this, R.string.hoteladmin_proximamente, Toast.LENGTH_SHORT).show());
 
+        if (FirebaseHotelAdminRepository.remote(this)) remote = new FirebaseHotelAdminRepository(this);
         habitacionId = getIntent().getIntExtra(EXTRA_HABITACION_ID, -1);
         if (habitacionId != -1) {
             binding.toolbar.tvTitle.setText(R.string.hoteladmin_titulo_editar_habitacion);
-            precargar(HotelAdminSampleData.habitacion(habitacionId), adapter);
+            if (remote == null) precargar(HotelAdminSampleData.habitacion(habitacionId), adapter);
+            else {
+                binding.btnGuardar.setEnabled(false);
+                remote.loadRoom(habitacionId, room -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    remoteOriginal = room; precargar(room, adapter); binding.btnGuardar.setEnabled(true);
+                }, error -> { if (!isFinishing()) { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); finish(); } });
+            }
         } else {
             binding.toolbar.tvTitle.setText(R.string.hoteladmin_titulo_nueva_habitacion);
         }
@@ -61,7 +74,7 @@ public class FormularioHabitacionActivity extends AppCompatActivity {
         binding.etArea.setText(String.valueOf(h.areaM2));
         binding.etAdultos.setText(String.valueOf(h.adultos));
         binding.etNinos.setText(String.valueOf(h.ninos));
-        binding.etPrecio.setText(String.format(Locale.US, "%.0f", h.precioNoche));
+        binding.etPrecio.setText(String.format(Locale.US, "%.2f", h.precioNoche));
         binding.etDescripcion.setText(h.descripcion);
         binding.swDisponible.setChecked(h.disponible);
     }
@@ -96,6 +109,20 @@ public class FormularioHabitacionActivity extends AppCompatActivity {
         String descripcion = binding.etDescripcion.getText().toString().trim();
         boolean disponible = binding.swDisponible.isChecked();
 
+        if (remote != null) {
+            if (habitacionId != -1 && remoteOriginal == null) return;
+            Habitacion room = new Habitacion(habitacionId == -1 ? FirebaseHotelAdminRepository.newId() : habitacionId,
+                    remote.hotelId, tipo, codigo, area, adultos, ninos, precio, descripcion,
+                    R.drawable.superadmin_hotel_sol, disponible);
+            binding.btnGuardar.setEnabled(false);
+            remote.saveRoom(room, habitacionId == -1, error -> {
+                if (isFinishing() || isDestroyed()) return;
+                binding.btnGuardar.setEnabled(true);
+                if (error != null) { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); return; }
+                Toast.makeText(this, R.string.hoteladmin_habitacion_guardada, Toast.LENGTH_SHORT).show(); finish();
+            });
+            return;
+        }
         Habitacion guardada;
         if (habitacionId != -1) {
             Habitacion actual = HotelAdminSampleData.habitacion(habitacionId);
@@ -141,7 +168,7 @@ public class FormularioHabitacionActivity extends AppCompatActivity {
         try {
             return Double.parseDouble(value);
         } catch (NumberFormatException e) {
-            return 0;
+            return Double.NaN;
         }
     }
 }
