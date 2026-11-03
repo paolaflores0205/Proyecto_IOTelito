@@ -50,6 +50,11 @@ public class HotelAdminMainActivity extends AppCompatActivity {
         binding = ActivityHoteladminMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        if (!HotelAdminAccessGuard.allow(this)) return;
+        if (com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(this)) {
+            configurarNavegacion(savedInstanceState);
+            return;
+        }
         HotelAdminNotifications.createChannel(this);
         HotelAdminLocalStore.get(this).load(error -> {
             if (isFinishing() || isDestroyed()) return;
@@ -76,6 +81,11 @@ public class HotelAdminMainActivity extends AppCompatActivity {
         binding.hoteladminBottomNav.setOnItemSelectedListener(item -> {
             Fragment fragment;
             int id = item.getItemId();
+            if (com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(this)
+                    && id != R.id.nav_hoteladmin_hotel) {
+                Toast.makeText(this, R.string.hoteladmin_seccion_pendiente, Toast.LENGTH_LONG).show();
+                return false;
+            }
             if (id == R.id.nav_hoteladmin_reservas) fragment = new AdminReservasFragment();
             else if (id == R.id.nav_hoteladmin_mensajes) fragment = new AdminMensajesFragment();
             else if (id == R.id.nav_hoteladmin_reportes) fragment = new AdminReportesFragment();
@@ -84,8 +94,9 @@ public class HotelAdminMainActivity extends AppCompatActivity {
             return true;
         });
 
-        if (savedInstanceState == null) {
-            openTab(getIntent().getIntExtra(EXTRA_OPEN_TAB, R.id.nav_hoteladmin_hotel));
+        if (savedInstanceState == null || com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(this)) {
+            openTab(com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(this)
+                    ? R.id.nav_hoteladmin_hotel : getIntent().getIntExtra(EXTRA_OPEN_TAB, R.id.nav_hoteladmin_hotel));
         }
     }
 

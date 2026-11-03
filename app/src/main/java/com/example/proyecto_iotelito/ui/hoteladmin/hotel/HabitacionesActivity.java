@@ -8,6 +8,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository;
+import com.example.proyecto_iotelito.data.SessionRepository;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
@@ -26,10 +28,13 @@ public class HabitacionesActivity extends AppCompatActivity {
 
     private ActivityHoteladminHabitacionesBinding binding;
     private HabitacionesAdapter adapter;
+    private FirebaseHotelAdminRepository remote;
+    private boolean remoteReady;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminAccessGuard.allow(this)) return;
         binding = ActivityHoteladminHabitacionesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -46,16 +51,32 @@ public class HabitacionesActivity extends AppCompatActivity {
         });
         binding.rvHabitaciones.setLayoutManager(new LinearLayoutManager(this));
         binding.rvHabitaciones.setAdapter(adapter);
+        if (FirebaseHotelAdminRepository.remote(this)) {
+            remote = new FirebaseHotelAdminRepository(this);
+            binding.fabAdd.setEnabled(false);
+            remote.observe("rooms", Habitacion.class).observe(this, state -> {
+                remoteReady = !state.loading && state.error == null;
+                binding.fabAdd.setEnabled(remoteReady);
+                renderList(state.data);
+                if (!remoteReady) {
+                    binding.tvSinHabitaciones.setVisibility(View.VISIBLE);
+                    binding.tvSinHabitaciones.setText(state.error == null ? getString(R.string.hoteladmin_cargando_remoto) : state.error);
+                } else binding.tvSinHabitaciones.setText(R.string.hoteladmin_sin_habitaciones);
+            });
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        renderList();
+        if (binding != null && remote == null) renderList();
     }
 
     private void renderList() {
-        List<Habitacion> habitaciones = HotelAdminSampleData.habitaciones();
+        renderList(HotelAdminSampleData.habitaciones());
+    }
+
+    private void renderList(List<Habitacion> habitaciones) {
         binding.tvListado.setText(getResources().getQuantityString(
                 R.plurals.hoteladmin_listado_habitaciones, habitaciones.size(), habitaciones.size()));
 
@@ -64,6 +85,7 @@ public class HabitacionesActivity extends AppCompatActivity {
     }
 
     private void abrirFormulario(int habitacionId) {
+        if (remote != null && !remoteReady) return;
         Intent intent = new Intent(this, FormularioHabitacionActivity.class);
         if (habitacionId != -1) {
             intent.putExtra(FormularioHabitacionActivity.EXTRA_HABITACION_ID, habitacionId);
@@ -74,9 +96,17 @@ public class HabitacionesActivity extends AppCompatActivity {
     private void confirmarEliminar(Habitacion habitacion) {
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.hoteladmin_eliminar)
-                .setMessage(R.string.hoteladmin_confirmar_eliminar_hab_msg)
+                .setMessage(remote != null ? R.string.hoteladmin_archivar_habitacion : R.string.hoteladmin_confirmar_eliminar_hab_msg)
                 .setNegativeButton(R.string.btn_cancelar, null)
                 .setPositiveButton(R.string.hoteladmin_eliminar, (dialog, which) -> {
+                    if (remote != null) {
+                        if (!remoteReady) return;
+                        remote.archiveRoom(habitacion.id, error -> {
+                            if (isFinishing() || isDestroyed()) return;
+                            Toast.makeText(this, error == null ? getString(R.string.hoteladmin_habitacion_eliminada) : error, Toast.LENGTH_LONG).show();
+                        });
+                        return;
+                    }
                     HotelAdminLocalStore.get(this).deleteHabitacion(habitacion.id, error -> {
                         if (error != null) {
                             Toast.makeText(this, R.string.hoteladmin_error_guardado_local,

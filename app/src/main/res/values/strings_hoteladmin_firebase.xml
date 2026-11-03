@@ -1,0 +1,8 @@
+<resources>
+    <string name="hoteladmin_cargando_remoto">Consultando datos…</string>
+    <string name="hoteladmin_seccion_pendiente">Reservas, mensajes y reportes estarán disponibles próximamente para esta cuenta.</string>
+    <string name="hoteladmin_cerrar_sesion">Cerrar sesión</string>
+    <string name="hoteladmin_archivar_habitacion">Se retirará del inventario disponible. Se conservará su registro para las reservas anteriores.</string>
+    <string name="hoteladmin_archivar_servicio">Se retirará de la lista de servicios disponibles. Su registro se conservará.</string>
+    <string name="hoteladmin_numero_invalido">Revisa el área, capacidad y precio. Los importes deben ser números positivos o cero.</string>
+</resources>

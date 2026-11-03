@@ -125,9 +125,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void resolverPerfil(String password) {
         binding.loginButton.setEnabled(false);
+        binding.createAccountButton.setEnabled(false);
+        binding.forgotPasswordButton.setEnabled(false);
         FirebaseProfileRepository.loadCurrent((user, error) -> {
             if (isFinishing() || isDestroyed()) return;
             binding.loginButton.setEnabled(true);
+            binding.createAccountButton.setEnabled(true);
+            binding.forgotPasswordButton.setEnabled(true);
             if (user == null) {
                 SessionRepository.cerrar(this);
                 binding.passwordLayout.setError(error);

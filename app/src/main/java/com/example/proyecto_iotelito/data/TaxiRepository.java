@@ -19,6 +19,8 @@ import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
 import com.example.proyecto_iotelito.model.auth.UserRole;
 import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
 import com.example.proyecto_iotelito.notification.ClienteNotificationManager;
+import com.example.proyecto_iotelito.data.taxista.FirebaseTaxiStore;
+import com.example.proyecto_iotelito.data.taxista.TaxiStorageRoute;
 import org.json.JSONObject;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -79,6 +81,14 @@ public final class TaxiRepository {
     }
 
     public static LiveData<JSONObject> observar(Context context, int id) {
+        if(FirebaseTaxiStore.usaFirebase(context)) {
+            AuthenticatedUser user=SessionRepository.obtener(context);
+            return Transformations.switchMap(TaxiDatabase.getInstance(context).taxiDao().observar(id),entity->{
+                if(entity!=null&&TaxiStorageRoute.usarLocal(true,user.getRole(),user.getEmail(),entity.clienteId))
+                    return new MutableLiveData<>(entity.comoJson());
+                return FirebaseTaxiStore.observar(id);
+            });
+        }
         return Transformations.map(TaxiDatabase.getInstance(context).taxiDao().observar(id),
                 entity -> entity == null ? null : entity.comoJson());
     }
@@ -86,6 +96,11 @@ public final class TaxiRepository {
     @WorkerThread
     public static JSONObject buscar(Context context, int id) {
         TaxiEntity entity = dao(context).buscar(id);
+        if(FirebaseTaxiStore.usaFirebase(context)) {
+            AuthenticatedUser user=SessionRepository.obtener(context);
+            if(entity==null||!TaxiStorageRoute.usarLocal(true,user.getRole(),user.getEmail(),entity.clienteId))
+                return FirebaseTaxiStore.buscar(id,true);
+        }
         return entity == null ? null : entity.comoJson();
     }
 
@@ -95,6 +110,13 @@ public final class TaxiRepository {
         AuthenticatedUser user = SessionRepository.obtener(context);
         if (user == null || user.getRole() != UserRole.CLIENT) return -1;
         TaxiDao dao = dao(context);
+        if(FirebaseTaxiStore.usaFirebase(context)) {
+            TaxiEntity anterior=dao.porReserva(user.getEmail(),reserva.id);
+            if(anterior!=null)return anterior.id;
+            int id=FirebaseTaxiStore.crear(reserva,PerfilRepository.cargar(context).name,hotel,origen,hora,pasajeros,maletas);
+            ClienteNotificationManager.mostrarEstadoTaxi(context,id,reserva.id,Estado.SOLICITADO);
+            return id;
+        }
         TaxiEntity[] guardada = new TaxiEntity[1];
         boolean[] creada = {false};
         TaxiDatabase.getInstance(context).runInTransaction(() -> {
@@ -131,6 +153,7 @@ public final class TaxiRepository {
         AuthenticatedUser user = SessionRepository.obtener(context);
         if (user == null || user.getRole() != UserRole.CLIENT) return -1;
         TaxiEntity entity = dao(context).porReserva(user.getEmail(), reservaId);
+        if(entity==null&&FirebaseTaxiStore.usaFirebase(context))return FirebaseTaxiStore.porReserva(reservaId);
         return entity == null ? -1 : entity.id;
     }
 

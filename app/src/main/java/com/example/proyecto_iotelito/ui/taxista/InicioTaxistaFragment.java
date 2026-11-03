@@ -27,9 +27,12 @@ public class InicioTaxistaFragment extends Fragment {
     @Override public void onViewCreated(@NonNull View view,@Nullable Bundle state){
         super.onViewCreated(view,state);
         vm=new ViewModelProvider(requireActivity()).get(TaxistaViewModel.class);
-        ((TextView)view.findViewById(R.id.tv_saludo)).setText(getString(R.string.taxi_saludo,"Miguel"));
-        ((TextView)view.findViewById(R.id.tv_avatar_inicial)).setText("MA");
-        ((TextView)view.findViewById(R.id.tv_nombre_conductor)).setText("Miguel Arispe S.");
+        com.example.proyecto_iotelito.model.auth.AuthenticatedUser usuario =
+                com.example.proyecto_iotelito.data.SessionRepository.obtener(requireContext());
+        String nombre = usuario == null ? "" : usuario.getDisplayName();
+        ((TextView)view.findViewById(R.id.tv_saludo)).setText(getString(R.string.taxi_saludo,nombre));
+        ((TextView)view.findViewById(R.id.tv_avatar_inicial)).setText(nombre.isEmpty()?"":nombre.substring(0,1));
+        ((TextView)view.findViewById(R.id.tv_nombre_conductor)).setText(nombre);
         ((TextView)view.findViewById(R.id.tv_rating_vehiculo)).setText("★ 4.8 · Toyota Corolla (ABC-123)");
         ((TextView)view.findViewById(R.id.tv_stat_calificacion)).setText("4.8");
         ConductorUi.disponibilidad(this,view,R.id.switch_disponibilidad,R.id.tv_estado_disponibilidad,vm);
@@ -47,7 +50,7 @@ public class InicioTaxistaFragment extends Fragment {
         view.findViewById(R.id.btn_ver_solicitudes).setOnClickListener(v->irASolicitudes());
         view.findViewById(R.id.banner_nueva_solicitud).setOnClickListener(v->irASolicitudes());
         prefs=ConductorPreferencias.get(requireContext(),vm.repo.cuenta);
-        listener=(p,key)->{if("disponible".equals(key)&&getView()!=null)pintar(requireView());};
+        listener=(p,key)->{if(("disponible".equals(key)||"disponible_confirmada".equals(key))&&getView()!=null)pintar(requireView());};
         prefs.registerOnSharedPreferenceChangeListener(listener);
         pintar(view);
     }

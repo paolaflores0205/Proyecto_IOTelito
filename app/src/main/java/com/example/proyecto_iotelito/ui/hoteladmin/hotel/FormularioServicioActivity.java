@@ -6,6 +6,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository;
+import com.example.proyecto_iotelito.data.SessionRepository;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
@@ -26,10 +28,13 @@ public class FormularioServicioActivity extends AppCompatActivity {
 
     private ActivityHoteladminFormularioServicioBinding binding;
     private int servicioId = -1;
+    private FirebaseHotelAdminRepository remote;
+    private Servicio remoteOriginal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminAccessGuard.allow(this)) return;
         binding = ActivityHoteladminFormularioServicioBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -37,19 +42,29 @@ public class FormularioServicioActivity extends AppCompatActivity {
         binding.boxFoto.setOnClickListener(v ->
                 Toast.makeText(this, R.string.hoteladmin_proximamente, Toast.LENGTH_SHORT).show());
 
+        if (FirebaseHotelAdminRepository.remote(this)) remote = new FirebaseHotelAdminRepository(this);
         servicioId = getIntent().getIntExtra(EXTRA_SERVICIO_ID, -1);
         if (servicioId != -1) {
             binding.toolbar.tvTitle.setText(R.string.hoteladmin_titulo_editar_servicio);
-            Servicio s = HotelAdminSampleData.servicio(servicioId);
-            binding.etNombre.setText(s.nombre);
-            binding.etDescripcion.setText(s.descripcion);
-            binding.etPrecio.setText(String.format(Locale.US, "%.0f", s.precio));
-            binding.swDisponible.setChecked(s.activo);
+            if (remote == null) precargar(HotelAdminSampleData.servicio(servicioId));
+            else {
+                binding.btnGuardar.setEnabled(false);
+                remote.loadService(servicioId, service -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    remoteOriginal = service; precargar(service); binding.btnGuardar.setEnabled(true);
+                }, error -> { if (!isFinishing()) { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); finish(); } });
+            }
         } else {
             binding.toolbar.tvTitle.setText(R.string.hoteladmin_titulo_nuevo_servicio);
         }
 
         binding.btnGuardar.setOnClickListener(v -> guardar());
+    }
+
+    private void precargar(Servicio service) {
+        binding.etNombre.setText(service.nombre); binding.etDescripcion.setText(service.descripcion);
+        binding.etPrecio.setText(String.format(Locale.US, "%.2f", service.precio));
+        binding.swDisponible.setChecked(service.activo);
     }
 
     private void guardar() {
@@ -73,6 +88,20 @@ public class FormularioServicioActivity extends AppCompatActivity {
         double precio = parseDouble(precioStr);
         boolean activo = binding.swDisponible.isChecked();
 
+        if (remote != null) {
+            if (servicioId != -1 && remoteOriginal == null) return;
+            Servicio service = new Servicio(servicioId == -1 ? FirebaseHotelAdminRepository.newId() : servicioId,
+                    remote.hotelId, nombre, descripcion, precio, remoteOriginal == null ? "servicio" : remoteOriginal.unidad,
+                    R.drawable.superadmin_hotel_sol, activo);
+            binding.btnGuardar.setEnabled(false);
+            remote.saveService(service, servicioId == -1, error -> {
+                if (isFinishing() || isDestroyed()) return;
+                binding.btnGuardar.setEnabled(true);
+                if (error != null) { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); return; }
+                Toast.makeText(this, R.string.hoteladmin_servicio_guardado, Toast.LENGTH_SHORT).show(); finish();
+            });
+            return;
+        }
         Servicio guardado;
         if (servicioId != -1) {
             Servicio actual = HotelAdminSampleData.servicio(servicioId);
@@ -110,7 +139,7 @@ public class FormularioServicioActivity extends AppCompatActivity {
         try {
             return Double.parseDouble(value);
         } catch (NumberFormatException e) {
-            return 0;
+            return Double.NaN;
         }
     }
 }

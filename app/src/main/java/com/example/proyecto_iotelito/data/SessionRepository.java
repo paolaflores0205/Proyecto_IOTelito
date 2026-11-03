@@ -1,6 +1,7 @@
 package com.example.proyecto_iotelito.data;
 
 import android.content.Context;
+import com.example.proyecto_iotelito.data.taxista.TaxistaAuthRepository;
 import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
 import com.example.proyecto_iotelito.model.auth.UserRole;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +32,7 @@ public final class SessionRepository {
         if (user.getRole() == UserRole.SUPERADMIN && user.getUid() == null)
             throw new IllegalArgumentException("Superadmin requiere una identidad Firebase verificada.");
         current = user;
+        TaxistaAuthRepository.recordar(context, user);
         if (user.getUid() != null) watchProfile(context.getApplicationContext(), user);
     }
 
@@ -49,6 +51,9 @@ public final class SessionRepository {
                         AuthenticatedUser verified = com.example.proyecto_iotelito.model.auth.RemoteUserProfile
                                 .parse(uid, doc.getData()).authenticated();
                         if (verified.getRole() != user.getRole()) throw new IllegalArgumentException();
+                        if (user.getRole() == UserRole.HOTEL_ADMIN
+                                && !java.util.Objects.equals(verified.getHotelId(), user.getHotelId()))
+                            throw new IllegalArgumentException();
                         current = verified;
                     } catch (IllegalArgumentException invalid) {
                         cerrar(context);
@@ -72,6 +77,7 @@ public final class SessionRepository {
             com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.cancelSession(context, FirebaseAuth.getInstance().getCurrentUser().getUid());
         stopWatching();
         current = null;
+        TaxistaAuthRepository.olvidar(context);
         FirebaseAuth.getInstance().signOut();
         context.getSharedPreferences("sesion_cliente", Context.MODE_PRIVATE).edit().clear().apply();
     }
