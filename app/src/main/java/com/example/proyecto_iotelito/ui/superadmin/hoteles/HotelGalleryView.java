@@ -28,7 +28,7 @@ public class HotelGalleryView extends HorizontalScrollView {
             ImageView image = new ImageView(getContext());
             image.setScaleType(ImageView.ScaleType.CENTER_CROP);
             image.setImageResource(fallback);
-            if (!photos.isEmpty()) image.setImageURI(Uri.parse(photos.get(i)));
+            com.example.proyecto_iotelito.data.HotelImageLoader.show(image, photos.isEmpty() ? null : photos.get(i));
             image.setContentDescription("Foto " + (i + 1) + " de " + count);
             card.addView(image, new LinearLayout.LayoutParams(-1, 0, 1));
             TextView caption = new TextView(getContext());

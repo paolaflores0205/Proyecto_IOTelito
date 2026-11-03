@@ -402,6 +402,7 @@ public final class SuperadminRepository {
     public void publishPendingAlerts() { worker.execute(this::publishOnWorker); }
 
     private void publishOnWorker() {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) return;
         for (AdminAlertEntity alert : dao.pendingAlerts()) {
             AdminHotelEntity hotel = dao.hotel(alert.hotelId);
             if (hotel == null || !hotel.active || hotel.administratorId != null) continue;

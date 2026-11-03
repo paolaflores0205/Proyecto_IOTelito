@@ -39,6 +39,9 @@ public class RegistroLogsActivity extends AppCompatActivity {
             renderLogs();
         });
         renderLogs();
+        new ViewModelProvider(this).get(SuperadminViewModel.class).logsState().observe(this, state -> {
+            binding.toolbar.setSubtitle(state.error != null ? state.error : state.loading ? "Cargando actividad…" : "Últimos 200 eventos remotos");
+        });
     }
 
     private void renderLogs() {

@@ -26,6 +26,8 @@ public class DashboardFragment extends Fragment {
     private FragmentSuperadminDashboardBinding binding;
     private List<AdminUser> users = new ArrayList<>();
     private List<ManagedHotel> hotels = new ArrayList<>();
+    private List<com.example.proyecto_iotelito.model.Reserva> reservations = new ArrayList<>();
+    private boolean reservationsReady;
 
     @Nullable
     @Override
@@ -50,6 +52,9 @@ public class DashboardFragment extends Fragment {
         SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         model.users().observe(getViewLifecycleOwner(), rows -> { users = rows; renderSummary(); });
         model.hotels().observe(getViewLifecycleOwner(), rows -> { hotels = rows; renderSummary(); });
+        model.reservationsState().observe(getViewLifecycleOwner(), state -> {
+            reservations = state.rows; reservationsReady = !state.loading && state.error == null; renderSummary();
+        });
         model.logs().observe(getViewLifecycleOwner(), rows -> {
             android.widget.TextView[] recent = {binding.tvRecentOne, binding.tvRecentTwo, binding.tvRecentThree};
             for (int i = 0; i < recent.length; i++) {
@@ -74,14 +79,17 @@ public class DashboardFragment extends Fragment {
         int unassignedHotels = 0;
         int bookings = 0;
         for (ManagedHotel hotel : hotels) {
-            bookings += hotel.reservations;
             if (!hotel.hasAdministrator()) unassignedHotels++;
         }
+
+        java.time.YearMonth month = java.time.YearMonth.now();
+        for (com.example.proyecto_iotelito.model.Reserva reservation : reservations)
+            if (java.time.YearMonth.from(reservation.fechaEntrada).equals(month)) bookings++;
 
         binding.tvDashboardUsers.setText(String.valueOf(activeUsers));
         binding.tvDashboardHotels.setText(String.valueOf(hotels.size()));
         binding.tvDashboardAdmins.setText(String.valueOf(administrators));
-        binding.tvDashboardBookings.setText(String.valueOf(bookings));
+        binding.tvDashboardBookings.setText(reservationsReady ? String.valueOf(bookings) : "—");
         binding.tvInactiveAlert.setText(getResources().getQuantityString(
                 R.plurals.superadmin_inactive_users_dynamic, inactiveUsers, inactiveUsers));
         binding.tvUnassignedAlert.setText(getResources().getQuantityString(

@@ -23,6 +23,8 @@ public class ReportesFragment extends Fragment {
     private List<ManagedHotel> hotels = new ArrayList<>();
     private List<Reserva> reservations = new ArrayList<>();
     private List<Reserva> demoReservations = new ArrayList<>();
+    private String remoteStatus = "Cargando reservas de Firestore…";
+    private String catalogStatus = "";
     private int selectedHotel;
     private LocalDate date = LocalDate.now();
     private final Locale locale = new Locale("es", "PE");
@@ -68,8 +70,15 @@ public class ReportesFragment extends Fragment {
             binding.actvHotelSelector.setText(selection, false);
             render();
         });
-        ReservaRepository.getInstance(requireContext()).observarTodas().observe(getViewLifecycleOwner(), rows -> {
-            reservations = rows; render();
+        new ViewModelProvider(this).get(SuperadminViewModel.class).reservationsState().observe(getViewLifecycleOwner(), stateRows -> {
+            reservations = stateRows.rows;
+            remoteStatus = stateRows.error != null ? stateRows.error : stateRows.loading ? "Cargando reservas de Firestore…"
+                    : "Reservas reales de Firestore: " + reservations.size();
+            render();
+        });
+        new ViewModelProvider(this).get(SuperadminViewModel.class).hotelsState().observe(getViewLifecycleOwner(), stateRows -> {
+            catalogStatus = stateRows.error != null ? " · " + stateRows.error : stateRows.loading ? " · Cargando hoteles…" : "";
+            render();
         });
         render();
     }
@@ -80,10 +89,9 @@ public class ReportesFragment extends Fragment {
                 : id == R.id.chip_yearly ? ReportCalculator.Period.YEARLY : ReportCalculator.Period.MONTHLY;
         List<Reserva> source = new ArrayList<>(reservations);
         if (binding.switchDemoHistory.isChecked()) source.addAll(demoReservations);
-        binding.tvReportSource.setText(binding.switchDemoHistory.isChecked()
-                ? (demoReservations.isEmpty() ? "Preparando historial de demostración…"
-                    : String.format(locale, "%,d reservas simuladas + %d reservas locales. Solo reportes; no son operaciones reales.", demoReservations.size(), reservations.size()))
-                : "Solo reservas locales: " + reservations.size() + ". No incluye datos de demostración ni otros teléfonos.");
+        binding.tvReportSource.setText((binding.switchDemoHistory.isChecked()
+                ? remoteStatus + String.format(locale, " · DEMOSTRACIÓN: se añaden %,d reservas simuladas solo a este reporte.", demoReservations.size())
+                : remoteStatus + ". Sin datos simulados.") + catalogStatus);
         ReportCalculator.Result data = ReportCalculator.calculate(hotels, source, selectedHotel, period, date);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", locale);
         binding.tvSelectedRange.setText(data.start.format(formatter) + " — " + data.end.minusDays(1).format(formatter));

@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function active() {
+      return request.auth != null
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.uid == request.auth.uid
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.active == true
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['CLIENT', 'HOTEL_ADMIN', 'TAXISTA', 'SUPERADMIN'];
+    }
+    function owner(uid) {
+      return active() && request.auth.uid == uid
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'SUPERADMIN';
+    }
+    match /hotelPhotos/{uid}/{photo} {
+      allow read: if active();
+      allow create: if owner(uid) && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType == 'image/jpeg' && photo.matches('.*[.]jpg');
+      allow delete: if owner(uid);
+      allow update: if false;
+    }
+    match /{path=**} { allow read, write: if false; }
+  }
+}

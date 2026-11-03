@@ -49,4 +49,11 @@ public class HotelFirestoreCodecTest {
         for (String field : Arrays.asList("id", "administratorUid", "administratorName", "rooms", "reservations", "pricePerNight"))
             assertFalse(map.containsKey(field));
     }
+    @Test public void storageReferencesSurviveWithoutPublishingLocalUris() {
+        String photo = "gs://iot-telito.firebasestorage.app/hotelPhotos/uid/photo.jpg";
+        assertEquals(Collections.singletonList(photo), HotelFirestoreCodec.sharedPhotos(Arrays.asList(photo, "file:///private.jpg")));
+    }
+    @Test public void arbitraryStoragePathsAreRejected() {
+        assertTrue(HotelFirestoreCodec.sharedPhotos(Arrays.asList("gs://bucket/users/private.jpg", "gs://bucket/hotelPhotos/u/file.exe")).isEmpty());
+    }
 }

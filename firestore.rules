@@ -143,9 +143,9 @@ service cloud.firestore {
 
     match /reservations/{reservationId} {
       allow get: if activeUser()
-        && (resource == null || resource.data.clientUid == request.auth.uid);
+        && (superadmin() || resource == null || resource.data.clientUid == request.auth.uid);
       allow list: if activeUser()
-        && resource.data.clientUid == request.auth.uid;
+        && (superadmin() || resource.data.clientUid == request.auth.uid);
       allow create: if activeUser() && profile().role == 'CLIENT'
         && get(/databases/$(database)/documents/hotels/$(string(request.resource.data.hotelId))).data.active == true
         && get(/databases/$(database)/documents/hotels/$(string(request.resource.data.hotelId))).data.hasInventory == true
@@ -185,6 +185,21 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /logs/{logId} {
+      allow read: if superadmin();
+      allow create: if superadmin()
+        && request.resource.data.keys().hasOnly(['actorUid', 'actorRole', 'action', 'entityType', 'entityId', 'createdAt'])
+        && request.resource.data.actorUid == request.auth.uid && request.resource.data.actorRole == 'SUPERADMIN'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.entityId is string
+        && request.resource.data.entityId.size() > 0 && request.resource.data.entityId.size() <= 128
+        && ((request.resource.data.entityType == 'hotels'
+          && request.resource.data.action in ['HOTEL_CREATED', 'HOTEL_UPDATED', 'HOTEL_ACTIVATED', 'HOTEL_DEACTIVATED', 'HOTEL_IMPORTED', 'HOTEL_ADMIN_ASSIGNED', 'HOTEL_ADMIN_REMOVED'])
+          || (request.resource.data.entityType == 'users' && request.resource.data.action in ['USER_ACTIVATED', 'USER_DEACTIVATED']))
+        && getAfter(/databases/$(database)/documents/$(request.resource.data.entityType)/$(request.resource.data.entityId)).data.updatedAt == request.time
+        && getAfter(/databases/$(database)/documents/$(request.resource.data.entityType)/$(request.resource.data.entityId)).data.updatedByUid == request.auth.uid;
+      allow update, delete: if false;
+    }
     match /{document=**} {
       allow read, write: if false;
     }

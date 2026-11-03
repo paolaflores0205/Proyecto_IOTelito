@@ -1,11 +1,17 @@
 # Contrato compartido Firestore - Cliente y Superadmin
 
-Revisión: 02/11/2026, pasos 1 a 5. Este documento define el contrato de integración;
+Revisión: 02/11/2026, pasos 1 a 7. Este documento define el contrato de integración;
 **no crea colecciones, cuentas, índices ni publica reglas en Firebase**. Conserva
 los nombres y campos que ya usa el módulo cliente. Las ampliaciones de
 superadmin se marcan como pendientes hasta que se implementen y prueben.
 
 ## Estado de la integración
+
+Continuación pasos 6/7: se implementaron carga/lectura de fotos en Storage,
+lectura administrativa de reservas, logs transaccionales y alertas de hoteles
+remotos. Los apartados que marcaban esas áreas como pendientes en los pasos
+anteriores quedan actualizados por este estado y por
+`GUIA_FIREBASE_PASOS_6_7_Y_VERIFICACION.md`. No se desplegó ni probó Firebase real.
 
 Actualización pasos 3 y 4: el código ya resuelve roles desde users/{uid}, registra
 perfiles CLIENT y conecta la vista Usuarios y sus cambios de estado a Firestore.
@@ -25,12 +31,12 @@ GUIA_FIREBASE_HOTELES_PASO_5.md para la preparación y los límites de esta etap
 | Hoteles y habitaciones | CRUD sin borrado, asignaciones atómicas, lectura remota e importación explícita de ejemplos | Despliegue y prueba remota; gestión de inventario por hotel-admin |
 | Reservas | Firestore para cliente autenticado, Room sin sesión Firebase | Consultas administrativas autorizadas y reportes remotos |
 | Usuarios superadmin | Listado, detalle y activación Firestore; reglas locales verificadas | Despliegue de reglas y prueba con cuentas reales |
-| Logs, alertas y reportes superadmin | Room y datos de demostración | Repositorios Firestore y reglas específicas |
-| Fotografías | Recursos de la app y fotos locales | Almacenamiento compartido de nuevas fotos |
+| Logs, alertas y reportes superadmin | Reservas/logs Firestore; alertas derivadas; demo solo optativa | Despliegue y prueba real; agregación para gran volumen |
+| Fotografías | Subida Storage al guardar y lector autenticado gs/HTTPS | Configuración/publicación de reglas y prueba real |
 
 El contrato no implica que las reglas de este repositorio estén desplegadas ni
 que se haya comprobado la consola del proyecto. Las reglas locales habilitan users
-y hoteles con restricciones de rol y mantienen cerrados los logs. No se abren
+y hoteles con restricciones de rol, y logs restringidos a superadmin. No se abren
 provisionalmente a cualquier usuario.
 
 Base: `(default)` del proyecto `iot-telito`. Las claves de documento de hotel
@@ -174,12 +180,18 @@ resolver su UID; no se inventa un UID a partir de su nombre o correo.
 Las fotos android.resource son demostración empaquetada. Las URI content:// de un
 teléfono no son referencias compartidas: no se tratarán como URLs accesibles desde
 otro dispositivo. No se publican imageRes/fotoRes de Android como IDs remotos estables.
-El campo photos guarda referencias HTTPS o recursos android.resource con nombre.
+El campo photos guarda referencias gs:// de Storage, HTTPS o recursos android.resource con nombre.
 Las fotos file/content se conservan aparte en el dispositivo por UID e ID de hotel
-(hotel_private_galleries); la carga compartida y su visualización completa por URL
-corresponden al paso 6. No se considera una copia local como foto ya subida.
+(hotel_private_galleries). Al guardar se suben las nuevas fotos privadas antes
+de confirmar las referencias gs en Firestore. No se considera una copia local como foto ya subida.
 
-## logs/{logId} - Eventos administrativos (pendiente)
+## logs/{logId} - Eventos administrativos (pasos 6/7 implementados)
+
+El esquema implementado es deliberadamente mínimo: actorUid, actorRole, action,
+entityType (hotels/users), entityId y createdAt. No se escriben todavía los campos
+de presentación opcionales del contrato propuesto a continuación. Los eventos se
+añaden con la entidad en la misma transacción. Lectura solo SUPERADMIN activo;
+sin edición/borrado. La interfaz consulta los últimos 200 por createdAt.
 
 ID automático de Firestore. Campos: actorUid (texto), actorRole (rol canónico),
 type (texto de categoría), action (texto estable), title/detail (texto visible),
@@ -192,7 +204,13 @@ Los logs serán de solo anexado para los flujos autorizados; los clientes no pod
 editar o borrar el historial. Un log generado desde una app cliente no equivale a
 una auditoría infalsificable de servidor: las reglas deben limitar sus campos y autoría.
 
-## Reservas, reportes y alertas de superadmin (pendientes)
+## Reservas, reportes y alertas de superadmin
+
+Implementado: consulta global de reservas para SUPERADMIN activo y cálculo en
+memoria; la demostración está apagada por defecto. Alertas de hoteles derivadas
+de snapshots remotos y marcas de leído/notificado locales por UID. No hay FCM.
+Pendiente: consultas HOTEL_ADMIN de su hotel, agregaciones/índices cuando proceda
+y verificación positiva real por el equipo. No se importaron reservas simuladas.
 
 Superadmin consultará reservations con permisos globales por rol; HOTEL_ADMIN
 consultará solo las de su hotel. No reutilizar sin cambios la consulta personal
@@ -205,12 +223,12 @@ de users y hotels, evitando colecciones duplicadas innecesarias. Los contadores
 y reportes reales se derivarán de datos remotos; DemoBookingHistory seguirá siendo
 un conjunto de demostración separado. No subirlo a reservations como actividad real.
 
-## Matriz objetivo de permisos (implementación parcial hasta el paso 5)
+## Matriz objetivo de permisos (implementación parcial hasta el paso 7)
 
 Actualmente HOTEL_ADMIN no escribe hoteles ni habitaciones. SUPERADMIN puede
 importar/crear habitaciones, pero actualizar/borrar inventario permanece cerrado.
-Las consultas administrativas de reservas y los logs de la tabla son objetivos
-pendientes, no permisos ya desplegados. La pantalla hotel-admin debe adaptarse
+Las consultas de reservas y logs para SUPERADMIN ya están implementadas en las
+reglas locales; siguen pendientes las de HOTEL_ADMIN. Nada se desplegó. La pantalla hotel-admin debe adaptarse
 por su responsable a users.hotelId; no se migró su repositorio local en este paso.
 
 | Recurso | CLIENT activo | HOTEL_ADMIN activo | SUPERADMIN activo |

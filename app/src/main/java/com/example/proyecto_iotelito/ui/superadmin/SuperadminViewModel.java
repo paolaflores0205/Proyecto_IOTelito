@@ -25,6 +25,12 @@ public class SuperadminViewModel extends AndroidViewModel {
         }
     }
     private final SuperadminRepository repository;
+    private final com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository adminRead =
+            new com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository();
+    private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<com.example.proyecto_iotelito.model.Reserva>> reservationState = adminRead.reservations();
+    private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<ActivityLog>> logState = adminRead.logs();
+    public LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<com.example.proyecto_iotelito.model.Reserva>> reservationsState() { return reservationState; }
+    public LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<ActivityLog>> logsState() { return logState; }
     private final com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository remoteHotels =
             new com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository(getApplication(), true);
     private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository.State> remoteHotelsState = remoteHotels.observe();
@@ -99,7 +105,7 @@ public class SuperadminViewModel extends AndroidViewModel {
     public void remoteUserStatus(String uid, boolean active, String reason) {
         if (start()) remoteUsers.setActive(uid, active, reason, callback);
     }
-    public LiveData<List<ActivityLog>> logs() { return repository.logs(); }
+    public LiveData<List<ActivityLog>> logs() { return androidx.lifecycle.Transformations.map(logState, state -> state.rows); }
     public LiveData<ManagedHotel> hotel(int id) {
         return androidx.lifecycle.Transformations.map(hotels(), rows -> {
             for (ManagedHotel hotel : rows) if (hotel.id == id) return hotel;

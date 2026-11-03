@@ -4,7 +4,7 @@
  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
   <TextView style="@style/TextAppearance.IoTelito.SectionTitle" android:text="Reportes de hoteles"/>
   <TextView android:id="@+id/tv_report_source" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Preparando historial local de demostración…" android:textColor="@color/io_text_secondary" android:textSize="12sp"/>
-  <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/switch_demo_history" android:layout_width="match_parent" android:layout_height="wrap_content" android:checked="true" android:text="Incluir historial de demostración" android:textColor="@color/io_navy"/>
+  <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/switch_demo_history" android:layout_width="match_parent" android:layout_height="wrap_content" android:checked="false" android:text="Incluir historial de demostración" android:textColor="@color/io_navy"/>
   <com.google.android.material.textfield.TextInputLayout style="@style/Widget.IoTelito.Input" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:hint="Hotel" app:endIconMode="dropdown_menu">
    <com.google.android.material.textfield.MaterialAutoCompleteTextView android:id="@+id/actv_hotel_selector" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="none"/>
   </com.google.android.material.textfield.TextInputLayout>

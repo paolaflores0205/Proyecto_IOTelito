@@ -41,7 +41,7 @@ public final class FirebaseHotelsRepository {
         int image = id != null && id.intValue() >= 1 && id.intValue() <= 12
                 ? HotelMedia.hotelImage(id.intValue()) : R.drawable.superadmin_hotel_hero;
         ManagedHotel hotel = HotelFirestoreCodec.decode(document.getId(), document.getData(), image);
-        if (showPrivatePhotos) {
+        if (showPrivatePhotos && hotel.photos.stream().noneMatch(photo -> photo.startsWith("gs://"))) {
             String raw = context.getSharedPreferences("hotel_private_galleries", Context.MODE_PRIVATE)
                     .getString(galleryKey(hotel.id), "[]");
             try {
@@ -129,6 +129,26 @@ public final class FirebaseHotelsRepository {
     }
     public void save(ManagedHotel hotel, SuperadminRepository.Callback callback) {
         final String uid;
+        try { uid = actor(); HotelFirestoreCodec.editable(hotel, false); }
+        catch (IllegalArgumentException error) { callback.complete(0, error.getMessage()); return; }
+        List<String> original = new ArrayList<>(hotel.photos);
+        List<com.google.firebase.storage.StorageReference> uploaded = new ArrayList<>();
+        HotelCloudPhotos.upload(uid, original, uploaded).addOnSuccessListener(photos -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null || !uid.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                HotelCloudPhotos.discard(uploaded); callback.complete(0, "La sesión cambió durante la carga. Inicia sesión de nuevo."); return;
+            }
+            hotel.photos = photos;
+            savePrepared(hotel, (id, error) -> {
+                if (error != null) { HotelCloudPhotos.discard(uploaded); hotel.photos = original; }
+                callback.complete(id, error);
+            });
+        }).addOnFailureListener(error -> {
+            HotelCloudPhotos.discard(uploaded);
+            callback.complete(0, "No se subieron las fotos. Revisa conexión, bucket y reglas de Storage. Tus copias locales se conservaron.");
+        });
+    }
+    private void savePrepared(ManagedHotel hotel, SuperadminRepository.Callback callback) {
+        final String uid;
         final Map<String, Object> edits;
         try { uid = actor(); edits = HotelFirestoreCodec.editable(hotel, false); }
         catch (IllegalArgumentException error) { callback.complete(0, error.getMessage()); return; }
@@ -137,7 +157,9 @@ public final class FirebaseHotelsRepository {
             if (hotel.id != 0) {
                 DocumentReference ref = db.collection("hotels").document(String.valueOf(hotel.id));
                 if (!tx.get(ref).exists()) throw new IllegalArgumentException("El hotel remoto ya no existe.");
-                tx.update(ref, edits); return hotel.id;
+                tx.update(ref, edits);
+                FirebaseAdminEvents.append(tx, db, uid, "HOTEL_UPDATED", "hotels", String.valueOf(hotel.id));
+                return hotel.id;
             }
             DocumentReference counter = db.collection("system").document("hotelIds");
             DocumentSnapshot sequence = tx.get(counter);
@@ -149,6 +171,7 @@ public final class FirebaseHotelsRepository {
             tx.set(ref, data);
             Map<String, Object> next = new HashMap<>(); next.put("nextId", id + 1); next.put("updatedAt", FieldValue.serverTimestamp());
             next.put("updatedByUid", uid); tx.set(counter, next);
+            FirebaseAdminEvents.append(tx, db, uid, "HOTEL_CREATED", "hotels", String.valueOf(id));
             return id;
         }).addOnSuccessListener(id -> savePrivatePhotos(uid, id, hotel.photos)), callback);
     }
@@ -167,8 +190,12 @@ public final class FirebaseHotelsRepository {
         try { uid = actor(); } catch (IllegalArgumentException error) { callback.complete(0, error.getMessage()); return; }
         Map<String, Object> changes = new HashMap<>(); changes.put("active", active);
         changes.put("updatedAt", FieldValue.serverTimestamp()); changes.put("updatedByUid", uid);
-        complete(db.collection("hotels").document(String.valueOf(id)).update(changes).continueWith(task -> {
-            if (!task.isSuccessful()) throw task.getException(); return id;
+        complete(db.runTransaction(tx -> {
+            DocumentReference ref = db.collection("hotels").document(String.valueOf(id));
+            if (!tx.get(ref).exists()) throw new IllegalArgumentException("El hotel ya no existe.");
+            tx.update(ref, changes);
+            FirebaseAdminEvents.append(tx, db, uid, active ? "HOTEL_ACTIVATED" : "HOTEL_DEACTIVATED", "hotels", String.valueOf(id));
+            return id;
         }), callback);
     }
     public void assign(int hotelId, String targetUid, SuperadminRepository.Callback callback) {
@@ -201,7 +228,9 @@ public final class FirebaseHotelsRepository {
             Map<String, Object> changes = new HashMap<>(); changes.put("administratorUid", targetUid);
             changes.put("administratorName", profile == null ? null : profile.name);
             changes.put("updatedAt", FieldValue.serverTimestamp()); changes.put("updatedByUid", uid);
-            tx.update(hotelRef, changes); return hotelId;
+            tx.update(hotelRef, changes);
+            FirebaseAdminEvents.append(tx, db, uid, targetUid == null ? "HOTEL_ADMIN_REMOVED" : "HOTEL_ADMIN_ASSIGNED", "hotels", String.valueOf(hotelId));
+            return hotelId;
         }), callback);
     }
     public void importLocal(List<ManagedHotel> hotels, SuperadminRepository.Callback callback) {
@@ -233,6 +262,7 @@ public final class FirebaseHotelsRepository {
                     item.put("descripcion", room.descripcion); item.put("disponible", room.disponible);
                     tx.set(ref.collection("rooms").document(String.valueOf(room.id)), item);
                 }
+                FirebaseAdminEvents.append(tx, db, uid, "HOTEL_IMPORTED", "hotels", String.valueOf(hotel.id));
                 return count + 1;
             }).addOnSuccessListener(newCount -> { if (newCount > count) savePrivatePhotos(uid, hotel.id, hotel.photos); }));
         }

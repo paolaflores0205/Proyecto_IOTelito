@@ -30,7 +30,7 @@ public class AvisosSuperadminActivity extends AppCompatActivity {
     private final List<AdminAlertEntity> alerts = new ArrayList<>();
     private final ActivityResultLauncher<String> permission = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted) SuperadminRepository.getInstance(this).publishPendingAlerts();
+                if (granted) recreate();
             });
 
     @Override protected void onCreate(Bundle state) {
@@ -41,11 +41,13 @@ public class AvisosSuperadminActivity extends AppCompatActivity {
         AlertAdapter adapter = new AlertAdapter();
         binding.rvAlerts.setLayoutManager(new LinearLayoutManager(this));
         binding.rvAlerts.setAdapter(adapter);
-        SuperadminRepository.getInstance(this).alerts().observe(this, rows -> {
+        new androidx.lifecycle.ViewModelProvider(this).get(com.example.proyecto_iotelito.ui.superadmin.SuperadminViewModel.class).hotelsState().observe(this, stateRows -> {
             alerts.clear();
-            alerts.addAll(rows);
+            if (!stateRows.loading && stateRows.error == null) alerts.addAll(
+                    com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.sync(this, stateRows.hotels, true));
             adapter.notifyDataSetChanged();
-            binding.tvEmpty.setVisibility(rows.isEmpty() ? View.VISIBLE : View.GONE);
+            binding.tvEmpty.setText(stateRows.error != null ? stateRows.error : stateRows.loading ? "Cargando alertas remotas…" : "No hay hoteles activos pendientes de administrador.");
+            binding.tvEmpty.setVisibility(alerts.isEmpty() ? View.VISIBLE : View.GONE);
         });
         binding.btnPermission.setOnClickListener(v -> {
             if (!SuperadminNotifications.hasPermission(this) && shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
@@ -59,7 +61,6 @@ public class AvisosSuperadminActivity extends AppCompatActivity {
 
     @Override protected void onResume() {
         super.onResume();
-        SuperadminRepository.getInstance(this).publishPendingAlerts();
     }
 
     private class AlertAdapter extends RecyclerView.Adapter<AlertHolder> {
@@ -74,7 +75,8 @@ public class AvisosSuperadminActivity extends AppCompatActivity {
             holder.item.tvDetail.setText(alert.message);
             holder.item.tvTime.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date(alert.createdAt)));
             holder.item.getRoot().setOnClickListener(v -> {
-                SuperadminRepository.getInstance(AvisosSuperadminActivity.this).markAlertsRead(alert.hotelId);
+                com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.read(AvisosSuperadminActivity.this, alert);
+                alert.read = true; notifyItemChanged(holder.getBindingAdapterPosition());
                 startActivity(new Intent(AvisosSuperadminActivity.this, DetalleHotelAdminActivity.class)
                         .putExtra(DetalleHotelAdminActivity.EXTRA_HOTEL_ID, alert.hotelId));
             });

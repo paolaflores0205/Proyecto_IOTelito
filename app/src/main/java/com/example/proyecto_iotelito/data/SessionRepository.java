@@ -68,6 +68,8 @@ public final class SessionRepository {
     }
 
     public static synchronized void cerrar(Context context) {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null)
+            com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.cancelSession(context, FirebaseAuth.getInstance().getCurrentUser().getUid());
         stopWatching();
         current = null;
         FirebaseAuth.getInstance().signOut();

@@ -91,8 +91,8 @@ public class DetalleHotelActivity extends AppCompatActivity {
             photo.findViewById(R.id.tv_photo_illustrative).setVisibility(!hotel.photos.isEmpty()
                     && com.example.proyecto_iotelito.data.SampleHotelGalleries.isIllustrative(hotel.photos.get(i))
                     ? View.VISIBLE : View.GONE);
-            if (!hotel.photos.isEmpty()) ((ImageView) photo.findViewById(R.id.iv_gallery_photo))
-                    .setImageURI(Uri.parse(hotel.photos.get(i)));
+            com.example.proyecto_iotelito.data.HotelImageLoader.show((ImageView) photo.findViewById(R.id.iv_gallery_photo),
+                    hotel.photos.isEmpty() ? null : hotel.photos.get(i));
         }
     }
 

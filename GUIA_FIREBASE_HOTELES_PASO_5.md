@@ -3,6 +3,10 @@
 Fecha: 02/11/2026. Rama: superadmin. Implementado y probado localmente.
 No se publicaron reglas, importaron datos en Firebase real ni hizo push.
 
+Continuación: la guía `GUIA_FIREBASE_PASOS_6_7_Y_VERIFICACION.md` documenta los
+cambios posteriores de fotos, reportes, logs y alertas. Sustituye los apartados
+de esta guía que los describen como todavía locales o pendientes de implementar.
+
 ## 1. Qué cambia y por qué
 
 Antes, registrar o editar un hotel modificaba Room en ese teléfono. Ahora las

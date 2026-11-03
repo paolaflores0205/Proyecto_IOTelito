@@ -22,7 +22,7 @@ public class SuperadminMainActivity extends AppCompatActivity {
     private NavController navController;
     private final ActivityResultLauncher<String> notificationPermission = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted) SuperadminRepository.getInstance(this).publishPendingAlerts();
+                if (granted) publishRemoteAlerts();
             });
 
     @Override
@@ -47,8 +47,9 @@ public class SuperadminMainActivity extends AppCompatActivity {
         }
         SuperadminNotifications.createChannel(this);
         SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
-        model.ready().observe(this, ready -> {
-            if (Boolean.TRUE.equals(ready)) SuperadminRepository.getInstance(this).publishPendingAlerts();
+        model.hotelsState().observe(this, state -> {
+            if (!state.loading && state.error == null)
+                com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.sync(this, state.hotels, true);
         });
         model.error().observe(this, error -> {
             if (error != null) Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_INDEFINITE).show();
@@ -62,7 +63,13 @@ public class SuperadminMainActivity extends AppCompatActivity {
 
     @Override protected void onResume() {
         super.onResume();
-        SuperadminRepository.getInstance(this).publishPendingAlerts();
+        publishRemoteAlerts();
+    }
+    private void publishRemoteAlerts() {
+        com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository.State state =
+                new ViewModelProvider(this).get(SuperadminViewModel.class).hotelsState().getValue();
+        if (state != null && !state.loading && state.error == null)
+            com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.sync(this, state.hotels, true);
     }
 
     public void openTab(int menuId) {

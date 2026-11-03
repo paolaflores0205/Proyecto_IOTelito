@@ -103,6 +103,7 @@ public final class FirebaseUsersRepository {
             update.put("updatedAt", FieldValue.serverTimestamp());
             update.put("updatedByUid", actorUid);
             tx.update(targetRef, update);
+            FirebaseAdminEvents.append(tx, db, actorUid, active ? "USER_ACTIVATED" : "USER_DEACTIVATED", "users", uid);
             return null;
         }).addOnSuccessListener(unused -> callback.complete(-1, null))
                 .addOnFailureListener(error -> callback.complete(-1,
