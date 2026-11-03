@@ -31,7 +31,7 @@ public final class FirebaseUsersRepository {
                     listener = null;
                     setValue(new State(Collections.emptyList(), true, null));
                     if (auth.getCurrentUser() == null) {
-                        setValue(new State(Collections.emptyList(), false, "Inicia sesión con Firebase.")); return;
+                        setValue(new State(Collections.emptyList(), false, "Inicia sesión para continuar.")); return;
                     }
                     String uid = auth.getCurrentUser().getUid();
                     listener = FirebaseFirestore.getInstance().collection("users")
@@ -40,11 +40,11 @@ public final class FirebaseUsersRepository {
                                 if (now == null || !uid.equals(now.getUid())) return;
                                 if (error != null || snapshot == null) {
                                     setValue(new State(Collections.emptyList(), false,
-                                            "No se pudieron cargar los usuarios. Revisa tu rol, conexión y reglas de Firestore.")); return;
+                                            "No se pudieron cargar los usuarios. Revisa tu conexión o vuelve a iniciar sesión.")); return;
                                 }
                                 if (snapshot.getMetadata().isFromCache()) {
                                     setValue(new State(Collections.emptyList(), false,
-                                            "Esperando confirmación del servidor. No se muestran perfiles guardados en caché.")); return;
+                                            "Conectando para actualizar los usuarios…")); return;
                                 }
                                 List<AdminUser> users = new ArrayList<>();
                                 int invalid = 0;
@@ -62,7 +62,7 @@ public final class FirebaseUsersRepository {
                                 }
                                 users.sort(Comparator.comparing(u -> u.name.toLowerCase(Locale.ROOT)));
                                 setValue(new State(users, false, invalid == 0 ? null
-                                        : "Hay " + invalid + " perfiles incompletos en users. Revisa su UID, nombre, correo, rol y active."));
+                                        : "Hay " + invalid + " cuentas con información incompleta. Revisa sus datos de acceso."));
                             });
                 };
                 FirebaseAuth.getInstance().addAuthStateListener(authListener);

@@ -65,20 +65,10 @@ public class HotelesAdminFragment extends Fragment {
         });
         model.hotelsState().observe(getViewLifecycleOwner(), state -> {
             loading = state.loading; syncError = state.error;
-            binding.tvHotelsSyncState.setText(state.loading ? "Cargando hoteles de Firebase…"
-                    : state.error == null ? "Catálogo Firebase · cambios en tiempo real" : state.error);
+            long active = state.hotels.stream().filter(hotel -> hotel.active).count();
+            binding.tvHotelsSyncState.setText(state.loading ? "Cargando hoteles…"
+                    : state.error == null ? active + " activos · " + (state.hotels.size() - active) + " inactivos" : state.error);
             renderHotels();
-        });
-        binding.btnImportLocal.setOnClickListener(v -> new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Publicar catálogo local de ejemplo")
-                .setMessage("Se crearán únicamente los hoteles y habitaciones que no existan en Firestore. No se sobrescribirán hoteles remotos, no se crearán cuentas ni se subirán reservas simuladas. Las asignaciones deben hacerse por UID. Las fotos privadas siguen solo en este teléfono.")
-                .setNegativeButton(R.string.superadmin_cancel, null)
-                .setPositiveButton("Importar", (dialog, which) -> model.importLocalCatalog()).show());
-        model.busy().observe(getViewLifecycleOwner(), busy -> binding.btnImportLocal.setEnabled(!busy));
-        model.importResult().observe(getViewLifecycleOwner(), result -> {
-            if (result.consume()) com.google.android.material.snackbar.Snackbar.make(binding.getRoot(),
-                    result.error == null ? "Importación terminada: " + result.id + " hoteles nuevos; los existentes se conservaron."
-                            : result.error, com.google.android.material.snackbar.Snackbar.LENGTH_LONG).show();
         });
         renderHotels();
     }

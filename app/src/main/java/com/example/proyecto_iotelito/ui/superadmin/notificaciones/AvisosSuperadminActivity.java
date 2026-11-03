@@ -46,7 +46,7 @@ public class AvisosSuperadminActivity extends AppCompatActivity {
             if (!stateRows.loading && stateRows.error == null) alerts.addAll(
                     com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.sync(this, stateRows.hotels, true));
             adapter.notifyDataSetChanged();
-            binding.tvEmpty.setText(stateRows.error != null ? stateRows.error : stateRows.loading ? "Cargando alertas remotas…" : "No hay hoteles activos pendientes de administrador.");
+            binding.tvEmpty.setText(stateRows.error != null ? stateRows.error : stateRows.loading ? "Cargando avisos…" : "No hay hoteles activos pendientes de administrador.");
             binding.tvEmpty.setVisibility(alerts.isEmpty() ? View.VISIBLE : View.GONE);
         });
         binding.btnPermission.setOnClickListener(v -> {

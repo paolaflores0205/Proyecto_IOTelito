@@ -60,7 +60,6 @@
 
         <com.google.android.material.chip.Chip android:id="@+id/chip_unassigned" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:checkable="true" android:text="Sin administrador asignado" />
         <TextView android:id="@+id/tv_hotels_sync_state" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:paddingVertical="4dp" android:textSize="12sp" android:textColor="@color/io_text_secondary" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/btn_import_local" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:text="Publicar catálogo local de ejemplo" />
         <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_hotels"

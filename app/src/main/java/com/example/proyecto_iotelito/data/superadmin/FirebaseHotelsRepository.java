@@ -32,7 +32,7 @@ public final class FirebaseHotelsRepository {
     }
     private static String actor() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) throw new IllegalArgumentException("Inicia sesión con Firebase.");
+        if (user == null) throw new IllegalArgumentException("Inicia sesión para continuar.");
         return user.getUid();
     }
     private String galleryKey(int id) { return actor() + ":" + id; }
@@ -75,14 +75,14 @@ public final class FirebaseHotelsRepository {
                         if (auth.getCurrentUser() == null || !uid.equals(auth.getCurrentUser().getUid())) return;
                         if (error != null || snapshot == null || snapshot.getMetadata().isFromCache()) {
                             setValue(new State(Collections.emptyList(), false,
-                                    "No se confirmó el catálogo remoto. Revisa conexión, perfil y reglas de Firestore.")); return;
+                                    "No se pudieron actualizar los hoteles. Revisa tu conexión o vuelve a iniciar sesión.")); return;
                         }
                         List<ManagedHotel> hotels = new ArrayList<>(); int invalid = 0;
                         for (DocumentSnapshot doc : snapshot.getDocuments()) {
                             try { hotels.add(decode(doc)); } catch (RuntimeException malformed) { invalid++; }
                         }
                         hotels.sort(Comparator.comparing(h -> h.name.toLowerCase(Locale.ROOT)));
-                        setValue(new State(hotels, false, invalid == 0 ? null : invalid + " hoteles tienen datos incompletos en Firestore."));
+                        setValue(new State(hotels, false, invalid == 0 ? null : invalid + " hoteles tienen información incompleta. Revisa sus datos."));
                     });
                 };
                 FirebaseAuth.getInstance().addAuthStateListener(authListener);
@@ -99,7 +99,7 @@ public final class FirebaseHotelsRepository {
         try {
             DocumentSnapshot doc = Tasks.await(db.collection("hotels").document(String.valueOf(id)).get(Source.SERVER));
             return doc.exists() ? decode(doc) : null;
-        } catch (ExecutionException error) { throw new IllegalStateException("No se pudo cargar el hotel remoto.", error); }
+        } catch (ExecutionException error) { throw new IllegalStateException("No se pudo cargar el hotel. Inténtalo de nuevo.", error); }
     }
     public List<Habitacion> rooms(int hotelId) throws InterruptedException {
         try {
@@ -117,14 +117,14 @@ public final class FirebaseHotelsRepository {
                         String.valueOf(data.get("descripcion")), R.drawable.superadmin_hotel_hero, true));
             }
             return result;
-        } catch (ExecutionException error) { throw new IllegalStateException("No se pudo cargar el inventario remoto.", error); }
+        } catch (ExecutionException error) { throw new IllegalStateException("No se pudieron cargar las habitaciones. Inténtalo de nuevo.", error); }
     }
     private void complete(com.google.android.gms.tasks.Task<Integer> task, SuperadminRepository.Callback callback) {
         task.addOnSuccessListener(id -> callback.complete(id, null)).addOnFailureListener(error -> {
             Throwable cause = error;
             while (cause.getCause() != null) cause = cause.getCause();
             callback.complete(0, cause instanceof IllegalArgumentException ? cause.getMessage()
-                    : "No se guardó en Firebase. Revisa conexión, permisos y datos del hotel.");
+                    : "No se pudieron guardar los cambios. Revisa tu conexión y vuelve a intentarlo.");
         });
     }
     public void save(ManagedHotel hotel, SuperadminRepository.Callback callback) {
@@ -144,7 +144,7 @@ public final class FirebaseHotelsRepository {
             });
         }).addOnFailureListener(error -> {
             HotelCloudPhotos.discard(uploaded);
-            callback.complete(0, "No se subieron las fotos. Revisa conexión, bucket y reglas de Storage. Tus copias locales se conservaron.");
+            callback.complete(0, "No se pudieron subir las fotos. Tus imágenes se conservaron; revisa tu conexión o contacta al administrador.");
         });
     }
     private void savePrepared(ManagedHotel hotel, SuperadminRepository.Callback callback) {
@@ -156,7 +156,7 @@ public final class FirebaseHotelsRepository {
         complete(db.runTransaction(tx -> {
             if (hotel.id != 0) {
                 DocumentReference ref = db.collection("hotels").document(String.valueOf(hotel.id));
-                if (!tx.get(ref).exists()) throw new IllegalArgumentException("El hotel remoto ya no existe.");
+                if (!tx.get(ref).exists()) throw new IllegalArgumentException("El hotel ya no está disponible.");
                 tx.update(ref, edits);
                 FirebaseAdminEvents.append(tx, db, uid, "HOTEL_UPDATED", "hotels", String.valueOf(hotel.id));
                 return hotel.id;
@@ -215,7 +215,7 @@ public final class FirebaseHotelsRepository {
                 profile = RemoteUserProfile.parse(targetUid, target.getData());
                 Number assigned = (Number) target.get("hotelId");
                 if (!profile.active || profile.role != UserRole.HOTEL_ADMIN)
-                    throw new IllegalArgumentException("Selecciona un administrador Firebase activo.");
+                    throw new IllegalArgumentException("Selecciona un administrador activo.");
                 if (assigned != null && assigned.intValue() != hotelId)
                     throw new IllegalArgumentException("Ese administrador ya está asignado a otro hotel. Desvincúlalo primero.");
             }

@@ -24,13 +24,13 @@ public final class FirebaseAdminReadRepository {
                     if (listener != null) listener.remove(); listener = null;
                     setValue(new State<>(Collections.emptyList(), true, null));
                     if (session.getCurrentUser() == null) {
-                        setValue(new State<>(Collections.emptyList(), false, "Inicia sesión con Firebase.")); return;
+                        setValue(new State<>(Collections.emptyList(), false, "Inicia sesión para continuar.")); return;
                     }
                     String uid = session.getCurrentUser().getUid();
                     listener = query.addSnapshotListener(MetadataChanges.INCLUDE, (snapshot, error) -> {
                         if (session.getCurrentUser() == null || !uid.equals(session.getCurrentUser().getUid())) return;
                         if (error != null || snapshot == null) {
-                            setValue(new State<>(Collections.emptyList(), false, "No se pudo consultar Firestore. Revisa conexión, rol y reglas.")); return;
+                            setValue(new State<>(Collections.emptyList(), false, "No se pudo actualizar la información. Revisa tu conexión o vuelve a iniciar sesión.")); return;
                         }
                         if (snapshot.getMetadata().isFromCache()) {
                             setValue(new State<>(Collections.emptyList(), true, null)); return;
@@ -39,7 +39,7 @@ public final class FirebaseAdminReadRepository {
                         for (DocumentSnapshot doc : snapshot) {
                             try { rows.add(parser.parse(doc)); } catch (RuntimeException malformed) { invalid++; }
                         }
-                        setValue(new State<>(rows, false, invalid == 0 ? null : invalid + " documentos inválidos omitidos."));
+                        setValue(new State<>(rows, false, invalid == 0 ? null : invalid + " registros no se pudieron procesar. Revisa sus datos."));
                     });
                 };
                 FirebaseAuth.getInstance().addAuthStateListener(auth);
@@ -66,9 +66,26 @@ public final class FirebaseAdminReadRepository {
     public LiveData<State<ActivityLog>> logs() {
         return observe(FirebaseFirestore.getInstance().collection("logs").orderBy("createdAt", Query.Direction.DESCENDING).limit(200), doc -> {
             com.google.firebase.Timestamp time = doc.getTimestamp("createdAt");
-            return new ActivityLog("Sistema", doc.getString("action"), doc.getString("entityType") + "/" + doc.getString("entityId")
-                    + " · Autor: " + doc.getString("actorUid"), time == null ? "Pendiente" :
+            String action = doc.getString("action");
+            return new ActivityLog(action != null && action.startsWith("USER_") ? "Usuario" : "Sistema",
+                    actionTitle(action), "hotels".equals(doc.getString("entityType"))
+                    ? "Hotel #" + doc.getString("entityId") : "Gestión de cuentas y acceso", time == null ? "Pendiente" :
                     new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(time.toDate()));
         });
+    }
+    private static String actionTitle(String action) {
+        if (action == null) return "Actividad registrada";
+        switch (action) {
+            case "HOTEL_CREATED": return "Hotel registrado";
+            case "HOTEL_UPDATED": return "Información del hotel actualizada";
+            case "HOTEL_ACTIVATED": return "Hotel activado";
+            case "HOTEL_DEACTIVATED": return "Hotel desactivado";
+            case "HOTEL_IMPORTED": return "Hotel incorporado";
+            case "HOTEL_ADMIN_ASSIGNED": return "Administrador asignado";
+            case "HOTEL_ADMIN_REMOVED": return "Administrador desvinculado";
+            case "USER_ACTIVATED": return "Usuario activado";
+            case "USER_DEACTIVATED": return "Usuario desactivado";
+            default: return "Actividad registrada";
+        }
     }
 }

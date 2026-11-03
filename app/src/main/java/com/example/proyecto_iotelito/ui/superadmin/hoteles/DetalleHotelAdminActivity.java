@@ -37,7 +37,7 @@ public class DetalleHotelAdminActivity extends AppCompatActivity {
             binding.btnChangeAdmin.setEnabled(row != null);
             binding.switchIot.setEnabled(row != null && !Boolean.TRUE.equals(model.busy().getValue()));
             if (row == null) {
-                binding.tvHotelName.setText("Hotel remoto no disponible");
+                binding.tvHotelName.setText("Hotel no disponible");
                 binding.tvAddress.setText(""); binding.tvAdmin.setText("");
                 return;
             }
