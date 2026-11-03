@@ -22,7 +22,9 @@ public final class HotelAdminAccessGuard {
             activity.finish(); return false;
         }
         String name = activity.getClass().getName();
-        if (remote && !name.equals(HotelAdminMainActivity.class.getName()) && !name.contains(".hoteladmin.hotel.")) {
+        if (remote && !name.equals(HotelAdminMainActivity.class.getName()) && !name.contains(".hoteladmin.hotel.")
+                && !name.equals("com.example.proyecto_iotelito.ui.hoteladmin.reservas.CobroCheckoutActivity")
+                && !name.equals("com.example.proyecto_iotelito.ui.hoteladmin.mensajes.AdminChatActivity")) {
             Toast.makeText(activity, com.example.proyecto_iotelito.R.string.hoteladmin_seccion_pendiente, Toast.LENGTH_LONG).show();
             activity.startActivity(new Intent(activity, HotelAdminMainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             activity.finish(); return false;

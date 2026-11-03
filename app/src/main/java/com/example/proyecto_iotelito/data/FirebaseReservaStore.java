@@ -104,6 +104,8 @@ final class FirebaseReservaStore {
         Map<String, Object> data = new HashMap<>();
         data.put("id", id);
         data.put("clientUid", uid);
+        data.put("clientName", com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+        data.put("hotelName", hotel.name);
         data.put("hotelId", hotel.id);
         data.put("roomIds", roomIds);
         data.put("roomName", habitaciones);

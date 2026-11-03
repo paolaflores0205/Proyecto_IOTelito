@@ -16,6 +16,11 @@ import java.util.concurrent.ExecutionException;
 
 /** Firestore es la fuente remota; Room se conserva únicamente como catálogo para importación explícita. */
 public final class FirebaseHotelsRepository {
+    enum SnapshotStatus { ERROR, WAITING_FOR_SERVER, READY }
+    static SnapshotStatus snapshotStatus(boolean hasError, boolean hasSnapshot, boolean fromCache) {
+        if (hasError || !hasSnapshot) return SnapshotStatus.ERROR;
+        return fromCache ? SnapshotStatus.WAITING_FOR_SERVER : SnapshotStatus.READY;
+    }
     public static final class State {
         public final List<ManagedHotel> hotels;
         public final String error;
@@ -73,9 +78,16 @@ public final class FirebaseHotelsRepository {
                     String uid = auth.getCurrentUser().getUid();
                     listener = db.collection("hotels").addSnapshotListener(MetadataChanges.INCLUDE, (snapshot, error) -> {
                         if (auth.getCurrentUser() == null || !uid.equals(auth.getCurrentUser().getUid())) return;
-                        if (error != null || snapshot == null || snapshot.getMetadata().isFromCache()) {
+                        SnapshotStatus status = snapshotStatus(error != null, snapshot != null,
+                                snapshot != null && snapshot.getMetadata().isFromCache());
+                        if (status == SnapshotStatus.ERROR) {
                             setValue(new State(Collections.emptyList(), false,
                                     "No se pudieron actualizar los hoteles. Revisa tu conexión o vuelve a iniciar sesión.")); return;
+                        }
+                        if (status == SnapshotStatus.WAITING_FOR_SERVER) {
+                            State previous = getValue();
+                            setValue(new State(previous == null ? Collections.emptyList() : previous.hotels, true, null));
+                            return;
                         }
                         List<ManagedHotel> hotels = new ArrayList<>(); int invalid = 0;
                         for (DocumentSnapshot doc : snapshot.getDocuments()) {

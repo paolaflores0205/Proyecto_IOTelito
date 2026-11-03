@@ -210,9 +210,10 @@ service cloud.firestore {
 
     match /reservations/{reservationId} {
       allow get: if activeUser()
-        && (superadmin() || resource == null || resource.data.clientUid == request.auth.uid);
+        && (superadmin() || resource == null || resource.data.clientUid == request.auth.uid
+          || hotelAdmin(string(resource.data.hotelId)));
       allow list: if activeUser()
-        && (superadmin() || resource.data.clientUid == request.auth.uid);
+        && (superadmin() || resource.data.clientUid == request.auth.uid || hotelAdmin(string(resource.data.hotelId)));
       allow create: if activeUser() && profile().role == 'CLIENT'
         && get(/databases/$(database)/documents/hotels/$(string(request.resource.data.hotelId))).data.active == true
         && get(/databases/$(database)/documents/hotels/$(string(request.resource.data.hotelId))).data.hasInventory == true
@@ -228,7 +229,57 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
         && resource.data.estado == 'CONFIRMADA'
         && request.resource.data.estado == 'COMPLETADA';
+      // Cierre administrativo: solo el estado, junto con un comprobante inmutable.
+      allow update: if hotelAdmin(string(resource.data.hotelId))
+        && resource.data.estado == 'CONFIRMADA' && request.resource.data.estado == 'COMPLETADA'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
+        && !exists(/databases/$(database)/documents/hotelCheckouts/$(reservationId))
+        && getAfter(/databases/$(database)/documents/hotelCheckouts/$(reservationId)).data.createdByUid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/hotelCheckouts/$(reservationId)).data.createdAt == request.time;
       allow delete: if false;
+      match /messages/{messageId} {
+        function participant() {
+          let booking = get(/databases/$(database)/documents/reservations/$(reservationId)).data;
+          return activeUser() && ((profile().role == 'CLIENT' && booking.clientUid == request.auth.uid)
+            || hotelAdmin(string(booking.hotelId)));
+        }
+        allow read: if participant();
+        allow create: if participant()
+          && request.resource.data.keys().hasOnly(['senderUid','senderRole','text','createdAt'])
+          && request.resource.data.senderUid == request.auth.uid
+          && request.resource.data.senderRole == profile().role
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 4000
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
+    }
+
+    match /hotelCheckouts/{reservationId} {
+      function booking() { return get(/databases/$(database)/documents/reservations/$(reservationId)).data; }
+      function departureReached() {
+        let parts = booking().fechaSalida.split('-');
+        return timestamp.date(int(parts[0]), int(parts[1]), int(parts[2])) + duration.value(5, 'h') <= request.time;
+      }
+      // get permite comprobar que el comprobante aún no existe dentro de la transacción.
+      allow get: if activeUser() && (superadmin() || booking().clientUid == request.auth.uid
+        || hotelAdmin(string(booking().hotelId)));
+      allow list: if activeUser() && (superadmin() || resource.data.clientUid == request.auth.uid
+        || hotelAdmin(string(resource.data.hotelId)));
+      allow create: if hotelAdmin(string(booking().hotelId)) && departureReached()
+        && booking().estado == 'CONFIRMADA'
+        && getAfter(/databases/$(database)/documents/reservations/$(reservationId)).data.estado == 'COMPLETADA'
+        && request.resource.data.keys().hasOnly(['reservationId','hotelId','clientUid','base','extra','total','reason','observation','createdAt','createdByUid'])
+        && request.resource.data.reservationId == reservationId
+        && request.resource.data.hotelId == booking().hotelId && request.resource.data.clientUid == booking().clientUid
+        && request.resource.data.base == booking().precioTotal && request.resource.data.base is number && request.resource.data.base >= 0
+        && request.resource.data.extra is number && request.resource.data.extra >= 0 && request.resource.data.extra <= 1000000
+        && request.resource.data.total == request.resource.data.base + request.resource.data.extra
+        && request.resource.data.reason is string && request.resource.data.reason.size() <= 1000
+        && request.resource.data.observation is string && request.resource.data.observation.size() <= 4000
+        && (request.resource.data.extra == 0 || (request.resource.data.reason.size() > 0 && request.resource.data.observation.size() > 0))
+        && request.resource.data.createdAt == request.time && request.resource.data.createdByUid == request.auth.uid;
+      allow update, delete: if false;
     }
 
     match /clientNights/{nightId} {

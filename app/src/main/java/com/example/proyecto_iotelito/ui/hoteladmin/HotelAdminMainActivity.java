@@ -81,11 +81,6 @@ public class HotelAdminMainActivity extends AppCompatActivity {
         binding.hoteladminBottomNav.setOnItemSelectedListener(item -> {
             Fragment fragment;
             int id = item.getItemId();
-            if (com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(this)
-                    && id != R.id.nav_hoteladmin_hotel) {
-                Toast.makeText(this, R.string.hoteladmin_seccion_pendiente, Toast.LENGTH_LONG).show();
-                return false;
-            }
             if (id == R.id.nav_hoteladmin_reservas) fragment = new AdminReservasFragment();
             else if (id == R.id.nav_hoteladmin_mensajes) fragment = new AdminMensajesFragment();
             else if (id == R.id.nav_hoteladmin_reportes) fragment = new AdminReportesFragment();

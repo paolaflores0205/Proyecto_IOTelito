@@ -31,6 +31,8 @@ public class AdminChatActivity extends AppCompatActivity {
     private ActivityHoteladminChatBinding binding;
     private Conversacion conversacion;
     private ArrayList<Mensaje> mensajes;
+    private com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelChat remote;
+    private int bookingId;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -40,6 +42,8 @@ public class AdminChatActivity extends AppCompatActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         binding = ActivityHoteladminChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        if (!com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminAccessGuard.allow(this)) return;
+        if (com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(this)) { iniciarRemoto(); return; }
         conversacion = HotelAdminSampleData.conversacion(
                 getIntent().getIntExtra(EXTRA_CONVERSACION_ID, 1));
         mensajes = historialInicial();
@@ -78,6 +82,34 @@ public class AdminChatActivity extends AppCompatActivity {
         });
     }
 
+    private void iniciarRemoto() {
+        bookingId = getIntent().getIntExtra(EXTRA_CONVERSACION_ID, -1);
+        if (bookingId <= 0) { finish(); return; }
+        remote = new com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelChat(this);
+        mensajes = new ArrayList<>();
+        binding.ivBack.setOnClickListener(v -> finish());
+        binding.tvNombre.setText("Reserva " + bookingId);
+        binding.tvHabitacion.setText("Conversación con el huésped");
+        binding.tvInicial.setText("H");
+        binding.btnAdjuntar.setVisibility(View.GONE);
+        binding.tvVerReserva.setOnClickListener(v -> startActivity(new android.content.Intent(this,
+                com.example.proyecto_iotelito.ui.hoteladmin.reservas.CobroCheckoutActivity.class)
+                .putExtra(com.example.proyecto_iotelito.ui.hoteladmin.reservas.CobroCheckoutActivity.EXTRA_RESERVA_ID, bookingId)));
+        binding.btnEnviar.setOnClickListener(v -> enviarMensaje());
+        binding.etMensaje.setOnEditorActionListener((v, action, event) -> {
+            if (action == EditorInfo.IME_ACTION_SEND) { enviarMensaje(); return true; } return false;
+        });
+        binding.btnEnviar.setEnabled(false);
+        remote.messages(bookingId).observe(this, state -> {
+            mensajes.clear();
+            for (com.google.firebase.firestore.DocumentSnapshot doc : state.rows)
+                mensajes.add(com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelChat.decode(doc));
+            renderMensajes();
+            binding.btnEnviar.setEnabled(!state.loading && state.error == null);
+            if (state.error != null) Toast.makeText(this, state.error, Toast.LENGTH_LONG).show();
+        });
+    }
+
     private ArrayList<Mensaje> historialInicial() {
         return new ArrayList<>(HotelAdminSampleData.chatDe(conversacion.id));
     }
@@ -90,6 +122,17 @@ public class AdminChatActivity extends AppCompatActivity {
             return;
         }
         binding.btnEnviar.setEnabled(false);
+        if (remote != null) {
+            try {
+                remote.send(bookingId, texto).addOnCompleteListener(task -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    binding.btnEnviar.setEnabled(true);
+                    if (task.isSuccessful()) binding.etMensaje.setText("");
+                    else Toast.makeText(this, "No se envió el mensaje. Revisa conexión y permisos.", Toast.LENGTH_LONG).show();
+                });
+            } catch (RuntimeException error) { binding.btnEnviar.setEnabled(true); binding.etMensaje.setError(error.getMessage()); }
+            return;
+        }
         HotelAdminLocalStore.get(this).saveMessage(conversacion.id, texto, error -> {
             if (isFinishing() || isDestroyed()) return;
             binding.btnEnviar.setEnabled(true);

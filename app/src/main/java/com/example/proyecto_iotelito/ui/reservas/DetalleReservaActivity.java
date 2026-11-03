@@ -79,6 +79,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         findViewById(R.id.btn_chatear).setOnClickListener(v -> {
             Intent intent = new Intent(this, ChatHotelActivity.class);
             intent.putExtra(ChatHotelActivity.EXTRA_HOTEL_ID, hotel.id);
+            intent.putExtra(ChatHotelActivity.EXTRA_RESERVA_ID, reserva.id);
             startActivity(intent);
         });
 

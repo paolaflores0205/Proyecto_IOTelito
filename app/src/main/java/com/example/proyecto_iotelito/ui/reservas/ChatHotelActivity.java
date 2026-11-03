@@ -29,9 +29,12 @@ import java.util.List;
  */
 public class ChatHotelActivity extends AppCompatActivity {
 
+    public static final String EXTRA_RESERVA_ID = "extra_reserva_id";
     public static final String EXTRA_HOTEL_ID = "extra_hotel_id";
     public static final String EXTRA_CONVERSACION_ID = "extra_conversacion_id";
 
+    private com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelChat remote;
+    private int bookingId;
     private LinearLayout mensajesContainer;
     private ScrollView scrollMensajes;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -52,7 +55,22 @@ public class ChatHotelActivity extends AppCompatActivity {
         mensajesContainer = findViewById(R.id.mensajes_container);
         scrollMensajes = findViewById(R.id.scroll_mensajes);
 
-        List<Mensaje> historial = SampleData.chatDeConversacion(conversacionId, hotel.name);
+        boolean online = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null;
+        List<Mensaje> historial = online ? java.util.Collections.emptyList() : SampleData.chatDeConversacion(conversacionId, hotel.name);
+        if (online) {
+            bookingId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
+            if (bookingId <= 0) { android.widget.Toast.makeText(this, "Abre el chat desde una reserva.", android.widget.Toast.LENGTH_LONG).show(); finish(); return; }
+            remote = new com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelChat(this);
+            findViewById(R.id.btn_enviar).setEnabled(false);
+            remote.messages(bookingId).observe(this, state -> {
+                mensajesContainer.removeAllViews();
+                for (com.google.firebase.firestore.DocumentSnapshot doc : state.rows)
+                    agregarBurbuja(com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelChat.decode(doc));
+                scrollAlFinal();
+                findViewById(R.id.btn_enviar).setEnabled(!state.loading && state.error == null);
+                if (state.error != null) android.widget.Toast.makeText(this, state.error, android.widget.Toast.LENGTH_LONG).show();
+            });
+        }
         for (Mensaje mensaje : historial) {
             agregarBurbuja(mensaje);
         }
@@ -73,6 +91,19 @@ public class ChatHotelActivity extends AppCompatActivity {
     private void enviarMensaje(EditText etMensaje) {
         String texto = etMensaje.getText().toString().trim();
         if (TextUtils.isEmpty(texto)) {
+            return;
+        }
+        if (remote != null) {
+            if (!findViewById(R.id.btn_enviar).isEnabled()) return;
+            findViewById(R.id.btn_enviar).setEnabled(false);
+            try {
+                remote.send(bookingId, texto).addOnCompleteListener(task -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    findViewById(R.id.btn_enviar).setEnabled(true);
+                    if (task.isSuccessful()) etMensaje.setText("");
+                    else android.widget.Toast.makeText(this, "No se envió el mensaje. Revisa conexión y permisos.", android.widget.Toast.LENGTH_LONG).show();
+                });
+            } catch (RuntimeException error) { findViewById(R.id.btn_enviar).setEnabled(true); etMensaje.setError(error.getMessage()); }
             return;
         }
         agregarBurbuja(new Mensaje(texto, true, "ahora"));
