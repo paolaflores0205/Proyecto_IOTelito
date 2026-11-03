@@ -19,8 +19,24 @@ public class RemoteUserProfileTest {
     @Test public void supportsAllFourCanonicalRoles() {
         for (UserRole role : UserRole.values()) {
             Map<String, Object> data = profile(); data.put("role", role.name());
+            if (role == UserRole.HOTEL_ADMIN) data.put("hotelId", 1L);
             assertEquals(role, RemoteUserProfile.parse("uid-1", data).authenticated().getRole());
         }
+    }
+    @Test public void unassignedHotelAdminCannotEnterSampleHotel() {
+        Map<String, Object> data = profile(); data.put("role", "HOTEL_ADMIN");
+        assertThrows(IllegalArgumentException.class,
+                () -> RemoteUserProfile.parse("uid-1", data).authenticated());
+    }
+    @Test public void carriesAssignedHotelFromFirestoreAndRejectsInvalidIds() {
+        Map<String, Object> data = profile(); data.put("role", "HOTEL_ADMIN");
+        data.put("hotelId", 17L);
+        assertEquals(Integer.valueOf(17), RemoteUserProfile.parse("uid-1", data)
+                .authenticated().getHotelId());
+        data.put("hotelId", "17");
+        assertThrows(IllegalArgumentException.class, () -> RemoteUserProfile.parse("uid-1", data));
+        data.put("hotelId", 0L);
+        assertThrows(IllegalArgumentException.class, () -> RemoteUserProfile.parse("uid-1", data));
     }
     @Test public void inactiveProfileCanBeListedButCannotAuthenticate() {
         Map<String, Object> data = profile(); data.put("active", false);
