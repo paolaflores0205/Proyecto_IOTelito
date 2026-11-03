@@ -35,12 +35,15 @@ public class PerfilTaxistaFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ((TextView) view.findViewById(R.id.tv_avatar_inicial)).setText("MA");
+        com.example.proyecto_iotelito.model.auth.AuthenticatedUser usuario =
+                com.example.proyecto_iotelito.data.SessionRepository.obtener(requireContext());
+        String nombre = usuario == null ? "" : usuario.getDisplayName();
+        ((TextView) view.findViewById(R.id.tv_avatar_inicial)).setText(nombre.isEmpty()?"":nombre.substring(0,1));
         ((TextView) view.findViewById(R.id.tv_rating)).setText("★ 4.8");
 
         bindRow(view, R.id.row_dni, R.string.taxi_label_dni, "68492135");
         bindRow(view, R.id.row_telefono, R.string.taxi_label_telefono, "+51 987 654 321");
-        bindRow(view, R.id.row_correo, R.string.taxi_label_correo, "miguel.arispe@iotelito.com");
+        bindRow(view, R.id.row_correo, R.string.taxi_label_correo, usuario == null ? "" : usuario.getEmail());
 
         bindRow(view, R.id.row_modelo, R.string.taxi_label_modelo, "Toyota Corolla (2024)");
         bindRow(view, R.id.row_placa, R.string.taxi_label_placa, "ABC-123");

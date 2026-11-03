@@ -28,6 +28,14 @@ public class RemoteUserProfileTest {
         assertThrows(IllegalArgumentException.class,
                 () -> RemoteUserProfile.parse("uid-1", data).authenticated());
     }
+    @Test public void operationalTaxiFieldsDoNotReplaceAdminRoleOrAssignment() {
+        Map<String, Object> data = profile(); data.put("role", "HOTEL_ADMIN");
+        data.put("hotelId", 17L); data.put("activo", true); data.put("disponible", true);
+        AuthenticatedUser user = RemoteUserProfile.parse("uid-1", data).authenticated();
+        assertEquals(UserRole.HOTEL_ADMIN, user.getRole());
+        assertEquals("uid-1", user.getUid());
+        assertEquals(Integer.valueOf(17), user.getHotelId());
+    }
     @Test public void carriesAssignedHotelFromFirestoreAndRejectsInvalidIds() {
         Map<String, Object> data = profile(); data.put("role", "HOTEL_ADMIN");
         data.put("hotelId", 17L);
