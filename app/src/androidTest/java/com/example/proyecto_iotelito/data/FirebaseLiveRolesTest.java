@@ -76,8 +76,10 @@ public class FirebaseLiveRolesTest {
         assumeNotNull(encoded);
         accounts = new JSONObject(new String(Base64.decode(encoded, Base64.DEFAULT), java.nio.charset.StandardCharsets.UTF_8));
         boolean excludeSuperadmin = "true".equals(args.getString("qaExcludeSuperadmin"));
+        boolean onlySuperadmin = "true".equals(args.getString("qaOnlySuperadmin"));
         int failures = 0;
         for (UserRole role : UserRole.values()) {
+            if (onlySuperadmin && role != UserRole.SUPERADMIN) continue;
             if (excludeSuperadmin && role == UserRole.SUPERADMIN) { result("SUPERADMIN pendiente_credencial_valida"); continue; }
             try {
                 AuthenticatedUser user = login(role);
@@ -85,6 +87,40 @@ public class FirebaseLiveRolesTest {
                     QuerySnapshot users = Tasks.await(db.collection("users").get(Source.SERVER), 30, TimeUnit.SECONDS);
                     QuerySnapshot hotels = Tasks.await(db.collection("hotels").get(Source.SERVER), 30, TimeUnit.SECONDS);
                     result("SUPERADMIN usuarios=" + users.size() + " hoteles=" + hotels.size());
+                    if (onlySuperadmin) {
+                        QuerySnapshot reservations = Tasks.await(db.collection("reservations").get(Source.SERVER), 30, TimeUnit.SECONDS);
+                        QuerySnapshot logs = Tasks.await(db.collection("logs").orderBy("createdAt", Query.Direction.DESCENDING).limit(200)
+                                .get(Source.SERVER), 30, TimeUnit.SECONDS);
+                        result("SUPERADMIN reservas=" + reservations.size() + " eventos=" + logs.size());
+                        String qaReservation = args.getString("qaReservationId");
+                        if (qaReservation != null) {
+                            DocumentSnapshot qa = get("reservations/" + qaReservation);
+                            assertTrue("Reserva QA visible", qa.exists());
+                            int hotelId = HotelFirestoreCodec.integer(qa.get("hotelId"));
+                            DocumentSnapshot hotelDoc = get("hotels/" + hotelId);
+                            com.example.proyecto_iotelito.model.superadmin.ManagedHotel managed =
+                                    HotelFirestoreCodec.decode(hotelDoc.getId(), hotelDoc.getData(), R.drawable.superadmin_hotel_hero);
+                            Reserva booking = new Reserva(HotelFirestoreCodec.integer(qa.get("id")), hotelId,
+                                    qa.getString("roomName"), qa.getString("roomNumber"), LocalDate.parse(qa.getString("fechaEntrada")),
+                                    LocalDate.parse(qa.getString("fechaSalida")), qa.getString("huespedes"), qa.getDouble("precioTotal"),
+                                    Reserva.Estado.valueOf(qa.getString("estado")), qa.getString("codigo"));
+                            for (com.example.proyecto_iotelito.ui.superadmin.reportes.ReportCalculator.Period period :
+                                    com.example.proyecto_iotelito.ui.superadmin.reportes.ReportCalculator.Period.values()) {
+                                com.example.proyecto_iotelito.ui.superadmin.reportes.ReportCalculator.Result report =
+                                        com.example.proyecto_iotelito.ui.superadmin.reportes.ReportCalculator.calculate(
+                                                Collections.singletonList(managed), Collections.singletonList(booking), hotelId, period, booking.fechaEntrada);
+                                assertEquals(1, report.bookings); assertEquals(175.75, report.amount, .001);
+                                assertEquals(1, report.ranking.size()); result("SUPERADMIN reporte_QA_" + period + " correcto");
+                            }
+                        }
+                        if ("true".equals(args.getString("qaScreens"))) {
+                            com.example.proyecto_iotelito.SuperadminUiTest ui = new com.example.proyecto_iotelito.SuperadminUiTest();
+                            ui.menuBlancoDe64dpMantieneOpcionesVisiblesYNavegacion();
+                            result("SUPERADMIN menu_64dp_y_navegacion_usuarios_hoteles correctos");
+                            ui.formularioValidaYAsignacionCargaAdministradoresReales();
+                            result("SUPERADMIN formulario_asignacion_y_avisos correctos_sin_escrituras");
+                        }
+                    }
                 } else if (role == UserRole.HOTEL_ADMIN) {
                     assertNotNull("Hotel asignado", user.getHotelId());
                     DocumentSnapshot hotel = get("hotels/" + user.getHotelId());
