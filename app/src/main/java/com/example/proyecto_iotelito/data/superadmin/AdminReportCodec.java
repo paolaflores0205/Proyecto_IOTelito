@@ -22,9 +22,13 @@ public final class AdminReportCodec {
         LocalDate from = LocalDate.parse((String) data.get("fechaEntrada"));
         LocalDate to = LocalDate.parse((String) data.get("fechaSalida"));
         if (!from.isBefore(to)) throw new IllegalArgumentException("Fechas de reserva inválidas.");
+        Reserva.Estado state = Reserva.Estado.desdeFirestore((String) data.get("estado"));
+        // Los reportes agrupan los alias históricos sin cambiar el estado del flujo del cliente.
+        if (state == Reserva.Estado.ACTIVA) state = Reserva.Estado.CONFIRMADA;
+        if (state == Reserva.Estado.FINALIZADA) state = Reserva.Estado.COMPLETADA;
         Reserva value = new Reserva(id, hotel, (String) data.get("roomName"),
                 (String) data.get("roomNumber"), from, to, (String) data.get("huespedes"), amount,
-                Reserva.Estado.desdeFirestore((String) data.get("estado")), (String) data.get("codigo"));
+                state, (String) data.get("codigo"));
         // roomIds es la fuente del inventario; roomNumber se conserva para presentación.
         Object roomIds = data.get("roomIds");
         if (roomIds instanceof List) {

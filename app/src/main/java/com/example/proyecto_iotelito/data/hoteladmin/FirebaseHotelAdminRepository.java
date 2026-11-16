@@ -13,8 +13,6 @@ import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
-import com.google.firebase.storage.StorageException;
-import com.google.firebase.storage.StorageReference;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.Consumer;
@@ -136,9 +134,9 @@ public final class FirebaseHotelAdminRepository {
             try { sameSession(); callback.accept(null); } catch (RuntimeException error) { callback.accept(error.getMessage()); }
         }).addOnFailureListener(error -> {
             Throwable cause = error; while (cause.getCause() != null) cause = cause.getCause();
-            if (cause instanceof StorageException
-                    && ((StorageException) cause).getErrorCode() == StorageException.ERROR_BUCKET_NOT_FOUND) {
-                callback.accept("Firebase Storage todavía no está disponible para este proyecto.");
+            String photoError = com.example.proyecto_iotelito.data.HotelAwsPhotos.message(error);
+            if (photoError != null) {
+                callback.accept(photoError);
             } else {
                 callback.accept(cause instanceof IllegalArgumentException || cause instanceof IllegalStateException
                         ? cause.getMessage() : "No se guardó en Firebase. Revisa conexión, permisos y vuelve a intentarlo.");
@@ -222,11 +220,9 @@ public final class FirebaseHotelAdminRepository {
 
     private void uploadThenSave(List<String> photos, java.util.function.Function<List<String>, Task<Void>> save,
                                 Consumer<String> callback) {
-        List<StorageReference> uploaded = new ArrayList<>();
         Task<Void> operation = verifiedHotel()
-                .onSuccessTask(current -> HotelCloudPhotos.uploadForHotel(hotelId, uid, photos, uploaded))
+                .onSuccessTask(current -> HotelCloudPhotos.uploadForHotel(context, hotelId, photos))
                 .onSuccessTask(save::apply);
-        operation.addOnFailureListener(error -> HotelCloudPhotos.discard(uploaded));
         complete(operation, callback);
     }
     public void saveRoom(Habitacion room, boolean creating, Consumer<String> callback) {

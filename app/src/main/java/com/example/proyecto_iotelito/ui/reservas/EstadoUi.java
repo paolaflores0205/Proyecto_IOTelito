@@ -16,14 +16,16 @@ final class EstadoUi {
 
     static String texto(Context context, Reserva.Estado estado) {
         switch (estado) {
+            case ACTIVA:
             case CONFIRMADA:
                 return context.getString(R.string.estado_confirmada);
+            case EN_CHECKOUT:
+                return context.getString(R.string.estado_checkout_solicitado);
             case PENDIENTE_PAGO:
                 return context.getString(R.string.estado_pendiente_pago);
+            case FINALIZADA:
             case COMPLETADA:
                 return context.getString(R.string.estado_completada);
-            case EN_CHECKOUT:
-                return context.getString(R.string.estado_en_checkout);
             default:
                 return context.getString(R.string.estado_cancelada);
         }
@@ -31,10 +33,11 @@ final class EstadoUi {
 
     static int colorFondo(Reserva.Estado estado) {
         switch (estado) {
+            case ACTIVA:
             case CONFIRMADA:
                 return R.color.io_teal_light;
-            case PENDIENTE_PAGO:
             case EN_CHECKOUT:
+            case PENDIENTE_PAGO:
                 return R.color.io_warning_bg;
             case CANCELADA:
                 return R.color.io_danger_bg;
@@ -45,10 +48,11 @@ final class EstadoUi {
 
     static int colorTexto(Reserva.Estado estado) {
         switch (estado) {
+            case ACTIVA:
             case CONFIRMADA:
                 return R.color.io_teal;
-            case PENDIENTE_PAGO:
             case EN_CHECKOUT:
+            case PENDIENTE_PAGO:
                 return R.color.io_warning_text;
             case CANCELADA:
                 return R.color.io_danger_text;
@@ -59,14 +63,16 @@ final class EstadoUi {
 
     static int mensaje(Reserva.Estado estado) {
         switch (estado) {
+            case ACTIVA:
             case CONFIRMADA:
                 return R.string.mensaje_estado_confirmada;
+            case EN_CHECKOUT:
+                return R.string.checkout_pendiente_cliente;
             case PENDIENTE_PAGO:
                 return R.string.mensaje_estado_pendiente;
+            case FINALIZADA:
             case COMPLETADA:
                 return R.string.mensaje_estado_completada;
-            case EN_CHECKOUT:
-                return R.string.checkout_solicitado;
             default:
                 return R.string.mensaje_estado_cancelada;
         }

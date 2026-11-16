@@ -27,6 +27,7 @@
                 android:background="@drawable/bg_circle_teal_light">
 
                 <ImageView
+                    android:id="@+id/iv_estado_cobro"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_gravity="center"
@@ -43,7 +44,8 @@
                 android:textSize="22sp"
                 android:textFontWeight="900"
                 tools:ignore="UnusedAttribute"
-                android:text="@string/checkout_realizado_titulo" />
+                android:id="@+id/tv_titulo_cobro"
+                android:text="Consultando checkout" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -52,7 +54,8 @@
                 android:gravity="center"
                 android:textColor="@color/io_text_secondary"
                 android:textSize="13sp"
-                android:text="@string/checkout_realizado_subtitulo" />
+                android:id="@+id/tv_estado_cobro"
+                android:text="Esperando confirmación del servidor…" />
         </LinearLayout>
 
         <LinearLayout
@@ -88,6 +91,9 @@
                     <include layout="@layout/item_summary_row" android:id="@+id/row_habitacion" android:layout_marginTop="6dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_fechas" android:layout_marginTop="6dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_tarjeta" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_base_checkout" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_valoracion_checkout" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_observaciones_checkout" android:layout_marginTop="6dp" />
 
                     <View
                         android:layout_width="match_parent"
@@ -168,7 +174,8 @@
                         android:layout_marginTop="6dp"
                         android:textColor="@color/io_text_muted"
                         android:textSize="11sp"
-                        android:text="@string/desc_sin_cargos_adicionales" />
+                        android:id="@+id/tv_motivo_cobro"
+                        android:text="Pendiente de revisión del hotel" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -195,9 +202,20 @@
                     android:layout_marginStart="8dp"
                     android:textColor="@color/io_text_secondary"
                     android:textSize="11sp"
-                    android:text="@string/aviso_factura_enviada" />
+                    android:id="@+id/tv_datos_comprobante"
+                    android:text="Demostración sin dinero real. El comprobante aparecerá cuando el hotel confirme el cobro." />
             </LinearLayout>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_taxi_checkout" style="@style/Widget.IoTelito.Button.Outline"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="48dp" android:layout_marginTop="16dp"
+                android:text="Taxi al aeropuerto" android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reintentar_cobro" style="@style/Widget.IoTelito.Button.Outline"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="48dp" android:layout_marginTop="16dp"
+                android:text="Reintentar" android:visibility="gone" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_continuar"
                 style="@style/Widget.IoTelito.Button.Primary"

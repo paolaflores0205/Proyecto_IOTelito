@@ -37,7 +37,9 @@ service cloud.firestore {
     }
     function managedPhoto(value, hotelId) {
       return value is string && value.size() <= 2048
-        && value.matches('gs://[^/]+/hotelAdminPhotos/' + hotelId + '/[^/]+/[a-zA-Z0-9-]+[.]jpg');
+        && (value.matches('gs://[^/]+/hotelAdminPhotos/' + hotelId + '/[^/]+/[a-zA-Z0-9-]+[.]jpg')
+          || value.matches('s3://iot-telito-imagenes/hotelPhotos/' + hotelId
+            + '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[.]jpg'));
     }
     function validGallery(hotelId) {
       let photos = request.resource.data.photos;
@@ -101,6 +103,45 @@ service cloud.firestore {
           || getAfter(/databases/$(database)/documents/users/$(before)).data.hotelId == null);
     }
 
+    function ownProfilePhoto(data, uid) {
+      return data.photoUrl is string && (data.photoUrl == ''
+        || data.photoUrl.matches('gs://[^/]+/profilePhotos/' + uid + '/[a-zA-Z0-9-]+[.]jpg')
+        || data.photoUrl.matches('s3://iot-telito-imagenes/profilePhotos/' + uid
+          + '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[.]jpg'));
+    }
+    function clientDocument(data) {
+      return data.documentType in ['DNI','Carnet de Extranjería','Pasaporte']
+        && data.documentNumber is string
+        && ((data.documentType == 'DNI' && data.documentNumber.matches('[0-9]{8}'))
+          || (data.documentType == 'Carnet de Extranjería' && data.documentNumber.matches('[A-Za-z0-9]{9,12}'))
+          || (data.documentType == 'Pasaporte' && data.documentNumber.matches('[A-Za-z0-9]{6,12}')));
+    }
+    function clientBirthday(data) {
+      let parts = data.birthDate.split('-');
+      let year = int(parts[0]); let month = int(parts[1]); let day = int(parts[2]);
+      let now = request.time - duration.value(5, 'h');
+      let age = now.year() - year;
+      let birth = timestamp.date(year,month,day);
+      return data.birthDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && birth.year() == year && birth.month() == month && birth.day() == day
+        && birth <= request.time && year >= now.year() - 120
+        && (age > 18 || (age == 18 && (now.month() > month || (now.month() == month && now.day() >= day))));
+    }
+    function clientNames(data) {
+      return data.firstNames is string && data.firstNames.size() > 0 && data.firstNames.size() <= 80
+        && data.lastNames is string && data.lastNames.size() > 0 && data.lastNames.size() <= 79
+        && data.name == data.firstNames + ' ' + data.lastNames;
+    }
+    function clientEditable(uid) {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let data = request.resource.data;
+      return changed.hasOnly(['name','firstNames','lastNames','phone','address','photoUrl','updatedAt','lastAccessAt'])
+        && (!changed.hasAny(['name','firstNames','lastNames']) || clientNames(data))
+        && (!changed.hasAny(['phone']) || (data.phone is string && data.phone.matches('[0-9]{9}')))
+        && (!changed.hasAny(['address']) || (data.address is string && data.address.size() >= 8 && data.address.size() <= 500))
+        && (!changed.hasAny(['photoUrl']) || ownProfilePhoto(data,uid));
+    }
+
     match /users/{uid} {
       // El perfil propio debe poder leerse para informar que la cuenta está inactiva.
       allow get: if signedIn() && (request.auth.uid == uid || superadmin());
@@ -115,6 +156,10 @@ service cloud.firestore {
         && request.resource.data.name is string && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 160
         && request.resource.data.role == 'CLIENT'
+        && clientNames(request.resource.data) && clientDocument(request.resource.data) && clientBirthday(request.resource.data)
+        && request.resource.data.phone is string && request.resource.data.phone.matches('[0-9]{9}')
+        && request.resource.data.address is string && request.resource.data.address.size() >= 8 && request.resource.data.address.size() <= 500
+        && (!request.resource.data.keys().hasAny(['photoUrl']) || ownProfilePhoto(request.resource.data,uid))
         && request.resource.data.active == true
         && request.resource.data.get('hotelId', null) == null
         && request.resource.data.createdAt == request.time
@@ -124,7 +169,8 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'name', 'firstNames', 'lastNames', 'documentType', 'documentNumber', 'birthDate',
             'phone', 'address', 'photoUrl', 'updatedAt', 'lastAccessAt'])
-          && request.resource.data.updatedAt == request.time)
+          && request.resource.data.updatedAt == request.time
+          && (resource.data.role != 'CLIENT' || clientEditable(uid)))
         || (superadmin() && request.auth.uid != uid && resource.data.role != 'SUPERADMIN'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'active', 'statusReason', 'updatedAt', 'updatedByUid'])
@@ -385,6 +431,35 @@ service cloud.firestore {
     }
 
     match /taxiRequests/{requestId} {
+      function airportForCity(city, code) {
+        let value = city.lower().trim();
+        return (code == 'LIM' && value in ['lima','lima metropolitana','callao'])
+          || (code == 'CUZ' && value in ['cusco','cuzco'])
+          || (code == 'AQP' && value == 'arequipa')
+          || (code == 'TRU' && value == 'trujillo')
+          || (code == 'PIO' && value in ['paracas','pisco']);
+      }
+      function validAirport() {
+        let data = request.resource.data;
+        let booking = get(/databases/$(database)/documents/reservations/$(requestId)).data;
+        let hotel = get(/databases/$(database)/documents/hotels/$(string(booking.hotelId))).data;
+        return data.hotelId == booking.hotelId && hotel.id == data.hotelId && hotel.active == true
+          && data.hotelCity == hotel.city && data.hotel == hotel.name && data.origen == hotel.address
+          && airportForCity(hotel.city, data.airportCode)
+          && data.destino == data.airportName + ' (' + data.airportCode + ')'
+          && ((data.airportCode == 'LIM' && data.airportName == 'Aeropuerto Internacional Jorge Chávez' && data.airportCity == 'Callao')
+            || (data.airportCode == 'CUZ' && data.airportName == 'Aeropuerto Internacional Alejandro Velasco Astete' && data.airportCity == 'Cusco')
+            || (data.airportCode == 'AQP' && data.airportName == 'Aeropuerto Internacional Alfredo Rodríguez Ballón' && data.airportCity == 'Arequipa')
+            || (data.airportCode == 'TRU' && data.airportName == 'Aeropuerto Internacional Capitán FAP Carlos Martínez de Pinillos' && data.airportCity == 'Trujillo')
+            || (data.airportCode == 'PIO' && data.airportName == 'Aeropuerto Capitán FAP Renán Elías Olivera' && data.airportCity == 'Pisco'));
+      }
+      function validDestination() {
+        let data = request.resource.data;
+        let keys = ['hotelId','hotelCity','airportCode','airportName','airportCity'];
+        // Compatibilidad con las versiones anteriores de las pantallas de taxi.
+        return (!data.keys().hasAny(keys) && data.destino == 'Aeropuerto Jorge Chávez')
+          || (data.keys().hasAll(keys) && validAirport());
+      }
       function ownsReservation() {
         return exists(/databases/$(database)/documents/reservations/$(requestId))
           && get(/databases/$(database)/documents/reservations/$(requestId)).data.clientUid == request.auth.uid;
@@ -402,7 +477,8 @@ service cloud.firestore {
           || resource.data.taxistaUid == request.auth.uid)));
       allow create: if request.auth != null && ownsReservation()
         && request.resource.data.keys().hasOnly(['id','reserva','clientUid','cliente','nombre','hotel',
-             'origen','destino','hora','pasajeros','maletas','estado','creado','taxistaUid','taxista','conductor','finalizado'])
+             'origen','destino','hora','pasajeros','maletas','estado','creado','taxistaUid','taxista','conductor','finalizado',
+             'hotelId','hotelCity','airportCode','airportName','airportCity'])
         && request.resource.data.id is int && request.resource.data.id > 0
         && requestId == string(request.resource.data.id)
         && request.resource.data.reserva == request.resource.data.id
@@ -410,7 +486,7 @@ service cloud.firestore {
         && request.resource.data.cliente == request.auth.token.email
         && request.resource.data.nombre is string && request.resource.data.nombre.size() > 0
         && request.resource.data.hotel is string && request.resource.data.origen is string
-        && request.resource.data.destino == 'Aeropuerto Jorge Chávez'
+        && validDestination()
         && request.resource.data.hora is string
         && request.resource.data.hora.matches('([01][0-9]|2[0-3]):[0-5][0-9]')
         && request.resource.data.pasajeros is int && request.resource.data.pasajeros >= 1

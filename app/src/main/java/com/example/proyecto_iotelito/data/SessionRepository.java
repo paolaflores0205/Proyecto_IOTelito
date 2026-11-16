@@ -45,6 +45,8 @@ public final class SessionRepository {
                 .collection("users").document(uid)
                 .addSnapshotListener(com.google.firebase.firestore.MetadataChanges.INCLUDE, (doc, error) -> {
                     if (!uid.equals(watchedUid)) return;
+                    FirebaseUser activeAccount = FirebaseAuth.getInstance().getCurrentUser();
+                    if (activeAccount == null || !uid.equals(activeAccount.getUid())) return;
                     if (error == null && doc != null && doc.getMetadata().isFromCache()) return;
                     try {
                         if (error != null || doc == null || !doc.exists()) throw new IllegalArgumentException();
@@ -55,6 +57,7 @@ public final class SessionRepository {
                                 && !java.util.Objects.equals(verified.getHotelId(), user.getHotelId()))
                             throw new IllegalArgumentException();
                         current = verified;
+                        if (verified.getRole() == UserRole.CLIENT) PerfilRepository.guardar(context, ClientProfileCodec.decode(doc.getData()));
                     } catch (IllegalArgumentException invalid) {
                         cerrar(context);
                         android.widget.Toast.makeText(context, "La cuenta cambió o fue desactivada. Inicia sesión nuevamente.",

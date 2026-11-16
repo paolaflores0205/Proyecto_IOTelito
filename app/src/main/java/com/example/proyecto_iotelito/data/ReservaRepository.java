@@ -77,9 +77,17 @@ public final class ReservaRepository {
                                    String huespedes, double precioTotal, String codigo,
                                    String habitaciones, String codigosHabitaciones,
                                    List<Integer> roomIds) {
+        return agregarReserva(hotel, fechaEntrada, fechaSalida, huespedes, precioTotal, codigo,
+                habitaciones, codigosHabitaciones, roomIds, null);
+    }
+
+    public Reserva agregarReserva(Hotel hotel, LocalDate fechaEntrada, LocalDate fechaSalida,
+                                   String huespedes, double precioTotal, String codigo,
+                                   String habitaciones, String codigosHabitaciones,
+                                   List<Integer> roomIds, TarjetaSimulada tarjeta) {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             return FirebaseReservaStore.agregar(hotel, fechaEntrada, fechaSalida,
-                    huespedes, precioTotal, codigo, habitaciones, codigosHabitaciones, roomIds);
+                    huespedes, precioTotal, codigo, habitaciones, codigosHabitaciones, roomIds, tarjeta);
         }
         return database.runInTransaction((java.util.concurrent.Callable<Reserva>) () -> {
         Reserva reserva = new Reserva(
@@ -98,6 +106,14 @@ public final class ReservaRepository {
         });
     }
 
+    @androidx.annotation.WorkerThread
+    public void solicitarCheckout(int id, int estrellas, String observaciones, TarjetaSimulada tarjeta) {
+        FirebaseReservaStore.solicitarCheckout(id, estrellas, observaciones, tarjeta);
+    }
+
+    @androidx.annotation.WorkerThread
+    public ComprobanteCheckout comprobante(int id) { return FirebaseReservaStore.comprobante(id); }
+
     public void actualizarEstado(int reservaId, Reserva.Estado estado) {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             throw new IllegalStateException("Solicita el checkout desde el formulario de la reserva.");
@@ -107,7 +123,7 @@ public final class ReservaRepository {
 
     @androidx.annotation.WorkerThread
     public void solicitarCheckout(int reservaId, int calificacion, String comentario) {
-        FirebaseReservaStore.solicitarCheckout(reservaId, calificacion, comentario);
+        FirebaseReservaStore.solicitarCheckout(reservaId, calificacion, comentario, null);
     }
 
     @androidx.annotation.WorkerThread
@@ -116,6 +132,32 @@ public final class ReservaRepository {
                                                        List<OpcionHabitaciones> opciones) {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) return opciones;
         return FirebaseReservaStore.filtrarDisponibles(hotelId, entrada, salida, opciones);
+    }
+
+    @androidx.annotation.WorkerThread
+    public List<OpcionHabitaciones> opcionesDisponibles(Hotel hotel, LocalDate entrada,
+                                                        LocalDate salida, int adultos, int ninos) {
+        if (!hotel.active || !hotel.hasInventory) return java.util.Collections.emptyList();
+        List<OpcionHabitaciones> libres = filtrarDisponibles(hotel.id, entrada, salida,
+                InventarioCliente.individuales(InventarioCliente.habitaciones(hotel)));
+        return InventarioCliente.combinarLibres(libres, adultos, ninos);
+    }
+
+    @androidx.annotation.WorkerThread
+    public List<Hotel> hotelesDisponibles(Context context, List<Hotel> catalogo,
+                                          LocalDate entrada, LocalDate salida, int adultos, int ninos)
+            throws InterruptedException {
+        List<Hotel> result = new ArrayList<>();
+        for (Hotel item : catalogo) {
+            if (!item.active || !item.hasInventory) continue;
+            Hotel hotel = item.remote ? HotelCatalogRepository.buscar(context, item.id) : item;
+            if (hotel == null) continue;
+            List<OpcionHabitaciones> opciones = opcionesDisponibles(hotel, entrada, salida, adultos, ninos);
+            if (opciones.isEmpty()) continue;
+            hotel.precioBusqueda = opciones.get(0).precioPorNoche();
+            result.add(hotel);
+        }
+        return result;
     }
 
     @androidx.annotation.WorkerThread

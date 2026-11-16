@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.CatalogoHabitaciones;
 import com.example.proyecto_iotelito.data.HotelMedia;
 import com.example.proyecto_iotelito.model.Hotel;
 
@@ -109,8 +108,7 @@ public class HotelAdapter extends RecyclerView.Adapter<HotelAdapter.HotelViewHol
             if (hotel.reviews == 0) rating.setText("Sin calificaciones");
             nombre.setText(hotel.name);
 
-            double precioDesde = CatalogoHabitaciones.precioMinimoDisponible(
-                    hotel.id, hotel.pricePerNight);
+            double precioDesde = com.example.proyecto_iotelito.data.InventarioCliente.precioDesde(hotel);
             String precioFormateado = String.format(Locale.getDefault(), "S/ %.0f", precioDesde);
             precio.setText(tipo == TipoTarjeta.HORIZONTAL
                     ? itemView.getContext().getString(R.string.precio_por_noche, precioFormateado)

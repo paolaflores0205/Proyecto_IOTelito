@@ -30,9 +30,10 @@ public final class HotelOperationsCodec {
         return row;
     }
     public static ReservaAdmin.EstadoCheckout status(String estado,LocalDate entrada,LocalDate salida,LocalDate hoy) {
-        if("FINALIZADA".equals(estado) || "COMPLETADA".equals(estado)) return ReservaAdmin.EstadoCheckout.FINALIZADA;
+        if(com.example.proyecto_iotelito.data.CheckoutPolicy.finalizada(estado))return ReservaAdmin.EstadoCheckout.FINALIZADA;
         if("EN_CHECKOUT".equals(estado)) return ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE;
         if(hoy.isBefore(entrada))return ReservaAdmin.EstadoCheckout.PROXIMA;
+
         return ReservaAdmin.EstadoCheckout.HOSPEDADO;
     }
     public static double total(double base,double extra) {

@@ -1,42 +1,24 @@
 package com.example.proyecto_iotelito.data.superadmin;
 
-import android.net.Uri;
-import com.google.android.gms.tasks.*;
-import com.google.firebase.storage.*;
-import java.util.*;
+import android.content.Context;
+import com.example.proyecto_iotelito.data.HotelAwsPhotos;
+import com.google.android.gms.tasks.Task;
+import java.util.List;
 
-/** Sube las copias JPEG privadas; Firestore conserva rutas gs sin tokens públicos. */
+/**
+ * Sube las copias JPEG privadas al bucket de AWS; Firestore conserva referencias s3:// estables.
+ * La API no borra objetos: una carga que no llega a guardarse deja un archivo privado sin referencia.
+ */
 public final class HotelCloudPhotos {
     private HotelCloudPhotos() { }
-    public static Task<List<String>> upload(String uid, List<String> photos, List<StorageReference> uploaded) {
-        return uploadAt("hotelPhotos/" + uid, photos, uploaded);
+
+    /** Superadmin: las fotos nuevas van a la carpeta de catálogo. */
+    public static Task<List<String>> upload(Context context, List<String> photos) {
+        return HotelAwsPhotos.upload(context, null, photos);
     }
 
-    public static Task<List<String>> uploadForHotel(int hotelId, String uid, List<String> photos,
-                                                    List<StorageReference> uploaded) {
-        return uploadAt("hotelAdminPhotos/" + hotelId + "/" + uid, photos, uploaded);
-    }
-
-    private static Task<List<String>> uploadAt(String folder, List<String> photos, List<StorageReference> uploaded) {
-        Task<List<String>> chain = Tasks.forResult(new ArrayList<>());
-        for (String value : photos) {
-            chain = chain.onSuccessTask(result -> {
-                if (value.startsWith("file:") || value.startsWith("content:")) {
-                    StorageReference ref = FirebaseStorage.getInstance().getReference()
-                            .child(folder + "/" + UUID.randomUUID() + ".jpg");
-                    uploaded.add(ref);
-                    return ref.putFile(Uri.parse(value), new StorageMetadata.Builder().setContentType("image/jpeg").build())
-                            .continueWithTask(task -> {
-                                if (!task.isSuccessful()) return Tasks.forException(task.getException());
-                                result.add(ref.toString()); return Tasks.forResult(result);
-                            });
-                }
-                result.add(value); return Tasks.forResult(result);
-            });
-        }
-        return chain;
-    }
-    public static void discard(List<StorageReference> uploaded) {
-        for (StorageReference ref : uploaded) ref.delete();
+    /** Administrador asignado: las fotos nuevas van a la carpeta de su hotel. */
+    public static Task<List<String>> uploadForHotel(Context context, int hotelId, List<String> photos) {
+        return HotelAwsPhotos.upload(context, hotelId, photos);
     }
 }

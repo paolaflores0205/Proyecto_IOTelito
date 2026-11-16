@@ -41,13 +41,14 @@ public class CheckoutActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checkout);
+        if (savedInstanceState != null) calificacion = savedInstanceState.getInt("rating", 0);
 
         reservaRepository = ReservaRepository.getInstance(this);
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
         com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, hotel) -> {
         reserva = value;
         checkoutRemoto = FirebaseAuth.getInstance().getCurrentUser() != null;
-        if (!puedeSolicitarSalida(reserva)) {
+        if (!reserva.puedeSolicitarCheckout()) {
             abrirSolicitudODetalle();
             return;
         }
@@ -80,14 +81,6 @@ public class CheckoutActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_confirmar_checkout).setOnClickListener(v -> onConfirmarCheckout());
         findViewById(R.id.btn_cancelar_checkout).setOnClickListener(v -> finish());
-        findViewById(R.id.btn_confirmar_checkout).setEnabled(false);
-        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), solicitudId -> {
-            if (solicitudId >= 0) {
-                abrirSolicitud(solicitudId);
-            } else {
-                findViewById(R.id.btn_confirmar_checkout).setEnabled(true);
-            }
-        });
         });
     }
 
@@ -101,6 +94,7 @@ public class CheckoutActivity extends AppCompatActivity {
         };
         for (int i = 0; i < estrellas.length; i++) {
             int seleccion = i + 1;
+            estrellas[i].setImageResource(i < calificacion ? R.drawable.ic_star : R.drawable.ic_star_border);
             estrellas[i].setOnClickListener(v -> {
                 calificacion = seleccion;
                 for (int j = 0; j < estrellas.length; j++) {
@@ -116,97 +110,61 @@ public class CheckoutActivity extends AppCompatActivity {
         ((TextView) row.findViewById(R.id.tv_value)).setText(value);
     }
 
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state); state.putInt("rating", calificacion);
+    }
+
     private void onConfirmarCheckout() {
-        if (calificacion == 0) {
-            Toast.makeText(this, R.string.toast_calificacion_requerida, Toast.LENGTH_SHORT).show();
-            return;
+        if (!com.example.proyecto_iotelito.data.ConexionCliente.disponible(this)) {
+            Toast.makeText(this, R.string.cliente_sin_conexion, Toast.LENGTH_LONG).show(); return;
         }
-        EditText comentarios = findViewById(R.id.et_comentarios);
-        String comentario = comentarios.getText().toString().trim();
-        if (checkoutRemoto && (comentario.isBlank() || comentario.length() > 4000)) {
-            comentarios.setError(getString(R.string.error_comentario_checkout));
-            return;
+        String comentario = ((android.widget.EditText)findViewById(R.id.et_comentarios)).getText().toString().trim();
+        try { com.example.proyecto_iotelito.data.CheckoutPolicy.validarOpinion(calificacion, comentario); }
+        catch (IllegalArgumentException error) {
+            Toast.makeText(this, error.getMessage(), Toast.LENGTH_LONG).show(); return;
         }
-        int estrellas = calificacion;
+        if (reserva.tarjeta == null) { solicitarTarjeta(comentario); return; }
+        enviarCheckout(comentario, reserva.tarjeta);
+    }
+
+    private void solicitarTarjeta(String comentario) {
+        View form = getLayoutInflater().inflate(R.layout.dialog_tarjeta_prueba, null);
+        androidx.appcompat.app.AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("Registrar tarjeta de prueba")
+                .setView(form).setNegativeButton(R.string.btn_cancelar, null)
+                .setPositiveButton("Solicitar checkout", null).create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            try {
+                com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta = com.example.proyecto_iotelito.data.TarjetaSimulada.validar(
+                        ((android.widget.EditText)form.findViewById(R.id.et_numero_tarjeta)).getText().toString(),
+                        ((android.widget.EditText)form.findViewById(R.id.et_vencimiento)).getText().toString(),
+                        ((android.widget.EditText)form.findViewById(R.id.et_cvv)).getText().toString(),
+                        java.time.YearMonth.now(java.time.ZoneId.of("America/Lima")));
+                dialog.dismiss(); enviarCheckout(comentario, tarjeta);
+            } catch (IllegalArgumentException error) {
+                TextView label = form.findViewById(R.id.tv_error_tarjeta);
+                label.setText(error.getMessage()); label.setVisibility(View.VISIBLE);
+            }
+        }));
+        dialog.show();
+        if (dialog.getWindow() != null) dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
+
+    private void enviarCheckout(String comentario, com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta) {
         findViewById(R.id.btn_confirmar_checkout).setEnabled(false);
         com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this, () -> {
-            Reserva actual = reservaRepository.buscarPorId(reserva.id);
-            if (actual == null || !puedeSolicitarSalida(actual)
-                    || TaxiRepository.porReserva(this, reserva.id) >= 0) return false;
-            if (checkoutRemoto) reservaRepository.solicitarCheckout(reserva.id, estrellas, comentario);
-            else reservaRepository.actualizarEstado(reserva.id, Reserva.Estado.COMPLETADA);
+            reservaRepository.solicitarCheckout(reserva.id, calificacion, comentario, tarjeta);
             return true;
-        }, saved -> {
-        if (!saved) {
-            abrirSolicitudODetalle();
-            return;
-        }
-        reserva.estado = checkoutRemoto ? Reserva.Estado.EN_CHECKOUT : Reserva.Estado.COMPLETADA;
-        if (checkoutRemoto) Toast.makeText(this, R.string.checkout_solicitado, Toast.LENGTH_LONG).show();
-        if (elegibleTaxi) {
-            mostrarOfertaTaxi();
-        } else {
-            irACobroConfirmado();
-        }
-        }, () -> findViewById(R.id.btn_confirmar_checkout).setEnabled(true));
+        }, saved -> abrirComprobante(), () -> findViewById(R.id.btn_confirmar_checkout).setEnabled(true));
     }
 
-    private boolean puedeSolicitarSalida(Reserva reserva) {
-        return checkoutRemoto ? reserva.puedeSolicitarCheckout() : reserva.puedeHacerCheckout();
-    }
+    private void abrirSolicitudODetalle() { abrirComprobante(); }
 
-    private void abrirSolicitudODetalle() {
-        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), solicitudId -> {
-            if (solicitudId >= 0) {
-                abrirSolicitud(solicitudId);
-            } else {
-                startActivity(new Intent(this, DetalleReservaActivity.class)
-                        .putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id));
-                finish();
-            }
-        });
-    }
-
-    private void abrirSolicitud(int solicitudId) {
-        if (isFinishing()) return;
-        startActivity(new Intent(this, TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID, solicitudId));
+    private void abrirComprobante() {
+        startActivity(new Intent(this, CobroConfirmadoActivity.class)
+                .putExtra(CobroConfirmadoActivity.EXTRA_RESERVA_ID, reserva.id));
         finish();
     }
 
-    private void mostrarOfertaTaxi() {
-        BottomSheetDialog sheet = new BottomSheetDialog(this);
-        View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_oferta_taxi, null);
-        sheet.setContentView(sheetView);
-        sheet.setCanceledOnTouchOutside(false);
-
-        sheetView.findViewById(R.id.btn_aceptar_taxi).setOnClickListener(v -> {
-            sheet.dismiss();
-            Intent intent = new Intent(this, BeneficioTaxiActivity.class);
-            intent.putExtra(BeneficioTaxiActivity.EXTRA_RESERVA_ID, reserva.id);
-            startActivity(intent);
-            finish();
-        });
-
-        sheetView.findViewById(R.id.btn_rechazar_taxi).setOnClickListener(v -> {
-            sheet.dismiss();
-            irACobroConfirmado();
-        });
-
-        sheet.show();
-    }
-
-    private void irACobroConfirmado() {
-        if (checkoutRemoto) {
-            abrirSolicitudODetalle();
-            return;
-        }
-        Intent intent = new Intent(this, CobroConfirmadoActivity.class);
-        intent.putExtra(CobroConfirmadoActivity.EXTRA_RESERVA_ID, reserva.id);
-        startActivity(intent);
-        finish();
-    }
-
-    private String formatMoney(double amount) {
-        return "S/ " + String.format(Locale.US, "%,.0f", amount);
-    }
+    private String formatMoney(double amount) { return "S/ " + String.format(Locale.US, "%,.2f", amount); }
 }

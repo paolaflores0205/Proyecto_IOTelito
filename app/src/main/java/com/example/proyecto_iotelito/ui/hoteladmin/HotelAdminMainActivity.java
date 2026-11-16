@@ -60,7 +60,13 @@ public class HotelAdminMainActivity extends AppCompatActivity {
         if (FirebaseHotelAdminRepository.remote(this)) {
             operations = new FirebaseHotelOperations(this);
             reservations = operations.reservations();
-            reservations.observe(this, state -> refreshNotifications());
+            reservations.observe(this, state -> {
+                refreshNotifications();
+                if (state.loading || state.error != null) return;
+                long pending = state.rows.stream().filter(row -> row.estado == ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE).count();
+                com.google.android.material.badge.BadgeDrawable badge = binding.hoteladminBottomNav.getOrCreateBadge(R.id.nav_hoteladmin_reservas);
+                badge.setVisible(pending > 0); badge.setNumber((int)pending);
+            });
             configurarNavegacion(savedInstanceState);
             requestNotificationPermission();
             return;

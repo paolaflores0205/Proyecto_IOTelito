@@ -14,8 +14,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.PerfilRepository;
-import com.example.proyecto_iotelito.model.UserProfile;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
@@ -25,15 +23,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.format.ResolverStyle;
 
 public class RegisterActivity extends AppCompatActivity {
-
-    private static final DateTimeFormatter BIRTHDATE_FORMATTER =
-            DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private TextInputLayout namesLayout;
     private TextInputLayout lastnamesLayout;
@@ -52,6 +43,18 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputEditText passwordEditText;
     private TextInputEditText phoneEditText;
     private TextInputEditText addressEditText;
+    private String fotoPreparada;
+    private boolean preparandoFoto;
+    private final androidx.activity.result.ActivityResultLauncher<String> fotoPicker = registerForActivityResult(
+            new androidx.activity.result.contract.ActivityResultContracts.GetContent(), uri -> {
+                if(uri==null)return;
+                preparandoFoto=true;findViewById(R.id.btn_registrarme).setEnabled(false);
+                com.example.proyecto_iotelito.data.ClientLocalTasks.run(this,this,
+                        ()->com.example.proyecto_iotelito.data.ClientProfilePhotos.preparar(this,uri),path->{
+                            fotoPreparada=path;preparandoFoto=false;findViewById(R.id.btn_registrarme).setEnabled(true);
+                            com.example.proyecto_iotelito.data.HotelImageLoader.show(findViewById(R.id.iv_registro_foto),android.net.Uri.fromFile(new java.io.File(path)).toString());
+                        },()->{preparandoFoto=false;findViewById(R.id.btn_registrarme).setEnabled(true);});
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,15 +64,34 @@ public class RegisterActivity extends AppCompatActivity {
         setupHeader();
         bindFields();
         setupBirthdateInput();
+        com.example.proyecto_iotelito.ui.common.FormKeyboard.attach(this,findViewById(R.id.scroll_registro),
+                namesEditText,lastnamesEditText,documentEditText,birthdateEditText,emailEditText,
+                passwordEditText,phoneEditText,addressEditText);
+        if(savedInstanceState!=null)fotoPreparada=savedInstanceState.getString("foto_preparada");
+        if(fotoPreparada!=null)com.example.proyecto_iotelito.data.HotelImageLoader.show(findViewById(R.id.iv_registro_foto),android.net.Uri.fromFile(new java.io.File(fotoPreparada)).toString());
+        findViewById(R.id.btn_registro_foto).setOnClickListener(v->fotoPicker.launch("image/*"));
+        View.OnClickListener elegirTipo=v->new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("Tipo de documento").setItems(com.example.proyecto_iotelito.data.ClientProfileCodec.DOCUMENTS,(dialog,which)->{
+                    ((TextView)findViewById(R.id.register_document_type_edit_text)).setText(com.example.proyecto_iotelito.data.ClientProfileCodec.DOCUMENTS[which]);
+                    documentEditText.setInputType(which==0?android.text.InputType.TYPE_CLASS_NUMBER:android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+                    documentEditText.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(which==0?8:12)});
+                }).show();
+        findViewById(R.id.register_document_type_edit_text).setOnClickListener(elegirTipo);
+        ((TextInputLayout)findViewById(R.id.register_document_type_layout)).setEndIconOnClickListener(elegirTipo);
         findViewById(R.id.btn_registrarme).setOnClickListener(v -> attemptRegister());
     }
 
     private void attemptRegister() {
         clearErrors();
+        if(preparandoFoto)return;
+        if(!com.example.proyecto_iotelito.data.ConexionCliente.disponible(this)){
+            Toast.makeText(this,R.string.cliente_sin_conexion,Toast.LENGTH_LONG).show();return;
+        }
 
         String names = valueOf(namesEditText.getText());
         String lastnames = valueOf(lastnamesEditText.getText());
-        String document = valueOf(documentEditText.getText());
+        String document = valueOf(documentEditText.getText()).toUpperCase(java.util.Locale.ROOT);
+        String documentType=((TextView)findViewById(R.id.register_document_type_edit_text)).getText().toString();
         String birthdate = valueOf(birthdateEditText.getText());
         String email = valueOf(emailEditText.getText());
         String password = passwordEditText.getText() == null ? "" : passwordEditText.getText().toString();
@@ -85,10 +107,8 @@ public class RegisterActivity extends AppCompatActivity {
             lastnamesLayout.setError(getString(R.string.register_error_lastname));
             hasError = true;
         }
-        if (!document.matches("\\d{8}")) {
-            documentLayout.setError(getString(R.string.register_error_document));
-            hasError = true;
-        }
+        try { com.example.proyecto_iotelito.data.ClientProfileCodec.validarDocumento(documentType,document); }
+        catch(IllegalArgumentException error){documentLayout.setError(error.getMessage());hasError=true;}
         if (!isAdultBirthdate(birthdate)) {
             birthdateLayout.setError(getString(R.string.register_error_birthdate));
             hasError = true;
@@ -110,7 +130,17 @@ public class RegisterActivity extends AppCompatActivity {
             hasError = true;
         }
 
+        try {com.example.proyecto_iotelito.data.ClientProfileCodec.editables(names,lastnames,phone,address);}
+        catch(IllegalArgumentException error){Toast.makeText(this,error.getMessage(),Toast.LENGTH_LONG).show();hasError=true;}
         if (hasError) return;
+
+        final java.util.Map<String,Object> registration;
+        try {
+            registration=com.example.proyecto_iotelito.data.ClientProfileCodec.registro(names,lastnames,
+                    documentType,document,birthdate,phone,address,LocalDate.now(java.time.ZoneId.of("America/Lima")));
+        } catch(IllegalArgumentException error) {
+            Toast.makeText(this,error.getMessage(),Toast.LENGTH_LONG).show();return;
+        }
 
         View submitButton = findViewById(R.id.btn_registrarme);
         submitButton.setEnabled(false);
@@ -136,31 +166,20 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
             String fullName = names + " " + lastnames;
-            PerfilRepository.guardar(this, new UserProfile(fullName, email, phone,
-                    "DNI", document, birthdate, address));
-            java.util.Map<String, Object> profile = new java.util.HashMap<>();
+
+            java.util.Map<String, Object> profile = new java.util.HashMap<>(registration);
             profile.put("uid", user.getUid());
-            profile.put("name", fullName);
-            profile.put("firstNames", names);
-            profile.put("lastNames", lastnames);
             profile.put("email", user.getEmail());
-            profile.put("phone", phone);
-            profile.put("documentType", "DNI");
-            profile.put("documentNumber", document);
-            profile.put("birthDate", LocalDate.parse(birthdate, BIRTHDATE_FORMATTER).toString());
-            profile.put("address", address);
-            profile.put("role", "CLIENT");
-            profile.put("active", true);
-            profile.put("hotelId", null);
             profile.put("createdAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
             profile.put("updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
             com.example.proyecto_iotelito.data.FirebaseProfileRepository.createClient(user.getUid(), profile)
-                    .addOnSuccessListener(unused -> user.updateProfile(new UserProfileChangeRequest.Builder()
-                            .setDisplayName(fullName).build()).addOnCompleteListener(this, profileTask -> {
-                        auth.signOut();
-                        Toast.makeText(this, R.string.register_success_demo, Toast.LENGTH_LONG).show();
-                        finish();
-                    }))
+                    .addOnSuccessListener(unused -> {
+                        user.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(fullName).build());
+                        if(fotoPreparada==null){terminarRegistro(user,false);return;}
+                        com.example.proyecto_iotelito.data.PerfilRepository.guardarRemoto(this,user.getUid(),names,lastnames,phone,address,fotoPreparada)
+                                .addOnSuccessListener(saved -> terminarRegistro(user,false))
+                                .addOnFailureListener(error -> terminarRegistro(user,true));
+                    })
                     .addOnFailureListener(error -> {
                         auth.signOut();
                         submitButton.setEnabled(true);
@@ -261,14 +280,17 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean isAdultBirthdate(String value) {
-        try {
-            LocalDate birthdate = LocalDate.parse(value, BIRTHDATE_FORMATTER);
-            return !birthdate.isAfter(LocalDate.now())
-                    && Period.between(birthdate, LocalDate.now()).getYears() >= 18;
-        } catch (DateTimeParseException exception) {
-            return false;
-        }
+        try{com.example.proyecto_iotelito.data.ClientProfileCodec.nacimientoIso(value,LocalDate.now(java.time.ZoneId.of("America/Lima")));return true;}
+        catch(IllegalArgumentException error){return false;}
     }
+    private void terminarRegistro(FirebaseUser user,boolean fotoPendiente){
+        FirebaseUser current=FirebaseAuth.getInstance().getCurrentUser();
+        if(current==null||!current.getUid().equals(user.getUid()))return;
+        FirebaseAuth.getInstance().signOut();
+        if(isFinishing()||isDestroyed())return;
+        Toast.makeText(this,fotoPendiente?"Cuenta creada. La foto no se pudo subir; puedes añadirla después desde Editar perfil.":"Cuenta creada. Ya puedes iniciar sesión.",Toast.LENGTH_LONG).show();finish();
+    }
+    @Override protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);state.putString("foto_preparada",fotoPreparada);}
 
     private String valueOf(CharSequence value) {
         return value == null ? "" : value.toString().trim();

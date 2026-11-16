@@ -26,6 +26,17 @@ service firebase.storage {
       allow delete: if owner(uid);
       allow update: if false;
     }
+    match /profilePhotos/{uid}/{photo} {
+      function profileOwner() {
+        return active() && request.auth.uid == uid
+          && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'CLIENT';
+      }
+      allow read: if profileOwner();
+      allow create: if profileOwner() && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType == 'image/jpeg' && photo.matches('[a-zA-Z0-9-]+[.]jpg');
+      allow delete: if profileOwner();
+      allow update: if false;
+    }
     match /hotelAdminPhotos/{hotelId}/{uid}/{photo} {
       allow get: if active();
       allow create: if hotelOwner(hotelId, uid) && request.resource.size > 0

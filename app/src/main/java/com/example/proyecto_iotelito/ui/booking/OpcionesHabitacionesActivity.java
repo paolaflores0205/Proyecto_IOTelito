@@ -10,14 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.CatalogoHabitaciones;
-import com.example.proyecto_iotelito.data.GeneradorOpcionesHabitaciones;
-import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.OpcionHabitaciones;
 import com.example.proyecto_iotelito.model.hoteladmin.Habitacion;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,11 +50,7 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
             explicacion.setText(R.string.catalogo_habitaciones_explicacion);
         }
 
-        List<Habitacion> inventory = hotel.remote ? hotel.inventory : CatalogoHabitaciones.disponiblesPorHotel(hotelId);
-        List<OpcionHabitaciones> opciones = !hotel.active || !hotel.hasInventory ? Collections.emptyList() : modoReserva
-                ? GeneradorOpcionesHabitaciones.generar(inventory, seleccion.adultos, seleccion.ninos)
-                : opcionesDeCatalogo(inventory);
-
+        List<Habitacion> inventory = com.example.proyecto_iotelito.data.InventarioCliente.habitaciones(hotel);
         java.util.function.Consumer<List<OpcionHabitaciones>> mostrarOpciones = disponibles -> {
         RecyclerView recyclerView = findViewById(R.id.rv_opciones_habitaciones);
         TextView vacio = findViewById(R.id.tv_sin_opciones);
@@ -76,30 +68,30 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
                 ? R.string.sin_combinaciones_habitaciones : R.string.sin_habitaciones_disponibles);
         recyclerView.setVisibility(sinOpciones ? View.GONE : View.VISIBLE);
         };
-        if (modoReserva && !opciones.isEmpty()) {
-            com.example.proyecto_iotelito.data.ClientLocalTasks.runWithError(this, this,
-                    () -> com.example.proyecto_iotelito.data.ReservaRepository.getInstance(this)
-                            .filtrarDisponibles(hotelId, seleccion.fechaEntrada(),
-                                    seleccion.fechaSalida(), opciones),
-                    mostrarOpciones, error -> {
-                        String message = error instanceof IllegalArgumentException
-                                ? error.getMessage() : getString(R.string.disponibilidad_sin_verificar);
-                        explicacion.setText(message);
-                        mostrarOpciones.accept(Collections.emptyList());
-                        ((TextView) findViewById(R.id.tv_sin_opciones)).setText(message);
-                    });
+        if (!hotel.active || !hotel.hasInventory) {
+            mostrarOpciones.accept(Collections.emptyList());
+        } else if (modoReserva) {
+            Runnable consultar = () -> {
+                TextView estado = findViewById(R.id.tv_sin_opciones);
+                estado.setText(R.string.consultando_disponibilidad);
+                estado.setVisibility(View.VISIBLE);
+                estado.setOnClickListener(null);
+                findViewById(R.id.rv_opciones_habitaciones).setVisibility(View.GONE);
+                com.example.proyecto_iotelito.data.ClientLocalTasks.runWithError(this, this,
+                        () -> com.example.proyecto_iotelito.data.ReservaRepository.getInstance(this)
+                                .opcionesDisponibles(hotel, seleccion.fechaEntrada(),
+                                        seleccion.fechaSalida(), seleccion.adultos, seleccion.ninos),
+                        mostrarOpciones, error -> {
+                            estado.setText(error instanceof IllegalArgumentException
+                                    ? error.getMessage() : getString(R.string.error_disponibilidad_reintentar));
+                            estado.setOnClickListener(v -> recreate());
+                        });
+            };
+            consultar.run();
         } else {
-            mostrarOpciones.accept(opciones);
+            mostrarOpciones.accept(com.example.proyecto_iotelito.data.InventarioCliente.individuales(inventory));
         }
         });
-    }
-
-    private List<OpcionHabitaciones> opcionesDeCatalogo(List<Habitacion> inventory) {
-        List<OpcionHabitaciones> opciones = new ArrayList<>();
-        for (Habitacion habitacion : inventory) {
-            opciones.add(new OpcionHabitaciones(Collections.singletonList(habitacion)));
-        }
-        return opciones;
     }
 
     private void abrirDetalle(int hotelId, BookingSelection seleccion,

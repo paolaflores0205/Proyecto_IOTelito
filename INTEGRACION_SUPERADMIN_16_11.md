@@ -131,3 +131,15 @@ La infraestructura AWS de imágenes sigue pendiente. El código de Storage hered
 Continúan fuera de estos puntos 1–3 el alta segura de administradores, la coherencia de habilitación del taxista con la web/API y la comprobación real de asignaciones. El checklist completo está en AUDITORIA_SUPERADMIN_FIREBASE_16_11.md.
 
 La integración y los ajustes permanecen en la rama local superadmin hasta que se solicite su push. No se cambian las ramas remotas de los compañeros.
+
+## Segunda integración del 16/11: cliente, administrador, taxista y AWS
+
+Tras publicar el avance anterior en b13f015, se integró origin/feat/hotel-admin (7d83253). Este commit contiene origin/feature/inicio-cliente-reserva (d08a76c), los cambios de taxista y la migración de fotos de hotel a AWS. No hace falta repetir el merge del cliente.
+
+Se resolvieron conflictos en Reserva, FirebaseReservaStore y OpcionesHabitacionesActivity conservando los nuevos campos de checkout, la consulta por lotes de noches, las combinaciones de habitaciones libres, el estado de carga/reintento y la comprobación previa de cruces propios del cliente. Los estados ACTIVA/FINALIZADA se conservan en el flujo cliente; el codec de reportes los normaliza a CONFIRMADA/COMPLETADA para mantener las estadísticas históricas.
+
+No cambiaron los layouts, colores ni lógica de navegación de superadmin, ni sus datos de ejemplo. Las mejoras globales de teclado de formularios de los compañeros se incorporaron. El catálogo conserva fotos locales existentes y añade referencias privadas S3 para nuevas cargas, sin claves AWS en la aplicación.
+
+Verificación de esta integración: assembleDebug, testDebugUnitTest y assembleDebugAndroidTest correctos; 119 pruebas unitarias sin fallos y 43 pruebas de la API AWS con dobles locales sin fallos. No se ejecutó nuevamente la instrumentación en dispositivos ni se instaló en el A55. No se desplegaron reglas ni recursos cloud durante esta integración. La guía aws/imagenes/README.md de la rama integrada comunica que las rutas de hotel ya fueron desplegadas por el equipo; queda comprobarlas desde la app real.
+
+Prueba siguiente: superadmin agrega una foto en un hotel de prueba, guarda y vuelve a abrir; cliente comprueba el carrusel desde otro dispositivo; administrador asignado prueba galería/servicios. Firestore debe guardar referencias s3:// estables y la API entregar enlaces temporales para lectura. Confirmar además disponibilidad por huéspedes/fechas y checkout. No se asegura que AWS real funcione hasta completar esa prueba.

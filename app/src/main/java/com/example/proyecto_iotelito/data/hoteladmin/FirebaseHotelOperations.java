@@ -70,19 +70,23 @@ public final class FirebaseHotelOperations {
         verify();if(extra>0&&(reason.trim().isEmpty()||observation.trim().isEmpty()))throw new IllegalArgumentException("Completa el motivo y observación.");
         DocumentReference booking=db.collection("reservations").document(String.valueOf(id)),receipt=db.collection("hotelCheckouts").document(String.valueOf(id));
         return db.runTransaction(tx->{verify();DocumentSnapshot before=tx.get(booking),existing=tx.get(receipt);
-            if(existing.exists())return null;
             if(!before.exists())throw new IllegalArgumentException("Reserva inexistente");
             ReservaAdmin row=HotelOperationsCodec.decode(before.getId(),before.getData(),hotelId,LocalDate.now(ZONE));
-            if(row==null || !"EN_CHECKOUT".equals(before.getString("estado"))
-                    || LocalDate.now(ZONE).isBefore(row.fechaSalida))
+            if (existing.exists()) {
+                if (row == null || !com.example.proyecto_iotelito.data.CheckoutPolicy.finalizada(before.getString("estado")))
+                    throw new IllegalStateException("Comprobante inconsistente.");
+                return null;
+            }
+            if(row==null||row.estado!=ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE
+                    || !"EN_CHECKOUT".equals(before.getString("estado")) || LocalDate.now(ZONE).isBefore(row.fechaSalida))
                 throw new IllegalStateException("La reserva no permite checkout o ya fue finalizada.");
             Map<String,Object> data=new HashMap<>();data.put("reservationId",String.valueOf(id));data.put("hotelId",hotelId);
             data.put("clientUid",before.getString("clientUid"));data.put("base",row.precioAlojamiento);data.put("extra",extra);
+            com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta = com.example.proyecto_iotelito.data.TarjetaSimulada.leer(before.getData());
+            if (tarjeta == null) throw new IllegalArgumentException("La reserva no tiene una tarjeta de prueba registrada.");
+            data.put("cardType", tarjeta.tipo); data.put("cardLast4", tarjeta.ultimos4); data.put("paymentMode", "SIMULATED");
             data.put("total",HotelOperationsCodec.total(row.precioAlojamiento,extra));data.put("reason",extra>0?reason.trim():"");
             data.put("observation",extra>0?observation.trim():"");data.put("createdAt",FieldValue.serverTimestamp());data.put("createdByUid",uid);
-            data.put("cardType", before.getString("cardType"));
-            data.put("cardLast4", before.getString("cardLast4"));
-            data.put("paymentMode", before.getString("paymentMode"));
             tx.set(receipt,data);tx.update(booking,"estado","FINALIZADA");return null;});
     }
 }

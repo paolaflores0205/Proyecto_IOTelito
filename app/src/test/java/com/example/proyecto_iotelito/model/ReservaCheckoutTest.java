@@ -7,25 +7,23 @@ import static org.junit.Assert.*;
 
 public class ReservaCheckoutTest {
     private Reserva crear(Reserva.Estado estado, LocalDate salida) {
-        return new Reserva(1, 1, "Suite", "310", LocalDate.now().minusDays(3), salida,
+        return new Reserva(1, 1, "Suite", "310", LocalDate.now(java.time.ZoneId.of("America/Lima")).minusDays(3), salida,
                 "2 adultos", 1140, estado, "IOT-PRUEBA");
     }
 
     @Test
-    public void soloLasReservasActivasConSalidaHoyPermitenCheckout() {
+    public void soloConfirmadasOActivasDesdeSalidaPermitenSolicitarCheckout() {
         for (Reserva.Estado estado : Reserva.Estado.values()) {
-            Reserva reserva = crear(estado, LocalDate.now());
-            boolean checkoutLocalDisponible = estado == Reserva.Estado.CONFIRMADA
-                    || estado == Reserva.Estado.PENDIENTE_PAGO;
-            assertEquals(estado.name(), checkoutLocalDisponible, reserva.puedeHacerCheckout());
+            Reserva reserva = crear(estado, LocalDate.now(java.time.ZoneId.of("America/Lima")));
+            assertEquals(estado.name(), estado == Reserva.Estado.CONFIRMADA || estado == Reserva.Estado.ACTIVA, reserva.puedeHacerCheckout());
         }
-        assertFalse(crear(Reserva.Estado.CONFIRMADA, LocalDate.now().plusDays(1)).puedeHacerCheckout());
-        assertFalse(crear(Reserva.Estado.CONFIRMADA, LocalDate.now().minusDays(1)).puedeHacerCheckout());
+        assertFalse(crear(Reserva.Estado.CONFIRMADA, LocalDate.now(java.time.ZoneId.of("America/Lima")).plusDays(1)).puedeHacerCheckout());
+        assertTrue(crear(Reserva.Estado.CONFIRMADA, LocalDate.now(java.time.ZoneId.of("America/Lima")).minusDays(1)).puedeHacerCheckout());
     }
 
     @Test
     public void finalizarLaReservaImpideRepetirCheckoutElMismoDia() {
-        Reserva reserva = crear(Reserva.Estado.CONFIRMADA, LocalDate.now());
+        Reserva reserva = crear(Reserva.Estado.CONFIRMADA, LocalDate.now(java.time.ZoneId.of("America/Lima")));
         assertTrue(reserva.puedeHacerCheckout());
         reserva.estado = Reserva.Estado.COMPLETADA;
         assertFalse(reserva.puedeHacerCheckout());

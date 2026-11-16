@@ -35,7 +35,6 @@
                 android:padding="16dp">
 
                 <LinearLayout
-                    android:id="@+id/container_estadia"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -118,10 +117,12 @@
                     android:orientation="vertical" />
 
                 <LinearLayout
+                    android:id="@+id/container_estadia"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:background="@drawable/bg_info_box_teal"
+                    android:visibility="gone"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="12dp">

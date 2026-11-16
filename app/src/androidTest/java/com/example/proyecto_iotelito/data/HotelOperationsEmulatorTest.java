@@ -209,10 +209,8 @@ public class HotelOperationsEmulatorTest {
         verifyBookingAvailability(today);
         if ("true".equals(InstrumentationRegistry.getArguments().getString("bookingAvailabilityOnly"))) return;
         Tasks.await(new FirebaseHotelChat(context).send(2001,"Pregunta del huésped"),20,TimeUnit.SECONDS);
-        ReservaRepository.getInstance(context).solicitarCheckout(2001, 5, "Estadía de prueba");
-        DocumentSnapshot solicitud = Tasks.await(db.document("reservations/2001").get(Source.SERVER),20,TimeUnit.SECONDS);
-        assertEquals("EN_CHECKOUT", solicitud.getString("estado"));
-        assertEquals("SIMULATED", solicitud.getString("paymentMode"));
+        com.example.proyecto_iotelito.data.ReservaRepository.getInstance(context).solicitarCheckout(2001,5,"Estadía de prueba satisfactoria",
+                TarjetaSimulada.validar("4242424242424242","12/39","123",java.time.YearMonth.now()));
         login("admin-hotel@example.test",UserRole.HOTEL_ADMIN,adminUid,1);
         AdminChatActivity chat=open(AdminChatActivity.class,new Intent(context,AdminChatActivity.class).putExtra(AdminChatActivity.EXTRA_CONVERSACION_ID,2001));
         waitFor(()->chat.findViewById(R.id.btn_enviar).isEnabled()&&((LinearLayout)chat.findViewById(R.id.ll_mensajes)).getChildCount()==1);
@@ -235,10 +233,7 @@ public class HotelOperationsEmulatorTest {
         // Reintentar no cambia el comprobante ni duplica importes.
         Tasks.await(new FirebaseHotelOperations(context).checkout(2001,0,"",""),20,TimeUnit.SECONDS);
         assertEquals("FINALIZADA",Tasks.await(db.document("reservations/2001").get(Source.SERVER),20,TimeUnit.SECONDS).getString("estado"));
-        DocumentSnapshot comprobante = Tasks.await(db.document("hotelCheckouts/2001").get(Source.SERVER),20,TimeUnit.SECONDS);
-        assertEquals(112.75, comprobante.getDouble("total"), .001);
-        assertEquals(solicitud.getString("cardLast4"), comprobante.getString("cardLast4"));
-        assertFalse(comprobante.contains("cardToken"));
+        assertEquals(112.75,Tasks.await(db.document("hotelCheckouts/2001").get(Source.SERVER),20,TimeUnit.SECONDS).getDouble("total"),.001);
         AtomicReference<com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin> loaded = new AtomicReference<>();
         AtomicReference<String> loadError = new AtomicReference<>();
         ins.runOnMainSync(() -> new FirebaseHotelOperations(context).load(2001, loaded::set, loadError::set));

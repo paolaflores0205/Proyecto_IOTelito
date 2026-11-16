@@ -8,6 +8,8 @@ import java.io.Serializable;
  * entregable posterior se reemplazará por la base de datos NoSQL.
  */
 public class Hotel implements Serializable {
+    // Precio de la combinación disponible para una búsqueda; no se persiste en Firebase.
+    public Double precioBusqueda;
     public java.util.List<String> photos = new java.util.ArrayList<>();
     public boolean active = true;
     public boolean hasInventory = true;

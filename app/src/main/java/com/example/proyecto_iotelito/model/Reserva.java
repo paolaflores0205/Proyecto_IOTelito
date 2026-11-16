@@ -19,13 +19,9 @@ public class Reserva implements Serializable {
     };
 
     public enum Estado {
-        CONFIRMADA, PENDIENTE_PAGO, COMPLETADA, CANCELADA, EN_CHECKOUT;
+        CONFIRMADA, ACTIVA, EN_CHECKOUT, FINALIZADA, PENDIENTE_PAGO, COMPLETADA, CANCELADA;
 
-        public static Estado desdeFirestore(String estado) {
-            if ("ACTIVA".equals(estado)) return CONFIRMADA;
-            if ("FINALIZADA".equals(estado)) return COMPLETADA;
-            return valueOf(estado);
-        }
+        public static Estado desdeFirestore(String estado) { return valueOf(estado); }
     }
 
     public final int id;
@@ -52,6 +48,9 @@ public class Reserva implements Serializable {
         if (roomNumber == null || roomNumber.trim().isEmpty()) return 1;
         return Math.max(1, roomNumber.split(",").length);
     }
+    public com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta;
+    public Integer valoracion;
+    public String observaciones;
 
     public Reserva(int id, int hotelId, String roomName, String roomNumber, LocalDate fechaEntrada, LocalDate fechaSalida,
                     String huespedes, double precioTotal, Estado estado, String codigo) {
@@ -69,7 +68,7 @@ public class Reserva implements Serializable {
     }
 
     public boolean esActiva() {
-        return estado == Estado.CONFIRMADA || estado == Estado.PENDIENTE_PAGO || estado == Estado.EN_CHECKOUT;
+        return estado == Estado.CONFIRMADA || estado == Estado.ACTIVA || estado == Estado.EN_CHECKOUT || estado == Estado.PENDIENTE_PAGO;
     }
 
     /** La estadía ya empezó y todavía no termina. */
@@ -83,14 +82,12 @@ public class Reserva implements Serializable {
         return LocalDate.now().isBefore(fechaEntrada);
     }
 
-    /** Hoy es el día de salida de una estadía en curso: ya se puede hacer el checkout. */
+    /** El cliente puede solicitar el checkout desde el día de salida en Lima. */
     public boolean puedeHacerCheckout() {
-        return estado != Estado.EN_CHECKOUT && esActiva() && estaEnCurso() && fechaSalida.isEqual(LocalDate.now());
+        return com.example.proyecto_iotelito.data.CheckoutPolicy.puedeSolicitar(estado.name(), fechaSalida, LocalDate.now(java.time.ZoneId.of("America/Lima")));
     }
 
-    public boolean puedeSolicitarCheckout() {
-        return estado == Estado.CONFIRMADA && !LocalDate.now(ZoneId.of("America/Lima")).isBefore(fechaSalida);
-    }
+    public boolean puedeSolicitarCheckout() { return puedeHacerCheckout(); }
 
     public String rangoFechasTexto() {
         String mesEntrada = MESES_ABREV[fechaEntrada.getMonthValue() - 1];

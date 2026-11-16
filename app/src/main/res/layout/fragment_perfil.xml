@@ -56,6 +56,9 @@
             </LinearLayout>
         </LinearLayout>
 
+        <TextView android:id="@+id/tv_estado_perfil" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingHorizontal="20dp" android:paddingVertical="8dp" android:textColor="@color/io_text_secondary"
+            android:textSize="12sp" android:visibility="gone" />
         <!-- Avatar e Info Principal -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -78,6 +81,10 @@
                     android:textSize="26sp"
                     android:textStyle="bold"
                     tools:text="CB" />
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_perfil_foto" android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:scaleType="centerCrop" android:contentDescription="Foto de perfil"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.IoTelito.Avatar" />
             </FrameLayout>
 
             <TextView

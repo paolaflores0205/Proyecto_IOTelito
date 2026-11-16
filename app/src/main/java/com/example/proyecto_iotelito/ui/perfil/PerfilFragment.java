@@ -33,6 +33,22 @@ public class PerfilFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         pintarDatosPerfil(view);
+        PerfilRepository.observar(requireContext()).observe(getViewLifecycleOwner(), state -> {
+            pintarDatosPerfil(view);
+            TextView status=view.findViewById(R.id.tv_estado_perfil);
+            boolean online=com.example.proyecto_iotelito.data.ConexionCliente.disponible(requireContext());
+            status.setText(!online?getString(R.string.perfil_cache_sin_conexion):state.error!=null?state.error:state.cargando?"Actualizando perfil…":"");
+            status.setVisibility(!online||state.error!=null||state.cargando?View.VISIBLE:View.GONE);
+        });
+        new com.example.proyecto_iotelito.data.ConexionCliente(requireContext()).observe(getViewLifecycleOwner(), online -> {
+            TextView status=view.findViewById(R.id.tv_estado_perfil);
+            if(!online){status.setText(R.string.perfil_cache_sin_conexion);status.setVisibility(View.VISIBLE);}
+            else {status.setText("Actualizando perfil…");status.setVisibility(View.VISIBLE);
+                PerfilRepository.cargarServidor(requireContext()).addOnCompleteListener(task->{
+                    if(getView()!=view)return;
+                    pintarDatosPerfil(view);status.setText(task.isSuccessful()?"":"No se pudo actualizar el perfil.");status.setVisibility(task.isSuccessful()?View.GONE:View.VISIBLE);
+                });}
+        });
 
         // Botón Editar Perfil
         view.findViewById(R.id.btn_editar_perfil).setOnClickListener(v ->
@@ -68,16 +84,17 @@ public class PerfilFragment extends Fragment {
         PerfilRepository.aplicarEnMemoria(perfil);
 
         ((TextView) view.findViewById(R.id.tv_avatar_inicial)).setText(perfil.initials());
+        com.example.proyecto_iotelito.data.ClientProfilePhotos.mostrar(view.findViewById(R.id.iv_perfil_foto),perfil.photoUrl);
         ((TextView) view.findViewById(R.id.tv_nombre)).setText(perfil.name);
         ((TextView) view.findViewById(R.id.tv_email)).setText(perfil.email);
 
         // Card Datos Personales
         ((TextView) view.findViewById(R.id.tv_datos_nombre)).setText(perfil.name);
-        ((TextView) view.findViewById(R.id.tv_datos_tipo_doc)).setText(perfil.tipoDocumento);
-        ((TextView) view.findViewById(R.id.tv_datos_num_doc)).setText(perfil.numeroDocumento);
-        ((TextView) view.findViewById(R.id.tv_datos_fecha_nac)).setText(perfil.fechaNacimiento);
+        ((TextView) view.findViewById(R.id.tv_datos_tipo_doc)).setText(perfil.tipoDocumento == null || perfil.tipoDocumento.isEmpty() ? "No registrado" : perfil.tipoDocumento);
+        ((TextView) view.findViewById(R.id.tv_datos_num_doc)).setText(perfil.numeroDocumento == null || perfil.numeroDocumento.isEmpty() ? "No registrado" : perfil.numeroDocumento);
+        ((TextView) view.findViewById(R.id.tv_datos_fecha_nac)).setText(perfil.fechaNacimiento == null || perfil.fechaNacimiento.isEmpty() ? "No registrado" : perfil.fechaNacimiento);
         ((TextView) view.findViewById(R.id.tv_datos_email)).setText(perfil.email);
         ((TextView) view.findViewById(R.id.tv_datos_telefono)).setText(perfil.phone);
-        ((TextView) view.findViewById(R.id.tv_datos_domicilio)).setText(perfil.domicilio);
+        ((TextView) view.findViewById(R.id.tv_datos_domicilio)).setText(perfil.domicilio == null || perfil.domicilio.isEmpty() ? "No registrado" : perfil.domicilio);
     }
 }
