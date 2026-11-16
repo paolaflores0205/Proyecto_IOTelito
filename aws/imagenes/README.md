@@ -24,11 +24,15 @@ Las rutas de perfil siguen permitiendo solo a clientes y solo su propia carpeta.
 1. Subir el nuevo `iot-telito-imagenes-api.zip` (Lambda > Código > Cargar desde > Archivo .zip).
    Se genera con `npm ci --ignore-scripts` y comprimiendo index.mjs, package.json,
    package-lock.json y node_modules en la raíz del ZIP (el ZIP está en .gitignore).
+   En Windows usar `tar.exe -a -c -f iot-telito-imagenes-api.zip index.mjs package.json package-lock.json node_modules`.
+   No usar `Compress-Archive` de Windows PowerShell: guarda las rutas con `\` y Lambda (Linux) no encuentra los módulos.
 2. En API Gateway, en la misma HTTP API, agregar las rutas `POST /hotel-photos/upload-url` y
    `POST /hotel-photos/read-url` con la misma integración Lambda. Las rutas de perfil no cambian.
 3. Prueba sin sesión de `POST /hotel-photos/upload-url`: debe responder 401.
 4. Probar desde la app: superadmin edita fotos de un hotel; admin agrega una foto a la galería y a un
    servicio; cliente ve las fotos en el catálogo; un admin de otro hotel recibe 403.
+Estado (16/11/2026): pasos 1 a 3 hechos con AWS CLI. La versión publicada 1 de la Lambda guarda el código
+anterior (solo perfil) por si hay que volver atrás. Falta el paso 4.
 No hay borrado: una subida que no llega a guardarse en Firestore deja un objeto privado sin referencia.
 
 ## Despliegue manual
