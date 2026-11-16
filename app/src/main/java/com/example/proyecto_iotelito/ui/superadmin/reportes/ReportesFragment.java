@@ -7,7 +7,6 @@ import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.ReservaRepository;
 import com.example.proyecto_iotelito.databinding.FragmentSuperadminReportesBinding;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
@@ -22,8 +21,8 @@ public class ReportesFragment extends Fragment {
     private FragmentSuperadminReportesBinding binding;
     private List<ManagedHotel> hotels = new ArrayList<>();
     private List<Reserva> reservations = new ArrayList<>();
-    private List<Reserva> demoReservations = new ArrayList<>();
-    private String remoteStatus = "Cargando reservas de Firestore…";
+    private String remoteStatus = "Cargando reservas…";
+    private boolean reservationsReady;
     private String catalogStatus = "";
     private int selectedHotel;
     private LocalDate date = LocalDate.now();
@@ -37,11 +36,6 @@ public class ReportesFragment extends Fragment {
         return binding.getRoot();
     }
     @Override public void onViewCreated(@NonNull View view, @Nullable Bundle state) {
-        binding.switchDemoHistory.setOnCheckedChangeListener((button, checked) -> render());
-        new ViewModelProvider(this).get(SuperadminViewModel.class).reportHistory().observe(getViewLifecycleOwner(), rows -> {
-            demoReservations = rows;
-            render();
-        });
         binding.actvHotelSelector.setOnItemClickListener((parent, v, position, id) -> {
             selectedHotel = position == 0 ? 0 : hotels.get(position - 1).id;
             render();
@@ -72,8 +66,8 @@ public class ReportesFragment extends Fragment {
         });
         new ViewModelProvider(this).get(SuperadminViewModel.class).reservationsState().observe(getViewLifecycleOwner(), stateRows -> {
             reservations = stateRows.rows;
-            remoteStatus = stateRows.error != null ? stateRows.error : stateRows.loading ? "Cargando reservas de Firestore…"
-                    : "Reservas reales de Firestore: " + reservations.size();
+            reservationsReady = !stateRows.loading && stateRows.error == null;
+            remoteStatus = stateRows.error != null ? stateRows.error : "Cargando reservas…";
             render();
         });
         new ViewModelProvider(this).get(SuperadminViewModel.class).hotelsState().observe(getViewLifecycleOwner(), stateRows -> {
@@ -88,11 +82,10 @@ public class ReportesFragment extends Fragment {
         ReportCalculator.Period period = id == R.id.chip_daily ? ReportCalculator.Period.DAILY
                 : id == R.id.chip_yearly ? ReportCalculator.Period.YEARLY : ReportCalculator.Period.MONTHLY;
         List<Reserva> source = new ArrayList<>(reservations);
-        if (binding.switchDemoHistory.isChecked()) source.addAll(demoReservations);
-        binding.tvReportSource.setText((binding.switchDemoHistory.isChecked()
-                ? remoteStatus + String.format(locale, " · DEMOSTRACIÓN: se añaden %,d reservas simuladas solo a este reporte.", demoReservations.size())
-                : remoteStatus + ". Sin datos simulados.") + catalogStatus);
         ReportCalculator.Result data = ReportCalculator.calculate(hotels, source, selectedHotel, period, date);
+        binding.tvReportSource.setText((reservationsReady
+                ? getResources().getQuantityString(R.plurals.superadmin_report_bookings, data.bookings, data.bookings)
+                : remoteStatus) + catalogStatus);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", locale);
         binding.tvSelectedRange.setText(data.start.format(formatter) + " — " + data.end.minusDays(1).format(formatter));
         binding.btnReportDate.setText("Cambiar fecha: " + date.format(formatter));
@@ -103,7 +96,7 @@ public class ReportesFragment extends Fragment {
         binding.tvOccupancy.setText(String.format(locale, "%.1f%%", data.occupancy));
         binding.tvOccupancyNote.setText("Estimación según habitaciones reservadas");
         binding.tvIncome.setText(String.format(locale, "S/ %,.2f", data.amount));
-        binding.tvIncomeNote.setText("Prorrateado por noches; no es cobro bancario");
+        binding.tvIncomeNote.setText("Valor de las estadías en el período");
         binding.tvChartTitle.setText(data.title);
         binding.weeklyBookingsChart.setData(data.labels, data.values);
         binding.weeklyBookingsChart.setContentDescription(data.title + ": " + Arrays.toString(data.values));

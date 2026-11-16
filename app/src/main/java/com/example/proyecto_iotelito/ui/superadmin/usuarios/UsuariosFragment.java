@@ -61,8 +61,8 @@ public class UsuariosFragment extends Fragment {
         model.usersState().observe(getViewLifecycleOwner(), state -> {
             syncLoading = state.loading;
             syncError = state.error;
-            binding.tvUsersSyncState.setText(state.loading ? "Cargando usuarios de Firebase…"
-                    : state.error == null ? "Usuarios de Firebase · actualizados en tiempo real" : state.error);
+            binding.tvUsersSyncState.setText(state.loading ? "Cargando usuarios…"
+                    : state.error == null ? "Administra las cuentas y sus permisos de acceso" : state.error);
             binding.tvUsersSyncState.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(),
                     state.error == null ? R.color.io_text_secondary : R.color.io_danger_text));
             binding.cardUsersEmpty.setVisibility(!state.loading && state.error == null && adapter.getItemCount() == 0

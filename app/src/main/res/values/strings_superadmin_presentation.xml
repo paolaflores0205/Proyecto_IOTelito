@@ -1,0 +1,6 @@
+<resources>
+    <plurals name="superadmin_report_bookings">
+        <item quantity="one">%d reserva en el período seleccionado</item>
+        <item quantity="other">%d reservas en el período seleccionado</item>
+    </plurals>
+</resources>

@@ -53,7 +53,7 @@ public class AsignarAdministradorActivity extends AppCompatActivity {
         });
         model.users().observe(this, rows -> { users = rows; renderAdmins(); });
         model.usersState().observe(this, state -> binding.tvAssignmentState.setText(state.loading
-                ? "Cargando administradores Firebase…" : state.error == null
+                ? "Cargando administradores…" : state.error == null
                 ? "Solo administradores activos sin otro hotel asignado." : state.error));
         model.hotelsState().observe(this, state -> {
             if (state.error != null) binding.tvAssignmentState.setText(state.error);

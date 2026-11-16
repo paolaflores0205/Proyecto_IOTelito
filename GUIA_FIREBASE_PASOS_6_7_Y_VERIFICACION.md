@@ -1,5 +1,11 @@
 # Fotos, reportes, actividad y alertas de superadmin
 
+Actualización de presentación (03/11/2026): se retiraron de las vistas habituales
+el botón de publicar ejemplos y el interruptor de historial de demostración.
+Los reportes ahora usan exclusivamente reservas registradas; las indicaciones
+anteriores sobre esos controles se conservan aquí como historial de implementación.
+Los hoteles ya publicados y el contenido de Firebase no se modificaron.
+
 02/11/2026 · Rama superadmin · Continuación del paso 5.
 
 ## Qué se implementó
