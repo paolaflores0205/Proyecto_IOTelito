@@ -2,11 +2,12 @@ package com.example.proyecto_iotelito.ui.superadmin.reportes;
 
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
+import com.example.proyecto_iotelito.model.superadmin.HotelCheckout;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-/** Estadísticas locales, sin usar los contadores estáticos del catálogo. */
+/** Estadías por sus noches; cobros simulados por fecha de comprobante en Lima. */
 public final class ReportCalculator {
     public enum Period { DAILY, MONTHLY, YEARLY }
     public static final class Ranking {
@@ -18,6 +19,8 @@ public final class ReportCalculator {
         public LocalDate start, end;
         public int bookings, cancellations;
         public double amount, occupancy;
+        public double checkoutAmount, checkoutExtras;
+        public int checkouts;
         public String title;
         public String[] labels;
         public int[] values;
@@ -25,6 +28,10 @@ public final class ReportCalculator {
     }
     public static Result calculate(List<ManagedHotel> hotels, List<Reserva> bookings,
                                    int hotelId, Period period, LocalDate date) {
+        return calculate(hotels, bookings, Collections.emptyList(), hotelId, period, date);
+    }
+    public static Result calculate(List<ManagedHotel> hotels, List<Reserva> bookings,
+                                   List<HotelCheckout> checkouts, int hotelId, Period period, LocalDate date) {
         Result out = new Result();
         out.start = period == Period.DAILY ? date
                 : period == Period.MONTHLY ? date.withDayOfMonth(1) : date.withDayOfYear(1);
@@ -57,12 +64,11 @@ public final class ReportCalculator {
                 out.bookings++;
                 if (booking.estado == Reserva.Estado.CANCELADA) out.cancellations++;
             }
-            if (booking.estado == Reserva.Estado.CANCELADA) continue;
+            if (booking.estado == Reserva.Estado.CANCELADA || booking.estado == Reserva.Estado.PENDIENTE_PAGO) continue;
             LocalDate from = booking.fechaEntrada.isAfter(out.start) ? booking.fechaEntrada : out.start;
             LocalDate to = booking.fechaSalida.isBefore(out.end) ? booking.fechaSalida : out.end;
             long nights = Math.max(0, ChronoUnit.DAYS.between(from, to));
-            // Una reserva puede incluir varios códigos de habitación separados por comas.
-            int rooms = roomCount(booking.roomNumber);
+            int rooms = booking.cantidadHabitaciones();
             long roomNights = nights * rooms;
             totalRoomNights += roomNights;
             occupied.merge(booking.hotelId, roomNights, Long::sum);
@@ -78,6 +84,14 @@ public final class ReportCalculator {
             }
         }
         out.occupancy = capacity > 0 ? Math.min(100, totalRoomNights * 100.0 / capacity) : 0;
+        for (HotelCheckout checkout : checkouts) {
+            // Un comprobante histórico puede pertenecer a un hotel ausente del catálogo.
+            if (hotelId != 0 && checkout.hotelId != hotelId) continue;
+            if (checkout.date.isBefore(out.start) || !checkout.date.isBefore(out.end)) continue;
+            out.checkouts++;
+            out.checkoutAmount += checkout.total;
+            out.checkoutExtras += checkout.extra;
+        }
         for (ManagedHotel hotel : hotels) if (included.contains(hotel.id)) {
             double rate = hotel.rooms > 0 ? Math.min(100, occupied.getOrDefault(hotel.id, 0L) * 100.0 / (hotel.rooms * days)) : 0;
             out.ranking.add(new Ranking(hotel, rate));
@@ -85,9 +99,5 @@ public final class ReportCalculator {
         out.ranking.sort(Comparator.comparingDouble((Ranking r) -> r.occupancy).reversed()
                 .thenComparing(r -> r.hotel.name));
         return out;
-    }
-    private static int roomCount(String codes) {
-        if (codes == null || codes.trim().isEmpty()) return 1;
-        return Math.max(1, codes.split(",").length);
     }
 }

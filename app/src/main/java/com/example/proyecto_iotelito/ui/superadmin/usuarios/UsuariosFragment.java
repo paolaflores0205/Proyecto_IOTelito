@@ -53,20 +53,16 @@ public class UsuariosFragment extends Fragment {
             binding.chipGroupStatus.check(R.id.chip_inactive);
         }
         SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
-        model.users().observe(getViewLifecycleOwner(), rows -> {
-            users = rows;
-            updateSummary();
-            renderUsers();
-        });
         model.usersState().observe(getViewLifecycleOwner(), state -> {
+            users = state.users;
             syncLoading = state.loading;
             syncError = state.error;
             binding.tvUsersSyncState.setText(state.loading ? "Cargando usuarios…"
                     : state.error == null ? "Administra las cuentas y sus permisos de acceso" : state.error);
             binding.tvUsersSyncState.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(),
                     state.error == null ? R.color.io_text_secondary : R.color.io_danger_text));
-            binding.cardUsersEmpty.setVisibility(!state.loading && state.error == null && adapter.getItemCount() == 0
-                    ? View.VISIBLE : View.GONE);
+            updateSummary();
+            renderUsers();
         });
         renderUsers();
     }
@@ -77,9 +73,9 @@ public class UsuariosFragment extends Fragment {
         for (AdminUser user : users) {
             if (user.active) active++;
         }
-        binding.tvUsersTotal.setText(String.valueOf(total));
-        binding.tvUsersStatusSummary.setText(
-                getString(R.string.superadmin_users_status_summary, active, total - active));
+        binding.tvUsersTotal.setText(users.isEmpty() && (syncLoading || syncError != null) ? "—" : String.valueOf(total));
+        binding.tvUsersStatusSummary.setText(users.isEmpty() && (syncLoading || syncError != null)
+                ? "Esperando datos" : getString(R.string.superadmin_users_status_summary, active, total - active));
     }
 
     @Override

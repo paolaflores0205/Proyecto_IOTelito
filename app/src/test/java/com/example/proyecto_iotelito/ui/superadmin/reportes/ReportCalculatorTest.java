@@ -2,6 +2,7 @@ package com.example.proyecto_iotelito.ui.superadmin.reportes;
 
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
+import com.example.proyecto_iotelito.model.superadmin.HotelCheckout;
 import org.junit.Test;
 import java.time.LocalDate;
 import java.util.*;
@@ -55,5 +56,38 @@ public class ReportCalculatorTest {
         assertEquals(0, out.bookings); assertEquals(0, out.amount, 0);
         assertEquals(0, out.occupancy, 0); assertEquals(1, out.ranking.size());
         assertEquals(0, Arrays.stream(out.values).sum());
+    }
+    @Test public void estadiasYCobrosUsanFechasDiferentesSinDuplicarExtras() {
+        List<ManagedHotel> hotels = Arrays.asList(hotel(1, 5), hotel(2, 5));
+        Reserva stay = booking(1, 1, date.minusDays(2), date, 200, Reserva.Estado.desdeFirestore("FINALIZADA"));
+        List<HotelCheckout> receipts = Arrays.asList(
+                new HotelCheckout("1", 1, date, 200, 25, 225),
+                new HotelCheckout("2", 2, date, 100, 10, 110),
+                new HotelCheckout("3", 1, date.plusDays(1), 300, 0, 300));
+        ReportCalculator.Result day = ReportCalculator.calculate(hotels, Collections.singletonList(stay), receipts, 1, ReportCalculator.Period.DAILY, date);
+        assertEquals(0, day.amount, 0.001); // El día de salida no se cobra otra noche.
+        assertEquals(225, day.checkoutAmount, 0.001);
+        assertEquals(25, day.checkoutExtras, 0.001);
+        assertEquals(1, day.checkouts);
+        ReportCalculator.Result month = ReportCalculator.calculate(hotels, Collections.singletonList(stay), receipts, 1, ReportCalculator.Period.MONTHLY, date);
+        assertEquals(200, month.amount, 0.001);
+        assertEquals(525, month.checkoutAmount, 0.001);
+        assertEquals(2, month.checkouts);
+        ReportCalculator.Result all = ReportCalculator.calculate(hotels, Collections.singletonList(stay), receipts, 0, ReportCalculator.Period.YEARLY, date);
+        assertEquals(635, all.checkoutAmount, 0.001);
+        assertEquals(35, all.checkoutExtras, 0.001);
+    }
+    @Test public void checkoutYFinalizadasMantienenOcupacionPeroPendientePagoNo() {
+        List<Reserva> rows = Arrays.asList(
+                booking(1, 1, date, date.plusDays(1), 100, Reserva.Estado.desdeFirestore("EN_CHECKOUT")),
+                booking(2, 1, date, date.plusDays(1), 200, Reserva.Estado.desdeFirestore("FINALIZADA")),
+                booking(3, 1, date, date.plusDays(1), 900, Reserva.Estado.PENDIENTE_PAGO));
+        rows.get(0).setCantidadHabitaciones(1);
+        rows.get(1).setCantidadHabitaciones(1);
+        ReportCalculator.Result out = ReportCalculator.calculate(Collections.singletonList(hotel(1, 10)), rows, 1, ReportCalculator.Period.DAILY, date);
+        assertEquals(3, out.bookings);
+        assertEquals(300, out.amount, 0.001);
+        assertEquals(20, out.occupancy, 0.001);
+        assertArrayEquals(new int[]{2, 0, 2}, out.values);
     }
 }

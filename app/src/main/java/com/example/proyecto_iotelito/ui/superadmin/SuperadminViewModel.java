@@ -29,6 +29,8 @@ public class SuperadminViewModel extends AndroidViewModel {
             new com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository();
     private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<com.example.proyecto_iotelito.model.Reserva>> reservationState = adminRead.reservations();
     private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<ActivityLog>> logState = adminRead.logs();
+    private final LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<com.example.proyecto_iotelito.model.superadmin.HotelCheckout>> checkoutState = adminRead.checkouts();
+    public LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<com.example.proyecto_iotelito.model.superadmin.HotelCheckout>> checkoutsState() { return checkoutState; }
     public LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<com.example.proyecto_iotelito.model.Reserva>> reservationsState() { return reservationState; }
     public LiveData<com.example.proyecto_iotelito.data.superadmin.FirebaseAdminReadRepository.State<ActivityLog>> logsState() { return logState; }
     private final com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository remoteHotels =
