@@ -70,7 +70,7 @@ public class MensajesFragment extends Fragment {
                         java.time.LocalDate today = java.time.LocalDate.now(com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelOperations.ZONE);
                         java.time.LocalDate start = java.time.LocalDate.parse(doc.getString("fechaEntrada")), end = java.time.LocalDate.parse(doc.getString("fechaSalida"));
                         Conversacion.Categoria category = today.isBefore(start) ? Conversacion.Categoria.POR_LLEGAR :
-                                (!today.isBefore(end) || !"CONFIRMADA".equals(doc.getString("estado"))) ? Conversacion.Categoria.PASADOS : Conversacion.Categoria.HOSPEDADOS;
+                                (!today.isBefore(end) || com.example.proyecto_iotelito.data.CheckoutPolicy.finalizada(doc.getString("estado")) || "CANCELADA".equals(doc.getString("estado"))) ? Conversacion.Categoria.PASADOS : Conversacion.Categoria.HOSPEDADOS;
                         String name = doc.getString("hotelName");
                         if (name == null) name = "Hotel · " + doc.getLong("hotelId");
                         rows.add(new Conversacion(Integer.parseInt(doc.getId()), doc.getLong("hotelId").intValue(), name,

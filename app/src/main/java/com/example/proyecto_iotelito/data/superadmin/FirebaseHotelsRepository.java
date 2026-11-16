@@ -122,7 +122,7 @@ public final class FirebaseHotelsRepository {
                 int id = HotelFirestoreCodec.integer(data.get("id"));
                 if (!String.valueOf(id).equals(doc.getId()) || HotelFirestoreCodec.integer(data.get("hotelId")) != hotelId)
                     throw new IllegalArgumentException("Inventario remoto con IDs inconsistentes.");
-                if (!Boolean.TRUE.equals(data.get("disponible"))) continue;
+                if (Boolean.TRUE.equals(data.get("archived")) || !Boolean.TRUE.equals(data.get("disponible"))) continue;
                 result.add(new Habitacion(id, hotelId, String.valueOf(data.get("tipo")), String.valueOf(data.get("nombreCodigo")),
                         HotelFirestoreCodec.integer(data.get("areaM2")), HotelFirestoreCodec.integer(data.get("adultos")),
                         HotelFirestoreCodec.integer(data.get("ninos")), ((Number) data.get("precioNoche")).doubleValue(),

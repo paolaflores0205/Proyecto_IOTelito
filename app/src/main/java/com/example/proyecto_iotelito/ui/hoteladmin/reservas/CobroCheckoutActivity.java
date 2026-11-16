@@ -50,7 +50,7 @@ public class CobroCheckoutActivity extends AppCompatActivity {
         binding.btnConfirmar.setEnabled(false);
         if (remote != null) {
             binding.tvAviso.setText("Cierre administrativo. No realiza cargos bancarios.");
-            binding.btnConfirmar.setText("Registrar checkout");
+            binding.btnConfirmar.setText("Confirmar cobro simulado");
             remote.load(getIntent().getIntExtra(EXTRA_RESERVA_ID, -1), row -> {
                 if (isFinishing() || isDestroyed()) return;
                 reserva = row; mostrarReserva(); binding.btnConfirmar.setEnabled(true);
@@ -116,7 +116,7 @@ public class CobroCheckoutActivity extends AppCompatActivity {
             catch (IllegalArgumentException error) { binding.etMontoDano.setError(error.getMessage()); return; }
         }
         new MaterialAlertDialogBuilder(this)
-                .setTitle(remote != null ? "¿Registrar checkout?" : getString(R.string.hoteladmin_confirmar_checkout_titulo))
+                .setTitle(remote != null ? "¿Confirmar cobro simulado?" : getString(R.string.hoteladmin_confirmar_checkout_titulo))
                 .setMessage(remote != null ? "Se registrará el cierre por " + binding.tvTotal.getText() + ". No se cargará ninguna tarjeta."
                         : getString(R.string.hoteladmin_confirmar_checkout_mensaje, binding.tvTotal.getText()))
                 .setNegativeButton(R.string.btn_cancelar, null)
@@ -130,7 +130,7 @@ public class CobroCheckoutActivity extends AppCompatActivity {
             try {
                 remote.checkout(reserva.id, binding.switchDanos.isChecked() ? montoDano() : 0,
                         texto(binding.etMotivoDano), texto(binding.etObservacionDano))
-                    .addOnSuccessListener(done -> { Toast.makeText(this, "Checkout registrado. Sin cargo bancario.", Toast.LENGTH_LONG).show(); finish(); })
+                    .addOnSuccessListener(done -> { HotelAdminNotifications.cancelCheckout(this, reserva.id); Toast.makeText(this, "Cobro simulado registrado. Sin cargo bancario.", Toast.LENGTH_LONG).show(); finish(); })
                     .addOnFailureListener(error -> { binding.btnConfirmar.setEnabled(true); Toast.makeText(this, "No se pudo registrar. Revisa conexión, permisos y estado de la reserva.", Toast.LENGTH_LONG).show(); });
             } catch (RuntimeException error) { binding.btnConfirmar.setEnabled(true); Toast.makeText(this, error.getMessage(), Toast.LENGTH_LONG).show(); }
             return;

@@ -2,12 +2,12 @@
 const assert = require('node:assert/strict');
 const {call,fields,expect,write,commit,runAuthRules,countChecks}=require('./firestore_auth_rules.test.cjs');
 async function put(path,data){const r=await call('PATCH',`/${path}`,{fields:fields(data)},'owner');assert.ok(r.ok,await r.text());}
-const booking=(id=2001,hotelId=1)=>({id,hotelId,clientUid:'client',roomIds:[101],roomName:'Simple',roomNumber:'101',fechaEntrada:'2025-01-01',fechaSalida:'2025-01-02',precioTotal:100,estado:'CONFIRMADA',codigo:`QA-${id}`});
-const receipt=(id=2001,extra=0)=>({reservationId:String(id),hotelId:1,clientUid:'client',base:100,extra,total:100+extra,reason:extra?'Daño verificado':'',observation:extra?'Acuerdo de cierre':'',createdByUid:'admin'});
-const close=(id=2001)=>write(`reservations/${id}`,{estado:'COMPLETADA'},['estado']);
+const booking=(id=2001,hotelId=1)=>({id,hotelId,clientUid:'client',roomIds:[101],roomName:'Simple',roomNumber:'101',fechaEntrada:'2025-01-01',fechaSalida:'2025-01-02',precioTotal:100,estado:'EN_CHECKOUT',cardType:'Visa',cardLast4:'4242',cardToken:'DEMO_test',paymentMode:'SIMULATED',rating:5,review:'Buena estadía',codigo:`QA-${id}`});
+const receipt=(id=2001,extra=0)=>({reservationId:String(id),hotelId:1,clientUid:'client',base:100,extra,total:100+extra,reason:extra?'Daño verificado':'',observation:extra?'Acuerdo de cierre':'',createdByUid:'admin',cardType:'Visa',cardLast4:'4242',paymentMode:'SIMULATED'});
+const close=(id=2001)=>write(`reservations/${id}`,{estado:'FINALIZADA'},['estado']);
 const bill=(id=2001,extra=0,changes={})=>write(`hotelCheckouts/${id}`,{...receipt(id,extra),...changes},null,['createdAt']);
 const message=(text='Hola',senderUid='client',senderRole='CLIENT')=>({text,senderUid,senderRole});
-const msg=(id,data=message(),reservation=2001)=>write(`reservations/${reservation}/messages/${id}`,data,null,['createdAt']);
+const msg=(id,data=message(),reservation=2004)=>write(`reservations/${reservation}/messages/${id}`,data,null,['createdAt']);
 async function query(collection,field,value,uid){return call('POST',':runQuery',{structuredQuery:{from:[{collectionId:collection}],where:{fieldFilter:{field:{fieldPath:field},op:'EQUAL',value:fields({v:value}).v}}}},uid);}
 (async()=>{
  await runAuthRules();const start=countChecks();
@@ -48,10 +48,10 @@ async function query(collection,field,value,uid){return call('POST',':runQuery',
  assert.deepEqual(concurrent.map(r=>r.status).sort(),[200,403],'Solo un cierre concurrente');
  await expect(await commit([msg('client-1')],'client'),true,'Huesped envia');
  await expect(await commit([msg('admin-1',message('Bienvenido','admin','HOTEL_ADMIN'))],'admin'),true,'Admin responde');
- await expect(await call('GET','/reservations/2001/messages',undefined,'client'),true,'Huesped lee ambos mensajes');
- await expect(await call('GET','/reservations/2001/messages',undefined,'admin'),true,'Admin lee ambos mensajes');
- await expect(await call('GET','/reservations/2001/messages',undefined,'other'),false,'Cliente ajeno no lee chat');
- await expect(await call('GET','/reservations/2001/messages',undefined,'admin2'),false,'Otro hotel no lee chat');
+ await expect(await call('GET','/reservations/2004/messages',undefined,'client'),true,'Huesped lee ambos mensajes');
+ await expect(await call('GET','/reservations/2004/messages',undefined,'admin'),true,'Admin lee ambos mensajes');
+ await expect(await call('GET','/reservations/2004/messages',undefined,'other'),false,'Cliente ajeno no lee chat');
+ await expect(await call('GET','/reservations/2004/messages',undefined,'admin2'),false,'Otro hotel no lee chat');
  await expect(await commit([msg('intruso',message('Intruso','other'))],'other'),false,'Cliente ajeno no escribe');
  await expect(await commit([msg('intruso',message('Intruso','admin2','HOTEL_ADMIN'))],'admin2'),false,'Otro admin no escribe');
  await expect(await commit([msg('suplantar',message('Hola','admin','HOTEL_ADMIN'))],'client'),false,'No suplanta emisor');
@@ -61,12 +61,13 @@ async function query(collection,field,value,uid){return call('POST',':runQuery',
  await expect(await commit([msg('largo',message('x'.repeat(4001)))],'client'),false,'Longitud acotada');
  await expect(await commit([msg('extra',{...message(),hotelId:2})],'client'),false,'No agrega metadatos falsos');
  await expect(await commit([msg('client-1',message('Editado'))],'client'),false,'No reescribe historial');
- await expect(await call('DELETE','/reservations/2001/messages/client-1',undefined,'client'),false,'No borra historial');
+ await expect(await call('DELETE','/reservations/2004/messages/client-1',undefined,'client'),false,'No borra historial');
  await expect(await commit([msg('ausente',message(),99999)],'client'),false,'No chat sin reserva');
  await put('users/admin',{uid:'admin',role:'HOTEL_ADMIN',active:false,hotelId:1});
- await expect(await call('GET','/reservations/2001/messages',undefined,'admin'),false,'Admin inactivo pierde chat');
+ await expect(await call('GET','/reservations/2004/messages',undefined,'admin'),false,'Admin inactivo pierde chat');
  await expect(await commit([bill(2004),close(2004)],'admin'),false,'Admin inactivo no cierra');
  await put('users/admin',{uid:'admin',role:'HOTEL_ADMIN',active:true,hotelId:2});
  await expect(await call('GET','/reservations/2001',undefined,'admin'),false,'Cambio asignacion corta acceso');
+ await expect(await commit([msg('cerrado',message(),2001)],'client'),false,'No envia mensajes tras finalizar');
  console.log(`Operaciones hotel: ${countChecks()-start} comprobaciones + cierre concurrente correctos.`);
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -47,7 +47,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         ((TextView) subHeader.findViewById(R.id.tv_title)).setText(hotel.name);
 
-        boolean enCurso = reserva.esActiva() && reserva.estaEnCurso();
+        boolean enCurso = reserva.esActiva() && reserva.estado != Reserva.Estado.EN_CHECKOUT && reserva.estaEnCurso();
         TextView tvEstadoPill = findViewById(R.id.tv_estado_pill);
         int colorFondo = enCurso ? R.color.io_teal : EstadoUi.colorFondo(reserva.estado);
         int colorTexto = enCurso ? R.color.white : EstadoUi.colorTexto(reserva.estado);
@@ -76,6 +76,20 @@ public class DetalleReservaActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        View comprobante = findViewById(R.id.btn_ver_comprobante);
+        comprobante.setVisibility(reserva.estado == Reserva.Estado.EN_CHECKOUT
+                || com.example.proyecto_iotelito.data.CheckoutPolicy.finalizada(reserva.estado.name()) ? View.VISIBLE : View.GONE);
+        ((TextView)comprobante).setText(reserva.estado == Reserva.Estado.EN_CHECKOUT ? "Ver estado del checkout" : "Ver comprobante");
+        comprobante.setOnClickListener(v -> startActivity(new Intent(this, com.example.proyecto_iotelito.ui.pago.CobroConfirmadoActivity.class)
+                .putExtra(com.example.proyecto_iotelito.ui.pago.CobroConfirmadoActivity.EXTRA_RESERVA_ID, reserva.id)));
+        View taxi = findViewById(R.id.btn_estado_taxi_reserva);
+        taxi.setVisibility(View.GONE);
+        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), solicitudId -> {
+            if (solicitudId < 0) return;
+            taxi.setVisibility(View.VISIBLE);
+            taxi.setOnClickListener(v -> startActivity(new Intent(this, TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID, solicitudId)));
+        });
+        findViewById(R.id.btn_chatear).setVisibility(reserva.esActiva() ? View.VISIBLE : View.GONE);
         findViewById(R.id.btn_chatear).setOnClickListener(v -> {
             Intent intent = new Intent(this, ChatHotelActivity.class);
             intent.putExtra(ChatHotelActivity.EXTRA_HOTEL_ID, hotel.id);
@@ -97,22 +111,15 @@ public class DetalleReservaActivity extends AppCompatActivity {
         View checkout = findViewById(R.id.btn_realizar_checkout);
         checkout.setVisibility(View.GONE);
         int id = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
-        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, id), solicitudId -> {
-            if (isFinishing()) return;
-            if (solicitudId >= 0) {
-                startActivity(new Intent(this, TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID, solicitudId));
-                finish();
-                return;
-            }
-            com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, id, this::pintarReserva);
-        });
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, id, this::pintarReserva);
     }
 
     private String mensajeEstado(Reserva reserva) {
+        if (reserva.estado == Reserva.Estado.EN_CHECKOUT) return getString(R.string.checkout_pendiente_cliente);
         if (reserva.esActiva() && reserva.puedeHacerCheckout()) {
             return getString(R.string.mensaje_puede_checkout);
         }
-        if (reserva.esActiva() && reserva.estaEnCurso()) {
+        if (reserva.esActiva() && reserva.estado != Reserva.Estado.EN_CHECKOUT && reserva.estaEnCurso()) {
             return getString(R.string.mensaje_estado_en_curso);
         }
         return getString(EstadoUi.mensaje(reserva.estado));

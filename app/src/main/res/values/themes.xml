@@ -118,4 +118,7 @@
         <item name="android:textColor">@color/io_text_muted</item>
         <item name="android:textSize">9sp</item>
     </style>
+    <style name="ShapeAppearanceOverlay.IoTelito.Avatar" parent="">
+        <item name="cornerFamily">rounded</item><item name="cornerSize">50%</item>
+    </style>
 </resources>

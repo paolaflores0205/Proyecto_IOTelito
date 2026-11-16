@@ -92,6 +92,16 @@
             tools:visibility="visible" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tv_estado_disponibilidad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:gravity="center"
+        android:textColor="@color/io_text_secondary"
+        android:text="@string/consultando_disponibilidad"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_hoteles_resultados"
         android:layout_width="match_parent"

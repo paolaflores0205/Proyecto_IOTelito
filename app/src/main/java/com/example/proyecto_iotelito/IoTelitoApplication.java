@@ -51,6 +51,9 @@ public class IoTelitoApplication extends Application implements Application.Acti
         boolean hasBottomNavigation = bottomNavigation != null;
         View navigationView = bottomNavigation;
         boolean hasAdminChat = activity.findViewById(R.id.hoteladmin_chat_root) != null;
+        boolean hasPaymentForm = activity.findViewById(R.id.scroll_confirmacion) != null;
+        boolean hasProfileForm = activity.findViewById(R.id.scroll_editar_perfil) != null;
+        boolean hasRegistrationForm = activity.findViewById(R.id.scroll_registro) != null;
 
         ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
             Insets safeInsets = windowInsets.getInsets(
@@ -60,7 +63,11 @@ public class IoTelitoApplication extends Application implements Application.Acti
             // Las pantallas con menú inferior gestionan su inset como margen del
             // propio menú. Aplicarlo también aquí generaba la franja vacía del A55.
             int bottomInset = hasBottomNavigation ? 0 : safeInsets.bottom;
-            if (hasAdminChat) {
+            boolean keyboardVisible = windowInsets.isVisible(WindowInsetsCompat.Type.ime());
+            if (hasProfileForm && navigationView != null) {
+                navigationView.setVisibility(keyboardVisible ? View.GONE : View.VISIBLE);
+            }
+            if (hasAdminChat || hasPaymentForm || hasProfileForm || hasRegistrationForm) {
                 // El IME ya incluye la zona inferior: no sumar también la barra de navegación.
                 bottomInset = Math.max(safeInsets.bottom,
                         windowInsets.getInsets(WindowInsetsCompat.Type.ime()).bottom);
@@ -82,8 +89,9 @@ public class IoTelitoApplication extends Application implements Application.Acti
                 ViewGroup.LayoutParams rawParams = navigationView.getLayoutParams();
                 if (rawParams instanceof ViewGroup.MarginLayoutParams) {
                     ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) rawParams;
-                    if (params.bottomMargin != safeInsets.bottom) {
-                        params.bottomMargin = safeInsets.bottom;
+                    int navigationMargin = hasProfileForm && keyboardVisible ? 0 : safeInsets.bottom;
+                    if (params.bottomMargin != navigationMargin) {
+                        params.bottomMargin = navigationMargin;
                         navigationView.setLayoutParams(params);
                     }
                 }

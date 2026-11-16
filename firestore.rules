@@ -82,6 +82,45 @@ service cloud.firestore {
           || getAfter(/databases/$(database)/documents/users/$(before)).data.hotelId == null);
     }
 
+    function ownProfilePhoto(data, uid) {
+      return data.photoUrl is string && (data.photoUrl == ''
+        || data.photoUrl.matches('gs://[^/]+/profilePhotos/' + uid + '/[a-zA-Z0-9-]+[.]jpg')
+        || data.photoUrl.matches('s3://iot-telito-imagenes/profilePhotos/' + uid
+          + '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[.]jpg'));
+    }
+    function clientDocument(data) {
+      return data.documentType in ['DNI','Carnet de Extranjería','Pasaporte']
+        && data.documentNumber is string
+        && ((data.documentType == 'DNI' && data.documentNumber.matches('[0-9]{8}'))
+          || (data.documentType == 'Carnet de Extranjería' && data.documentNumber.matches('[A-Za-z0-9]{9,12}'))
+          || (data.documentType == 'Pasaporte' && data.documentNumber.matches('[A-Za-z0-9]{6,12}')));
+    }
+    function clientBirthday(data) {
+      let parts = data.birthDate.split('-');
+      let year = int(parts[0]); let month = int(parts[1]); let day = int(parts[2]);
+      let now = request.time - duration.value(5, 'h');
+      let age = now.year() - year;
+      let birth = timestamp.date(year,month,day);
+      return data.birthDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && birth.year() == year && birth.month() == month && birth.day() == day
+        && birth <= request.time && year >= now.year() - 120
+        && (age > 18 || (age == 18 && (now.month() > month || (now.month() == month && now.day() >= day))));
+    }
+    function clientNames(data) {
+      return data.firstNames is string && data.firstNames.size() > 0 && data.firstNames.size() <= 80
+        && data.lastNames is string && data.lastNames.size() > 0 && data.lastNames.size() <= 79
+        && data.name == data.firstNames + ' ' + data.lastNames;
+    }
+    function clientEditable(uid) {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let data = request.resource.data;
+      return changed.hasOnly(['name','firstNames','lastNames','phone','address','photoUrl','updatedAt','lastAccessAt'])
+        && (!changed.hasAny(['name','firstNames','lastNames']) || clientNames(data))
+        && (!changed.hasAny(['phone']) || (data.phone is string && data.phone.matches('[0-9]{9}')))
+        && (!changed.hasAny(['address']) || (data.address is string && data.address.size() >= 8 && data.address.size() <= 500))
+        && (!changed.hasAny(['photoUrl']) || ownProfilePhoto(data,uid));
+    }
+
     match /users/{uid} {
       // El perfil propio debe poder leerse para informar que la cuenta está inactiva.
       allow get: if signedIn() && (request.auth.uid == uid || superadmin());
@@ -96,6 +135,10 @@ service cloud.firestore {
         && request.resource.data.name is string && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 160
         && request.resource.data.role == 'CLIENT'
+        && clientNames(request.resource.data) && clientDocument(request.resource.data) && clientBirthday(request.resource.data)
+        && request.resource.data.phone is string && request.resource.data.phone.matches('[0-9]{9}')
+        && request.resource.data.address is string && request.resource.data.address.size() >= 8 && request.resource.data.address.size() <= 500
+        && (!request.resource.data.keys().hasAny(['photoUrl']) || ownProfilePhoto(request.resource.data,uid))
         && request.resource.data.active == true
         && request.resource.data.get('hotelId', null) == null
         && request.resource.data.createdAt == request.time
@@ -105,7 +148,8 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'name', 'firstNames', 'lastNames', 'documentType', 'documentNumber', 'birthDate',
             'phone', 'address', 'photoUrl', 'updatedAt', 'lastAccessAt'])
-          && request.resource.data.updatedAt == request.time)
+          && request.resource.data.updatedAt == request.time
+          && (resource.data.role != 'CLIENT' || clientEditable(uid)))
         || (superadmin() && request.auth.uid != uid && resource.data.role != 'SUPERADMIN'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'active', 'statusReason', 'updatedAt', 'updatedByUid'])
@@ -208,6 +252,17 @@ service cloud.firestore {
       allow list, delete: if false;
     }
 
+    function validDemoCard(data) {
+      return data.cardType in ['Visa', 'Mastercard', 'Amex', 'Tarjeta']
+        && data.cardLast4 is string && data.cardLast4.matches('[0-9]{4}')
+        && data.cardToken is string && data.cardToken.matches('DEMO_[a-zA-Z0-9-]{1,64}')
+        && data.paymentMode == 'SIMULATED';
+    }
+    function departureReached(data) {
+      let parts = data.fechaSalida.split('-');
+      return timestamp.date(int(parts[0]), int(parts[1]), int(parts[2])) + duration.value(5, 'h') <= request.time;
+    }
+
     match /reservations/{reservationId} {
       allow get: if activeUser()
         && (superadmin() || resource == null || resource.data.clientUid == request.auth.uid
@@ -219,19 +274,31 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/hotels/$(string(request.resource.data.hotelId))).data.hasInventory == true
         && request.resource.data.clientUid == request.auth.uid
         && request.resource.data.estado == 'CONFIRMADA'
+        && validDemoCard(request.resource.data)
+        && request.resource.data.keys().hasOnly(['id','clientUid','clientName','hotelName','hotelId','roomIds','roomName','roomNumber',
+          'fechaEntrada','fechaSalida','huespedes','precioTotal','estado','codigo','createdAt','cardType','cardLast4','cardToken','paymentMode'])
         && request.resource.data.roomIds is list
         && request.resource.data.roomIds.size() > 0
         && request.resource.data.fechaEntrada is string
         && request.resource.data.fechaSalida is string
         && request.resource.data.fechaEntrada < request.resource.data.fechaSalida;
-      allow update: if activeUser()
+      allow update: if activeUser() && profile().role == 'CLIENT'
         && resource.data.clientUid == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
-        && resource.data.estado == 'CONFIRMADA'
-        && request.resource.data.estado == 'COMPLETADA';
-      // Cierre administrativo: solo el estado, junto con un comprobante inmutable.
+        && resource.data.estado in ['CONFIRMADA','ACTIVA']
+        && request.resource.data.estado == 'EN_CHECKOUT' && departureReached(resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+          ['estado','rating','review','checkoutRequestedAt','cardType','cardLast4','cardToken','paymentMode'])
+        && request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && request.resource.data.review is string && request.resource.data.review.size() <= 4000
+        && request.resource.data.review.matches('[\\s\\S]*\\S[\\s\\S]*')
+        && request.resource.data.checkoutRequestedAt == request.time
+        && validDemoCard(request.resource.data)
+        && (resource.data.get('cardToken', '') == '' || (
+          request.resource.data.cardToken == resource.data.cardToken && request.resource.data.cardLast4 == resource.data.cardLast4
+          && request.resource.data.cardType == resource.data.cardType && request.resource.data.paymentMode == resource.data.paymentMode));
+      // El administrador solo finaliza una solicitud junto con su comprobante inmutable.
       allow update: if hotelAdmin(string(resource.data.hotelId))
-        && resource.data.estado == 'CONFIRMADA' && request.resource.data.estado == 'COMPLETADA'
+        && resource.data.estado == 'EN_CHECKOUT' && request.resource.data.estado == 'FINALIZADA'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
         && !exists(/databases/$(database)/documents/hotelCheckouts/$(reservationId))
         && getAfter(/databases/$(database)/documents/hotelCheckouts/$(reservationId)).data.createdByUid == request.auth.uid
@@ -245,6 +312,7 @@ service cloud.firestore {
         }
         allow read: if participant();
         allow create: if participant()
+          && get(/databases/$(database)/documents/reservations/$(reservationId)).data.estado in ['CONFIRMADA','ACTIVA','EN_CHECKOUT']
           && request.resource.data.keys().hasOnly(['senderUid','senderRole','text','createdAt'])
           && request.resource.data.senderUid == request.auth.uid
           && request.resource.data.senderRole == profile().role
@@ -267,11 +335,13 @@ service cloud.firestore {
       allow list: if activeUser() && (superadmin() || resource.data.clientUid == request.auth.uid
         || hotelAdmin(string(resource.data.hotelId)));
       allow create: if hotelAdmin(string(booking().hotelId)) && departureReached()
-        && booking().estado == 'CONFIRMADA'
-        && getAfter(/databases/$(database)/documents/reservations/$(reservationId)).data.estado == 'COMPLETADA'
-        && request.resource.data.keys().hasOnly(['reservationId','hotelId','clientUid','base','extra','total','reason','observation','createdAt','createdByUid'])
+        && booking().estado == 'EN_CHECKOUT'
+        && getAfter(/databases/$(database)/documents/reservations/$(reservationId)).data.estado == 'FINALIZADA'
+        && request.resource.data.keys().hasOnly(['reservationId','hotelId','clientUid','base','extra','total','reason','observation','createdAt','createdByUid','cardType','cardLast4','paymentMode'])
         && request.resource.data.reservationId == reservationId
         && request.resource.data.hotelId == booking().hotelId && request.resource.data.clientUid == booking().clientUid
+        && request.resource.data.cardType == booking().cardType && request.resource.data.cardLast4 == booking().cardLast4
+        && request.resource.data.paymentMode == 'SIMULATED'
         && request.resource.data.base == booking().precioTotal && request.resource.data.base is number && request.resource.data.base >= 0
         && request.resource.data.extra is number && request.resource.data.extra >= 0 && request.resource.data.extra <= 1000000
         && request.resource.data.total == request.resource.data.base + request.resource.data.extra

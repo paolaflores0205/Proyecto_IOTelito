@@ -189,7 +189,7 @@ public class FirebaseLiveRolesTest {
                 arrival = arrival.plusDays(1);
             }
             Reserva booking = FirebaseReservaStore.agregar(hotel, arrival, arrival.plusDays(1), "2 adultos · PRUEBA QA",
-                    175.75, marker, "Prueba QA", marker, Collections.singletonList(roomId));
+                    175.75, marker, "Prueba QA", marker, Collections.singletonList(roomId), TarjetaSimulada.validar("4242424242424242", "12/39", "123", java.time.YearMonth.now()));
             assertTrue(get("reservations/" + booking.id).exists());
             result("RESERVA id=" + booking.id + " hotel=" + hotelId + " entrada=" + arrival + " codigo=" + marker);
             int taxiId = FirebaseTaxiStore.crear(booking, "PRUEBA QA", hotel.name, hotel.address, "14:30", 2, 1);

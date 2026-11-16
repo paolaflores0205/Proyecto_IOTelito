@@ -112,6 +112,22 @@ public class AdminHotelFragment extends Fragment {
             binding.tvSubtitulo.setText(state.data != null ? getString(R.string.hoteladmin_panel_control, state.data.name)
                     : state.error == null ? getString(R.string.hoteladmin_cargando_remoto) : state.error);
         });
+        new com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelOperations(requireContext()).reservations()
+                .observe(getViewLifecycleOwner(), state -> {
+                    if (binding == null || state.loading) return;
+                    java.util.List<ReservaAdmin> pendientes = new java.util.ArrayList<>();
+                    for (ReservaAdmin row : state.rows) if (row.estado == ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE) pendientes.add(row);
+                    binding.tvAlertas.setVisibility(pendientes.isEmpty() ? View.GONE : View.VISIBLE);
+                    binding.tvAlertas.setText(getString(R.string.hoteladmin_alertas, pendientes.size()));
+                    binding.cardAlertaCheckout.setVisibility(pendientes.isEmpty() ? View.GONE : View.VISIBLE);
+                    if (!pendientes.isEmpty()) {
+                        ReservaAdmin first = pendientes.get(0);
+                        binding.tvAlertaCheckoutTitulo.setText("Checkout solicitado · " + first.huespedNombre);
+                        binding.tvAlertaCheckoutDescripcion.setText("Revisa el alojamiento y los adicionales para confirmar el cobro simulado.");
+                        binding.cardAlertaCheckout.setOnClickListener(v -> startActivity(new Intent(requireContext(), CobroCheckoutActivity.class)
+                                .putExtra(CobroCheckoutActivity.EXTRA_RESERVA_ID, first.id)));
+                    }
+                });
         repository.observe("rooms", com.example.proyecto_iotelito.model.hoteladmin.Habitacion.class).observe(getViewLifecycleOwner(), state -> {
             if (state.loading || state.error != null) binding.tvDisponibles.setText("—");
             else {

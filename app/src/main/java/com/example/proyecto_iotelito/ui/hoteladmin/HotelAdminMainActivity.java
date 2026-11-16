@@ -36,10 +36,11 @@ public class HotelAdminMainActivity extends AppCompatActivity {
 
     public static final String EXTRA_OPEN_TAB = "hoteladmin_open_tab";
     private ActivityHoteladminMainBinding binding;
+    private java.util.List<com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin> remoteCheckouts = java.util.Collections.emptyList();
     private final ActivityResultLauncher<String> notificationPermission = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted) HotelAdminNotifications.showPendingCheckouts(
-                        this, HotelAdminSampleData.reservas());
+                        this, com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(this) ? remoteCheckouts : HotelAdminSampleData.reservas());
             });
 
     @Override
@@ -52,7 +53,22 @@ public class HotelAdminMainActivity extends AppCompatActivity {
 
         if (!HotelAdminAccessGuard.allow(this)) return;
         if (com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(this)) {
+            HotelAdminNotifications.createChannel(this);
+            new com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelOperations(this).reservations().observe(this, state -> {
+                remoteCheckouts = state.rows;
+                HotelAdminNotifications.showPendingCheckouts(this, state.rows);
+                long pending = state.rows.stream().filter(r -> r.estado == com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE).count();
+                com.google.android.material.badge.BadgeDrawable badge = binding.hoteladminBottomNav.getOrCreateBadge(R.id.nav_hoteladmin_reservas);
+                badge.setVisible(pending > 0); badge.setNumber((int)pending);
+            });
             configurarNavegacion(savedInstanceState);
+            if (!HotelAdminNotifications.hasPermission(this)) {
+                android.content.SharedPreferences prefs = getSharedPreferences("hoteladmin_alerts", Context.MODE_PRIVATE);
+                if (!prefs.getBoolean("permission_asked", false)) {
+                    prefs.edit().putBoolean("permission_asked", true).apply();
+                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS);
+                }
+            }
             return;
         }
         HotelAdminNotifications.createChannel(this);

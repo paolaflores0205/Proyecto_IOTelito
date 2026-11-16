@@ -82,6 +82,13 @@ final class FirebaseReservaStore {
     static Reserva agregar(Hotel hotel, LocalDate entrada, LocalDate salida, String huespedes,
                            double total, String codigo, String habitaciones, String codigos,
                            List<Integer> roomIds) {
+        return agregar(hotel, entrada, salida, huespedes, total, codigo, habitaciones, codigos, roomIds, null);
+    }
+
+    static Reserva agregar(Hotel hotel, LocalDate entrada, LocalDate salida, String huespedes,
+                           double total, String codigo, String habitaciones, String codigos,
+                           List<Integer> roomIds, TarjetaSimulada tarjeta) {
+        if (tarjeta == null) throw new IllegalArgumentException("Registra una tarjeta de prueba para confirmar la reserva.");
         String uid = requireUid();
         long noches = ChronoUnit.DAYS.between(entrada, salida);
         if (entrada.isBefore(LocalDate.now()) || noches < 1 || roomIds.isEmpty()
@@ -102,6 +109,7 @@ final class FirebaseReservaStore {
         }
 
         Map<String, Object> data = new HashMap<>();
+        data.putAll(tarjeta.campos());
         data.put("id", id);
         data.put("clientUid", uid);
         data.put("clientName", com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
@@ -135,7 +143,10 @@ final class FirebaseReservaStore {
                 }
                 for (DocumentReference bloqueo : bloqueos) {
                     if (transaction.get(bloqueo).exists()) {
-                        throw new IllegalArgumentException("La habitación o tus fechas ya no están disponibles.");
+                        throw new IllegalArgumentException(
+                                bloqueo.getPath().startsWith("clientNights/")
+                                        ? "Ya tienes una reserva para esas fechas. Revisa Mis reservas."
+                                        : "Esta habitación ya fue reservada para esas fechas.");
                     }
                 }
                 transaction.set(reservaRef, data);
@@ -158,22 +169,32 @@ final class FirebaseReservaStore {
     static List<OpcionHabitaciones> filtrarDisponibles(int hotelId, LocalDate entrada,
                                                        LocalDate salida,
                                                        List<OpcionHabitaciones> opciones) {
-        List<OpcionHabitaciones> disponibles = new ArrayList<>();
+        String uid = requireUid();
+        if (!entrada.isBefore(salida)) throw new IllegalArgumentException("Revisa las fechas de tu búsqueda.");
+        Set<String> keys = new java.util.LinkedHashSet<>();
+        for (OpcionHabitaciones opcion : opciones) for (Habitacion room : opcion.habitaciones())
+            for (LocalDate date = entrada; date.isBefore(salida); date = date.plusDays(1))
+                keys.add(hotelId + "_" + room.id + "_" + date);
         Map<String, Boolean> ocupadas = new HashMap<>();
+        List<String> noches = new ArrayList<>(keys);
+        try {
+            // Lecturas independientes en grupos acotados; nunca usar caché para confirmar disponibilidad.
+            for (int start = 0; start < noches.size(); start += 20) {
+                List<com.google.android.gms.tasks.Task<DocumentSnapshot>> lecturas = new ArrayList<>();
+                for (int i = start; i < Math.min(start + 20, noches.size()); i++)
+                    lecturas.add(DB.collection("roomNights").document(noches.get(i))
+                            .get(com.google.firebase.firestore.Source.SERVER));
+                for (DocumentSnapshot doc : Tasks.await(Tasks.<DocumentSnapshot>whenAllSuccess(lecturas)))
+                    ocupadas.put(doc.getId(), doc.exists());
+                if (!uid.equals(requireUid())) throw new IllegalStateException("La sesión cambió. Vuelve a buscar.");
+            }
+        } catch (ExecutionException | InterruptedException error) { throw fallo(error); }
+        List<OpcionHabitaciones> disponibles = new ArrayList<>();
         for (OpcionHabitaciones opcion : opciones) {
             boolean libre = true;
             for (Habitacion room : opcion.habitaciones()) {
                 for (LocalDate date = entrada; date.isBefore(salida); date = date.plusDays(1)) {
-                    String key = hotelId + "_" + room.id + "_" + date;
-                    if (!ocupadas.containsKey(key)) {
-                        try {
-                            ocupadas.put(key, Tasks.await(DB.collection("roomNights")
-                                    .document(key).get()).exists());
-                        } catch (ExecutionException | InterruptedException error) {
-                            throw fallo(error);
-                        }
-                    }
-                    if (ocupadas.get(key)) {
+                    if (Boolean.TRUE.equals(ocupadas.get(hotelId + "_" + room.id + "_" + date))) {
                         libre = false;
                         break;
                     }
@@ -186,19 +207,54 @@ final class FirebaseReservaStore {
     }
 
     static void actualizarEstado(int id, Reserva.Estado estado) {
-        if (estado != Reserva.Estado.COMPLETADA) {
-            throw new IllegalArgumentException("Cambio de estado no permitido.");
-        }
-        Reserva reserva = buscarPorId(id);
-        if (reserva == null || !reserva.esActiva()) {
-            throw new IllegalArgumentException("No se encontró una reserva activa.");
-        }
+        throw new IllegalArgumentException("Solicita el checkout; el cierre corresponde al administrador.");
+    }
+
+    static void solicitarCheckout(int id, int estrellas, String comentario, TarjetaSimulada tarjeta) {
+        String uid = requireUid();
+        CheckoutPolicy.validarOpinion(estrellas, comentario);
+        DocumentReference ref = DB.collection("reservations").document(String.valueOf(id));
         try {
-            Tasks.await(DB.collection("reservations").document(String.valueOf(id))
-                    .update("estado", estado.name()));
-        } catch (ExecutionException | InterruptedException error) {
-            throw fallo(error);
-        }
+            Tasks.await(DB.runTransaction(tx -> {
+                DocumentSnapshot before = tx.get(ref);
+                if (!uid.equals(requireUid()) || !before.exists() || !uid.equals(before.getString("clientUid")))
+                    throw new IllegalArgumentException("No se encontró una reserva propia.");
+                String estado = before.getString("estado");
+                if ("EN_CHECKOUT".equals(estado) || CheckoutPolicy.finalizada(estado)) return null;
+                if (!CheckoutPolicy.puedeSolicitar(estado, LocalDate.parse(before.getString("fechaSalida")),
+                        LocalDate.now(java.time.ZoneId.of("America/Lima"))))
+                    throw new IllegalArgumentException("El checkout está disponible desde el día de salida.");
+                TarjetaSimulada existing = TarjetaSimulada.leer(before.getData());
+                if (existing == null && tarjeta == null) throw new IllegalArgumentException("Registra una tarjeta de prueba.");
+                Map<String,Object> changes = new HashMap<>();
+                changes.put("estado", "EN_CHECKOUT"); changes.put("rating", estrellas);
+                changes.put("review", comentario.trim()); changes.put("checkoutRequestedAt", FieldValue.serverTimestamp());
+                if (existing == null) changes.putAll(tarjeta.campos());
+                tx.update(ref, changes);
+                return null;
+            }));
+        } catch (ExecutionException | InterruptedException error) { throw fallo(error); }
+    }
+
+    static ComprobanteCheckout comprobante(int id) {
+        String uid = requireUid();
+        try {
+            DocumentSnapshot booking = Tasks.await(DB.collection("reservations").document(String.valueOf(id))
+                    .get(com.google.firebase.firestore.Source.SERVER));
+            if (!booking.exists() || !uid.equals(booking.getString("clientUid")))
+                throw new IllegalArgumentException("No se encontró tu reserva.");
+            DocumentSnapshot doc = Tasks.await(DB.collection("hotelCheckouts").document(String.valueOf(id))
+                    .get(com.google.firebase.firestore.Source.SERVER));
+            if (!uid.equals(requireUid())) throw new IllegalArgumentException("La sesión cambió.");
+            if (!doc.exists()) return null;
+            if (!uid.equals(doc.getString("clientUid")) || !CheckoutPolicy.finalizada(booking.getString("estado"))
+                    || !String.valueOf(id).equals(doc.getString("reservationId"))
+                    || !java.util.Objects.equals(booking.getLong("hotelId"), doc.getLong("hotelId")))
+                throw new IllegalArgumentException("El comprobante no corresponde a una reserva finalizada propia.");
+            com.google.firebase.Timestamp fecha = doc.getTimestamp("createdAt");
+            if (fecha == null) throw new IllegalArgumentException("El comprobante aún no fue confirmado por el servidor.");
+            return new ComprobanteCheckout(doc.getData(), fecha.toDate().getTime());
+        } catch (ExecutionException | InterruptedException error) { throw fallo(error); }
     }
 
     private static List<Reserva> convertir(QuerySnapshot snapshot) {
@@ -217,13 +273,18 @@ final class FirebaseReservaStore {
         Number id = (Number) document.get("id");
         Number hotelId = (Number) document.get("hotelId");
         Number total = (Number) document.get("precioTotal");
-        return new Reserva(id.intValue(), hotelId.intValue(),
+        Reserva reserva = new Reserva(id.intValue(), hotelId.intValue(),
                 document.getString("roomName"), document.getString("roomNumber"),
                 LocalDate.parse(document.getString("fechaEntrada")),
                 LocalDate.parse(document.getString("fechaSalida")),
                 document.getString("huespedes"), total.doubleValue(),
                 Reserva.Estado.valueOf(document.getString("estado")),
                 document.getString("codigo"));
+        reserva.tarjeta = TarjetaSimulada.leer(document.getData());
+        Long rating = document.getLong("rating");
+        reserva.valoracion = rating == null ? null : rating.intValue();
+        reserva.observaciones = document.getString("review");
+        return reserva;
     }
 
     private static String requireUid() {

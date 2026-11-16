@@ -14,7 +14,6 @@ import android.widget.ScrollView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
@@ -58,7 +57,8 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         if (opcionHabitaciones == null) {
             java.util.List<OpcionHabitaciones> opciones =
                     com.example.proyecto_iotelito.data.GeneradorOpcionesHabitaciones.generar(
-                            hotelId, bookingSelection.adultos, bookingSelection.ninos);
+                            com.example.proyecto_iotelito.data.InventarioCliente.habitaciones(hotel),
+                            bookingSelection.adultos, bookingSelection.ninos);
             if (opciones.isEmpty()) {
                 finish();
                 return;
@@ -97,26 +97,39 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
 
     /** Mantiene el campo activo visible incluso en dispositivos con teclado flotante o edge-to-edge. */
     private void configurarTeclado(ScrollView scrollView, EditText... campos) {
-        int paddingInferiorBase = scrollView.getPaddingBottom();
+        // IoTelitoApplication reserva el espacio del IME en el contenedor de la pantalla.
+        // Desplazar después del layout evita medir contra la altura anterior del teclado.
+        Runnable mostrarCampo = () -> {
+            View focused = getCurrentFocus();
+            if (!(focused instanceof EditText)) return;
+            Rect rect = new Rect(0, -dp(24), focused.getWidth(), focused.getHeight() + dp(24));
+            focused.requestRectangleOnScreen(rect, false);
+        };
         ViewCompat.setOnApplyWindowInsetsListener(scrollView, (view, windowInsets) -> {
-            Insets ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
-            int paddingIme = windowInsets.isVisible(WindowInsetsCompat.Type.ime()) ? ime.bottom : 0;
-            view.setPadding(
-                    view.getPaddingLeft(),
-                    view.getPaddingTop(),
-                    view.getPaddingRight(),
-                    paddingInferiorBase + paddingIme);
+            if (windowInsets.isVisible(WindowInsetsCompat.Type.ime())) scrollView.post(mostrarCampo);
             return windowInsets;
         });
-
-        for (EditText campo : campos) {
+        scrollView.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            if (b - t != ob - ot) scrollView.post(mostrarCampo);
+        });
+        for (int i = 0; i < campos.length; i++) {
+            EditText campo = campos[i];
+            final int siguiente = i + 1;
             campo.setOnFocusChangeListener((view, tieneFoco) -> {
-                if (!tieneFoco) return;
-                scrollView.postDelayed(() -> {
-                    Rect rect = new Rect(0, 0, view.getWidth(), view.getHeight());
-                    rect.bottom += dp(32);
-                    view.requestRectangleOnScreen(rect, true);
-                }, 250);
+                if (tieneFoco) scrollView.post(mostrarCampo);
+            });
+            campo.setOnEditorActionListener((view, action, event) -> {
+                if (action == android.view.inputmethod.EditorInfo.IME_ACTION_NEXT && siguiente < campos.length) {
+                    campos[siguiente].requestFocus();
+                    return true;
+                }
+                if (action == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                    androidx.core.view.WindowCompat.getInsetsController(getWindow(), scrollView)
+                            .hide(WindowInsetsCompat.Type.ime());
+                    campo.clearFocus();
+                    return true;
+                }
+                return false;
             });
         }
         ViewCompat.requestApplyInsets(scrollView);
@@ -216,20 +229,13 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
         EditText etVencimiento = findViewById(R.id.et_vencimiento);
         EditText etCvv = findViewById(R.id.et_cvv);
 
-        boolean valido = true;
-        if (TextUtils.isEmpty(etNumero.getText())) {
-            etNumero.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
-        if (TextUtils.isEmpty(etVencimiento.getText())) {
-            etVencimiento.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
-        if (TextUtils.isEmpty(etCvv.getText())) {
-            etCvv.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
-        if (!valido) {
+        final com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta;
+        try {
+            tarjeta = com.example.proyecto_iotelito.data.TarjetaSimulada.validar(
+                    etNumero.getText().toString(), etVencimiento.getText().toString(),
+                    etCvv.getText().toString(), java.time.YearMonth.now(java.time.ZoneId.of("America/Lima")));
+        } catch (IllegalArgumentException error) {
+            android.widget.Toast.makeText(this, error.getMessage(), android.widget.Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -255,7 +261,7 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
                 opcionHabitaciones.resumenCodigos(),
                 opcionHabitaciones.habitaciones().stream()
                         .map(habitacion -> habitacion.id)
-                        .collect(java.util.stream.Collectors.toList()));
+                        .collect(java.util.stream.Collectors.toList()), tarjeta);
         }, reserva -> {
 
         findViewById(R.id.btn_confirmar_reserva).setEnabled(false);

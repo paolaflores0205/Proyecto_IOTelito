@@ -83,19 +83,19 @@ async function runAuthRules() {
   await expect(await status('other', false, 'sa', { role: 'SUPERADMIN' }), false, 'Cambio de estado no permite cambiar rol');
   await expect(await commit([write('users/client', { role: 'SUPERADMIN' }, ['role'])], 'client'), false, 'No autopromoción');
   await expect(await commit([write('users/disabled', { active: true }, ['active'])], 'disabled'), false, 'No autoreactivación');
-  const profile = uid => ({ uid, name: 'Nueva cuenta', email: `${uid}@example.test`, role: 'CLIENT', active: true, hotelId: null });
+  const profile = uid => ({ uid, name: 'Nueva cuenta', firstNames:'Nueva',lastNames:'cuenta',documentType:'DNI',documentNumber:'12345678',birthDate:'1990-03-15',phone:'999888777',address:'Av. Principal 123', email: `${uid}@example.test`, role: 'CLIENT', active: true, hotelId: null });
   await expect(await commit([write('users/new', profile('new'), null, ['createdAt', 'updatedAt'])], 'new'), true, 'Registro público crea solo CLIENT');
   await expect(await commit([write('users/escalate', { ...profile('escalate'), role: 'SUPERADMIN' }, null, ['createdAt', 'updatedAt'])], 'escalate'), false, 'Registro no crea SUPERADMIN');
   await expect(await commit([write('users/wrong', profile('wrong'), null, ['createdAt', 'updatedAt'])], 'client'), false, 'No crea perfil de otro UID');
   await expect(await commit([write('users/assigned', { ...profile('assigned'), hotelId: 1 }, null, ['createdAt', 'updatedAt'])], 'assigned'), false, 'No autoasignación de hotel');
-  await expect(await commit([write('users/new', { name: 'Nombre actualizado' }, ['name', 'updatedAt'], ['updatedAt'])], 'new'), true, 'Actualizar nombre propio');
+  await expect(await commit([write('users/new', { name: 'Nombre actualizado',firstNames:'Nombre',lastNames:'actualizado' }, ['name','firstNames','lastNames','updatedAt'], ['updatedAt'])], 'new'), true, 'Actualizar nombre propio');
   await expect(await commit([write('users/new', { uid: 'sa' }, ['uid', 'updatedAt'], ['updatedAt'])], 'new'), false, 'UID inmutable');
   await expect(await call('DELETE', '/users/other', undefined, 'sa'), false, 'No borrar perfiles desde la app');
   const missing = await call('GET', '/reservations/absent', undefined, 'client');
   assert.equal(missing.status, 404, 'Una reserva ausente debe poder comprobarse sin error de permisos'); checks++;
   const reservation = { id: 1001, clientUid: 'client', hotelId: 1, roomIds: [101], roomName: 'Simple',
     roomNumber: '101', fechaEntrada: '2026-12-10', fechaSalida: '2026-12-11', huespedes: '1 adulto',
-    precioTotal: 100, estado: 'CONFIRMADA', codigo: 'TEST-RULES' };
+    precioTotal: 100, estado: 'CONFIRMADA', codigo: 'TEST-RULES', cardType:'Visa',cardLast4:'4242',cardToken:'DEMO_test',paymentMode:'SIMULATED' };
   await expect(await commit([
     write('reservations/1001', reservation, null, ['createdAt']),
     write('roomNights/1_101_2026-12-10', { reservationId: '1001' }),
@@ -103,7 +103,7 @@ async function runAuthRules() {
   ], 'client'), true, 'Conserva transacción de reserva y bloqueos del cliente');
   await expect(await call('GET', '/reservations/1001', undefined, 'client'), true, 'Reserva propia');
   await expect(await call('GET', '/reservations/1001', undefined, 'other'), false, 'No lee reserva ajena');
-  await expect(await commit([write('reservations/1001', { estado: 'COMPLETADA' }, ['estado'])], 'client'), true, 'Conserva checkout propio');
+  await expect(await commit([write('reservations/1001', { estado: 'COMPLETADA' }, ['estado'])], 'client'), false, 'Cliente no finaliza ni acredita cobro por su cuenta');
   await expect(await commit([write('reservations/1001', { precioTotal: 0 }, ['precioTotal'])], 'client'), false, 'No altera precio de reserva existente');
   console.log(`Reglas de autenticación/usuarios: ${checks} comprobaciones correctas, solo emulador.`);
 }

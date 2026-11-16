@@ -12,7 +12,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.example.proyecto_iotelito.MainActivity;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.CatalogoHabitaciones;
 import com.example.proyecto_iotelito.data.GeneradorOpcionesHabitaciones;
@@ -31,11 +30,13 @@ import java.util.Locale;
 public class DetalleHabitacionActivity extends AppCompatActivity {
 
     public static final String EXTRA_HOTEL_ID = "extra_hotel_id";
+    private Bundle borradorEstadia;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalle_habitacion);
+        if (savedInstanceState != null) borradorEstadia = savedInstanceState.getBundle("borrador_estadia");
 
         int hotelId = getIntent().getIntExtra(EXTRA_HOTEL_ID, 1);
         com.example.proyecto_iotelito.data.ClientDataLoader.hotel(this, hotelId, hotel -> {
@@ -92,14 +93,18 @@ public class DetalleHabitacionActivity extends AppCompatActivity {
         TextView botonReservar = findViewById(R.id.btn_reservar);
         if (modoCatalogo) {
             findViewById(R.id.container_estadia).setVisibility(View.GONE);
-            botonReservar.setText(R.string.elegir_fechas_reservar);
+            botonReservar.setText(R.string.elegir_fechas_huespedes);
             botonReservar.setOnClickListener(v -> {
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.putExtra(MainActivity.EXTRA_OPEN_TAB, R.id.nav_explorar);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
+                if (getSupportFragmentManager().findFragmentByTag("estadia_hotel") != null) return;
+                Bundle args = borradorEstadia == null ? new Bundle() : new Bundle(borradorEstadia);
+                args.putString("hotel", hotel.name + " · " + opcionSeleccionada.titulo());
+                if (borradorEstadia == null) args.putInt("adultos", Math.min(2, opcionSeleccionada.capacidadAdultos()));
+                SeleccionEstadiaSheet sheet = new SeleccionEstadiaSheet();
+                sheet.setArguments(args);
+                sheet.show(getSupportFragmentManager(), "estadia_hotel");
             });
         } else {
+            findViewById(R.id.container_estadia).setVisibility(View.VISIBLE);
             ((TextView) findViewById(R.id.tv_estadia)).setText(
                     getString(R.string.estadia_seleccionada, bookingSelection.textoFechas()));
             double total = opcion.precioPorNoche() * bookingSelection.noches();
@@ -112,6 +117,57 @@ public class DetalleHabitacionActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+        getSupportFragmentManager().setFragmentResultListener(SeleccionEstadiaSheet.RESULT, this, (key, result) -> {
+            borradorEstadia = new Bundle(result);
+            borradorEstadia.putBoolean("fechas", true);
+            comprobarEstadia(hotelId, opcionSeleccionada, new BookingSelection(result.getLong("entrada"),
+                    result.getLong("salida"), result.getInt("adultos"), result.getInt("ninos")));
+        });
+        });
+    }
+
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        if (borradorEstadia != null) state.putBundle("borrador_estadia", borradorEstadia);
+    }
+
+    private void comprobarEstadia(int hotelId, OpcionHabitaciones elegida, BookingSelection seleccion) {
+        TextView boton = findViewById(R.id.btn_reservar);
+        if (!com.example.proyecto_iotelito.data.ConexionCliente.disponible(this)) {
+            android.widget.Toast.makeText(this, R.string.cliente_sin_conexion, android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        boton.setEnabled(false);
+        boton.setText(R.string.consultando_disponibilidad);
+        com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this, () -> {
+            Hotel actual = com.example.proyecto_iotelito.data.HotelCatalogRepository.buscar(this, hotelId);
+            if (actual == null || !actual.active) throw new IllegalArgumentException("El hotel ya no está disponible.");
+            OpcionHabitaciones opcion = com.example.proyecto_iotelito.data.InventarioCliente.actualizarOpcion(
+                    actual, elegida, seleccion.adultos, seleccion.ninos);
+            if (opcion == null) return null;
+            List<OpcionHabitaciones> libres = com.example.proyecto_iotelito.data.ReservaRepository.getInstance(this)
+                    .filtrarDisponibles(hotelId, seleccion.fechaEntrada(), seleccion.fechaSalida(),
+                            java.util.Collections.singletonList(opcion));
+            return libres.isEmpty() ? null : opcion;
+        }, disponible -> {
+            boton.setEnabled(true);
+            boton.setText(R.string.elegir_fechas_huespedes);
+            Intent intent;
+            if (disponible != null) {
+                intent = new Intent(this, DetalleHabitacionActivity.class);
+                intent.putExtra(OpcionesHabitacionesActivity.EXTRA_OPCION, disponible);
+                intent.putExtra(OpcionesHabitacionesActivity.EXTRA_MODO_CATALOGO, false);
+            } else {
+                android.widget.Toast.makeText(this, R.string.habitacion_ver_alternativas, android.widget.Toast.LENGTH_LONG).show();
+                intent = new Intent(this, OpcionesHabitacionesActivity.class);
+            }
+            intent.putExtra(EXTRA_HOTEL_ID, hotelId);
+            seleccion.putInto(intent);
+            startActivity(intent);
+            if (disponible != null) finish();
+        }, () -> {
+            boton.setEnabled(true);
+            boton.setText(R.string.elegir_fechas_huespedes);
         });
     }
 

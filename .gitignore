@@ -19,3 +19,8 @@ local.properties
 /firebase-debug.log*
 /firestore-debug.log*
 /ui-debug.log*
+
+/tmp/checkout-tests/
+/.idea/deviceManager.xml
+/firestore-publicadas-antes-aws.txt
+/firestore-para-publicar-aws.txt

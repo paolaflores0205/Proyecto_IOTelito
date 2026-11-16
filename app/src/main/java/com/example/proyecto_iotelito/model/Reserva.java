@@ -18,7 +18,7 @@ public class Reserva implements Serializable {
     };
 
     public enum Estado {
-        CONFIRMADA, PENDIENTE_PAGO, COMPLETADA, CANCELADA
+        CONFIRMADA, ACTIVA, EN_CHECKOUT, FINALIZADA, PENDIENTE_PAGO, COMPLETADA, CANCELADA
     }
 
     public final int id;
@@ -32,6 +32,9 @@ public class Reserva implements Serializable {
     public final double precioTotal;
     public Estado estado;
     public final String codigo;
+    public com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta;
+    public Integer valoracion;
+    public String observaciones;
 
     public Reserva(int id, int hotelId, String roomName, String roomNumber, LocalDate fechaEntrada, LocalDate fechaSalida,
                     String huespedes, double precioTotal, Estado estado, String codigo) {
@@ -49,7 +52,7 @@ public class Reserva implements Serializable {
     }
 
     public boolean esActiva() {
-        return estado == Estado.CONFIRMADA || estado == Estado.PENDIENTE_PAGO;
+        return estado == Estado.CONFIRMADA || estado == Estado.ACTIVA || estado == Estado.EN_CHECKOUT || estado == Estado.PENDIENTE_PAGO;
     }
 
     /** La estadía ya empezó y todavía no termina. */
@@ -65,7 +68,7 @@ public class Reserva implements Serializable {
 
     /** Hoy es el día de salida de una estadía en curso: ya se puede hacer el checkout. */
     public boolean puedeHacerCheckout() {
-        return esActiva() && estaEnCurso() && fechaSalida.isEqual(LocalDate.now());
+        return com.example.proyecto_iotelito.data.CheckoutPolicy.puedeSolicitar(estado.name(), fechaSalida, LocalDate.now(java.time.ZoneId.of("America/Lima")));
     }
 
     public String rangoFechasTexto() {

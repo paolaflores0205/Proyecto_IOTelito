@@ -20,7 +20,8 @@ public final class HotelCatalogRepository {
         if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
             String[] lastError = {null};
             return Transformations.map(new com.example.proyecto_iotelito.data.superadmin.FirebaseHotelsRepository(context, false).observe(), state -> {
-                if (state.error != null && !state.error.equals(lastError[0]))
+                if (state.error != null && !state.error.equals(lastError[0])
+                        && ConexionCliente.disponible(context))
                     android.widget.Toast.makeText(context.getApplicationContext(), state.error, android.widget.Toast.LENGTH_LONG).show();
                 lastError[0] = state.error;
                 List<Hotel> result = new ArrayList<>();

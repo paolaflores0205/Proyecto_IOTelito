@@ -16,7 +16,7 @@ public final class HotelOperationsCodec {
         double total=((Number)data.get("precioTotal")).doubleValue();
         if(!entrada.isBefore(salida)||!Double.isFinite(total)||total<0)throw new IllegalArgumentException("Reserva inválida");
         String estado=(String)data.get("estado");
-        if(!Arrays.asList("CONFIRMADA","COMPLETADA","CANCELADA","PENDIENTE_PAGO").contains(estado))throw new IllegalArgumentException("Estado inválido");
+        if(!Arrays.asList("CONFIRMADA","ACTIVA","EN_CHECKOUT","FINALIZADA","COMPLETADA","CANCELADA","PENDIENTE_PAGO").contains(estado))throw new IllegalArgumentException("Estado inválido");
         if("CANCELADA".equals(estado)||"PENDIENTE_PAGO".equals(estado))return null;
         String codigo=String.valueOf(data.get("codigo"));
         String nombre=data.get("clientName") instanceof String?(String)data.get("clientName"):"Huésped · "+codigo;
@@ -30,9 +30,10 @@ public final class HotelOperationsCodec {
         return row;
     }
     public static ReservaAdmin.EstadoCheckout status(String estado,LocalDate entrada,LocalDate salida,LocalDate hoy) {
-        if("COMPLETADA".equals(estado))return ReservaAdmin.EstadoCheckout.FINALIZADA;
+        if(com.example.proyecto_iotelito.data.CheckoutPolicy.finalizada(estado))return ReservaAdmin.EstadoCheckout.FINALIZADA;
+        if("EN_CHECKOUT".equals(estado)) return ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE;
         if(hoy.isBefore(entrada))return ReservaAdmin.EstadoCheckout.PROXIMA;
-        if(!hoy.isBefore(salida))return ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE;
+
         return ReservaAdmin.EstadoCheckout.HOSPEDADO;
     }
     public static double total(double base,double extra) {

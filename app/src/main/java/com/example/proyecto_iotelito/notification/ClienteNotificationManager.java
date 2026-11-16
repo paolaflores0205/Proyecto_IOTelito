@@ -67,6 +67,9 @@ public final class ClienteNotificationManager {
     }
 
     public static void mostrarPagoRealizado(Context context, Reserva reserva) {
+        mostrarPagoRealizado(context, reserva, reserva.precioTotal);
+    }
+    public static void mostrarPagoRealizado(Context context, Reserva reserva, double total) {
         publicar(
                 context,
                 20_000 + reserva.id,
@@ -75,7 +78,7 @@ public final class ClienteNotificationManager {
                 context.getString(R.string.notif_pago_realizado_titulo),
                 context.getString(
                         R.string.notif_pago_realizado_texto,
-                        String.format(Locale.US, "%,.0f", reserva.precioTotal),
+                        String.format(Locale.US, "%,.2f", total),
                         reserva.codigo));
     }
 

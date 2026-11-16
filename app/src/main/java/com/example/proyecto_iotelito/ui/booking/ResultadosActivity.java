@@ -13,9 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.CatalogoHabitaciones;
-import com.example.proyecto_iotelito.data.GeneradorOpcionesHabitaciones;
-import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.ui.hoteles.HotelAdapter;
 import com.example.proyecto_iotelito.util.ServicioIconos;
@@ -37,7 +34,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Lista de hoteles resultado de una búsqueda (datos estáticos). Los
+ * Lista de hoteles disponibles para las fechas y huéspedes seleccionados. Los
  * filtros de Precio/Valoración/Servicios abren un panel deslizable de
  * Material Design (bottom sheet), igual que en "Ver todos los hoteles":
  * calificación con estrellas tocables, precio con un RangeSlider y
@@ -53,6 +50,12 @@ public class ResultadosActivity extends AppCompatActivity {
     public static final String EXTRA_RESUMEN = "extra_resumen";
 
     private final List<Hotel> todosLosHoteles = new ArrayList<>();
+    private List<Hotel> catalogoActual = new ArrayList<>();
+    private int consultaVersion;
+    private boolean consultaPendiente;
+    private Boolean conexionAnterior;
+    private TextView estadoBusqueda;
+
     private HotelAdapter hotelAdapter;
     private BookingSelection bookingSelection;
     private String destinoBusqueda;
@@ -108,16 +111,88 @@ public class ResultadosActivity extends AppCompatActivity {
         btnFiltros.setOnClickListener(v -> mostrarFiltros());
         tvLimpiarFiltros.setOnClickListener(v -> limpiarFiltros());
 
-        com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(this).observe(this, hoteles -> {
-            boolean rangoCompleto = precioMinimo == dominioPrecioMin && precioMaximo == dominioPrecioMax;
-            todosLosHoteles.clear();
-            for (Hotel hotel : hoteles) if (hotel.active) todosLosHoteles.add(hotel);
-            double[] nuevoDominio = calcularDominioPrecio();
-            dominioPrecioMin = nuevoDominio[0];
-            dominioPrecioMax = nuevoDominio[1];
-            if (rangoCompleto) { precioMinimo = dominioPrecioMin; precioMaximo = dominioPrecioMax; }
-            aplicarFiltros();
+        estadoBusqueda = findViewById(R.id.tv_estado_disponibilidad);
+        new com.example.proyecto_iotelito.data.ConexionCliente(this).observe(this, online -> {
+            boolean reconectado = Boolean.FALSE.equals(conexionAnterior) && online;
+            conexionAnterior = online;
+            if (!online) mostrarSinConexion();
+            else if (reconectado) consultarDisponibilidad();
         });
+        com.example.proyecto_iotelito.data.HotelCatalogRepository.observar(this).observe(this, hoteles -> {
+            catalogoActual = new ArrayList<>(hoteles);
+            consultarDisponibilidad();
+        });
+    }
+
+    @Override protected void onRestart() {
+        super.onRestart();
+        consultarDisponibilidad();
+    }
+
+    @Override protected void onDestroy() {
+        consultaVersion++;
+        super.onDestroy();
+    }
+
+    private void consultarDisponibilidad() {
+        if (!com.example.proyecto_iotelito.data.ConexionCliente.disponible(this)) {
+            mostrarSinConexion();
+            return;
+        }
+        final int version = ++consultaVersion;
+        List<Hotel> candidatos = new ArrayList<>();
+        for (Hotel hotel : catalogoActual) if (hotel.active && coincideConDestino(hotel, destinoBusqueda)) candidatos.add(hotel);
+        if (bookingSelection == null) {
+            recibirHoteles(candidatos);
+            return;
+        }
+        consultaPendiente = true;
+        todosLosHoteles.clear();
+        hotelAdapter.submitList(Collections.emptyList());
+        btnFiltros.setEnabled(false);
+        estadoBusqueda.setVisibility(View.VISIBLE);
+        estadoBusqueda.setText(R.string.consultando_disponibilidad);
+        estadoBusqueda.setOnClickListener(null);
+        com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this,
+                () -> com.example.proyecto_iotelito.data.ReservaRepository.getInstance(this)
+                        .hotelesDisponibles(this, candidatos, bookingSelection.fechaEntrada(),
+                                bookingSelection.fechaSalida(), bookingSelection.adultos, bookingSelection.ninos),
+                hoteles -> { if (version == consultaVersion) recibirHoteles(hoteles); },
+                () -> {
+                    if (version != consultaVersion) return;
+                    estadoBusqueda.setText(R.string.error_disponibilidad_reintentar);
+                    estadoBusqueda.setOnClickListener(v -> consultarDisponibilidad());
+                });
+    }
+
+    private void recibirHoteles(List<Hotel> hoteles) {
+        if (!com.example.proyecto_iotelito.data.ConexionCliente.disponible(this)) {
+            mostrarSinConexion();
+            return;
+        }
+        consultaPendiente = false;
+        boolean rangoCompleto = precioMinimo == dominioPrecioMin && precioMaximo == dominioPrecioMax;
+        todosLosHoteles.clear();
+        todosLosHoteles.addAll(hoteles);
+        double[] dominio = calcularDominioPrecio();
+        dominioPrecioMin = dominio[0];
+        dominioPrecioMax = dominio[1];
+        precioMinimo = rangoCompleto ? dominioPrecioMin : Math.max(dominioPrecioMin, Math.min(precioMinimo, dominioPrecioMax));
+        precioMaximo = rangoCompleto ? dominioPrecioMax : Math.max(precioMinimo, Math.min(precioMaximo, dominioPrecioMax));
+        btnFiltros.setEnabled(true);
+        estadoBusqueda.setOnClickListener(null);
+        estadoBusqueda.setVisibility(View.GONE);
+        aplicarFiltros();
+    }
+
+    private void mostrarSinConexion() {
+        consultaVersion++;
+        consultaPendiente = true;
+        btnFiltros.setEnabled(false);
+        hotelAdapter.submitList(Collections.emptyList());
+        estadoBusqueda.setText(R.string.cliente_sin_conexion);
+        estadoBusqueda.setVisibility(View.VISIBLE);
+        estadoBusqueda.setOnClickListener(null);
     }
 
     private double[] calcularDominioPrecio() {
@@ -299,13 +374,10 @@ public class ResultadosActivity extends AppCompatActivity {
     }
 
     private void aplicarFiltros() {
+        if (consultaPendiente) return;
         List<Hotel> resultado = new ArrayList<>();
         for (Hotel hotel : todosLosHoteles) {
             if (!coincideConDestino(hotel, destinoBusqueda)) {
-                continue;
-            }
-            if (hotel.hasInventory && GeneradorOpcionesHabitaciones.generar(
-                    hotel.id, bookingSelection.adultos, bookingSelection.ninos).isEmpty()) {
                 continue;
             }
             if (hotel.rating < calificacionMinima) {
@@ -368,10 +440,12 @@ public class ResultadosActivity extends AppCompatActivity {
 
     private void renderHoteles(List<Hotel> hoteles) {
         hotelAdapter.submitList(hoteles);
+        estadoBusqueda.setVisibility(hoteles.isEmpty() ? View.VISIBLE : View.GONE);
+        estadoBusqueda.setText(R.string.sin_resultados_hoteles);
     }
 
     private double precioDesde(Hotel hotel) {
-        return hotel.remote ? hotel.pricePerNight : CatalogoHabitaciones.precioMinimoDisponible(hotel.id, hotel.pricePerNight);
+        return com.example.proyecto_iotelito.data.InventarioCliente.precioDesde(hotel);
     }
 
     private float dpF(int value) {

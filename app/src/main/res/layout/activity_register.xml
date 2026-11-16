@@ -11,9 +11,12 @@
         layout="@layout/item_sub_header" />
 
     <ScrollView
+        android:id="@+id/scroll_registro"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,6 +32,8 @@
                 android:paddingBottom="8dp">
 
                 <FrameLayout
+                    android:id="@+id/btn_registro_foto" android:clickable="true" android:focusable="true"
+                    android:contentDescription="Elegir foto de perfil"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:background="@drawable/bg_avatar_upload">
@@ -40,6 +45,9 @@
                         android:contentDescription="@null"
                         android:src="@drawable/ic_camera"
                         app:tint="@color/io_text_primary" />
+                    <com.google.android.material.imageview.ShapeableImageView android:id="@+id/iv_registro_foto"
+                        android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop"
+                        android:contentDescription="Vista previa de la foto" app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.IoTelito.Avatar" />
                 </FrameLayout>
 
                 <TextView
@@ -211,7 +219,7 @@
                 app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/register_password_edit_text"
+                    android:id="@+id/register_password_edit_text" android:saveEnabled="false"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="@string/register_password_hint"

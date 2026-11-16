@@ -25,7 +25,9 @@ public class HotelOperationsCodecTest {
         LocalDate start=today,end=today.plusDays(2);
         assertEquals(ReservaAdmin.EstadoCheckout.PROXIMA,HotelOperationsCodec.status("CONFIRMADA",start,end,today.minusDays(1)));
         assertEquals(ReservaAdmin.EstadoCheckout.HOSPEDADO,HotelOperationsCodec.status("CONFIRMADA",start,end,today));
-        assertEquals(ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE,HotelOperationsCodec.status("CONFIRMADA",start,end,end));
+        assertEquals(ReservaAdmin.EstadoCheckout.HOSPEDADO,HotelOperationsCodec.status("CONFIRMADA",start,end,end));
+        assertEquals(ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE,HotelOperationsCodec.status("EN_CHECKOUT",start,end,end));
+        assertEquals(ReservaAdmin.EstadoCheckout.FINALIZADA,HotelOperationsCodec.status("FINALIZADA",start,end,end));
         assertEquals(ReservaAdmin.EstadoCheckout.FINALIZADA,HotelOperationsCodec.status("COMPLETADA",start,end,today));
     }
     @Test public void noPresentaCanceladasNiPendientesComoConfirmadas(){

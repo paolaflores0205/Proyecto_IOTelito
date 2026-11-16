@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         setContentView(R.layout.activity_main);
+        com.example.proyecto_iotelito.data.ClientCheckoutNotifications.observar(this);
 
         FragmentManager fm = getSupportFragmentManager();
         explorarFragment = findOrCreate(fm, TAG_EXPLORAR, ExplorarFragment::new);

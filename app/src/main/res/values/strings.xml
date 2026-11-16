@@ -110,7 +110,7 @@
     <string name="hint_numero_tarjeta">0000 0000 0000 0000</string>
     <string name="vencimiento">Vencimiento</string>
     <string name="cvv">CVV</string>
-    <string name="aviso_registro_tarjeta">No se te cobrará ahora. Esto solo registra tu tarjeta para confirmar la reserva; el cobro se realizará automáticamente al hacer el checkout al finalizar tu estadía, donde también se sumará cualquier cargo adicional.</string>
+    <string name="aviso_registro_tarjeta">Demostración sin dinero real. Puedes usar 4242 4242 4242 4242, un vencimiento futuro y CVV 123. El hotel confirmará el cobro simulado después de tu solicitud de checkout.</string>
     <string name="btn_confirmar_reserva">Confirmar reserva</string>
     <string name="error_campo_obligatorio">Campo obligatorio</string>
 
@@ -172,20 +172,20 @@
     <string name="titulo_checkout">Realizar checkout</string>
     <string name="label_valoracion_estadia">Valoración de tu estadía</string>
     <string name="pregunta_valoracion">¿Cómo calificarías tu experiencia general y la conectividad IoT?</string>
-    <string name="hint_comentarios_checkout">Comentarios y sugerencias (Opcional)</string>
+    <string name="hint_comentarios_checkout">Observaciones de tu estadía (Obligatorio)</string>
     <string name="cd_estrella_valoracion">Calificar con %1$d estrellas</string>
-    <string name="label_monto_preautorizado">Monto pre-autorizado</string>
+    <string name="label_monto_preautorizado">Alojamiento reservado</string>
     <string name="label_consumos_adicionales">Consumos adicionales</string>
     <string name="label_total_liquidar">Total a liquidar</string>
     <string name="label_taxi_cortesia">¿Deseas taxi de cortesía al aeropuerto?</string>
     <string name="desc_taxi_cortesia">Beneficio gratis para reservas de 3+ noches</string>
     <string name="aviso_cargos_adicionales">Cualquier daño a la propiedad o domótica puede aplicar cargos adicionales. Liquidación académica ficticia.</string>
-    <string name="btn_confirmar_checkout">Confirmar checkout</string>
+    <string name="btn_confirmar_checkout">Solicitar checkout</string>
     <string name="toast_calificacion_requerida">Por favor califica tu estadía antes de continuar</string>
 
     <!-- Checkout realizado -->
     <string name="checkout_realizado_titulo">Checkout realizado</string>
-    <string name="checkout_realizado_subtitulo">Se ha debitado el cobro con éxito a tu tarjeta registrada.</string>
+    <string name="checkout_realizado_subtitulo">Cobro de demostración registrado por el hotel. No se ha debitado dinero.</string>
     <string name="resumen_cobro_final">Resumen de cobro final</string>
     <string name="label_tarjeta_cargo">Tarjeta de cargo:</string>
     <string name="tarjeta_simulada_valor">Visa terminada en 4557</string>
@@ -298,7 +298,7 @@
     <string name="btn_enviar_calificacion">Enviar calificación</string>
     <string name="link_volver_inicio">Volver al inicio</string>
     <string name="footer_gracias_iot">¡Gracias por ayudarnos a mejorar el servicio domótico e IoT de IoTelito!</string>
-    <string name="label_comentarios_taxi">Comentarios y sugerencias (Opcional)</string>
+    <string name="label_comentarios_taxi">Observaciones de tu estadía (Obligatorio)</string>
 
     <!-- ============ Rol Taxista ============ -->
 
@@ -966,8 +966,8 @@
     <string name="notif_canal_reservas_descripcion">Confirmaciones de reservas, checkout y cobros</string>
     <string name="notif_reserva_confirmada_titulo">¡Reserva confirmada!</string>
     <string name="notif_reserva_confirmada_texto">Tu reserva en %1$s para %2$s quedó registrada.</string>
-    <string name="notif_pago_realizado_titulo">Pago realizado</string>
-    <string name="notif_pago_realizado_texto">Se realizó el cargo de S/ %1$s de la reserva %2$s.</string>
+    <string name="notif_pago_realizado_titulo">Cobro simulado confirmado</string>
+    <string name="notif_pago_realizado_texto">El hotel registró un cobro de prueba de S/ %1$s para la reserva %2$s. Sin débito de dinero.</string>
     <string name="marcar_todas_leidas">Marcar leídas</string>
     <string name="sin_notificaciones">Todavía no tienes notificaciones. Tus confirmaciones de reserva y pagos aparecerán aquí.</string>
 
@@ -997,4 +997,17 @@
     <string name="ver_caracteristicas_habitacion">Ver características</string>
     <string name="elegir_fechas_reservar">Elegir fechas para reservar</string>
     <string name="capacidad_area_habitacion">%1$s · %2$d m²</string>
+    <string name="consultando_disponibilidad">Consultando habitaciones disponibles…</string>
+    <string name="error_disponibilidad_reintentar">No pudimos verificar la disponibilidad. Toca aquí para reintentar.</string>
+    <string name="cliente_sin_conexion">Se perdió la conexión a internet. Revisa tu Wi-Fi o datos móviles. Volveremos a consultar cuando se restablezca la conexión.</string>
+    <string name="elegir_fechas_huespedes">Elegir fechas y huéspedes</string>
+    <string name="fechas_estadia_hotel">Entrada y salida de tu estadía</string>
+    <string name="comprobar_habitacion">Comprobar disponibilidad</string>
+    <string name="estadia_minima_noche">Selecciona una salida posterior a la entrada: la estadía mínima es de una noche.</string>
+    <string name="habitacion_ver_alternativas">Esta opción no está disponible para esas fechas o huéspedes. Te mostramos alternativas del mismo hotel.</string>
+    <string name="estado_checkout_solicitado">Checkout solicitado</string>
+    <string name="checkout_pendiente_cliente">Tu checkout fue solicitado. El hotel revisará los cargos y confirmará el cobro de demostración.</string>
+    <string name="ayuda_tarjeta_prueba">Demostración sin dinero real. Usa 4242 4242 4242 4242, un vencimiento futuro y CVV 123. Solo guardamos tipo, últimos cuatro dígitos y un token ficticio.</string>
+    <string name="perfil_identidad_bloqueada">Documento, nacimiento y correo son datos de solo lectura. Para corregirlos, contacta al administrador. Los datos faltantes de cuentas antiguas deben completarse con su ayuda.</string>
+    <string name="perfil_cache_sin_conexion">Sin conexión. Mostramos la última copia guardada de tu perfil.</string>
 </resources>

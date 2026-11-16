@@ -124,6 +124,7 @@
 
                     <EditText
                         android:id="@+id/et_numero_tarjeta"
+                        android:saveEnabled="false"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="6dp"
@@ -192,6 +193,7 @@
 
                             <EditText
                                 android:id="@+id/et_cvv"
+                                android:saveEnabled="false"
                                 android:layout_width="match_parent"
                                 android:layout_height="48dp"
                                 android:layout_marginTop="6dp"
@@ -203,7 +205,7 @@
                                 android:textSize="14sp"
                                 android:inputType="numberPassword"
                                 android:imeOptions="actionDone"
-                                android:maxLength="3"
+                                android:maxLength="4"
                                 android:singleLine="true" />
                         </LinearLayout>
                     </LinearLayout>

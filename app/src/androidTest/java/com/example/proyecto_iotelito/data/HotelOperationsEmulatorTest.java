@@ -104,6 +104,8 @@ public class HotelOperationsEmulatorTest {
         seed("reservations/3001",fields("id",3001,"hotelId",2,"clientUid","other-client","roomIds",new int[]{201},"roomName","Simple","roomNumber","201","fechaEntrada",today.toString(),"fechaSalida",today.plusDays(1).toString(),"precioTotal",999.0,"estado","CONFIRMADA","codigo","AJENO"));
         login("client-hotel@example.test",UserRole.CLIENT,clientUid,null);
         Tasks.await(new FirebaseHotelChat(context).send(2001,"Pregunta del huésped"),20,TimeUnit.SECONDS);
+        com.example.proyecto_iotelito.data.ReservaRepository.getInstance(context).solicitarCheckout(2001,5,"Estadía de prueba satisfactoria",
+                TarjetaSimulada.validar("4242424242424242","12/39","123",java.time.YearMonth.now()));
         login("admin-hotel@example.test",UserRole.HOTEL_ADMIN,adminUid,1);
         AdminChatActivity chat=open(AdminChatActivity.class,new Intent(context,AdminChatActivity.class).putExtra(AdminChatActivity.EXTRA_CONVERSACION_ID,2001));
         waitFor(()->chat.findViewById(R.id.btn_enviar).isEnabled()&&((LinearLayout)chat.findViewById(R.id.ll_mensajes)).getChildCount()==1);
@@ -121,7 +123,7 @@ public class HotelOperationsEmulatorTest {
         Tasks.await(new FirebaseHotelOperations(context).checkout(2001,12.50,"Daño de prueba","Observación QA"),20,TimeUnit.SECONDS);
         // Reintentar no cambia el comprobante ni duplica importes.
         Tasks.await(new FirebaseHotelOperations(context).checkout(2001,0,"",""),20,TimeUnit.SECONDS);
-        assertEquals("COMPLETADA",Tasks.await(db.document("reservations/2001").get(Source.SERVER),20,TimeUnit.SECONDS).getString("estado"));
+        assertEquals("FINALIZADA",Tasks.await(db.document("reservations/2001").get(Source.SERVER),20,TimeUnit.SECONDS).getString("estado"));
         assertEquals(112.75,Tasks.await(db.document("hotelCheckouts/2001").get(Source.SERVER),20,TimeUnit.SECONDS).getDouble("total"),.001);
         AtomicReference<com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin> loaded = new AtomicReference<>();
         AtomicReference<String> loadError = new AtomicReference<>();

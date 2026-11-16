@@ -6,6 +6,7 @@ package com.example.proyecto_iotelito.model;
  * para que el cambio se refleje de inmediato en el resto de la app.
  */
 public class UserProfile {
+    public String firstNames = "", lastNames = "", photoUrl = "";
 
     public String name;
     public String email;

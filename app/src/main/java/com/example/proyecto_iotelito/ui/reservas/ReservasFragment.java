@@ -186,7 +186,7 @@ public class ReservasFragment extends Fragment {
                 if (!reserva.esActiva()) {
                     continue;
                 }
-                if (reserva.estaEnCurso()) {
+                if (reserva.estaEnCurso() || reserva.estado == Reserva.Estado.EN_CHECKOUT) {
                     enCurso.add(reserva);
                 } else {
                     proximas.add(reserva);
@@ -234,17 +234,7 @@ public class ReservasFragment extends Fragment {
     }
 
     private void abrirDetalle(int reservaId) {
-        android.content.Context app = requireContext().getApplicationContext();
-        TaxiRepository.ejecutar(app, getViewLifecycleOwner(), () -> TaxiRepository.porReserva(app, reservaId), solicitudId -> {
-            Intent intent;
-            if (solicitudId >= 0) {
-                intent = new Intent(requireContext(), TaxistaAsignadoActivity.class)
-                        .putExtra(TaxiRepository.EXTRA_ID, solicitudId);
-            } else {
-                intent = new Intent(requireContext(), DetalleReservaActivity.class)
-                        .putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reservaId);
-            }
-            startActivity(intent);
-        });
+        startActivity(new Intent(requireContext(), com.example.proyecto_iotelito.ui.reservas.DetalleReservaActivity.class)
+                .putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reservaId));
     }
 }

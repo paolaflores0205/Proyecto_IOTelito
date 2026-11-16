@@ -8,6 +8,7 @@ import com.example.proyecto_iotelito.model.hoteladmin.Habitacion;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GeneradorOpcionesHabitacionesTest {
@@ -62,5 +63,28 @@ public class GeneradorOpcionesHabitacionesTest {
                 assertFalse(sigueCubriendoAdultos && sigueCubriendoNinos);
             }
         }
+    }
+
+    @Test
+    public void generaAlternativasTrasExcluirHabitacionOcupadaAntesDelLimite() {
+        List<Habitacion> inventario = new ArrayList<>();
+        inventario.add(habitacion(1, 1, 1, 1));
+        inventario.add(habitacion(2, 1, 1, 100));
+        for (int id = 3; id <= 10; id++) inventario.add(habitacion(id, 1, 0, id + 7));
+
+        List<OpcionHabitaciones> primeras = GeneradorOpcionesHabitaciones.generar(inventario, 2, 1);
+        assertTrue(primeras.stream().allMatch(opcion -> opcion.habitaciones().stream()
+                .anyMatch(habitacion -> habitacion.id == 1)));
+
+        inventario.removeIf(habitacion -> habitacion.id == 1);
+        List<OpcionHabitaciones> libres = GeneradorOpcionesHabitaciones.generar(inventario, 2, 1);
+        assertFalse(libres.isEmpty());
+        assertTrue(libres.stream().allMatch(opcion -> opcion.habitaciones().stream()
+                .noneMatch(habitacion -> habitacion.id == 1)));
+    }
+
+    private Habitacion habitacion(int id, int adultos, int ninos, double precio) {
+        return new Habitacion(id, 1, "Habitación", "Hab. " + id, 20,
+                adultos, ninos, precio, "Prueba", 0, true);
     }
 }
