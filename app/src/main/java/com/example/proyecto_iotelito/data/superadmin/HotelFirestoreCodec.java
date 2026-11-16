@@ -29,7 +29,8 @@ public final class HotelFirestoreCodec {
         for (String photo : photos) {
             if (photo == null || photo.length() > 2048) continue;
             boolean shared = photo.startsWith("android.resource://com.example.proyecto_iotelito/drawable/")
-                    || photo.matches("gs://[^/]+/hotelPhotos/[^/]+/[^/]+[.]jpg");
+                    || photo.matches("gs://[^/]+/hotelPhotos/[^/]+/[^/]+[.]jpg")
+                    || photo.matches("gs://[^/]+/hotelAdminPhotos/[0-9]+/[^/]+/[^/]+[.]jpg");
             try {
                 java.net.URI uri = java.net.URI.create(photo);
                 shared |= "https".equals(uri.getScheme()) && uri.getHost() != null && uri.getUserInfo() == null;

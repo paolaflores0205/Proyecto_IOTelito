@@ -120,6 +120,27 @@ public class AdminHotelFragment extends Fragment {
                 binding.tvDisponibles.setText(String.valueOf(available));
             }
         });
+        ((com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminMainActivity) requireActivity())
+                .reservations().observe(getViewLifecycleOwner(), state -> {
+                    java.util.List<ReservaAdmin> pending = new java.util.ArrayList<>();
+                    if (!state.loading && state.error == null) {
+                        for (ReservaAdmin row : state.rows) {
+                            if (row.estado == ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE) pending.add(row);
+                        }
+                    }
+                    boolean visible = !pending.isEmpty();
+                    binding.tvAlertas.setVisibility(visible ? View.VISIBLE : View.GONE);
+                    binding.cardAlertaCheckout.setVisibility(visible ? View.VISIBLE : View.GONE);
+                    if (!visible) return;
+                    ReservaAdmin first = pending.get(0);
+                    binding.tvAlertas.setText(getString(R.string.hoteladmin_alertas, pending.size()));
+                    binding.tvAlertaCheckoutTitulo.setText(R.string.hoteladmin_notif_checkout_titulo);
+                    binding.tvAlertaCheckoutDescripcion.setText(
+                            getString(R.string.hoteladmin_notif_checkout_texto, first.huespedNombre));
+                    binding.cardAlertaCheckout.setOnClickListener(v -> startActivity(
+                            new Intent(requireContext(), CobroCheckoutActivity.class)
+                                    .putExtra(CobroCheckoutActivity.EXTRA_RESERVA_ID, first.id)));
+                });
     }
 
     private void actualizarAlertaCheckout() {

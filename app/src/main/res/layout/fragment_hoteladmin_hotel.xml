@@ -309,6 +309,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:id="@+id/tv_alerta_checkout_titulo"
                             android:text="@string/hoteladmin_alerta_checkout_titulo"
                             android:textColor="@color/io_text_primary"
                             android:textSize="14sp"
@@ -317,6 +318,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:id="@+id/tv_alerta_checkout_descripcion"
                             android:text="@string/hoteladmin_alerta_checkout_desc"
                             android:textColor="@color/io_text_secondary"
                             android:textSize="12sp" />

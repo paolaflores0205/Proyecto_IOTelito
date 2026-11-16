@@ -16,10 +16,16 @@ public class Servicio implements Serializable {
     /** Unidad de cobro mostrada tras el precio, ej. "persona", "carga", "servicio". */
     public final String unidad;
     public final int fotoRes;
+    public final String fotoUrl;
     public boolean activo;
 
     public Servicio(int id, int hotelId, String nombre, String descripcion, double precio,
                     String unidad, int fotoRes, boolean activo) {
+        this(id, hotelId, nombre, descripcion, precio, unidad, fotoRes, activo, null);
+    }
+
+    public Servicio(int id, int hotelId, String nombre, String descripcion, double precio,
+                    String unidad, int fotoRes, boolean activo, String fotoUrl) {
         this.id = id;
         this.hotelId = hotelId;
         this.nombre = nombre;
@@ -27,6 +33,7 @@ public class Servicio implements Serializable {
         this.precio = precio;
         this.unidad = unidad;
         this.fotoRes = fotoRes;
+        this.fotoUrl = fotoUrl;
         this.activo = activo;
     }
 }

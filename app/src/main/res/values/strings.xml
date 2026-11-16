@@ -931,6 +931,9 @@
     <string name="hoteladmin_notif_canal_desc">Alertas de checkout pendientes del hotel</string>
     <string name="hoteladmin_notif_checkout_titulo">Checkout pendiente de cobro</string>
     <string name="hoteladmin_notif_checkout_texto">La reserva de %1$s requiere atención.</string>
+    <string name="hoteladmin_checkout_aviso_remoto">Tu hotel tiene una solicitud de salida por revisar.</string>
+    <string name="cliente_checkout_confirmado">El hotel registró un cobro simulado de S/ %1$s por el cierre de tu reserva.</string>
+    <string name="cliente_checkout_titulo">Checkout confirmado</string>
     <string name="hoteladmin_error_monto_dano">Ingresa un monto mayor que cero</string>
     <string name="hoteladmin_campo_obligatorio">Este campo es obligatorio</string>
     <string name="hoteladmin_cobro_dano_concepto">Cobro por daños</string>

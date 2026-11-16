@@ -35,13 +35,32 @@ service cloud.firestore {
       let after = getAfter(/databases/$(database)/documents/hotels/$(hotelId)).data;
       return after.inventoryRevision == before.get('inventoryRevision', 0) + 1 && auditUpdate(after);
     }
+    function managedPhoto(value, hotelId) {
+      return value is string && value.size() <= 2048
+        && value.matches('gs://[^/]+/hotelAdminPhotos/' + hotelId + '/[^/]+/[a-zA-Z0-9-]+[.]jpg');
+    }
+    function validGallery(hotelId) {
+      let photos = request.resource.data.photos;
+      let added = photos.removeAll(resource.data.get('photos', []));
+      let count = added.size();
+      return photos is list && photos.size() >= 4 && photos.size() <= 8 && photos.toSet().size() == photos.size()
+        && (count < 1 || managedPhoto(added[0], hotelId))
+        && (count < 2 || managedPhoto(added[1], hotelId))
+        && (count < 3 || managedPhoto(added[2], hotelId))
+        && (count < 4 || managedPhoto(added[3], hotelId))
+        && (count < 5 || managedPhoto(added[4], hotelId))
+        && (count < 6 || managedPhoto(added[5], hotelId))
+        && (count < 7 || managedPhoto(added[6], hotelId))
+        && (count < 8 || managedPhoto(added[7], hotelId));
+    }
     function validService(data, hotelId, serviceId) {
-      return data.keys().hasOnly(['id', 'hotelId', 'nombre', 'descripcion', 'precio', 'unidad', 'activo', 'archived'])
+      return data.keys().hasOnly(['id', 'hotelId', 'nombre', 'descripcion', 'precio', 'unidad', 'activo', 'archived', 'fotoUrl'])
         && data.id is int && data.id > 0 && string(data.id) == serviceId && data.hotelId == int(hotelId)
         && data.nombre is string && data.nombre.size() > 0 && data.nombre.size() <= 160
         && data.descripcion is string && data.descripcion.size() <= 5000
         && data.precio is number && data.precio >= 0 && data.precio <= 1000000
         && data.unidad is string && data.unidad.size() > 0 && data.unidad.size() <= 80
+        && (data.get('fotoUrl', null) == null || managedPhoto(data.fotoUrl, hotelId))
         && data.activo is bool && data.archived is bool && (data.archived == false || data.activo == false);
     }
     function nextHotelId() {
@@ -184,6 +203,8 @@ service cloud.firestore {
           && request.resource.data.rooms is int && request.resource.data.rooms >= 0
           && request.resource.data.hasInventory is bool && request.resource.data.pricePerNight is number
           && request.resource.data.pricePerNight >= 0 && request.resource.data.pricePerNight <= 1000000)
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['photos', 'updatedAt', 'updatedByUid'])
+          && validGallery(hotelId))
       );
       match /services/{serviceId} {
         allow read: if activeUser();

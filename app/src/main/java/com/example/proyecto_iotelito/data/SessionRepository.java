@@ -73,8 +73,13 @@ public final class SessionRepository {
     }
 
     public static synchronized void cerrar(Context context) {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null)
-            com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.cancelSession(context, FirebaseAuth.getInstance().getCurrentUser().getUid());
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            String uid = firebaseUser.getUid();
+            com.example.proyecto_iotelito.data.superadmin.RemoteHotelAlerts.cancelSession(context, uid);
+            com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminNotifications.cancelRemoteSession(context, uid);
+            com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.cancelSession(context, uid);
+        }
         stopWatching();
         current = null;
         TaxistaAuthRepository.olvidar(context);

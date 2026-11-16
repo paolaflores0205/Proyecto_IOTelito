@@ -62,15 +62,19 @@ public final class HotelAdminFirestoreCodec {
         data.put("id", service.id); data.put("hotelId", service.hotelId); data.put("nombre", service.nombre);
         data.put("descripcion", service.descripcion); data.put("precio", service.precio);
         data.put("unidad", service.unidad); data.put("activo", service.activo); data.put("archived", false);
+        if (service.fotoUrl != null) data.put("fotoUrl", service.fotoUrl);
         service(String.valueOf(service.id), service.hotelId, data, service.fotoRes);
         return data;
     }
     public static Servicio service(String key, int hotelId, Map<String,Object> data, int image) {
         int id = id(key, hotelId, data);
         if (!(data.get("activo") instanceof Boolean)) throw new IllegalArgumentException("Estado no válido.");
+        String photo = data.get("fotoUrl") == null ? null : text(data.get("fotoUrl"), 2048, true);
+        if (photo != null && !photo.matches("gs://[^/]+/hotelAdminPhotos/" + hotelId + "/[^/]+/[^/]+[.]jpg"))
+            throw new IllegalArgumentException("La imagen del servicio no corresponde a este hotel.");
         return new Servicio(id, hotelId, text(data.get("nombre"), 160, true),
                 text(data.get("descripcion"), 5000, false), money(data.get("precio")),
-                text(data.get("unidad"), 80, true), image, (Boolean) data.get("activo"));
+                text(data.get("unidad"), 80, true), image, (Boolean) data.get("activo"), photo);
     }
     public static Map<String,Object> inventory(List<Habitacion> rooms) {
         Map<String,Object> result = new HashMap<>();

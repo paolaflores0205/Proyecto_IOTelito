@@ -145,8 +145,9 @@ No necesitas compartir contraseñas, tokens de acceso ni claves privadas.
 ## Límites de esta entrega
 
 El panel principal aún muestra una raya en las métricas pendientes de integración.
-Disponibles representa habitaciones habilitadas. Las notificaciones de checkout
-de ejemplo corresponden al modo local. La galería compartida es de consulta.
+Disponibles representa habitaciones habilitadas. La tarjeta de checkout usa
+solicitudes del hotel. La edición de fotos en el Firebase compartido requiere
+el bucket de Storage y las reglas indicadas en la guía de operaciones.
 
 Las reglas ya están desplegadas y la cuenta de prueba tiene hotel asignado.
 El login, los datos del hotel y el alta/edición/retirada de habitaciones se

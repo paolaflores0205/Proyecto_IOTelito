@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -14,6 +15,9 @@ import androidx.core.content.ContextCompat;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.model.hoteladmin.ReservaAdmin;
 import com.example.proyecto_iotelito.ui.hoteladmin.reservas.CobroCheckoutActivity;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /** Avisa una sola vez por cada checkout pendiente de gestionar en este dispositivo. */
 public final class HotelAdminNotifications {
@@ -71,5 +75,50 @@ public final class HotelAdminNotifications {
 
     public static void cancelCheckout(Context context, int reservaId) {
         context.getSystemService(NotificationManager.class).cancel(reservaId);
+    }
+
+    public static void showRemoteCheckouts(Context context, String uid, int hotelId, List<ReservaAdmin> rows) {
+        String tag = "hotel-checkout:" + uid + ":" + hotelId;
+        NotificationManager manager = context.getSystemService(NotificationManager.class);
+        Set<Integer> pending = new HashSet<>();
+        for (ReservaAdmin row : rows) {
+            if (row.hotelId == hotelId && row.estado == ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE) {
+                pending.add(row.id);
+            }
+        }
+        for (android.service.notification.StatusBarNotification item : manager.getActiveNotifications()) {
+            if (tag.equals(item.getTag()) && !pending.contains(item.getId())) manager.cancel(tag, item.getId());
+        }
+        if (!hasPermission(context) || !manager.areNotificationsEnabled()) return;
+        android.content.SharedPreferences prefs = context.getSharedPreferences("hoteladmin_alerts", Context.MODE_PRIVATE);
+        for (int id : pending) {
+            String key = tag + ":" + id;
+            if (prefs.getBoolean(key, false)) continue;
+            Intent intent = new Intent(context, CobroCheckoutActivity.class)
+                    .setData(Uri.parse("iotelito://admin-checkout/" + hotelId + "/" + id))
+                    .putExtra(CobroCheckoutActivity.EXTRA_RESERVA_ID, id);
+            PendingIntent link = PendingIntent.getActivity(context, id, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            try {
+                manager.notify(tag, id, new NotificationCompat.Builder(context, CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_notifications)
+                        .setContentTitle(context.getString(R.string.hoteladmin_notif_checkout_titulo))
+                        .setContentText(context.getString(R.string.hoteladmin_checkout_aviso_remoto))
+                        .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                        .setContentIntent(link).setAutoCancel(true).build());
+                prefs.edit().putBoolean(key, true).apply();
+            } catch (SecurityException ignored) {
+                // El permiso pudo cambiar mientras se publicaba el aviso.
+            }
+        }
+    }
+
+    public static void cancelRemoteSession(Context context, String uid) {
+        NotificationManager manager = context.getSystemService(NotificationManager.class);
+        for (android.service.notification.StatusBarNotification item : manager.getActiveNotifications()) {
+            if (item.getTag() != null && item.getTag().startsWith("hotel-checkout:" + uid + ":")) {
+                manager.cancel(item.getTag(), item.getId());
+            }
+        }
     }
 }

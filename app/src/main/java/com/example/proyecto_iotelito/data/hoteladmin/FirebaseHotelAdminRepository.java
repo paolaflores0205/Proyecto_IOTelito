@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SessionRepository;
 import com.example.proyecto_iotelito.data.superadmin.HotelFirestoreCodec;
+import com.example.proyecto_iotelito.data.superadmin.HotelCloudPhotos;
 import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.model.auth.*;
 import com.example.proyecto_iotelito.model.hoteladmin.*;
@@ -12,6 +13,8 @@ import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
+import com.google.firebase.storage.StorageException;
+import com.google.firebase.storage.StorageReference;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.Consumer;
@@ -63,7 +66,8 @@ public final class FirebaseHotelAdminRepository {
                 listener = hotel.addSnapshotListener(MetadataChanges.INCLUDE, (doc, error) -> {
                     try {
                         sameSession();
-                        if (error != null || doc == null || doc.getMetadata().isFromCache())
+                        if (error == null && doc != null && doc.getMetadata().isFromCache()) return;
+                        if (error != null || doc == null)
                             throw new IllegalStateException("No se confirmó el hotel. Revisa Internet y permisos.");
                         setValue(new State<>(decode(doc), null, false));
                     } catch (RuntimeException failure) { setValue(new State<>(null, failure.getMessage(), false)); }
@@ -132,8 +136,13 @@ public final class FirebaseHotelAdminRepository {
             try { sameSession(); callback.accept(null); } catch (RuntimeException error) { callback.accept(error.getMessage()); }
         }).addOnFailureListener(error -> {
             Throwable cause = error; while (cause.getCause() != null) cause = cause.getCause();
-            callback.accept(cause instanceof IllegalArgumentException || cause instanceof IllegalStateException
-                    ? cause.getMessage() : "No se guardó en Firebase. Revisa conexión, permisos y vuelve a intentarlo.");
+            if (cause instanceof StorageException
+                    && ((StorageException) cause).getErrorCode() == StorageException.ERROR_BUCKET_NOT_FOUND) {
+                callback.accept("Firebase Storage todavía no está disponible para este proyecto.");
+            } else {
+                callback.accept(cause instanceof IllegalArgumentException || cause instanceof IllegalStateException
+                        ? cause.getMessage() : "No se guardó en Firebase. Revisa conexión, permisos y vuelve a intentarlo.");
+            }
         });
     }
     private Map<String,Object> audit(Map<String,Object> fields) {
@@ -149,18 +158,76 @@ public final class FirebaseHotelAdminRepository {
         final Map<String,Object> fields;
         try { sameSession(); fields = HotelAdminFirestoreCodec.service(service); if (service.hotelId != hotelId) throw new IllegalArgumentException("Hotel incorrecto."); }
         catch (RuntimeException error) { callback.accept(error.getMessage()); return; }
-        changeService(service.id, fields, creating, false, callback);
+        complete(changeService(service.id, fields, creating, false, false), callback);
     }
-    public void archiveService(int id, Consumer<String> callback) { changeService(id, null, false, true, callback); }
-    private void changeService(int id, Map<String,Object> fields, boolean creating, boolean archive, Consumer<String> callback) {
+    public void saveServiceWithPhoto(Servicio service, boolean creating, String localPhoto, Consumer<String> callback) {
+        Map<String,Object> fields;
+        try {
+            sameSession();
+            if (service.hotelId != hotelId) throw new IllegalArgumentException("Hotel incorrecto.");
+            fields = HotelAdminFirestoreCodec.service(service);
+        } catch (RuntimeException failure) {
+            callback.accept(failure.getMessage());
+            return;
+        }
+        uploadThenSave(Collections.singletonList(localPhoto), photos -> {
+            fields.put("fotoUrl", photos.get(0));
+            return changeService(service.id, fields, creating, false, true);
+        }, callback);
+    }
+
+    public void archiveService(int id, Consumer<String> callback) {
+        complete(changeService(id, null, false, true, false), callback);
+    }
+
+    private Task<Void> changeService(int id, Map<String,Object> fields, boolean creating, boolean archive, boolean photoChanged) {
         DocumentReference ref = hotel.collection("services").document(String.valueOf(id));
-        complete(db.runTransaction(tx -> {
+        return db.runTransaction(tx -> {
             DocumentSnapshot doc = tx.get(hotel); assigned(tx, doc); DocumentSnapshot current = tx.get(ref);
             if (creating ? current.exists() : !current.exists() || Boolean.TRUE.equals(current.getBoolean("archived")))
                 throw new IllegalArgumentException("El servicio cambió o el ID ya existe. Recarga la lista.");
-            if (archive) tx.update(ref, "activo", false, "archived", true); else tx.set(ref, fields);
+            if (archive) {
+                tx.update(ref, "activo", false, "archived", true);
+            } else {
+                Map<String,Object> update = new HashMap<>(fields);
+                if (!creating && !photoChanged) {
+                    String previousPhoto = current.getString("fotoUrl");
+                    if (previousPhoto != null) update.put("fotoUrl", previousPhoto);
+                }
+                tx.set(ref, update);
+            }
+            return null;
+        });
+    }
+
+    public void savePhotos(List<String> selected, List<String> original, Consumer<String> callback) {
+        List<String> draft = new ArrayList<>(selected);
+        List<String> expected = new ArrayList<>(original);
+        if (draft.size() < 4 || draft.size() > 8 || new HashSet<>(draft).size() != draft.size()) {
+            callback.accept("Selecciona entre 4 y 8 fotos distintas.");
+            return;
+        }
+        uploadThenSave(draft, photos -> db.runTransaction(tx -> {
+            DocumentSnapshot doc = tx.get(hotel);
+            assigned(tx, doc);
+            if (!decode(doc).photos.equals(expected)) {
+                throw new IllegalStateException("La galería cambió en otro dispositivo. Vuelve a abrirla para editar.");
+            }
+            Map<String,Object> fields = new HashMap<>();
+            fields.put("photos", photos);
+            tx.update(hotel, audit(fields));
             return null;
         }), callback);
+    }
+
+    private void uploadThenSave(List<String> photos, java.util.function.Function<List<String>, Task<Void>> save,
+                                Consumer<String> callback) {
+        List<StorageReference> uploaded = new ArrayList<>();
+        Task<Void> operation = verifiedHotel()
+                .onSuccessTask(current -> HotelCloudPhotos.uploadForHotel(hotelId, uid, photos, uploaded))
+                .onSuccessTask(save::apply);
+        operation.addOnFailureListener(error -> HotelCloudPhotos.discard(uploaded));
+        complete(operation, callback);
     }
     public void saveRoom(Habitacion room, boolean creating, Consumer<String> callback) {
         try { sameSession(); HotelAdminFirestoreCodec.room(room); if (room.hotelId != hotelId) throw new IllegalArgumentException("Hotel incorrecto."); }

@@ -1,13 +1,19 @@
 package com.example.proyecto_iotelito.ui.hoteladmin.hotel;
 
 import android.os.Bundle;
+import android.net.Uri;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository;
-import com.example.proyecto_iotelito.data.SessionRepository;
+import com.example.proyecto_iotelito.data.ClientLocalTasks;
+import com.example.proyecto_iotelito.data.HotelImageLoader;
+import com.example.proyecto_iotelito.data.HotelPhotoStore;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
@@ -15,7 +21,9 @@ import com.example.proyecto_iotelito.databinding.ActivityHoteladminFormularioSer
 import com.example.proyecto_iotelito.model.hoteladmin.Servicio;
 
 import java.util.List;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * Formulario para registrar o editar un servicio (adm-formulario-servicio).
@@ -30,6 +38,9 @@ public class FormularioServicioActivity extends AppCompatActivity {
     private int servicioId = -1;
     private FirebaseHotelAdminRepository remote;
     private Servicio remoteOriginal;
+    private String draftPhoto;
+    private final ActivityResultLauncher<String> picker = registerForActivityResult(
+            new ActivityResultContracts.GetContent(), this::importPhoto);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,19 +50,24 @@ public class FormularioServicioActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.toolbar.ivBack.setOnClickListener(v -> finish());
-        binding.boxFoto.setOnClickListener(v ->
-                Toast.makeText(this, R.string.hoteladmin_proximamente, Toast.LENGTH_SHORT).show());
-
         if (FirebaseHotelAdminRepository.remote(this)) remote = new FirebaseHotelAdminRepository(this);
+        draftPhoto = savedInstanceState == null ? null : savedInstanceState.getString("servicePhoto");
+        binding.boxFoto.setOnClickListener(v -> {
+            if (remote == null) Toast.makeText(this, R.string.hoteladmin_proximamente, Toast.LENGTH_SHORT).show();
+            else picker.launch("image/*");
+        });
         servicioId = getIntent().getIntExtra(EXTRA_SERVICIO_ID, -1);
         if (servicioId != -1) {
             binding.toolbar.tvTitle.setText(R.string.hoteladmin_titulo_editar_servicio);
             if (remote == null) precargar(HotelAdminSampleData.servicio(servicioId));
             else {
                 binding.btnGuardar.setEnabled(false);
+                binding.boxFoto.setEnabled(false);
                 remote.loadService(servicioId, service -> {
                     if (isFinishing() || isDestroyed()) return;
                     remoteOriginal = service; precargar(service); binding.btnGuardar.setEnabled(true);
+                    binding.boxFoto.setEnabled(true);
+                    showPhoto();
                 }, error -> { if (!isFinishing()) { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); finish(); } });
             }
         } else {
@@ -59,6 +75,7 @@ public class FormularioServicioActivity extends AppCompatActivity {
         }
 
         binding.btnGuardar.setOnClickListener(v -> guardar());
+        showPhoto();
     }
 
     private void precargar(Servicio service) {
@@ -94,12 +111,16 @@ public class FormularioServicioActivity extends AppCompatActivity {
                     remote.hotelId, nombre, descripcion, precio, remoteOriginal == null ? "servicio" : remoteOriginal.unidad,
                     R.drawable.superadmin_hotel_sol, activo);
             binding.btnGuardar.setEnabled(false);
-            remote.saveService(service, servicioId == -1, error -> {
+            binding.boxFoto.setEnabled(false);
+            Consumer<String> completed = error -> {
                 if (isFinishing() || isDestroyed()) return;
                 binding.btnGuardar.setEnabled(true);
+                binding.boxFoto.setEnabled(true);
                 if (error != null) { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); return; }
                 Toast.makeText(this, R.string.hoteladmin_servicio_guardado, Toast.LENGTH_SHORT).show(); finish();
-            });
+            };
+            if (draftPhoto == null) remote.saveService(service, servicioId == -1, completed);
+            else remote.saveServiceWithPhoto(service, servicioId == -1, draftPhoto, completed);
             return;
         }
         Servicio guardado;
@@ -141,5 +162,28 @@ public class FormularioServicioActivity extends AppCompatActivity {
         } catch (NumberFormatException e) {
             return Double.NaN;
         }
+    }
+
+    private void importPhoto(Uri uri) {
+        if (uri == null || remote == null) return;
+        binding.boxFoto.setEnabled(false);
+        binding.btnGuardar.setEnabled(false);
+        Runnable ready = () -> {
+            binding.boxFoto.setEnabled(true);
+            binding.btnGuardar.setEnabled(true);
+        };
+        ClientLocalTasks.run(this, this, () -> HotelPhotoStore.importPhotos(this, Collections.singletonList(uri)).get(0),
+                photo -> { draftPhoto = photo; showPhoto(); ready.run(); }, ready);
+    }
+
+    private void showPhoto() {
+        String photo = draftPhoto != null ? draftPhoto : remoteOriginal == null ? null : remoteOriginal.fotoUrl;
+        binding.ivFotoServicio.setVisibility(photo == null ? View.GONE : View.VISIBLE);
+        HotelImageLoader.show(binding.ivFotoServicio, photo);
+    }
+
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putString("servicePhoto", draftPhoto);
     }
 }

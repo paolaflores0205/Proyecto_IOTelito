@@ -43,6 +43,9 @@ public class DetalleReservaActivity extends AppCompatActivity {
     }
 
     private void pintarReserva(Reserva reserva, Hotel hotel) {
+        if (getIntent().getBooleanExtra(com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.EXTRA_CHECKOUT_ALERT, false)) {
+            com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.markRead(this, reserva.id);
+        }
         View subHeader = findViewById(R.id.sub_header);
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         ((TextView) subHeader.findViewById(R.id.tv_title)).setText(hotel.name);

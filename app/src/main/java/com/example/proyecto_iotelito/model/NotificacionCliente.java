@@ -3,7 +3,7 @@ package com.example.proyecto_iotelito.model;
 /** Aviso del cliente guardado en la bandeja local de la aplicación. */
 public class NotificacionCliente {
 
-    public enum Tipo { RESERVA, PAGO, TAXI }
+    public enum Tipo { RESERVA, PAGO, TAXI, CHECKOUT }
 
     public final int id;
     public final Tipo tipo;

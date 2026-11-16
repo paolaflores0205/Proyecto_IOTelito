@@ -72,7 +72,7 @@ public class NotificacionAdapter extends RecyclerView.Adapter<NotificacionAdapte
         void bind(NotificacionCliente notificacion) {
             root.setBackgroundResource(notificacion.leida
                     ? R.drawable.bg_notif_read_card : R.drawable.bg_notif_unread_card);
-            icono.setImageResource(notificacion.tipo == NotificacionCliente.Tipo.PAGO
+            icono.setImageResource(notificacion.tipo == NotificacionCliente.Tipo.PAGO || notificacion.tipo == NotificacionCliente.Tipo.CHECKOUT
                     ? R.drawable.ic_credit_card : notificacion.tipo == NotificacionCliente.Tipo.TAXI
                     ? R.drawable.ic_taxi : R.drawable.ic_calendar);
             titulo.setText(notificacion.titulo);
