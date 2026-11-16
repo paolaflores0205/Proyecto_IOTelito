@@ -77,7 +77,8 @@ public final class FirebaseHotelOperations {
                     throw new IllegalStateException("Comprobante inconsistente.");
                 return null;
             }
-            if(row==null||row.estado!=ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE||!"EN_CHECKOUT".equals(before.getString("estado")))
+            if(row==null||row.estado!=ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE
+                    || !"EN_CHECKOUT".equals(before.getString("estado")) || LocalDate.now(ZONE).isBefore(row.fechaSalida))
                 throw new IllegalStateException("La reserva no permite checkout o ya fue finalizada.");
             Map<String,Object> data=new HashMap<>();data.put("reservationId",String.valueOf(id));data.put("hotelId",hotelId);
             data.put("clientUid",before.getString("clientUid"));data.put("base",row.precioAlojamiento);data.put("extra",extra);

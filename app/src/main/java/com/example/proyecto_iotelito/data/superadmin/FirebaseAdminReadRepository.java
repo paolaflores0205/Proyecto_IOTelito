@@ -60,7 +60,7 @@ public final class FirebaseAdminReadRepository {
             if (!Double.isFinite(total) || total < 0 || !start.isBefore(end)) throw new IllegalArgumentException("Reserva inválida");
             return new Reserva(id, HotelFirestoreCodec.integer(doc.get("hotelId")), doc.getString("roomName"),
                     doc.getString("roomNumber"), start, end, doc.getString("huespedes"), total,
-                    Reserva.Estado.valueOf(doc.getString("estado")), doc.getString("codigo"));
+                    Reserva.Estado.desdeFirestore(doc.getString("estado")), doc.getString("codigo"));
         });
     }
     public LiveData<State<ActivityLog>> logs() {

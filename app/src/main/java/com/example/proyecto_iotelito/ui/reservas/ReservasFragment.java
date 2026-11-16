@@ -186,7 +186,7 @@ public class ReservasFragment extends Fragment {
                 if (!reserva.esActiva()) {
                     continue;
                 }
-                if (reserva.estaEnCurso() || reserva.estado == Reserva.Estado.EN_CHECKOUT) {
+                if (!reserva.esProxima() || reserva.estado == Reserva.Estado.EN_CHECKOUT) {
                     enCurso.add(reserva);
                 } else {
                     proximas.add(reserva);

@@ -1,6 +1,6 @@
 # Firebase del administrador de hotel
 
-03/11/2026. Rama local `feat/hotel-admin-firebase`.
+Rama local `feat/hotel-admin-firebase`. La configuración de inventario se verificó el 3 de noviembre de 2026. Para reservas, checkout, chat y reportes, consulta [la integración de operaciones](FIREBASE_ADMIN_OPERACIONES_03_11.md) del 16 de noviembre.
 
 ## Configuración remota verificada
 
@@ -144,17 +144,15 @@ No necesitas compartir contraseñas, tokens de acceso ni claves privadas.
 
 ## Límites de esta entrega
 
-Reservas, cobro/checkout, mensajes y reportes de admin conservan su implementación
-anterior de demostración local, pero no se habilitan para una sesión Firebase.
-El panel remoto muestra una raya en las métricas que todavía no consulta, no
-importes ficticios. Disponibles representa habitaciones habilitadas, no una
-consulta de ocupación por fechas. Las notificaciones de checkout de ejemplo no se
-generan en este recorrido remoto. La galería compartida es de consulta.
+El panel principal aún muestra una raya en las métricas pendientes de integración.
+Disponibles representa habitaciones habilitadas. La tarjeta de checkout usa
+solicitudes del hotel. La edición de fotos en el Firebase compartido requiere
+el bucket de Storage y las reglas indicadas en la guía de operaciones.
 
 Las reglas ya están desplegadas y la cuenta de prueba tiene hotel asignado.
 El login, los datos del hotel y el alta/edición/retirada de habitaciones se
-comprobaron con la cuenta real. El CRUD de servicios en Android y las demás
-secciones remotas conservan los límites indicados en esta guía.
+comprobaron con la cuenta real. La verificación del nuevo recorrido de operaciones
+se registra en la guía enlazada al inicio.
 
 ## Código para explicar
 

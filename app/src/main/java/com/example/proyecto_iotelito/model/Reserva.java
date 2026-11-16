@@ -2,6 +2,7 @@ package com.example.proyecto_iotelito.model;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -18,7 +19,9 @@ public class Reserva implements Serializable {
     };
 
     public enum Estado {
-        CONFIRMADA, ACTIVA, EN_CHECKOUT, FINALIZADA, PENDIENTE_PAGO, COMPLETADA, CANCELADA
+        CONFIRMADA, ACTIVA, EN_CHECKOUT, FINALIZADA, PENDIENTE_PAGO, COMPLETADA, CANCELADA;
+
+        public static Estado desdeFirestore(String estado) { return valueOf(estado); }
     }
 
     public final int id;
@@ -66,10 +69,12 @@ public class Reserva implements Serializable {
         return LocalDate.now().isBefore(fechaEntrada);
     }
 
-    /** Hoy es el día de salida de una estadía en curso: ya se puede hacer el checkout. */
+    /** El cliente puede solicitar el checkout desde el día de salida en Lima. */
     public boolean puedeHacerCheckout() {
         return com.example.proyecto_iotelito.data.CheckoutPolicy.puedeSolicitar(estado.name(), fechaSalida, LocalDate.now(java.time.ZoneId.of("America/Lima")));
     }
+
+    public boolean puedeSolicitarCheckout() { return puedeHacerCheckout(); }
 
     public String rangoFechasTexto() {
         String mesEntrada = MESES_ABREV[fechaEntrada.getMonthValue() - 1];

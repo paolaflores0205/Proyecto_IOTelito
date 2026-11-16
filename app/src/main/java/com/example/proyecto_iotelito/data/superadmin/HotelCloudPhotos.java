@@ -9,12 +9,21 @@ import java.util.*;
 public final class HotelCloudPhotos {
     private HotelCloudPhotos() { }
     public static Task<List<String>> upload(String uid, List<String> photos, List<StorageReference> uploaded) {
+        return uploadAt("hotelPhotos/" + uid, photos, uploaded);
+    }
+
+    public static Task<List<String>> uploadForHotel(int hotelId, String uid, List<String> photos,
+                                                    List<StorageReference> uploaded) {
+        return uploadAt("hotelAdminPhotos/" + hotelId + "/" + uid, photos, uploaded);
+    }
+
+    private static Task<List<String>> uploadAt(String folder, List<String> photos, List<StorageReference> uploaded) {
         Task<List<String>> chain = Tasks.forResult(new ArrayList<>());
         for (String value : photos) {
             chain = chain.onSuccessTask(result -> {
                 if (value.startsWith("file:") || value.startsWith("content:")) {
                     StorageReference ref = FirebaseStorage.getInstance().getReference()
-                            .child("hotelPhotos/" + uid + "/" + UUID.randomUUID() + ".jpg");
+                            .child(folder + "/" + UUID.randomUUID() + ".jpg");
                     uploaded.add(ref);
                     return ref.putFile(Uri.parse(value), new StorageMetadata.Builder().setContentType("image/jpeg").build())
                             .continueWithTask(task -> {

@@ -27,6 +27,14 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
   for (const [field, value] of [['active', false], ['administratorUid', 'admin2'], ['id', 2], ['reservations', 999], ['services', ['Spa']]])
     await expect(await commit([change(1, { [field]: value })], 'admin'), false, `Campo protegido ${field}`);
   await expect(await commit([change(1, { name: '' })], 'admin'), false, 'Nombre vacio');
+  const photo = (n, hotelId = 1) => `gs://demo-iotelito-auth.appspot.com/hotelAdminPhotos/${hotelId}/admin/photo-${n}.jpg`;
+  const photos = [1, 2, 3, 4].map(n => photo(n));
+  await expect(await commit([change(1, { photos: photos.slice(0, 3) })], 'admin'), false, 'Galería requiere cuatro fotos');
+  await expect(await commit([change(1, { photos: [...photos, photos[0]] })], 'admin'), false, 'Galería no admite duplicados');
+  await expect(await commit([change(1, { photos: [...photos, photo(5, 2)] })], 'admin'), false, 'Galería rechaza foto ajena');
+  await expect(await commit([change(1, { photos, rooms: 999 })], 'admin'), false, 'Galería no modifica inventario');
+  await expect(await commit([change(1, { photos })], 'admin'), true, 'Admin actualiza su galería');
+  await expect(await commit([change(2, { photos })], 'admin'), false, 'Admin no actualiza otra galería');
   await expect(await commit([write('hotels/1/rooms/201', room())], 'admin'), false, 'Habitacion requiere resumen atomico');
   await expect(await commit([write('hotels/1/rooms/201', room()), summary(1)], 'admin'), true, 'Alta de habitacion y resumen');
   await expect(await call('GET', '/hotels/1/rooms/201', undefined, 'client'), true, 'Cliente lee inventario compartido');
@@ -45,6 +53,8 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
     'Dos dispositivos no pueden confirmar resumen con la misma revision');
   await expect(await commit([write('hotels/1/services/301', service())], 'admin'), true, 'Alta servicio propio');
   await expect(await commit([write('hotels/1/services/301', { ...service(), precio: 50.75 })], 'admin'), true, 'Editar servicio');
+  await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: photo(6) })], 'admin'), true, 'Servicio admite imagen de su hotel');
+  await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: photo(6, 2) })], 'admin'), false, 'Servicio rechaza imagen de otro hotel');
   await expect(await commit([write('hotels/1/services/302', service(302))], 'client'), false, 'Cliente no crea servicio');
   await expect(await commit([write('hotels/2/services/302', service(302, 2))], 'admin'), false, 'Otro hotel no autorizado');
   await expect(await commit([write('hotels/1/services/302', { ...service(302), precio: -10 })], 'admin'), false, 'Servicio precio negativo');

@@ -11,6 +11,14 @@ service firebase.storage {
       return active() && request.auth.uid == uid
         && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'SUPERADMIN';
     }
+    function hotelOwner(hotelId, uid) {
+      let profile = firestore.get(/databases/(default)/documents/users/$(uid)).data;
+      let hotel = firestore.get(/databases/(default)/documents/hotels/$(hotelId)).data;
+      return request.auth != null && request.auth.uid == uid && profile.uid == uid
+        && profile.active == true && profile.role == 'HOTEL_ADMIN'
+        && profile.hotelId == int(hotelId)
+        && hotel.id == int(hotelId) && hotel.active == true && hotel.administratorUid == uid;
+    }
     match /hotelPhotos/{uid}/{photo} {
       allow read: if active();
       allow create: if owner(uid) && request.resource.size < 5 * 1024 * 1024
@@ -28,6 +36,14 @@ service firebase.storage {
         && request.resource.contentType == 'image/jpeg' && photo.matches('[a-zA-Z0-9-]+[.]jpg');
       allow delete: if profileOwner();
       allow update: if false;
+    }
+    match /hotelAdminPhotos/{hotelId}/{uid}/{photo} {
+      allow get: if active();
+      allow create: if hotelOwner(hotelId, uid) && request.resource.size > 0
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType == 'image/jpeg' && photo.matches('[a-zA-Z0-9-]+[.]jpg');
+      allow delete: if hotelOwner(hotelId, uid);
+      allow update, list: if false;
     }
     match /{path=**} { allow read, write: if false; }
   }

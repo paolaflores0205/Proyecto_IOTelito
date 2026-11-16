@@ -103,7 +103,7 @@ public class FirebaseLiveRolesTest {
                             Reserva booking = new Reserva(HotelFirestoreCodec.integer(qa.get("id")), hotelId,
                                     qa.getString("roomName"), qa.getString("roomNumber"), LocalDate.parse(qa.getString("fechaEntrada")),
                                     LocalDate.parse(qa.getString("fechaSalida")), qa.getString("huespedes"), qa.getDouble("precioTotal"),
-                                    Reserva.Estado.valueOf(qa.getString("estado")), qa.getString("codigo"));
+                                    Reserva.Estado.desdeFirestore(qa.getString("estado")), qa.getString("codigo"));
                             for (com.example.proyecto_iotelito.ui.superadmin.reportes.ReportCalculator.Period period :
                                     com.example.proyecto_iotelito.ui.superadmin.reportes.ReportCalculator.Period.values()) {
                                 com.example.proyecto_iotelito.ui.superadmin.reportes.ReportCalculator.Result report =

@@ -65,6 +65,7 @@ public class ServiciosAdapter extends RecyclerView.Adapter<ServiciosAdapter.Serv
 
         void bind(Servicio servicio) {
             binding.ivFoto.setImageResource(servicio.fotoRes);
+            com.example.proyecto_iotelito.data.HotelImageLoader.show(binding.ivFoto, servicio.fotoUrl);
             binding.tvNombre.setText(servicio.nombre);
             binding.tvDescripcion.setText(servicio.descripcion);
             binding.tvPrecio.setText(itemView.getContext().getString(R.string.hoteladmin_moneda,

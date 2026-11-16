@@ -45,7 +45,7 @@ No se debe publicar una versión que elimine los bloques de taxi del equipo. No 
 ## Notificaciones y alcance
 
 El administrador tiene un indicador en Reservas y una alerta en el panel. Los avisos Android requieren permiso de notificaciones.
-El cliente recibe el aviso al observar la finalización con la aplicación abierta, al volver al panel o al consultar el comprobante. El importe proviene del comprobante del servidor. La entrega push con la aplicación cerrada y el aislamiento completo de la bandeja antigua por cuenta pertenecen al bloque de notificaciones posterior.
+El cliente recibe el aviso al observar los comprobantes con la aplicación abierta, al volver al panel o al consultar el comprobante. El importe proviene del comprobante del servidor. Los avisos nuevos de checkout comparten deduplicación y lectura por UID y se cancelan al cerrar sesión. La entrega push con la aplicación cerrada y el aislamiento completo de la bandeja antigua por cuenta pertenecen al bloque de notificaciones posterior.
 
 ## Verificación local
 

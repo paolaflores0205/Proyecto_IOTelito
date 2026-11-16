@@ -12,6 +12,9 @@
   vista sigan siendo las mismas antes de mostrar el resultado. No guarda enlaces temporales.
 - El token Firebase solo se envía al host de nuestra API. No se agregan claves AWS al APK.
 - No se modificaron las imágenes de hoteles ni sus pantallas. El bucket las podrá alojar después.
+- La integración con feat/hotel-admin conserva su nueva galería y fotos de servicios con Firebase
+  Storage (hotelAdminPhotos). Esas pantallas aún no usan esta API AWS y requieren coordinar su
+  adaptación si el proyecto continúa sin Firebase Storage. El perfil cliente sí usa AWS.
 - Pendiente: publicar manualmente el pequeño ajuste de Firestore y comprobar una subida/lectura
   con una cuenta real. Las pruebas locales no acreditan los permisos de LabRole sobre S3.
 

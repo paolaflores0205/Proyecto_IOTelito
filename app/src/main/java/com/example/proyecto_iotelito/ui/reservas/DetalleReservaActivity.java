@@ -43,6 +43,9 @@ public class DetalleReservaActivity extends AppCompatActivity {
     }
 
     private void pintarReserva(Reserva reserva, Hotel hotel) {
+        if (getIntent().getBooleanExtra(com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.EXTRA_CHECKOUT_ALERT, false)) {
+            com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.markRead(this, reserva.id);
+        }
         View subHeader = findViewById(R.id.sub_header);
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         ((TextView) subHeader.findViewById(R.id.tv_title)).setText(hotel.name);
@@ -69,7 +72,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         View btnCheckout = findViewById(R.id.btn_realizar_checkout);
         View btnVerHotel = findViewById(R.id.btn_ver_hotel);
 
-        btnCheckout.setVisibility(reserva.puedeHacerCheckout() ? View.VISIBLE : View.GONE);
+        btnCheckout.setVisibility(puedeSolicitarSalida(reserva) ? View.VISIBLE : View.GONE);
         btnCheckout.setOnClickListener(v -> {
             Intent intent = new Intent(this, CheckoutActivity.class);
             intent.putExtra(CheckoutActivity.EXTRA_RESERVA_ID, reserva.id);
@@ -123,6 +126,11 @@ public class DetalleReservaActivity extends AppCompatActivity {
             return getString(R.string.mensaje_estado_en_curso);
         }
         return getString(EstadoUi.mensaje(reserva.estado));
+    }
+
+    private boolean puedeSolicitarSalida(Reserva reserva) {
+        return com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
+                ? reserva.puedeSolicitarCheckout() : reserva.puedeHacerCheckout();
     }
 
     private void bindRow(int rowId, int labelRes, String value) {

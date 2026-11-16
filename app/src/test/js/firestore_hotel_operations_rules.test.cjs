@@ -16,6 +16,7 @@ async function query(collection,field,value,uid){return call('POST',':runQuery',
  await put('hotels/1',{id:1,active:true,administratorUid:'admin'});
  await put('hotels/2',{id:2,active:true,administratorUid:'admin2'});
  for(const id of [2001,2002,2003,2004,2005,2006,2007,2008])await put(`reservations/${id}`,booking(id));
+ await put('reservations/2001',{...booking(),estado:'CONFIRMADA'});
  await put('reservations/3001',booking(3001,2));
  await expect(await call('GET','/reservations/2001',undefined,'admin'),true,'Admin consulta reserva del hotel');
  await expect(await call('GET','/reservations/3001',undefined,'admin'),false,'No lee reservas de otro hotel');
@@ -23,6 +24,17 @@ async function query(collection,field,value,uid){return call('POST',':runQuery',
  await expect(await call('GET','/reservations',undefined,'admin'),false,'No lista todos los hoteles');
  const absentReceipt=await call('GET','/hotelCheckouts/2001',undefined,'admin');
  assert.equal(absentReceipt.status,404,'Admin puede leer ausencia de comprobante para transaccion');
+ await expect(await commit([bill(),close()],'admin'),false,'Admin espera la solicitud del huésped');
+ const requestCheckout = (review, extra = {}) => {
+   const data = { estado: 'EN_CHECKOUT', rating: 5, review, ...extra };
+   return write('reservations/2001', data, [...Object.keys(data), 'checkoutRequestedAt'], ['checkoutRequestedAt']);
+ };
+ await expect(await commit([requestCheckout('  ')],'client'),false,'La reseña debe incluir texto');
+ await expect(await commit([requestCheckout('Estadía de prueba',{cardLast4:'1234'})],'client'),false,'La tarjeta ya registrada es inmutable');
+ await expect(await commit([requestCheckout('Estadía de prueba')],'client'),true,'El huésped solicita el checkout');
+ await expect(await commit([msg('client-1')],'client'),true,'Huesped envia');
+ await expect(await commit([msg('admin-1',message('Bienvenido','admin','HOTEL_ADMIN'))],'admin'),true,'Admin responde');
+ await expect(await commit([msg('multilinea',message('Hola\nSegunda línea'))],'client'),true,'Permite texto multilinea');
  await expect(await commit([close()], 'admin'),false,'Sin comprobante no cierra');
  await expect(await commit([bill()], 'admin'),false,'Sin cierre no crea comprobante');
  await expect(await commit([bill(),close()], 'client'),false,'Cliente no emite cobro administrativo');
@@ -35,6 +47,7 @@ async function query(collection,field,value,uid){return call('POST',':runQuery',
  await expect(await commit([bill(2001,0,{hotelId:2}),close()], 'admin'),false,'Hotel del comprobante inmutable');
  await expect(await commit([bill(2001,0,{clientUid:'other'}),close()], 'admin'),false,'Cliente del comprobante coincide');
  await expect(await commit([bill(2001,0,{createdByUid:'admin2'}),close()], 'admin'),false,'Autor autenticado');
+ await expect(await commit([bill(2001,0,{cardLast4:'1234'}),close()], 'admin'),false,'Comprobante conserva la tarjeta simulada');
  await expect(await commit([bill(2001,12.50),close()], 'admin'),true,'Cierre atomico con extra');
  await expect(await commit([bill(2001),close()], 'admin'),false,'No duplica ni reemplaza cierre');
  await expect(await call('DELETE','/hotelCheckouts/2001',undefined,'admin'),false,'Comprobante no se borra');
@@ -46,8 +59,6 @@ async function query(collection,field,value,uid){return call('POST',':runQuery',
  await expect(await commit([bill(2002),close(2002)],'admin'),false,'No hace checkout antes de salida');
  const concurrent=await Promise.all([commit([bill(2003),close(2003)],'admin'),commit([bill(2003),close(2003)],'admin')]);
  assert.deepEqual(concurrent.map(r=>r.status).sort(),[200,403],'Solo un cierre concurrente');
- await expect(await commit([msg('client-1')],'client'),true,'Huesped envia');
- await expect(await commit([msg('admin-1',message('Bienvenido','admin','HOTEL_ADMIN'))],'admin'),true,'Admin responde');
  await expect(await call('GET','/reservations/2004/messages',undefined,'client'),true,'Huesped lee ambos mensajes');
  await expect(await call('GET','/reservations/2004/messages',undefined,'admin'),true,'Admin lee ambos mensajes');
  await expect(await call('GET','/reservations/2004/messages',undefined,'other'),false,'Cliente ajeno no lee chat');
@@ -57,7 +68,6 @@ async function query(collection,field,value,uid){return call('POST',':runQuery',
  await expect(await commit([msg('suplantar',message('Hola','admin','HOTEL_ADMIN'))],'client'),false,'No suplanta emisor');
  await expect(await commit([msg('rol',message('Hola','client','HOTEL_ADMIN'))],'client'),false,'No suplanta rol');
  await expect(await commit([msg('vacio',message(''))],'client'),false,'No mensaje vacio');
- await expect(await commit([msg('multilinea',message('Hola\nSegunda línea'))],'client'),true,'Permite texto multilinea');
  await expect(await commit([msg('largo',message('x'.repeat(4001)))],'client'),false,'Longitud acotada');
  await expect(await commit([msg('extra',{...message(),hotelId:2})],'client'),false,'No agrega metadatos falsos');
  await expect(await commit([msg('client-1',message('Editado'))],'client'),false,'No reescribe historial');

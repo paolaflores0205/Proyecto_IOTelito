@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import com.example.proyecto_iotelito.ui.taxi.BeneficioTaxiActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Locale;
 
@@ -32,6 +34,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private Reserva reserva;
     private ReservaRepository reservaRepository;
     private boolean elegibleTaxi;
+    private boolean checkoutRemoto;
     private int calificacion = 0;
 
     @Override
@@ -44,7 +47,8 @@ public class CheckoutActivity extends AppCompatActivity {
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
         com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, hotel) -> {
         reserva = value;
-        if (!reserva.puedeHacerCheckout()) {
+        checkoutRemoto = FirebaseAuth.getInstance().getCurrentUser() != null;
+        if (!reserva.puedeSolicitarCheckout()) {
             abrirSolicitudODetalle();
             return;
         }
@@ -58,6 +62,10 @@ public class CheckoutActivity extends AppCompatActivity {
                 getString(R.string.habitacion_con_numero, reserva.roomName, reserva.roomNumber));
 
         configurarEstrellas();
+        if (checkoutRemoto) {
+            ((TextView) findViewById(R.id.tv_comentarios_checkout)).setText(R.string.comentario_checkout_requerido);
+            ((MaterialButton) findViewById(R.id.btn_confirmar_checkout)).setText(R.string.solicitar_checkout);
+        }
 
         bindRow(R.id.row_monto_preautorizado, R.string.label_monto_preautorizado, formatMoney(reserva.precioTotal));
         bindRow(R.id.row_consumos_adicionales, R.string.label_consumos_adicionales, formatMoney(0));

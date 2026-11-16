@@ -1,12 +1,12 @@
 # Administrador: reservas, mensajes y reportes
 
-Preparación local en la rama `superadmin`. No se publicaron reglas, no se escribieron datos en el proyecto Firebase real y no se hizo commit ni push.
+Integración en la rama de admin a partir del commit `8e90c52` de `ultima_03_11`, adaptada al contrato activo de Firestore del 16 de noviembre de 2026.
 
 ## Datos y alcance
 
 | Pantalla | Lectura | Escritura |
 |---|---|---|
-| Reservas | `reservations`, filtrada por `hotelId` del administrador | Al cerrar, cambia únicamente `estado` a `COMPLETADA` |
+| Reservas | `reservations`, filtrada por `hotelId` del administrador | El huésped solicita la salida y deja la reserva en `EN_CHECKOUT`. Admin registra el cierre y la deja en `FINALIZADA`. |
 | Checkout | Reserva y comprobante, si existe | `hotelCheckouts/{idReserva}` y estado de la reserva en una transacción |
 | Mensajes | `reservations/{idReserva}/messages`, ordenada por `createdAt` | Mensajes nuevos con UID, rol y fecha del servidor |
 | Reportes | Reservas, comprobantes y habitaciones del hotel | Ninguna |
@@ -15,41 +15,34 @@ Las colecciones y subcolecciones nuevas aparecen automáticamente al guardar su 
 
 El chat del cliente también usa esa subcolección. Se abre desde el detalle de la reserva o desde Mensajes. La bandeja muestra las reservas como hilos disponibles; no inventa mensajes previos, respuestas automáticas ni cantidades de mensajes sin leer. Para reservas nuevas se guardan `clientName` y `hotelName` como etiquetas. Las antiguas siguen funcionando con el código de reserva y el ID del hotel, sin dar al admin acceso a todos los perfiles.
 
-El checkout registra un cierre administrativo, **no carga tarjetas ni implementa una pasarela de pago**. Solo permite cerrar una reserva confirmada cuya fecha de salida ya llegó en Lima. Un extra exige monto válido, motivo y observación. El comprobante es inmutable: no se sobrescribe ni se borra; repetir la operación no duplica el importe. Al volver a abrirlo, se muestra también el extra guardado. Si el cliente ya finalizó una reserva sin este comprobante, se muestra en lectura y no se le inventa un ingreso.
+El huésped puede solicitar checkout cuando llega la fecha de salida en Lima. El formulario existente envía su calificación y comentario. Para las reservas nuevas y las antiguas sin datos de pago, la app genera metadatos de tarjeta de demostración. El administrador actúa sobre la solicitud y registra un cierre administrativo simulado. Si agrega un cargo adicional debe ingresar el monto, motivo y observación. Una transacción guarda el comprobante inmutable y el estado final. Al repetir el cierre se conserva el mismo comprobante. Las reservas históricas `COMPLETADA` se pueden consultar.
 
 Reportes permite día, mes y año, con navegación entre períodos. Importes = comprobantes emitidos en el período; reservas = llegadas; ocupación estimada = noches reservadas / (habitaciones actuales × días). Los cuatro tramos del gráfico dividen el período. El inventario actual puede diferir del histórico: la ocupación es una estimación. Los servicios del catálogo no son ventas y aún no existe un registro remoto de consumos: esa tarjeta muestra «—» y lo explica. No hay notificaciones push, adjuntos ni confirmaciones de lectura en el chat.
 
 Las pantallas de ejemplo siguen disponibles únicamente para los fixtures locales de prueba. Las sesiones Firebase usan datos remotos. No se modificaron los flujos de taxi ni de gestión de usuarios/hoteles del superadmin. Del cliente se conectaron su chat y su bandeja y se añadieron las etiquetas opcionales a reservas nuevas.
 
-## Publicación de reglas (pendiente)
+## Reglas de Firestore
 
-Archivo preparado: `firestore.rules`.
+Las reglas de checkout y chat mantienen el contrato publicado en `iot-telito` consultado el 16 de noviembre. Limitan las operaciones al hotel asignado, exigen la solicitud del huésped antes del cierre y conservan los mensajes como historial después de finalizar una reserva. Las ampliaciones para fotos se probaron localmente y están pendientes de publicación.
 
-1. En Firebase, ir a **Firestore Database → Reglas**.
-2. Comparar las reglas publicadas con el archivo local para conservar cambios recientes de los compañeros. Guardar una copia de la versión publicada antes de editar.
-3. Integrar los cambios de operaciones del hotel: ampliar `get/list` de `reservations` al administrador asignado; añadir la actualización administrativa de estado, el bloque anidado `messages` y el bloque raíz `hotelCheckouts`. Mantener los permisos de los demás roles y el bloqueo general final.
-4. No duplicar `match /reservations`: las reglas de mensajes van dentro del bloque existente. `hotelCheckouts` va al mismo nivel que `reservations`, dentro de `match /databases/{database}/documents`.
-5. Si la consola coincide con la base del repositorio y no contiene aportes adicionales, puede copiarse el archivo local completo. Publicar solo después de esa comparación. Este cambio no requiere reglas nuevas de Storage ni índices compuestos.
-6. Volver a ejecutar la app desde Android Studio. Si hay un error de clases duplicadas con sufijo «2», limpiar los archivos generados y recompilar; no borrar archivos fuente.
-
-## Prueba manual en el proyecto real, después de publicar
+## Prueba manual en el proyecto real
 
 Usar cuentas y reservas identificadas como prueba. El cierre queda guardado y es definitivo para esa reserva de prueba.
 
 1. **Asignación:** verificar que `users/{uidAdmin}` tenga `role: HOTEL_ADMIN`, `active: true`, `hotelId` entero; en `hotels/{hotelId}`, `administratorUid` debe coincidir y `active` ser verdadero.
 2. **Reservas:** entrar con el admin, abrir Reservas, seleccionar el estado correspondiente. Probar búsqueda por código, nombre disponible o habitación y filtros de fecha. Solo deben aparecer reservas de su hotel. Entrar en detalle y volver; no debe aparecer información de ejemplo.
 3. **Chat cliente → admin:** desde una reserva del hotel, el cliente envía un texto identificable. En admin → Mensajes, abrir el mismo código de reserva. Debe aparecer. Responder, volver al cliente y comprobar la respuesta. Salir de la pantalla y entrar otra vez: ambos mensajes deben persistir. En consola se ven dentro de `reservations → id → messages`.
-4. **Checkout:** con una reserva de prueba confirmada cuya salida sea hoy o anterior, abrir Checkout. Revisar el total; opcionalmente añadir un daño de prueba con motivo y observación. Confirmar una vez. En consola deben existir simultáneamente `estado: COMPLETADA` y `hotelCheckouts/{mismoId}` con base, extra, total, autor y fecha. Abrir nuevamente: queda en lectura, con el extra si lo hubo. Una reserva futura no debe ofrecer cierre.
+4. **Checkout.** Con una reserva de prueba cuya fecha de salida haya llegado, el huésped envía la solicitud con estrellas y comentario. En admin, abrir Reservas → Checkout y escoger esa reserva. Revisar el total, probar un extra con motivo y observación y confirmar. Firestore debe guardar `FINALIZADA` y el comprobante `hotelCheckouts/{mismoId}`. Al volver a abrir la reserva se muestra el comprobante en lectura.
 5. **Reportes:** seleccionar el día actual y verificar que el importe coincida con el comprobante anterior. Cambiar a mes/año y período anterior. Un período sin registros debe mostrar cero; un fallo de consulta muestra un aviso y «—», no datos de demostración.
 6. **Regresión:** cliente puede iniciar sesión, ver hoteles y reservas; taxista conserva disponibilidad y sus servicios; superadmin conserva usuarios y hoteles. Revisar acceso con un segundo administrador asignado a otro hotel si se dispone de cuenta de prueba.
 
 ## Verificación automatizada
 
-- Compilación debug, APK de instrumentación y 82 pruebas JVM: correctas.
-- Seis suites de reglas contra Firestore efímero: autenticación/usuarios, hoteles/asignaciones, inventario admin, reportes/logs superadmin, taxi y operaciones admin.
-- Operaciones admin: 44 verificaciones de permisos y validaciones más prueba de cierre concurrente. Incluye chat de ambos participantes, lectura de comprobante ausente, comprobante inmutable, hotel ajeno, cuenta inactiva y reasignación.
-- Prueba Android de integración: correcta en AVD separado con Auth y Firestore emulados. Verifica mensaje cliente → admin → cliente, navegación de las tres pestañas, aislamiento por hotel, cierre idempotente y reporte.
-- Prueba Android opcional `HotelOperationsEmulatorTest`: usa únicamente `demo-iotelito-auth`, Auth 9099 y Firestore 8180 por `adb reverse`; requiere `hotelEmulator=true` en un AVD desechable. Sin ese argumento se omite. Nunca ejecutar esta prueba opcional en el emulador de trabajo con cuentas reales.
+- Compilación debug, APK de instrumentación y 79 pruebas JVM aprobadas.
+- Suites de reglas aprobadas para autenticación y usuarios, hoteles y asignaciones, inventario admin, reportes y logs, taxi y operaciones admin.
+- Operaciones admin pasó 50 comprobaciones y un caso de cierre concurrente. Incluye la solicitud del huésped, la inmutabilidad del comprobante, el historial del chat y el aislamiento por hotel.
+- `HotelOperationsEmulatorTest` pasó en Android 14 con servicios emulados. Verifica la solicitud de checkout desde el repositorio del cliente, el chat de ambos roles, las tres pestañas del admin, el cierre idempotente, el total del reporte y el rechazo de reservas ajenas.
+- Para repetir la prueba Android, inicia Auth (9099) y Firestore (8180) con el proyecto vacío `demo-iotelito-auth`, usa `adb reverse` para esos puertos y ejecuta con `hotelEmulator=true` en un AVD desechable.
 
 Comando de compilación y JVM:
 
@@ -57,4 +50,21 @@ Comando de compilación y JVM:
 bash gradlew clean :app:assembleDebug :app:testDebugUnitTest :app:assembleDebugAndroidTest --offline --no-daemon
 ```
 
-La comprobación en el Firebase real permanece pendiente hasta publicar las reglas y efectuar la prueba manual con las cuentas del equipo.
+Queda por ejecutar el recorrido manual con cuentas y reservas de prueba del equipo en Firebase real.
+
+## Alertas y fotos del administrador
+
+- La portada de admin muestra las solicitudes `EN_CHECKOUT` de su hotel y abre el checkout correspondiente. Android publica un aviso por solicitud y lo retira al sincronizar el cierre. El cliente ve el aviso con el importe simulado en su bandeja y puede abrir la reserva.
+- Los avisos del sistema requieren el permiso de Android. Llegan al sincronizar la app con la sesión activa y se deduplican por cuenta y reserva en el dispositivo. La tarjeta de admin y la bandeja del cliente siguen disponibles con el permiso denegado.
+- Desde Hotel → Datos del hotel → Fotos, admin puede agregar, reemplazar y quitar fotos, con un mínimo de cuatro y un máximo de ocho. Desde el formulario de servicios puede seleccionar o reemplazar una imagen. La app reduce las imágenes a JPEG localmente, las sube a Storage y guarda las rutas de los archivos en Firestore.
+- Las fotos nuevas se guardan en `hotelAdminPhotos/{hotelId}/{uid}/{foto}.jpg`. Las reglas comprueban la asignación por ambos lados. El cliente puede leer las fotos del catálogo con una cuenta activa. Eliminar una foto de la galería retira su referencia del catálogo.
+
+### Cómo probarlo
+
+1. Con el cliente, envía una solicitud de salida con estrellas y comentario. Con admin, abre la tarjeta de alertas del panel, verifica el mismo código de reserva y registra el cierre.
+2. Al volver al panel, la alerta desaparece. Con el huésped, abre Perfil → Notificaciones y comprueba el aviso con el importe. Abre la reserva desde el aviso y comprueba que quede marcado como leído.
+3. Abre la galería del hotel y agrega o reemplaza una foto. Guarda y vuelve a entrar para comprobar que permanece. Haz lo mismo desde un servicio. La subida al Firebase compartido requiere que el equipo habilite su bucket y publique las reglas de fotos.
+
+Para repetir la prueba aislada, inicia Auth, Firestore y Storage con `firebase emulators:start --only auth,firestore,storage --project demo-iotelito-auth --config firebase.local.json`. En el AVD desechable, asigna los puertos `9099`, `8180` y `9199` con `adb reverse` y concede el permiso de notificaciones. Ejecuta `HotelOperationsEmulatorTest` con los argumentos `hotelEmulator=true`, `hotelStorage=true` y `hotelNotifications=true`, usando emuladores con datos vacíos.
+
+La prueba Android aprobó la alerta del panel, ambas notificaciones de Android, el cierre sin duplicados, el aviso en la bandeja, la descarga de una foto guardada, el alta de un servicio con imagen y el rechazo de Storage para otro hotel. Las reglas Firestore también pasaron 39 comprobaciones de admin más su caso concurrente.

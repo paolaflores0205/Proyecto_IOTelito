@@ -278,7 +278,7 @@ final class FirebaseReservaStore {
                 LocalDate.parse(document.getString("fechaEntrada")),
                 LocalDate.parse(document.getString("fechaSalida")),
                 document.getString("huespedes"), total.doubleValue(),
-                Reserva.Estado.valueOf(document.getString("estado")),
+                Reserva.Estado.desdeFirestore(document.getString("estado")),
                 document.getString("codigo"));
         reserva.tarjeta = TarjetaSimulada.leer(document.getData());
         Long rating = document.getLong("rating");
