@@ -46,7 +46,7 @@ public final class FirebaseHotelsRepository {
         int image = id != null && id.intValue() >= 1 && id.intValue() <= 12
                 ? HotelMedia.hotelImage(id.intValue()) : R.drawable.superadmin_hotel_hero;
         ManagedHotel hotel = HotelFirestoreCodec.decode(document.getId(), document.getData(), image);
-        if (showPrivatePhotos && hotel.photos.stream().noneMatch(photo -> photo.startsWith("gs://"))) {
+        if (showPrivatePhotos && hotel.photos.stream().noneMatch(com.example.proyecto_iotelito.data.HotelPhotoPolicy::remote)) {
             String raw = context.getSharedPreferences("hotel_private_galleries", Context.MODE_PRIVATE)
                     .getString(galleryKey(hotel.id), "[]");
             try {
@@ -144,19 +144,19 @@ public final class FirebaseHotelsRepository {
         try { uid = actor(); HotelFirestoreCodec.editable(hotel, false); }
         catch (IllegalArgumentException error) { callback.complete(0, error.getMessage()); return; }
         List<String> original = new ArrayList<>(hotel.photos);
-        List<com.google.firebase.storage.StorageReference> uploaded = new ArrayList<>();
-        HotelCloudPhotos.upload(uid, original, uploaded).addOnSuccessListener(photos -> {
+        HotelCloudPhotos.upload(context, original).addOnSuccessListener(photos -> {
             if (FirebaseAuth.getInstance().getCurrentUser() == null || !uid.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                HotelCloudPhotos.discard(uploaded); callback.complete(0, "La sesión cambió durante la carga. Inicia sesión de nuevo."); return;
+                callback.complete(0, "La sesión cambió durante la carga. Inicia sesión de nuevo."); return;
             }
             hotel.photos = photos;
             savePrepared(hotel, (id, error) -> {
-                if (error != null) { HotelCloudPhotos.discard(uploaded); hotel.photos = original; }
+                if (error != null) hotel.photos = original;
                 callback.complete(id, error);
             });
         }).addOnFailureListener(error -> {
-            HotelCloudPhotos.discard(uploaded);
-            callback.complete(0, "No se pudieron subir las fotos. Tus imágenes se conservaron; revisa tu conexión o contacta al administrador.");
+            String detail = com.example.proyecto_iotelito.data.HotelAwsPhotos.message(error);
+            callback.complete(0, "No se pudieron subir las fotos. Tus imágenes se conservaron"
+                    + (detail == null ? "; revisa tu conexión o contacta al administrador." : ": " + detail));
         });
     }
     private void savePrepared(ManagedHotel hotel, SuperadminRepository.Callback callback) {

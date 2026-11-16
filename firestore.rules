@@ -37,7 +37,9 @@ service cloud.firestore {
     }
     function managedPhoto(value, hotelId) {
       return value is string && value.size() <= 2048
-        && value.matches('gs://[^/]+/hotelAdminPhotos/' + hotelId + '/[^/]+/[a-zA-Z0-9-]+[.]jpg');
+        && (value.matches('gs://[^/]+/hotelAdminPhotos/' + hotelId + '/[^/]+/[a-zA-Z0-9-]+[.]jpg')
+          || value.matches('s3://iot-telito-imagenes/hotelPhotos/' + hotelId
+            + '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[.]jpg'));
     }
     function validGallery(hotelId) {
       let photos = request.resource.data.photos;

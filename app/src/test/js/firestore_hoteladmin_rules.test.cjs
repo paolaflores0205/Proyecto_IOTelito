@@ -35,6 +35,15 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
   await expect(await commit([change(1, { photos, rooms: 999 })], 'admin'), false, 'Galería no modifica inventario');
   await expect(await commit([change(1, { photos })], 'admin'), true, 'Admin actualiza su galería');
   await expect(await commit([change(2, { photos })], 'admin'), false, 'Admin no actualiza otra galería');
+  const s3 = (n, folder = 1, bucket = 'iot-telito-imagenes') =>
+    `s3://${bucket}/hotelPhotos/${folder}/${String(n).padStart(8, '0')}-1234-1234-1234-123456789abc.jpg`;
+  const s3Photos = [1, 2, 3, 4].map(n => s3(n));
+  await expect(await commit([change(1, { photos: [...s3Photos, s3(5, 2)] })], 'admin'), false, 'Galería S3 rechaza foto de otro hotel');
+  await expect(await commit([change(1, { photos: [...s3Photos, s3(5, 'catalog')] })], 'admin'), false, 'Admin no agrega fotos del catálogo');
+  await expect(await commit([change(1, { photos: [...s3Photos, s3(5, 1, 'otro-bucket')] })], 'admin'), false, 'Galería S3 rechaza otro bucket');
+  await expect(await commit([change(1, { photos: [...s3Photos.slice(0, 3), s3Photos[3].replace('.jpg', '.png')] })], 'admin'), false, 'Galería S3 exige JPEG con UUID');
+  await expect(await commit([change(1, { photos: s3Photos })], 'admin'), true, 'Admin reemplaza su galería con fotos S3');
+  await expect(await commit([change(1, { photos })], 'admin'), true, 'Admin vuelve a la galería anterior');
   await expect(await commit([write('hotels/1/rooms/201', room())], 'admin'), false, 'Habitacion requiere resumen atomico');
   await expect(await commit([write('hotels/1/rooms/201', room()), summary(1)], 'admin'), true, 'Alta de habitacion y resumen');
   await expect(await call('GET', '/hotels/1/rooms/201', undefined, 'client'), true, 'Cliente lee inventario compartido');
@@ -55,6 +64,8 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
   await expect(await commit([write('hotels/1/services/301', { ...service(), precio: 50.75 })], 'admin'), true, 'Editar servicio');
   await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: photo(6) })], 'admin'), true, 'Servicio admite imagen de su hotel');
   await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: photo(6, 2) })], 'admin'), false, 'Servicio rechaza imagen de otro hotel');
+  await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: s3(6) })], 'admin'), true, 'Servicio admite imagen S3 de su hotel');
+  await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: s3(6, 2) })], 'admin'), false, 'Servicio rechaza imagen S3 de otro hotel');
   await expect(await commit([write('hotels/1/services/302', service(302))], 'client'), false, 'Cliente no crea servicio');
   await expect(await commit([write('hotels/2/services/302', service(302, 2))], 'admin'), false, 'Otro hotel no autorizado');
   await expect(await commit([write('hotels/1/services/302', { ...service(302), precio: -10 })], 'admin'), false, 'Servicio precio negativo');

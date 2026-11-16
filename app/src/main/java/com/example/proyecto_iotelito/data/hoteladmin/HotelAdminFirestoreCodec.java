@@ -70,7 +70,8 @@ public final class HotelAdminFirestoreCodec {
         int id = id(key, hotelId, data);
         if (!(data.get("activo") instanceof Boolean)) throw new IllegalArgumentException("Estado no válido.");
         String photo = data.get("fotoUrl") == null ? null : text(data.get("fotoUrl"), 2048, true);
-        if (photo != null && !photo.matches("gs://[^/]+/hotelAdminPhotos/" + hotelId + "/[^/]+/[^/]+[.]jpg"))
+        if (photo != null && !com.example.proyecto_iotelito.data.HotelPhotoPolicy.ofHotel(photo, hotelId)
+                && !photo.matches("gs://[^/]+/hotelAdminPhotos/" + hotelId + "/[^/]+/[^/]+[.]jpg"))
             throw new IllegalArgumentException("La imagen del servicio no corresponde a este hotel.");
         return new Servicio(id, hotelId, text(data.get("nombre"), 160, true),
                 text(data.get("descripcion"), 5000, false), money(data.get("precio")),

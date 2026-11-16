@@ -53,6 +53,11 @@ public class HotelFirestoreCodecTest {
         String photo = "gs://iot-telito.firebasestorage.app/hotelPhotos/uid/photo.jpg";
         assertEquals(Collections.singletonList(photo), HotelFirestoreCodec.sharedPhotos(Arrays.asList(photo, "file:///private.jpg")));
     }
+    @Test public void awsHotelReferencesAreSharedButProfilePhotosAreNot() {
+        String catalog = "s3://iot-telito-imagenes/hotelPhotos/catalog/12345678-1234-1234-1234-123456789abc.jpg";
+        String profile = "s3://iot-telito-imagenes/profilePhotos/uid/12345678-1234-1234-1234-123456789abc.jpg";
+        assertEquals(Collections.singletonList(catalog), HotelFirestoreCodec.sharedPhotos(Arrays.asList(catalog, profile)));
+    }
     @Test public void arbitraryStoragePathsAreRejected() {
         assertTrue(HotelFirestoreCodec.sharedPhotos(Arrays.asList("gs://bucket/users/private.jpg", "gs://bucket/hotelPhotos/u/file.exe")).isEmpty());
     }

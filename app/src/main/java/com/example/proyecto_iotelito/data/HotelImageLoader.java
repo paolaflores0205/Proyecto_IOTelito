@@ -15,7 +15,11 @@ public final class HotelImageLoader {
     public static void show(ImageView view, String value) {
         Object request = new Object(); view.setTag(com.example.proyecto_iotelito.R.id.hotel_image_request, request);
         if (value == null) return;
-        if (value.startsWith("gs://")) {
+        if (HotelPhotoPolicy.reference(value)) {
+            HotelAwsPhotos.load(value, bytes -> decode(view, request, bytes));
+        } else if (value.startsWith("s3://")) {
+            return;
+        } else if (value.startsWith("gs://")) {
             try {
                 FirebaseStorage.getInstance().getReferenceFromUrl(value).getBytes(LIMIT)
                         .addOnSuccessListener(bytes -> decode(view, request, bytes));
