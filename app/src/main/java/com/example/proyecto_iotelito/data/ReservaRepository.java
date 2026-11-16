@@ -100,10 +100,14 @@ public final class ReservaRepository {
 
     public void actualizarEstado(int reservaId, Reserva.Estado estado) {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            FirebaseReservaStore.actualizarEstado(reservaId, estado);
-            return;
+            throw new IllegalStateException("Solicita el checkout desde el formulario de la reserva.");
         }
         reservaDao.actualizarEstado(reservaId, estado.name());
+    }
+
+    @androidx.annotation.WorkerThread
+    public void solicitarCheckout(int reservaId, int calificacion, String comentario) {
+        FirebaseReservaStore.solicitarCheckout(reservaId, calificacion, comentario);
     }
 
     @androidx.annotation.WorkerThread

@@ -26,6 +26,8 @@ import java.util.Locale;
 public class AdminReservasFragment extends Fragment {
     private FragmentHoteladminReservasBinding binding;
     private ReservasAdapter adapter;
+    private boolean remote;
+    private List<ReservaAdmin> rows = new ArrayList<>();
 
     @Nullable
     @Override
@@ -37,6 +39,7 @@ public class AdminReservasFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        remote = com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository.remote(requireContext());
         adapter = new ReservasAdapter(new ReservasAdapter.OnReservaActionListener() {
             @Override public void onDetalle(ReservaAdmin reserva) { abrirCheckout(reserva.id); }
             @Override public void onTaxi(ReservaAdmin reserva) {
@@ -50,6 +53,15 @@ public class AdminReservasFragment extends Fragment {
         binding.chipGroupFecha.setOnCheckedStateChangeListener((group, ids) -> renderReservas());
         binding.chipProximas.setChecked(true);
         binding.chipTodasFechas.setChecked(true);
+        if (remote) {
+            new com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelOperations(requireContext()).reservations()
+                    .observe(getViewLifecycleOwner(), state -> {
+                        rows = state.rows;
+                        renderReservas();
+                        if (state.loading) binding.tvCantidad.setText("Consultando reservas…");
+                        if (state.error != null) binding.tvSinResultados.setText(state.error);
+                    });
+        }
         renderReservas();
     }
 
@@ -63,7 +75,7 @@ public class AdminReservasFragment extends Fragment {
         String query = String.valueOf(binding.etBuscar.getText()).trim().toLowerCase(Locale.ROOT);
         ReservaAdmin.EstadoCheckout filtro = estadoSeleccionado();
         List<ReservaAdmin> visibles = new ArrayList<>();
-        for (ReservaAdmin reserva : HotelAdminSampleData.reservas()) {
+        for (ReservaAdmin reserva : remote ? rows : HotelAdminSampleData.reservas()) {
             String searchable = (reserva.huespedNombre + " " + reserva.habitacion + " "
                     + reserva.huespedDoc).toLowerCase(Locale.ROOT);
             if (!query.isEmpty() && !searchable.contains(query)) continue;
@@ -88,6 +100,12 @@ public class AdminReservasFragment extends Fragment {
 
     private boolean coincideFecha(ReservaAdmin reserva) {
         int id = binding.chipGroupFecha.getCheckedChipId();
+        if (remote && reserva.fechaEntrada != null) {
+            java.time.LocalDate today = java.time.LocalDate.now(com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelOperations.ZONE);
+            if (id == R.id.chip_hoy) return !today.isBefore(reserva.fechaEntrada) && !today.isAfter(reserva.fechaSalida);
+            if (id == R.id.chip_semana) return reserva.fechaEntrada.isBefore(today.plusDays(7)) && !reserva.fechaSalida.isBefore(today);
+            return true;
+        }
         if (id == R.id.chip_hoy) {
             return reserva.estado == ReservaAdmin.EstadoCheckout.HOSPEDADO
                     || reserva.estado == ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE;

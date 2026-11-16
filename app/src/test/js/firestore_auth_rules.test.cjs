@@ -95,7 +95,8 @@ async function runAuthRules() {
   assert.equal(missing.status, 404, 'Una reserva ausente debe poder comprobarse sin error de permisos'); checks++;
   const reservation = { id: 1001, clientUid: 'client', hotelId: 1, roomIds: [101], roomName: 'Simple',
     roomNumber: '101', fechaEntrada: '2026-12-10', fechaSalida: '2026-12-11', huespedes: '1 adulto',
-    precioTotal: 100, estado: 'CONFIRMADA', codigo: 'TEST-RULES' };
+    precioTotal: 100, estado: 'CONFIRMADA', codigo: 'TEST-RULES', cardType: 'Tarjeta',
+    cardLast4: '4242', cardToken: 'DEMO_fixture', paymentMode: 'SIMULATED' };
   await expect(await commit([
     write('reservations/1001', reservation, null, ['createdAt']),
     write('roomNights/1_101_2026-12-10', { reservationId: '1001' }),
@@ -103,7 +104,8 @@ async function runAuthRules() {
   ], 'client'), true, 'Conserva transacción de reserva y bloqueos del cliente');
   await expect(await call('GET', '/reservations/1001', undefined, 'client'), true, 'Reserva propia');
   await expect(await call('GET', '/reservations/1001', undefined, 'other'), false, 'No lee reserva ajena');
-  await expect(await commit([write('reservations/1001', { estado: 'COMPLETADA' }, ['estado'])], 'client'), true, 'Conserva checkout propio');
+  await expect(await commit([write('reservations/1001', { estado: 'COMPLETADA' }, ['estado'])], 'client'), false,
+    'El huésped no puede cerrar la reserva directamente');
   await expect(await commit([write('reservations/1001', { precioTotal: 0 }, ['precioTotal'])], 'client'), false, 'No altera precio de reserva existente');
   console.log(`Reglas de autenticación/usuarios: ${checks} comprobaciones correctas, solo emulador.`);
 }

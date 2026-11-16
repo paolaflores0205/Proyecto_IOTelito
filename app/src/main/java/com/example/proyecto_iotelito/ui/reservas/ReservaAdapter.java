@@ -142,7 +142,7 @@ public class ReservaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             fechasHuespedes.setText(reserva.rangoFechasTexto() + " · " + reserva.huespedes);
             precioTotal.setText("S/ " + String.format(Locale.US, "%,.0f", reserva.precioTotal));
 
-            boolean enCurso = reserva.esActiva() && reserva.estaEnCurso();
+            boolean enCurso = reserva.estado != Reserva.Estado.EN_CHECKOUT && reserva.esActiva() && reserva.estaEnCurso();
             int colorFondo = enCurso ? R.color.io_teal : EstadoUi.colorFondo(reserva.estado);
             int colorTexto = enCurso ? R.color.white : EstadoUi.colorTexto(reserva.estado);
             estado.setText(enCurso

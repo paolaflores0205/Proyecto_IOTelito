@@ -47,7 +47,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         subHeader.findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         ((TextView) subHeader.findViewById(R.id.tv_title)).setText(hotel.name);
 
-        boolean enCurso = reserva.esActiva() && reserva.estaEnCurso();
+        boolean enCurso = reserva.estado != Reserva.Estado.EN_CHECKOUT && reserva.esActiva() && reserva.estaEnCurso();
         TextView tvEstadoPill = findViewById(R.id.tv_estado_pill);
         int colorFondo = enCurso ? R.color.io_teal : EstadoUi.colorFondo(reserva.estado);
         int colorTexto = enCurso ? R.color.white : EstadoUi.colorTexto(reserva.estado);
@@ -69,7 +69,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         View btnCheckout = findViewById(R.id.btn_realizar_checkout);
         View btnVerHotel = findViewById(R.id.btn_ver_hotel);
 
-        btnCheckout.setVisibility(reserva.puedeHacerCheckout() ? View.VISIBLE : View.GONE);
+        btnCheckout.setVisibility(puedeSolicitarSalida(reserva) ? View.VISIBLE : View.GONE);
         btnCheckout.setOnClickListener(v -> {
             Intent intent = new Intent(this, CheckoutActivity.class);
             intent.putExtra(CheckoutActivity.EXTRA_RESERVA_ID, reserva.id);
@@ -79,6 +79,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         findViewById(R.id.btn_chatear).setOnClickListener(v -> {
             Intent intent = new Intent(this, ChatHotelActivity.class);
             intent.putExtra(ChatHotelActivity.EXTRA_HOTEL_ID, hotel.id);
+            intent.putExtra(ChatHotelActivity.EXTRA_RESERVA_ID, reserva.id);
             startActivity(intent);
         });
 
@@ -108,13 +109,19 @@ public class DetalleReservaActivity extends AppCompatActivity {
     }
 
     private String mensajeEstado(Reserva reserva) {
-        if (reserva.esActiva() && reserva.puedeHacerCheckout()) {
+        if (reserva.estado == Reserva.Estado.EN_CHECKOUT) return getString(R.string.checkout_solicitado);
+        if (puedeSolicitarSalida(reserva)) {
             return getString(R.string.mensaje_puede_checkout);
         }
         if (reserva.esActiva() && reserva.estaEnCurso()) {
             return getString(R.string.mensaje_estado_en_curso);
         }
         return getString(EstadoUi.mensaje(reserva.estado));
+    }
+
+    private boolean puedeSolicitarSalida(Reserva reserva) {
+        return com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
+                ? reserva.puedeSolicitarCheckout() : reserva.puedeHacerCheckout();
     }
 
     private void bindRow(int rowId, int labelRes, String value) {

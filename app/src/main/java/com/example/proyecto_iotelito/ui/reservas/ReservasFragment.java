@@ -186,7 +186,7 @@ public class ReservasFragment extends Fragment {
                 if (!reserva.esActiva()) {
                     continue;
                 }
-                if (reserva.estaEnCurso()) {
+                if (!reserva.esProxima()) {
                     enCurso.add(reserva);
                 } else {
                     proximas.add(reserva);

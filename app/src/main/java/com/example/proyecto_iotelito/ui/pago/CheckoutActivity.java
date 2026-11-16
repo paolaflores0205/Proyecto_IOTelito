@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import com.example.proyecto_iotelito.ui.taxi.BeneficioTaxiActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Locale;
 
@@ -32,6 +34,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private Reserva reserva;
     private ReservaRepository reservaRepository;
     private boolean elegibleTaxi;
+    private boolean checkoutRemoto;
     private int calificacion = 0;
 
     @Override
@@ -43,7 +46,8 @@ public class CheckoutActivity extends AppCompatActivity {
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
         com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, hotel) -> {
         reserva = value;
-        if (!reserva.puedeHacerCheckout()) {
+        checkoutRemoto = FirebaseAuth.getInstance().getCurrentUser() != null;
+        if (!puedeSolicitarSalida(reserva)) {
             abrirSolicitudODetalle();
             return;
         }
@@ -57,6 +61,10 @@ public class CheckoutActivity extends AppCompatActivity {
                 getString(R.string.habitacion_con_numero, reserva.roomName, reserva.roomNumber));
 
         configurarEstrellas();
+        if (checkoutRemoto) {
+            ((TextView) findViewById(R.id.tv_comentarios_checkout)).setText(R.string.comentario_checkout_requerido);
+            ((MaterialButton) findViewById(R.id.btn_confirmar_checkout)).setText(R.string.solicitar_checkout);
+        }
 
         bindRow(R.id.row_monto_preautorizado, R.string.label_monto_preautorizado, formatMoney(reserva.precioTotal));
         bindRow(R.id.row_consumos_adicionales, R.string.label_consumos_adicionales, formatMoney(0));
@@ -113,26 +121,38 @@ public class CheckoutActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.toast_calificacion_requerida, Toast.LENGTH_SHORT).show();
             return;
         }
-
+        EditText comentarios = findViewById(R.id.et_comentarios);
+        String comentario = comentarios.getText().toString().trim();
+        if (checkoutRemoto && (comentario.isBlank() || comentario.length() > 4000)) {
+            comentarios.setError(getString(R.string.error_comentario_checkout));
+            return;
+        }
+        int estrellas = calificacion;
         findViewById(R.id.btn_confirmar_checkout).setEnabled(false);
         com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this, () -> {
             Reserva actual = reservaRepository.buscarPorId(reserva.id);
-            if (actual == null || !actual.puedeHacerCheckout()
+            if (actual == null || !puedeSolicitarSalida(actual)
                     || TaxiRepository.porReserva(this, reserva.id) >= 0) return false;
-            reservaRepository.actualizarEstado(reserva.id, Reserva.Estado.COMPLETADA);
+            if (checkoutRemoto) reservaRepository.solicitarCheckout(reserva.id, estrellas, comentario);
+            else reservaRepository.actualizarEstado(reserva.id, Reserva.Estado.COMPLETADA);
             return true;
         }, saved -> {
         if (!saved) {
             abrirSolicitudODetalle();
             return;
         }
-        reserva.estado = Reserva.Estado.COMPLETADA;
+        reserva.estado = checkoutRemoto ? Reserva.Estado.EN_CHECKOUT : Reserva.Estado.COMPLETADA;
+        if (checkoutRemoto) Toast.makeText(this, R.string.checkout_solicitado, Toast.LENGTH_LONG).show();
         if (elegibleTaxi) {
             mostrarOfertaTaxi();
         } else {
             irACobroConfirmado();
         }
         }, () -> findViewById(R.id.btn_confirmar_checkout).setEnabled(true));
+    }
+
+    private boolean puedeSolicitarSalida(Reserva reserva) {
+        return checkoutRemoto ? reserva.puedeSolicitarCheckout() : reserva.puedeHacerCheckout();
     }
 
     private void abrirSolicitudODetalle() {
@@ -176,6 +196,10 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void irACobroConfirmado() {
+        if (checkoutRemoto) {
+            abrirSolicitudODetalle();
+            return;
+        }
         Intent intent = new Intent(this, CobroConfirmadoActivity.class);
         intent.putExtra(CobroConfirmadoActivity.EXTRA_RESERVA_ID, reserva.id);
         startActivity(intent);

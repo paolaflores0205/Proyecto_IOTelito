@@ -2,6 +2,7 @@ package com.example.proyecto_iotelito.model;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -18,7 +19,13 @@ public class Reserva implements Serializable {
     };
 
     public enum Estado {
-        CONFIRMADA, PENDIENTE_PAGO, COMPLETADA, CANCELADA
+        CONFIRMADA, PENDIENTE_PAGO, COMPLETADA, CANCELADA, EN_CHECKOUT;
+
+        public static Estado desdeFirestore(String estado) {
+            if ("ACTIVA".equals(estado)) return CONFIRMADA;
+            if ("FINALIZADA".equals(estado)) return COMPLETADA;
+            return valueOf(estado);
+        }
     }
 
     public final int id;
@@ -49,7 +56,7 @@ public class Reserva implements Serializable {
     }
 
     public boolean esActiva() {
-        return estado == Estado.CONFIRMADA || estado == Estado.PENDIENTE_PAGO;
+        return estado == Estado.CONFIRMADA || estado == Estado.PENDIENTE_PAGO || estado == Estado.EN_CHECKOUT;
     }
 
     /** La estadía ya empezó y todavía no termina. */
@@ -65,7 +72,11 @@ public class Reserva implements Serializable {
 
     /** Hoy es el día de salida de una estadía en curso: ya se puede hacer el checkout. */
     public boolean puedeHacerCheckout() {
-        return esActiva() && estaEnCurso() && fechaSalida.isEqual(LocalDate.now());
+        return estado != Estado.EN_CHECKOUT && esActiva() && estaEnCurso() && fechaSalida.isEqual(LocalDate.now());
+    }
+
+    public boolean puedeSolicitarCheckout() {
+        return estado == Estado.CONFIRMADA && !LocalDate.now(ZoneId.of("America/Lima")).isBefore(fechaSalida);
     }
 
     public String rangoFechasTexto() {

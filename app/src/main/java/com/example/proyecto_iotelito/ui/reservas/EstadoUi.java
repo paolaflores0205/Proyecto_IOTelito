@@ -22,6 +22,8 @@ final class EstadoUi {
                 return context.getString(R.string.estado_pendiente_pago);
             case COMPLETADA:
                 return context.getString(R.string.estado_completada);
+            case EN_CHECKOUT:
+                return context.getString(R.string.estado_en_checkout);
             default:
                 return context.getString(R.string.estado_cancelada);
         }
@@ -32,6 +34,7 @@ final class EstadoUi {
             case CONFIRMADA:
                 return R.color.io_teal_light;
             case PENDIENTE_PAGO:
+            case EN_CHECKOUT:
                 return R.color.io_warning_bg;
             case CANCELADA:
                 return R.color.io_danger_bg;
@@ -45,6 +48,7 @@ final class EstadoUi {
             case CONFIRMADA:
                 return R.color.io_teal;
             case PENDIENTE_PAGO:
+            case EN_CHECKOUT:
                 return R.color.io_warning_text;
             case CANCELADA:
                 return R.color.io_danger_text;
@@ -61,6 +65,8 @@ final class EstadoUi {
                 return R.string.mensaje_estado_pendiente;
             case COMPLETADA:
                 return R.string.mensaje_estado_completada;
+            case EN_CHECKOUT:
+                return R.string.checkout_solicitado;
             default:
                 return R.string.mensaje_estado_cancelada;
         }

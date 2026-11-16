@@ -139,6 +139,11 @@
     <string name="estado_en_curso">En curso</string>
     <string name="estado_pendiente_pago">Pago pendiente</string>
     <string name="estado_completada">Finalizada</string>
+    <string name="estado_en_checkout">Checkout solicitado</string>
+    <string name="checkout_solicitado">Tu solicitud de checkout está pendiente de confirmación por el hotel.</string>
+    <string name="solicitar_checkout">Solicitar checkout</string>
+    <string name="comentario_checkout_requerido">Comentario sobre tu estadía</string>
+    <string name="error_comentario_checkout">Escribe un comentario de hasta 4000 caracteres.</string>
     <string name="estado_cancelada">Cancelada</string>
     <string name="seccion_proximas_estadias">Próximas estadías</string>
     <string name="seccion_en_curso">En curso</string>

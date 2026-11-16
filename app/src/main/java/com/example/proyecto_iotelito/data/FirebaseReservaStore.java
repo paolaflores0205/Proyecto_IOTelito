@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -104,6 +105,8 @@ final class FirebaseReservaStore {
         Map<String, Object> data = new HashMap<>();
         data.put("id", id);
         data.put("clientUid", uid);
+        data.put("clientName", com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+        data.put("hotelName", hotel.name);
         data.put("hotelId", hotel.id);
         data.put("roomIds", roomIds);
         data.put("roomName", habitaciones);
@@ -115,6 +118,7 @@ final class FirebaseReservaStore {
         data.put("estado", Reserva.Estado.CONFIRMADA.name());
         data.put("codigo", codigo);
         data.put("createdAt", FieldValue.serverTimestamp());
+        agregarTarjetaSimulada(data);
 
         try {
             return Tasks.await(DB.runTransaction(transaction -> {
@@ -183,17 +187,40 @@ final class FirebaseReservaStore {
         return disponibles;
     }
 
-    static void actualizarEstado(int id, Reserva.Estado estado) {
-        if (estado != Reserva.Estado.COMPLETADA) {
-            throw new IllegalArgumentException("Cambio de estado no permitido.");
+    private static void agregarTarjetaSimulada(Map<String, Object> data) {
+        data.put("cardType", "Tarjeta");
+        data.put("cardLast4", "4242");
+        data.put("cardToken", "DEMO_" + UUID.randomUUID());
+        data.put("paymentMode", "SIMULATED");
+    }
+
+    static void solicitarCheckout(int id, int calificacion, String comentario) {
+        if (calificacion < 1 || calificacion > 5 || comentario.isBlank() || comentario.length() > 4000) {
+            throw new IllegalArgumentException("Escribe un comentario y elige entre una y cinco estrellas.");
         }
-        Reserva reserva = buscarPorId(id);
-        if (reserva == null || !reserva.esActiva()) {
-            throw new IllegalArgumentException("No se encontró una reserva activa.");
-        }
+        String uid = requireUid();
+        DocumentReference ref = DB.collection("reservations").document(String.valueOf(id));
         try {
-            Tasks.await(DB.collection("reservations").document(String.valueOf(id))
-                    .update("estado", estado.name()));
+            Tasks.await(DB.runTransaction(transaction -> {
+                DocumentSnapshot document = transaction.get(ref);
+                if (!document.exists() || !uid.equals(requireUid()) || !uid.equals(document.getString("clientUid"))) {
+                    throw new IllegalArgumentException("No se encontró una reserva de tu cuenta.");
+                }
+                Reserva reserva = convertir(document);
+                if (reserva.estado == Reserva.Estado.EN_CHECKOUT) return null;
+                if (!reserva.puedeSolicitarCheckout()) {
+                    throw new IllegalArgumentException("La reserva todavía no permite solicitar el checkout.");
+                }
+                Map<String, Object> changes = new HashMap<>();
+                String token = document.getString("cardToken");
+                if (token == null || token.isEmpty()) agregarTarjetaSimulada(changes);
+                changes.put("estado", Reserva.Estado.EN_CHECKOUT.name());
+                changes.put("rating", calificacion);
+                changes.put("review", comentario);
+                changes.put("checkoutRequestedAt", FieldValue.serverTimestamp());
+                transaction.update(ref, changes);
+                return null;
+            }));
         } catch (ExecutionException | InterruptedException error) {
             throw fallo(error);
         }
@@ -220,7 +247,7 @@ final class FirebaseReservaStore {
                 LocalDate.parse(document.getString("fechaEntrada")),
                 LocalDate.parse(document.getString("fechaSalida")),
                 document.getString("huespedes"), total.doubleValue(),
-                Reserva.Estado.valueOf(document.getString("estado")),
+                Reserva.Estado.desdeFirestore(document.getString("estado")),
                 document.getString("codigo"));
     }
 

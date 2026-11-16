@@ -188,6 +188,7 @@
                         android:textColor="@color/io_text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold"
+                        android:id="@+id/tv_comentarios_checkout"
                         android:text="@string/hint_comentarios_checkout" />
 
                     <EditText

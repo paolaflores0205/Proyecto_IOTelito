@@ -27,6 +27,10 @@ public class ReservaAdmin implements Serializable {
     public final boolean tieneTaxi;
     public final List<ItemConsumo> consumos;
     public EstadoCheckout estado;
+    // Solo presentes en reservas remotas; los ejemplos locales conservan sus filtros anteriores.
+    public java.time.LocalDate fechaEntrada, fechaSalida;
+    public int cantidadHabitaciones = 1;
+    public boolean tieneComprobante;
 
     public ReservaAdmin(int id, int hotelId, String huespedNombre, String huespedDoc,
                         String habitacion, String rangoFechas, int noches,

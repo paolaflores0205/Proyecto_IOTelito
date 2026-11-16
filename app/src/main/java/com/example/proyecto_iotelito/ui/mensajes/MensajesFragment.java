@@ -31,6 +31,8 @@ import java.util.Locale;
  */
 public class MensajesFragment extends Fragment {
 
+    private boolean remote;
+    private List<Conversacion> rows = new ArrayList<>();
     private EditText etBuscar;
     private TextView chipTodos;
     private TextView chipHospedados;
@@ -59,6 +61,27 @@ public class MensajesFragment extends Fragment {
         conversacionesContainer = view.findViewById(R.id.conversaciones_container);
         tvVacio = view.findViewById(R.id.tv_mensajes_vacio);
 
+        remote = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null;
+        if (remote) new com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelChat(requireContext()).bookings()
+            .observe(getViewLifecycleOwner(), state -> {
+                rows = new ArrayList<>();
+                for (com.google.firebase.firestore.DocumentSnapshot doc : state.rows) {
+                    try {
+                        java.time.LocalDate today = java.time.LocalDate.now(com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelOperations.ZONE);
+                        java.time.LocalDate start = java.time.LocalDate.parse(doc.getString("fechaEntrada")), end = java.time.LocalDate.parse(doc.getString("fechaSalida"));
+                        Conversacion.Categoria category = today.isBefore(start) ? Conversacion.Categoria.POR_LLEGAR :
+                                (!today.isBefore(end) || !"CONFIRMADA".equals(doc.getString("estado"))) ? Conversacion.Categoria.PASADOS : Conversacion.Categoria.HOSPEDADOS;
+                        String name = doc.getString("hotelName");
+                        if (name == null) name = "Hotel · " + doc.getLong("hotelId");
+                        rows.add(new Conversacion(Integer.parseInt(doc.getId()), doc.getLong("hotelId").intValue(), name,
+                                doc.getString("roomName"), "Abrir conversación · " + doc.getString("codigo"), "", 0, category));
+                    } catch (RuntimeException error) { android.widget.Toast.makeText(requireContext(), "Hay una reserva con datos incompletos.", android.widget.Toast.LENGTH_LONG).show(); }
+                }
+                renderizarConversaciones();
+                if (state.loading) { tvVacio.setVisibility(View.VISIBLE); tvVacio.setText("Consultando conversaciones…"); }
+                else if (state.error != null) tvVacio.setText(state.error);
+                else tvVacio.setText("No hay conversaciones para este filtro.");
+            });
         configurarChipsFiltro();
         configurarBuscador();
 
@@ -72,6 +95,9 @@ public class MensajesFragment extends Fragment {
         renderizarConversaciones();
     }
 
+    @Override public void onDestroyView() {
+        super.onDestroyView(); conversacionesContainer = null;
+    }
     private void configurarChipsFiltro() {
         chipTodos.setOnClickListener(v -> cambiarCategoria(Conversacion.Categoria.TODOS));
         chipHospedados.setOnClickListener(v -> cambiarCategoria(Conversacion.Categoria.HOSPEDADOS));
@@ -122,10 +148,11 @@ public class MensajesFragment extends Fragment {
     }
 
     private void renderizarConversaciones() {
+        if (conversacionesContainer == null) return;
         conversacionesContainer.removeAllViews();
 
         List<Conversacion> filtradas = new ArrayList<>();
-        for (Conversacion conv : SampleData.CONVERSACIONES) {
+        for (Conversacion conv : remote ? rows : SampleData.CONVERSACIONES) {
             // Filtro de categoría
             if (categoriaActiva != Conversacion.Categoria.TODOS && conv.categoria != categoriaActiva) {
                 continue;
@@ -186,6 +213,7 @@ public class MensajesFragment extends Fragment {
         Intent intent = new Intent(getActivity(), ChatHotelActivity.class);
         intent.putExtra(ChatHotelActivity.EXTRA_HOTEL_ID, conv.hotelId);
         intent.putExtra(ChatHotelActivity.EXTRA_CONVERSACION_ID, conv.id);
+        if (remote) intent.putExtra(ChatHotelActivity.EXTRA_RESERVA_ID, conv.id);
         startActivity(intent);
     }
 }

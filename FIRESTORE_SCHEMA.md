@@ -7,7 +7,7 @@ Firestore en `feat/hotel-admin-firebase`. La guía vigente para este alcance es
 `GUIA_FIREBASE_ADMIN.md`. Esto sustituye las notas anteriores de inventario admin
 pendiente, únicamente para esta rama. El 03/11/2026 se publicaron las reglas de
 esta versión con autorización, y se verificó un perfil admin asignado al hotel 1.
-Queda pendiente el recorrido de lectura/escritura desde Android con la cuenta real.
+El recorrido con la cuenta real está documentado en `GUIA_FIREBASE_ADMIN.md`.
 
 - Se usa el `hotelId` del perfil autenticado, y se verifica también
   `hotels/{id}.administratorUid` y el estado activo del hotel.
@@ -26,9 +26,12 @@ Queda pendiente el recorrido de lectura/escritura desde Android con la cuenta re
   Es el detalle de los servicios adicionales del formulario admin. No sustituye
   el arreglo `hotels.services` que usa el cliente para las comodidades del hotel.
 - No se borran físicamente habitaciones o servicios ni se reutilizan IDs retirados.
-- Reservas, checkout, mensajes y reportes de admin todavía no tienen adaptación
-  remota. El panel de cuentas Firebase bloquea esas secciones y no muestra sus
-  ejemplos locales como datos reales. La galería remota se consulta sin edición.
+- Desde el 16/11/2026, admin consulta las reservas y comprobantes de su hotel.
+  El huésped solicita la salida (`EN_CHECKOUT`) y admin confirma el cierre
+  (`FINALIZADA`) en la misma transacción que crea `hotelCheckouts/{idReserva}`.
+  El chat comparte `reservations/{idReserva}/messages` entre ambos roles.
+  Los reportes leen reservas, comprobantes e inventario. El recorrido y sus
+  pruebas se describen en `FIREBASE_ADMIN_OPERACIONES_03_11.md`.
 
 Las reglas publicadas se verificaron por contenido después del despliegue;
 la configuración de prueba del hotel 1 ya existe. Para otras cuentas siguen siendo
