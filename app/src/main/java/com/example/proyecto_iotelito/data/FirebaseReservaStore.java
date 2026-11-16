@@ -137,7 +137,9 @@ final class FirebaseReservaStore {
                 }
                 for (DocumentReference bloqueo : bloqueos) {
                     if (transaction.get(bloqueo).exists()) {
-                        throw new IllegalArgumentException("La habitación o tus fechas ya no están disponibles.");
+                        if (bloqueo.getPath().startsWith("clientNights/"))
+                            throw new IllegalArgumentException("Ya tienes una reserva que se cruza con estas fechas. Elige otro período, aunque la habitación esté libre.");
+                        throw new IllegalArgumentException("La habitación acaba de ocuparse para esas fechas. Vuelve a consultar las opciones disponibles.");
                     }
                 }
                 transaction.set(reservaRef, data);
@@ -160,6 +162,16 @@ final class FirebaseReservaStore {
     static List<OpcionHabitaciones> filtrarDisponibles(int hotelId, LocalDate entrada,
                                                        LocalDate salida,
                                                        List<OpcionHabitaciones> opciones) {
+        String uid = requireUid();
+        for (LocalDate date = entrada; date.isBefore(salida); date = date.plusDays(1)) {
+            try {
+                if (Tasks.await(DB.collection("clientNights").document(uid + "_" + date)
+                        .get(com.google.firebase.firestore.Source.SERVER)).exists())
+                    throw new IllegalArgumentException("Ya tienes una reserva que se cruza con estas fechas. Elige otro período, aunque la habitación esté libre.");
+            } catch (ExecutionException | InterruptedException error) {
+                throw fallo(error);
+            }
+        }
         List<OpcionHabitaciones> disponibles = new ArrayList<>();
         Map<String, Boolean> ocupadas = new HashMap<>();
         for (OpcionHabitaciones opcion : opciones) {
@@ -170,7 +182,7 @@ final class FirebaseReservaStore {
                     if (!ocupadas.containsKey(key)) {
                         try {
                             ocupadas.put(key, Tasks.await(DB.collection("roomNights")
-                                    .document(key).get()).exists());
+                                    .document(key).get(com.google.firebase.firestore.Source.SERVER)).exists());
                         } catch (ExecutionException | InterruptedException error) {
                             throw fallo(error);
                         }

@@ -144,6 +144,39 @@ public class HotelOperationsEmulatorTest {
             for (File file : temporary) file.delete();
         }
     }
+    private void verifyBookingAvailability(LocalDate today) throws Exception {
+        LocalDate start = today.plusDays(10), end = start.plusDays(1);
+        java.util.List<com.example.proyecto_iotelito.model.hoteladmin.Habitacion> rooms = new java.util.ArrayList<>();
+        for (int id : new int[]{102, 103}) {
+            seed("hotels/1/rooms/" + id, fields("id", id, "hotelId", 1, "tipo", "Familiar", "nombreCodigo", String.valueOf(id),
+                    "areaM2", 30, "adultos", 2, "ninos", 1, "precioNoche", 100, "descripcion", "QA", "disponible", true, "archived", false));
+            rooms.add(new com.example.proyecto_iotelito.model.hoteladmin.Habitacion(id, 1, "Familiar", String.valueOf(id),
+                    30, 2, 1, 100, "QA", R.drawable.superadmin_hotel_sol, true));
+        }
+        java.util.List<com.example.proyecto_iotelito.model.OpcionHabitaciones> options =
+                GeneradorOpcionesHabitaciones.generar(rooms, 2, 1);
+        assertEquals(2, options.size());
+        assertEquals(2, FirebaseReservaStore.filtrarDisponibles(1, start, end, options).size());
+        seed("roomNights/1_102_" + start, fields("reservationId", "5001"));
+        java.util.List<com.example.proyecto_iotelito.model.OpcionHabitaciones> available =
+                FirebaseReservaStore.filtrarDisponibles(1, start, end, options);
+        assertEquals(1, available.size());
+        assertEquals(103, available.get(0).habitaciones().get(0).id);
+        seed("reservations/4001", fields("id", 4001, "hotelId", 2, "clientUid", clientUid,
+                "roomIds", new int[]{201}, "roomName", "Doble", "roomNumber", "201",
+                "fechaEntrada", start.toString(), "fechaSalida", end.toString(), "precioTotal", 100,
+                "estado", "CONFIRMADA", "codigo", "LOCAL-CRUCE"));
+        seed("clientNights/" + clientUid + "_" + start, fields("clientUid", clientUid, "reservationId", "4001"));
+        IllegalArgumentException searchConflict = assertThrows(IllegalArgumentException.class,
+                () -> FirebaseReservaStore.filtrarDisponibles(1, start, end, options));
+        assertTrue(searchConflict.getMessage().contains("Ya tienes una reserva"));
+        com.example.proyecto_iotelito.model.Hotel hotel = HotelCatalogRepository.buscar(context, 1);
+        IllegalArgumentException confirmConflict = assertThrows(IllegalArgumentException.class,
+                () -> FirebaseReservaStore.agregar(hotel, start, end, "2 adultos, 1 niño", 100,
+                        "LOCAL-RECHAZADA", "Familiar", "103", java.util.Collections.singletonList(103)));
+        assertTrue(confirmConflict.getMessage().contains("Ya tienes una reserva"));
+        assertEquals(2, FirebaseReservaStore.filtrarDisponibles(1, end, end.plusDays(1), options).size());
+    }
     @After public void cleanup()throws Exception{
         if(original==null)return;
         closeScreen();ins.runOnMainSync(()->SessionRepository.cerrar(context));
@@ -173,6 +206,8 @@ public class HotelOperationsEmulatorTest {
         seed("reservations/2001",fields("id",2001,"hotelId",1,"clientUid",clientUid,"clientName","Cliente QA","hotelName","Hotel QA","roomIds",new int[]{101},"roomName","Doble","roomNumber","101","fechaEntrada",today.minusDays(1).toString(),"fechaSalida",today.toString(),"precioTotal",100.25,"estado","CONFIRMADA","codigo","LOCAL-2001"));
         seed("reservations/3001",fields("id",3001,"hotelId",2,"clientUid","other-client","roomIds",new int[]{201},"roomName","Simple","roomNumber","201","fechaEntrada",today.toString(),"fechaSalida",today.plusDays(1).toString(),"precioTotal",999.0,"estado","CONFIRMADA","codigo","AJENO"));
         login("client-hotel@example.test",UserRole.CLIENT,clientUid,null);
+        verifyBookingAvailability(today);
+        if ("true".equals(InstrumentationRegistry.getArguments().getString("bookingAvailabilityOnly"))) return;
         Tasks.await(new FirebaseHotelChat(context).send(2001,"Pregunta del huésped"),20,TimeUnit.SECONDS);
         ReservaRepository.getInstance(context).solicitarCheckout(2001, 5, "Estadía de prueba");
         DocumentSnapshot solicitud = Tasks.await(db.document("reservations/2001").get(Source.SERVER),20,TimeUnit.SECONDS);

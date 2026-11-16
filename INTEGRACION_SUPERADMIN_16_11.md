@@ -103,6 +103,27 @@ Usar un AVD de pruebas con la app y APK de instrumentación instalados. La prueb
 
 ## Límites y siguientes tareas
 
+### Comprobaciones manuales comunicadas por el usuario
+
+- El administrador accede al hotel 9, Cusco Plaza Inn, y consulta tres habitaciones y un servicio.
+- La edición de la descripción se conserva y aparece también en superadmin.
+- El cambio temporal de precio de habitación se conserva y aparece en el cliente; el usuario confirmó el recorrido propuesto, incluida la restauración del precio.
+- Incidencia pendiente: al intentar reservar, el cliente indica falta de disponibilidad incluso al cambiar fechas. No se ha reproducido ni atribuido a una causa confirmada. El código filtra primero por hotel/inventario habilitado y capacidad de adultos/niños; después por bloqueos de noches. Cambiar fechas no modifica los dos primeros criterios. Falta identificar la pantalla/mensaje exacto, huéspedes solicitados y configuración remota de las habitaciones antes de corregirlo.
+
+### Ajuste posterior de disponibilidad del cliente
+
+El usuario confirmó que pudo reservar con un adulto y sin niños y que dos habitaciones admiten dos adultos y al menos un niño. Esa información no demuestra que falte capacidad: deben distinguirse capacidad, habilitación y noches libres. También confirmó que una habitación reservada desaparece al buscar sus fechas ocupadas.
+
+Se encontró una inconsistencia concreta en el código: la lista filtraba roomNights, pero no los bloqueos propios de clientNights. La confirmación sí comprobaba ambos y utilizaba el mismo mensaje para ambos conflictos. Así, una habitación libre podía ofrecerse a un cliente que ya tenía otra reserva superpuesta.
+
+Se corrigió la consulta previa para verificar los bloqueos personales y los de habitación desde el servidor. El motivo de rechazo personal se presenta expresamente en la pantalla, y la transacción vuelve a comprobarlo para proteger solicitudes concurrentes. Si la habitación se ocupa entre consulta y confirmación, se informa como ocupación de habitación. Si falla la verificación por red/permisos, no se muestran opciones sin verificar como si fueran disponibles.
+
+No se cambiaron capacidades, habilitación, bloqueos ni reservas reales. La causa exacta del intento original aún debe contrastarse con sus fechas y mensaje; la corrección resuelve la inconsistencia identificada sin afirmar que todas las negativas fueran cruces personales.
+
+La prueba local HotelOperationsEmulatorTest incluye ahora un grupo de dos adultos y un niño, dos habitaciones aptas libres, el bloqueo de una sola habitación, un cruce del cliente con otra reserva y una búsqueda posterior sin cruce. Comprueba también que la confirmación mantiene el rechazo personal aunque la otra habitación esté libre.
+
+Verificación: compilación correcta y 90 pruebas unitarias sin fallos. La instrumentación de disponibilidad pasó en 3,648 segundos con `hotelEmulator=true` y `bookingAvailabilityOnly=true`, usando exclusivamente Firebase local. La ejecución completa anterior avanzó más allá de estas comprobaciones, pero agotó el tiempo al abrir HotelAdminMainActivity; no se considera validado por esa ejecución el recorrido completo de interfaz del administrador. No se instaló esta actualización en el A55.
+
 No se publicaron reglas en Firebase, cambiaron cuentas reales, crearon reservas comerciales ni modificó facturación. Los archivos de reglas se actualizaron localmente al integrar la rama; eso no equivale a desplegarlos.
 
 La infraestructura AWS de imágenes sigue pendiente. El código de Storage heredado de ambas ramas se conserva por compatibilidad hasta sustituirlo por el contrato S3/Lambda/API Gateway; no se configuró ni utilizó Firebase Storage real.

@@ -77,13 +77,16 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
         recyclerView.setVisibility(sinOpciones ? View.GONE : View.VISIBLE);
         };
         if (modoReserva && !opciones.isEmpty()) {
-            com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this,
+            com.example.proyecto_iotelito.data.ClientLocalTasks.runWithError(this, this,
                     () -> com.example.proyecto_iotelito.data.ReservaRepository.getInstance(this)
                             .filtrarDisponibles(hotelId, seleccion.fechaEntrada(),
                                     seleccion.fechaSalida(), opciones),
-                    mostrarOpciones, () -> {
-                        explicacion.setText(R.string.disponibilidad_sin_verificar);
-                        mostrarOpciones.accept(opciones);
+                    mostrarOpciones, error -> {
+                        String message = error instanceof IllegalArgumentException
+                                ? error.getMessage() : getString(R.string.disponibilidad_sin_verificar);
+                        explicacion.setText(message);
+                        mostrarOpciones.accept(Collections.emptyList());
+                        ((TextView) findViewById(R.id.tv_sin_opciones)).setText(message);
                     });
         } else {
             mostrarOpciones.accept(opciones);
