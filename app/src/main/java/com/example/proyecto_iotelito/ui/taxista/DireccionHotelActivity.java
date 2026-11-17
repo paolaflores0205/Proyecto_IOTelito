@@ -13,6 +13,7 @@ public class DireccionHotelActivity extends AppCompatActivity {
             ((TextView)findViewById(R.id.tv_direccion)).setText(e.origen);
             ((TextView)findViewById(R.id.tv_instruccion)).setText(R.string.taxista_local_mapa_demo);
             ((TextView)findViewById(R.id.tv_tiempo_distancia)).setText(e.detalle);
+            TaxistaFlujo.pasajero(this,e);
             TaxistaFlujo.avanzar(this,vm,R.id.btn_llegue_al_hotel,e.id,EstadoServicio.EN_TRASLADO,DireccionAeropuertoActivity.class);
         });
     }
