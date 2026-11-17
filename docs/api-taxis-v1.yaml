@@ -1,0 +1,1047 @@
+openapi: 3.0.3
+info:
+  title: API de gestión de taxistas - IoTelito
+  version: 1.0.0
+  description: |
+    Contrato entre la app Android (cliente HTTP) y la web de gestión de taxistas
+    (servidor Spring Boot + MySQL). Este archivo manda: si el código y el contrato no
+    coinciden, se corrige el código o se cambia este archivo de común acuerdo (PR
+    revisado por quien hace la app y quien hace la web).
+
+    Reglas generales
+    - Base: `{base}/api/v1`, solo HTTPS.
+    - Autenticación: `Authorization: Bearer <token de Firebase>` en todo, salvo
+      `/health` y `/aeropuertos`. El servidor verifica el token del proyecto
+      `iot-telito` y lee `users/{uid}` en Firestore (`role` y `active`). Un taxista,
+      además, debe estar APROBADO y activo en MySQL, enlazado por `firebase_uid`.
+    - JSON en UTF-8. Fechas completas en ISO-8601 UTC (`2026-11-20T15:30:00Z`).
+      La hora de recojo (`hora`) es `HH:mm`, hora de Lima.
+    - El id de un servicio es el id de su reserva en Firestore: cada reserva tiene,
+      como máximo, un servicio de taxi.
+    - Todo error responde el esquema `Error`: un `codigo` estable para el código y
+      un `mensaje` en español listo para mostrar.
+    - Consulta periódica sugerida: estado del servicio cada 5 s mientras la pantalla
+      está visible, pedidos disponibles cada 10 s y ubicación cada 15 s durante un
+      servicio activo.
+    - La app espera como máximo 10 s. Sin respuesta, muestra "El servicio de taxis
+      no está disponible" y el resto de la app sigue funcionando.
+    - Estados del servicio, en este orden: SOLICITADO, ASIGNADO, EN_CAMINO,
+      EN_TRASLADO y FINALIZADO. FINALIZADO solo se alcanza validando el QR.
+servers:
+  - url: '{base}/api/v1'
+    variables:
+      base:
+        default: https://REEMPLAZAR-AL-DESPLEGAR.execute-api.us-east-1.amazonaws.com
+        description: URL del API Gateway; se comunica al desplegar la web.
+security:
+  - firebase: []
+tags:
+  - name: Sistema
+  - name: Taxista
+    description: Rol TAXISTA, desde la app.
+  - name: Cliente
+    description: Rol CLIENT, dueño de la reserva.
+  - name: Compartido
+    description: Varios roles sobre el mismo servicio.
+  - name: Superadmin
+    description: Rol SUPERADMIN, desde la app.
+
+paths:
+  /health:
+    get:
+      tags: [Sistema]
+      summary: Comprueba que la API responde
+      operationId: health
+      security: []
+      responses:
+        '200':
+          description: La API está en línea.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  /aeropuertos:
+    get:
+      tags: [Sistema]
+      summary: Aeropuertos de destino y las ciudades de hotel que atiende cada uno
+      description: |
+        Catálogo fijo. La app ofrece solo los aeropuertos cuya lista `ciudadesHotel`
+        contiene la ciudad del hotel en minúsculas y sin espacios al inicio o al final.
+      operationId: listarAeropuertos
+      security: []
+      responses:
+        '200':
+          description: Catálogo de aeropuertos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AeropuertoLista'
+
+  /taxistas/me:
+    get:
+      tags: [Taxista]
+      summary: Perfil del taxista con la sesión iniciada
+      description: |
+        La app lo llama al iniciar sesión como taxista. Responde 403
+        TAXISTA_NO_HABILITADO si está PENDIENTE, RECHAZADO o inactivo, y 404
+        TAXISTA_NO_REGISTRADO si su cuenta de Firebase no está enlazada a un taxista.
+      operationId: miPerfilTaxista
+      responses:
+        '200':
+          description: Perfil del taxista.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxistaPerfil'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+  /taxistas/me/disponibilidad:
+    put:
+      tags: [Taxista]
+      summary: Cambia la disponibilidad del taxista
+      description: Solo afecta a pedidos nuevos; un servicio ya aceptado sigue su curso.
+      operationId: cambiarDisponibilidad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Disponibilidad'
+      responses:
+        '200':
+          description: Perfil actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxistaPerfil'
+        '400':
+          $ref: '#/components/responses/Validacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+
+  /taxistas/me/servicio-activo:
+    get:
+      tags: [Taxista]
+      summary: Servicio en curso del taxista, si lo tiene
+      operationId: miServicioActivo
+      responses:
+        '200':
+          description: Servicio en ASIGNADO, EN_CAMINO o EN_TRASLADO.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servicio'
+        '204':
+          description: No tiene un servicio activo.
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+
+  /taxistas/me/servicios:
+    get:
+      tags: [Taxista]
+      summary: Historial de servicios finalizados del taxista
+      operationId: miHistorial
+      parameters:
+        - name: limite
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: Servicios FINALIZADO, del más reciente al más antiguo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicioLista'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+
+  /servicios/disponibles:
+    get:
+      tags: [Taxista]
+      summary: Pedidos que todavía no tienen taxista
+      description: |
+        Pedidos en SOLICITADO, ordenados por `hora`. Se listan aunque el taxista no
+        esté disponible; aceptar sí lo exige.
+      operationId: listarDisponibles
+      responses:
+        '200':
+          description: Pedidos en SOLICITADO.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicioLista'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+
+  /servicios:
+    post:
+      tags: [Cliente]
+      summary: El cliente pide el taxi de su reserva
+      description: |
+        El servidor toma de Firestore el hotel y la dirección de origen; no confía en
+        lo que mande la app. Comprueba que la reserva sea del cliente, que el hotel
+        esté activo y que el aeropuerto corresponda a la ciudad del hotel.
+        Repetir la llamada para la misma reserva no crea otro servicio: responde 200
+        con el que ya existe.
+        Pendiente: el monto mínimo por hotel que pide el plan del curso, cuando exista
+        ese campo en `hotels`.
+      operationId: crearServicio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudNueva'
+      responses:
+        '201':
+          description: Servicio creado en SOLICITADO.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servicio'
+        '200':
+          description: Ya existía un servicio para esa reserva; se devuelve tal cual.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servicio'
+        '400':
+          $ref: '#/components/responses/Validacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+  /servicios/{id}:
+    get:
+      tags: [Compartido]
+      summary: Estado y datos de un servicio
+      description: |
+        Pueden verlo el cliente dueño, el admin del hotel del servicio, el taxista
+        asignado, cualquier taxista habilitado mientras está en SOLICITADO y el
+        superadmin. Responde 404 si la reserva no tiene servicio de taxi.
+      operationId: verServicio
+      parameters:
+        - $ref: '#/components/parameters/ServicioId'
+      responses:
+        '200':
+          description: Servicio.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servicio'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+  /servicios/{id}/aceptar:
+    post:
+      tags: [Taxista]
+      summary: El taxista acepta un pedido
+      description: |
+        Pasa de SOLICITADO a ASIGNADO. Gana un solo taxista: los demás reciben 409
+        SERVICIO_NO_DISPONIBLE. También responde 409 SERVICIO_ACTIVO si el taxista ya
+        tiene otro servicio en curso y 409 TAXISTA_NO_DISPONIBLE si no está
+        disponible. Si este mismo taxista ya lo había aceptado, responde 200.
+      operationId: aceptarServicio
+      parameters:
+        - $ref: '#/components/parameters/ServicioId'
+      responses:
+        '200':
+          description: Servicio en ASIGNADO con este taxista.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servicio'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+
+  /servicios/{id}/estado:
+    post:
+      tags: [Taxista]
+      summary: El taxista asignado avanza el servicio
+      description: |
+        Solo ASIGNADO a EN_CAMINO y EN_CAMINO a EN_TRASLADO; cualquier otro salto es
+        409 ESTADO_INVALIDO. Si el servicio ya está en el estado pedido, responde 200.
+      operationId: avanzarServicio
+      parameters:
+        - $ref: '#/components/parameters/ServicioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambioEstado'
+      responses:
+        '200':
+          description: Servicio actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servicio'
+        '400':
+          $ref: '#/components/responses/Validacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+
+  /servicios/{id}/finalizar:
+    post:
+      tags: [Taxista]
+      summary: El taxista asignado finaliza el servicio leyendo el QR del cliente
+      description: |
+        Solo desde EN_TRASLADO. Un código distinto al del servicio responde 400
+        QR_INVALIDO. Si ya estaba FINALIZADO por este taxista, responde 200.
+      operationId: finalizarServicio
+      parameters:
+        - $ref: '#/components/parameters/ServicioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Finalizacion'
+      responses:
+        '200':
+          description: Servicio en FINALIZADO.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servicio'
+        '400':
+          $ref: '#/components/responses/Validacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+
+  /servicios/{id}/ubicacion:
+    put:
+      tags: [Taxista]
+      summary: El taxista asignado envía su ubicación
+      description: |
+        Cada 15 s mientras el servicio está en ASIGNADO, EN_CAMINO o EN_TRASLADO. En
+        otro estado responde 409 ESTADO_INVALIDO y la app deja de enviar.
+      operationId: enviarUbicacion
+      parameters:
+        - $ref: '#/components/parameters/ServicioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UbicacionNueva'
+      responses:
+        '204':
+          description: Ubicación guardada.
+        '400':
+          $ref: '#/components/responses/Validacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+
+  /servicios/{id}/qr:
+    get:
+      tags: [Compartido]
+      summary: Código que el cliente muestra como QR al llegar al aeropuerto
+      description: |
+        Para el cliente dueño y el admin del hotel, solo con taxista asignado
+        (ASIGNADO, EN_CAMINO o EN_TRASLADO); en otro estado responde 409
+        ESTADO_INVALIDO. La app dibuja `codigo` como QR; no se guarda en el teléfono.
+      operationId: verQr
+      parameters:
+        - $ref: '#/components/parameters/ServicioId'
+      responses:
+        '200':
+          description: Código del servicio.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QrServicio'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+
+  /servicios/{id}/calificacion:
+    post:
+      tags: [Cliente]
+      summary: El cliente califica al taxista
+      description: |
+        Una sola vez y solo con el servicio FINALIZADO: si no, 409 ESTADO_INVALIDO o
+        409 YA_CALIFICADO. Actualiza el promedio del taxista.
+      operationId: calificarServicio
+      parameters:
+        - $ref: '#/components/parameters/ServicioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalificacionNueva'
+      responses:
+        '201':
+          description: Calificación guardada; devuelve el servicio con ella.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servicio'
+        '400':
+          $ref: '#/components/responses/Validacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+
+  /taxistas:
+    get:
+      tags: [Superadmin]
+      summary: Lista de taxistas para la app del superadmin
+      operationId: listarTaxistas
+      parameters:
+        - name: estadoSolicitud
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/EstadoSolicitud'
+      responses:
+        '200':
+          description: Taxistas, del más reciente al más antiguo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxistaAdminLista'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+
+  /taxistas/{taxistaId}/activo:
+    patch:
+      tags: [Superadmin]
+      summary: Activa o desactiva a un taxista
+      description: |
+        Desactivar también deshabilita su cuenta de Firebase: no puede iniciar sesión
+        ni aceptar pedidos. Un servicio en curso no se corta.
+      operationId: cambiarActivoTaxista
+      parameters:
+        - $ref: '#/components/parameters/TaxistaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambioActivo'
+      responses:
+        '200':
+          description: Taxista actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxistaAdmin'
+        '400':
+          $ref: '#/components/responses/Validacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+components:
+  securitySchemes:
+    firebase:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token de Firebase Auth (`FirebaseUser.getIdToken`) del proyecto iot-telito.
+
+  parameters:
+    ServicioId:
+      name: id
+      in: path
+      required: true
+      description: Id de la reserva en Firestore; es también el id del servicio.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    TaxistaId:
+      name: taxistaId
+      in: path
+      required: true
+      description: Id del taxista en MySQL.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+  responses:
+    Validacion:
+      description: Datos inválidos (VALIDACION, AEROPUERTO_NO_CORRESPONDE o QR_INVALIDO).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoAutenticado:
+      description: Falta el token o no es válido (NO_AUTENTICADO). La app renueva el token una vez y reintenta.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Prohibido:
+      description: El rol o la cuenta no pueden hacer esto (PROHIBIDO o TAXISTA_NO_HABILITADO).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoEncontrado:
+      description: No existe (NO_ENCONTRADO o TAXISTA_NO_REGISTRADO).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflicto:
+      description: |
+        El estado actual no lo permite (SERVICIO_NO_DISPONIBLE, SERVICIO_ACTIVO,
+        TAXISTA_NO_DISPONIBLE, ESTADO_INVALIDO o YA_CALIFICADO).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      required: [codigo, mensaje]
+      properties:
+        codigo:
+          type: string
+          enum:
+            - VALIDACION
+            - AEROPUERTO_NO_CORRESPONDE
+            - QR_INVALIDO
+            - NO_AUTENTICADO
+            - PROHIBIDO
+            - TAXISTA_NO_HABILITADO
+            - NO_ENCONTRADO
+            - TAXISTA_NO_REGISTRADO
+            - SERVICIO_NO_DISPONIBLE
+            - SERVICIO_ACTIVO
+            - TAXISTA_NO_DISPONIBLE
+            - ESTADO_INVALIDO
+            - YA_CALIFICADO
+            - NO_DISPONIBLE
+        mensaje:
+          type: string
+          description: Texto en español para mostrar al usuario.
+      example:
+        codigo: SERVICIO_NO_DISPONIBLE
+        mensaje: Otro taxista ya aceptó este pedido.
+
+    EstadoServicio:
+      type: string
+      enum: [SOLICITADO, ASIGNADO, EN_CAMINO, EN_TRASLADO, FINALIZADO]
+
+    EstadoSolicitud:
+      type: string
+      enum: [PENDIENTE, APROBADO, RECHAZADO]
+
+    CodigoAeropuerto:
+      type: string
+      enum: [LIM, CUZ, AQP, TRU, PIO]
+
+    AeropuertoDestino:
+      type: object
+      required: [codigo, nombre, ciudad]
+      properties:
+        codigo:
+          $ref: '#/components/schemas/CodigoAeropuerto'
+        nombre:
+          type: string
+          example: Aeropuerto Internacional Jorge Chávez
+        ciudad:
+          type: string
+          example: Callao
+
+    Aeropuerto:
+      allOf:
+        - $ref: '#/components/schemas/AeropuertoDestino'
+        - type: object
+          required: [ciudadesHotel]
+          properties:
+            ciudadesHotel:
+              type: array
+              description: Ciudades de hotel, en minúsculas, que se atienden desde este aeropuerto.
+              items:
+                type: string
+              example: [lima, lima metropolitana, callao]
+
+    AeropuertoLista:
+      type: object
+      required: [aeropuertos]
+      properties:
+        aeropuertos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Aeropuerto'
+      example:
+        aeropuertos:
+          - codigo: LIM
+            nombre: Aeropuerto Internacional Jorge Chávez
+            ciudad: Callao
+            ciudadesHotel: [lima, lima metropolitana, callao]
+          - codigo: CUZ
+            nombre: Aeropuerto Internacional Alejandro Velasco Astete
+            ciudad: Cusco
+            ciudadesHotel: [cusco, cuzco]
+          - codigo: AQP
+            nombre: Aeropuerto Internacional Alfredo Rodríguez Ballón
+            ciudad: Arequipa
+            ciudadesHotel: [arequipa]
+          - codigo: TRU
+            nombre: Aeropuerto Internacional Capitán FAP Carlos Martínez de Pinillos
+            ciudad: Trujillo
+            ciudadesHotel: [trujillo]
+          - codigo: PIO
+            nombre: Aeropuerto Capitán FAP Renán Elías Olivera
+            ciudad: Pisco
+            ciudadesHotel: [paracas, pisco]
+
+    Vehiculo:
+      type: object
+      required: [placa, marca, modelo, color, anio]
+      properties:
+        placa:
+          type: string
+          example: ABC-123
+        marca:
+          type: string
+          example: Toyota
+        modelo:
+          type: string
+          example: Yaris
+        color:
+          type: string
+          example: Blanco
+        anio:
+          type: integer
+          example: 2020
+        fotoUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Enlace firmado de S3 que vence a los 120 s; no se guarda.
+
+    TaxistaPublico:
+      type: object
+      description: Lo que ven el cliente y el admin del hotel.
+      required: [id, nombres, apellidos, telefono, vehiculo, calificacion, cantidadServicios]
+      properties:
+        id:
+          type: integer
+          format: int64
+        nombres:
+          type: string
+          example: Carlos
+        apellidos:
+          type: string
+          example: Mendoza Ríos
+        telefono:
+          type: string
+          example: '987654321'
+        fotoUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Enlace firmado de S3 que vence a los 120 s; no se guarda.
+        vehiculo:
+          $ref: '#/components/schemas/Vehiculo'
+        calificacion:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 5
+          description: Promedio de las calificaciones; 0 si aún no tiene.
+          example: 4.6
+        cantidadServicios:
+          type: integer
+          example: 31
+
+    TaxistaPerfil:
+      allOf:
+        - $ref: '#/components/schemas/TaxistaPublico'
+        - type: object
+          required: [correo, estadoSolicitud, activo, disponible]
+          properties:
+            correo:
+              type: string
+              format: email
+            estadoSolicitud:
+              $ref: '#/components/schemas/EstadoSolicitud'
+            activo:
+              type: boolean
+            disponible:
+              type: boolean
+            servicioActivoId:
+              type: integer
+              format: int64
+              nullable: true
+
+    TaxistaAdmin:
+      allOf:
+        - $ref: '#/components/schemas/TaxistaPerfil'
+        - type: object
+          required: [tipoDocumento, numeroDocumento, fechaSolicitud]
+          properties:
+            tipoDocumento:
+              type: string
+              enum: [DNI, PASAPORTE, CARNET_EXTRANJERIA]
+            numeroDocumento:
+              type: string
+            fechaSolicitud:
+              type: string
+              format: date-time
+
+    TaxistaAdminLista:
+      type: object
+      required: [taxistas]
+      properties:
+        taxistas:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxistaAdmin'
+
+    Hotel:
+      type: object
+      required: [id, nombre, direccion, ciudad]
+      properties:
+        id:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+          example: Hotel Miraflores Park
+        direccion:
+          type: string
+          example: Av. Malecón de la Reserva 1035
+        ciudad:
+          type: string
+          example: Lima
+
+    Ubicacion:
+      type: object
+      required: [lat, lng, registradaEn]
+      properties:
+        lat:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        lng:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+        precisionM:
+          type: number
+          format: double
+          nullable: true
+        registradaEn:
+          type: string
+          format: date-time
+
+    UbicacionNueva:
+      type: object
+      required: [lat, lng]
+      properties:
+        lat:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        lng:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+        precisionM:
+          type: number
+          format: double
+          nullable: true
+
+    Fechas:
+      type: object
+      description: Momento en que el servicio entró a cada estado; null si aún no llega.
+      properties:
+        solicitado:
+          type: string
+          format: date-time
+        asignado:
+          type: string
+          format: date-time
+          nullable: true
+        enCamino:
+          type: string
+          format: date-time
+          nullable: true
+        enTraslado:
+          type: string
+          format: date-time
+          nullable: true
+        finalizado:
+          type: string
+          format: date-time
+          nullable: true
+
+    Calificacion:
+      type: object
+      required: [puntuacion, creadaEn]
+      properties:
+        puntuacion:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comentario:
+          type: string
+          nullable: true
+          maxLength: 500
+        creadaEn:
+          type: string
+          format: date-time
+
+    Servicio:
+      type: object
+      required: [id, estado, hotel, aeropuerto, hora, pasajeros, maletas, clienteNombre, fechas]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Id de la reserva.
+        estado:
+          $ref: '#/components/schemas/EstadoServicio'
+        hotel:
+          $ref: '#/components/schemas/Hotel'
+        aeropuerto:
+          $ref: '#/components/schemas/AeropuertoDestino'
+        hora:
+          type: string
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+          example: '14:30'
+        pasajeros:
+          type: integer
+          minimum: 1
+        maletas:
+          type: integer
+          minimum: 0
+        clienteNombre:
+          type: string
+          description: Solo el nombre; el taxista no recibe correo ni teléfono del cliente.
+        taxista:
+          allOf:
+            - $ref: '#/components/schemas/TaxistaPublico'
+          nullable: true
+          description: null mientras está en SOLICITADO.
+        ubicacion:
+          allOf:
+            - $ref: '#/components/schemas/Ubicacion'
+          nullable: true
+          description: Última ubicación del taxista; null si aún no envía ninguna.
+        fechas:
+          $ref: '#/components/schemas/Fechas'
+        calificacion:
+          allOf:
+            - $ref: '#/components/schemas/Calificacion'
+          nullable: true
+      example:
+        id: 1001
+        estado: EN_CAMINO
+        hotel:
+          id: 7
+          nombre: Hotel Miraflores Park
+          direccion: Av. Malecón de la Reserva 1035
+          ciudad: Lima
+        aeropuerto:
+          codigo: LIM
+          nombre: Aeropuerto Internacional Jorge Chávez
+          ciudad: Callao
+        hora: '14:30'
+        pasajeros: 2
+        maletas: 1
+        clienteNombre: Ana García
+        taxista:
+          id: 12
+          nombres: Carlos
+          apellidos: Mendoza Ríos
+          telefono: '987654321'
+          fotoUrl: null
+          vehiculo:
+            placa: ABC-123
+            marca: Toyota
+            modelo: Yaris
+            color: Blanco
+            anio: 2020
+            fotoUrl: null
+          calificacion: 4.6
+          cantidadServicios: 31
+        ubicacion:
+          lat: -12.1219
+          lng: -77.0298
+          precisionM: 8.5
+          registradaEn: '2026-11-20T19:12:45Z'
+        fechas:
+          solicitado: '2026-11-20T18:55:02Z'
+          asignado: '2026-11-20T19:01:10Z'
+          enCamino: '2026-11-20T19:05:33Z'
+          enTraslado: null
+          finalizado: null
+        calificacion: null
+
+    ServicioLista:
+      type: object
+      required: [servicios]
+      properties:
+        servicios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Servicio'
+
+    SolicitudNueva:
+      type: object
+      required: [reservaId, aeropuertoCodigo, hora, pasajeros, maletas]
+      properties:
+        reservaId:
+          type: integer
+          format: int64
+          minimum: 1
+        aeropuertoCodigo:
+          $ref: '#/components/schemas/CodigoAeropuerto'
+        hora:
+          type: string
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+          example: '14:30'
+        pasajeros:
+          type: integer
+          minimum: 1
+        maletas:
+          type: integer
+          minimum: 0
+      example:
+        reservaId: 1001
+        aeropuertoCodigo: LIM
+        hora: '14:30'
+        pasajeros: 2
+        maletas: 1
+
+    Disponibilidad:
+      type: object
+      required: [disponible]
+      properties:
+        disponible:
+          type: boolean
+
+    CambioEstado:
+      type: object
+      required: [estado]
+      properties:
+        estado:
+          type: string
+          enum: [EN_CAMINO, EN_TRASLADO]
+
+    Finalizacion:
+      type: object
+      required: [codigoQr]
+      properties:
+        codigoQr:
+          type: string
+          description: Texto leído del QR del cliente.
+
+    QrServicio:
+      type: object
+      required: [codigo]
+      properties:
+        codigo:
+          type: string
+          description: Texto a dibujar como QR; aleatorio y distinto en cada servicio.
+          example: TX1-8f3a2c9e4b7d41a6b0e5
+
+    CalificacionNueva:
+      type: object
+      required: [puntuacion]
+      properties:
+        puntuacion:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comentario:
+          type: string
+          nullable: true
+          maxLength: 500
+
+    CambioActivo:
+      type: object
+      required: [activo]
+      properties:
+        activo:
+          type: boolean
+        motivo:
+          type: string
+          nullable: true
+          maxLength: 500
