@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <body>
+<!-- Documentos del registro: miniatura de las imágenes y botón para abrir cada archivo.
+     El enlace lleva a una URL firmada de S3 que vence a los 5 minutos. -->
 <div class="document-list" th:fragment="lista">
     <p th:if="${#lists.isEmpty(documentosTaxista)}">Esta solicitud no tiene archivos disponibles.</p>
-    <div class="document-row" th:each="documento : ${documentosTaxista}">
-        <a th:href="@{/superadmin/taxistas/{id}/documentos/{doc}(id=${taxista.id},doc=${documento.id})}"
-           th:text="${documento.tipo.etiqueta}" target="_blank" rel="noopener noreferrer">
-            Abrir archivo
+    <div class="document-row document-row-archivo" th:each="documento : ${documentosTaxista}"
+         th:with="url=@{/superadmin/taxistas/{id}/documentos/{doc}(id=${taxista.id},doc=${documento.id})},
+                  imagen=${documento.contentType != null and documento.contentType.startsWith('image/')}">
+        <a class="document-thumb" th:href="${url}" target="_blank" rel="noopener noreferrer"
+           th:title="'Abrir ' + ${documento.tipo.etiqueta}">
+            <img th:if="${imagen}" th:src="${url}" th:alt="${documento.tipo.etiqueta}" loading="lazy">
+            <span th:unless="${imagen}" class="material-symbols-rounded">description</span>
         </a>
+        <div class="document-info">
+            <strong th:text="${documento.tipo.etiqueta}">Foto del conductor</strong>
+            <small th:text="${imagen ? 'Imagen' : 'PDF'}">Imagen</small>
+        </div>
         <span class="chip" th:text="${documento.estado}">PENDIENTE</span>
+        <a class="document-ver" th:href="${url}" target="_blank" rel="noopener noreferrer">
+            <span class="material-symbols-rounded">open_in_new</span>Ver
+        </a>
     </div>
 </div>
 </body>
