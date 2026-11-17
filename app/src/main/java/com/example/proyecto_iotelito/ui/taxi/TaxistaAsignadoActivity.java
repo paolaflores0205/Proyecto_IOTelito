@@ -84,6 +84,11 @@ public class TaxistaAsignadoActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_taxi_hora)).setText(pedido.optString("hora"));
         ((TextView) findViewById(R.id.tv_taxi_pasajeros)).setText(String.valueOf(pedido.optInt("pasajeros")));
         ((TextView) findViewById(R.id.tv_taxi_maletas)).setText(String.valueOf(pedido.optInt("maletas")));
+        android.view.View chat=findViewById(R.id.btn_chat_taxi_cliente);
+        boolean hasChat=com.example.proyecto_iotelito.data.TaxiChatPolicy.asignado(pedido.optString("taxistaUid"),pedido.optString("estado"));
+        chat.setVisibility(hasChat?android.view.View.VISIBLE:android.view.View.GONE);
+        ((TextView)chat).setText(estado==TaxiRepository.Estado.FINALIZADO?"Ver chat del viaje":"Chatear con el conductor");
+        chat.setOnClickListener(v->startActivity(new Intent(this,TaxiChatActivity.class).putExtra(TaxiRepository.EXTRA_ID,pedido.optInt("id"))));
         String conductor = pedido.optString("conductor");
         findViewById(R.id.card_taxi_conductor).setVisibility(conductor.isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE);
         ((TextView) findViewById(R.id.tv_taxi_conductor)).setText(conductor);

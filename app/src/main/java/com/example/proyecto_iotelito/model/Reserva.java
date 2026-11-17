@@ -51,6 +51,13 @@ public class Reserva implements Serializable {
     public com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta;
     public Integer valoracion;
     public String observaciones;
+    public com.example.proyecto_iotelito.data.ComprobanteCheckout comprobante;
+
+    /** Conserva precioTotal como alojamiento; el total liquidado solo proviene del comprobante. */
+    public double importeMostrado() {
+        return com.example.proyecto_iotelito.data.CheckoutPolicy.finalizada(estado.name()) && comprobante != null
+                ? comprobante.total : precioTotal;
+    }
 
     public Reserva(int id, int hotelId, String roomName, String roomNumber, LocalDate fechaEntrada, LocalDate fechaSalida,
                     String huespedes, double precioTotal, Estado estado, String codigo) {

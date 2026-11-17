@@ -63,7 +63,7 @@
                 android:textStyle="bold"
                 tools:text="Ana García" />
 
-            <TextView
+            <TextView android:id="@+id/tv_taxi_chat_presence"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/io_teal"

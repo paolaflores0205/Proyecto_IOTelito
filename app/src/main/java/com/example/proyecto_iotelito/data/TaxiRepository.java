@@ -105,15 +105,19 @@ public final class TaxiRepository {
     }
 
     @WorkerThread
-    public static int crear(Context context, Reserva reserva, String hotel, String origen,
+    public static int crear(Context context, Reserva reserva, com.example.proyecto_iotelito.model.Hotel hotel,
+                            AeropuertosCliente.Aeropuerto aeropuerto,
                             String hora, int pasajeros, int maletas) {
+        if(hotel==null||hotel.id!=reserva.hotelId||aeropuerto==null)throw new IllegalArgumentException("Revisa el hotel y aeropuerto seleccionados.");
+        if(!TaxiBenefitPolicy.puedeSolicitar(reserva))throw new IllegalArgumentException("El taxi gratuito requiere un alojamiento de al menos S/ 1000 y el checkout solicitado.");
+        AeropuertosCliente.Aeropuerto destino=AeropuertosCliente.elegir(hotel.city,aeropuerto.codigo);
         AuthenticatedUser user = SessionRepository.obtener(context);
         if (user == null || user.getRole() != UserRole.CLIENT) return -1;
         TaxiDao dao = dao(context);
         if(FirebaseTaxiStore.usaFirebase(context)) {
             TaxiEntity anterior=dao.porReserva(user.getEmail(),reserva.id);
             if(anterior!=null)return anterior.id;
-            int id=FirebaseTaxiStore.crear(reserva,PerfilRepository.cargar(context).name,hotel,origen,hora,pasajeros,maletas);
+            int id=FirebaseTaxiStore.crear(reserva,PerfilRepository.cargar(context).name,hotel,destino,hora,pasajeros,maletas);
             ClienteNotificationManager.mostrarEstadoTaxi(context,id,reserva.id,Estado.SOLICITADO);
             return id;
         }
@@ -130,9 +134,11 @@ public final class TaxiRepository {
             entity.reservaId = reserva.id;
             entity.clienteId = user.getEmail();
             entity.nombreCliente = PerfilRepository.cargar(context).name;
-            entity.hotel = hotel;
-            entity.origen = origen;
-            entity.destino = "Aeropuerto Jorge Chávez";
+            entity.hotel = hotel.name;
+            entity.origen = hotel.address;
+            entity.destino = destino.etiqueta();
+            entity.hotelId=hotel.id;entity.hotelCity=hotel.city;
+            entity.airportCode=destino.codigo;entity.airportName=destino.nombre;entity.airportCity=destino.ciudad;
             entity.hora = hora;
             entity.pasajeros = pasajeros;
             entity.maletas = maletas;

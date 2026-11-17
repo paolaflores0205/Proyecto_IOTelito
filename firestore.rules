@@ -310,15 +310,16 @@ service cloud.firestore {
         && resource.data.estado in ['CONFIRMADA','ACTIVA']
         && request.resource.data.estado == 'EN_CHECKOUT' && departureReached(resource.data)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
-          ['estado','rating','review','checkoutRequestedAt','cardType','cardLast4','cardToken','paymentMode'])
+          ['estado','rating','review','checkoutRequestedAt'])
         && request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
         && request.resource.data.review is string && request.resource.data.review.size() <= 4000
         && request.resource.data.review.matches('[\\s\\S]*\\S[\\s\\S]*')
         && request.resource.data.checkoutRequestedAt == request.time
         && validDemoCard(request.resource.data)
-        && (resource.data.get('cardToken', '') == '' || (
+        && validDemoCard(resource.data)
+        && (
           request.resource.data.cardToken == resource.data.cardToken && request.resource.data.cardLast4 == resource.data.cardLast4
-          && request.resource.data.cardType == resource.data.cardType && request.resource.data.paymentMode == resource.data.paymentMode));
+          && request.resource.data.cardType == resource.data.cardType && request.resource.data.paymentMode == resource.data.paymentMode);
       // El administrador solo finaliza una solicitud junto con su comprobante inmutable.
       allow update: if hotelAdmin(string(resource.data.hotelId))
         && resource.data.estado == 'EN_CHECKOUT' && request.resource.data.estado == 'FINALIZADA'
@@ -376,15 +377,32 @@ service cloud.firestore {
     }
 
     match /clientNights/{nightId} {
+      function validClientNight() {
+        let next = getAfter(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId)).data;
+        let date = nightId.split(request.auth.uid + '_')[1];
+        return request.resource.data.keys().hasOnly(['clientUid','reservationId'])
+          && request.resource.data.clientUid == request.auth.uid
+          && next.clientUid == request.auth.uid
+          && next.estado in ['CONFIRMADA','ACTIVA']
+          && date >= next.fechaEntrada && date < next.fechaSalida;
+      }
+      function reusableNight() {
+        let path = /databases/$(database)/documents/reservations/$(resource.data.reservationId);
+        let date = nightId.split(request.auth.uid + '_')[1];
+        return !exists(path) || (get(path).data.clientUid == request.auth.uid
+          && (get(path).data.estado in ['FINALIZADA','COMPLETADA','CANCELADA']
+            || date < get(path).data.fechaEntrada || date >= get(path).data.fechaSalida));
+      }
       allow get: if activeUser()
         && nightId.matches(request.auth.uid + '_.*');
       allow list: if false;
       allow create: if activeUser() && profile().role == 'CLIENT'
         && nightId.matches(request.auth.uid + '_.*')
-        && request.resource.data.clientUid == request.auth.uid
-        && getAfter(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId))
-             .data.clientUid == request.auth.uid;
-      allow update, delete: if false;
+        && validClientNight();
+      allow update: if activeUser() && profile().role == 'CLIENT'
+        && nightId.matches(request.auth.uid + '_.*') && resource.data.clientUid == request.auth.uid
+        && validClientNight() && reusableNight();
+      allow delete: if false;
     }
 
     match /roomNights/{nightId} {
@@ -514,7 +532,40 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','finalizado'])
           && request.resource.data.finalizado == request.time && driverLockAfter() == ''));
       allow delete: if false;
+      match /messages/{messageId} {
+        function participant() {
+          let trip = get(/databases/$(database)/documents/taxiRequests/$(requestId)).data;
+          return activeUser() && trip.taxistaUid != ''
+            && trip.estado in ['ASIGNADO','EN_CAMINO','EN_TRASLADO','FINALIZADO']
+            && ((profile().role == 'CLIENT' && trip.clientUid == request.auth.uid)
+              || (profile().role == 'TAXISTA' && trip.taxistaUid == request.auth.uid && taxiDriver()));
+        }
+        allow read: if participant();
+        allow create: if participant()
+          && get(/databases/$(database)/documents/taxiRequests/$(requestId)).data.estado != 'FINALIZADO'
+          && request.resource.data.keys().hasOnly(['senderUid','senderRole','text','createdAt'])
+          && request.resource.data.senderUid == request.auth.uid
+          && request.resource.data.senderRole == profile().role
+          && request.resource.data.text is string && request.resource.data.text.size() <= 4000
+          && request.resource.data.text.matches('[\\s\\S]*\\S[\\s\\S]*')
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
     }
+
+    // Dispositivos de una sesión cliente; las credenciales del emisor nunca van en la app.
+    match /users/{uid}/notificationDevices/{binding} {
+      allow read: if activeUser() && profile().role == 'CLIENT' && request.auth.uid == uid;
+      allow create, update: if activeUser() && profile().role == 'CLIENT' && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['token','binding','platform','updatedAt'])
+        && request.resource.data.token is string && request.resource.data.token.size() > 20
+        && request.resource.data.token.size() <= 4096
+        && request.resource.data.binding == binding && binding.size() == 36
+        && request.resource.data.platform == 'ANDROID' && request.resource.data.updatedAt == request.time;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+    // Estado interno del emisor AWS: solo Firebase Admin SDK puede acceder.
+    match /pushDeliveries/{delivery} { allow read, write: if false; }
 
     match /taxiDrivers/{uid} {
       function validLock() {

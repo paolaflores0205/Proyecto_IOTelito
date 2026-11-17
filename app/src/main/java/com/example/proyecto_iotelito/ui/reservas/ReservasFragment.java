@@ -55,6 +55,7 @@ public class ReservasFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         reservaRepository = ReservaRepository.getInstance(requireContext());
+        view.findViewById(R.id.btn_mis_taxis).setOnClickListener(v->startActivity(new Intent(requireContext(),com.example.proyecto_iotelito.ui.taxi.MisTaxisActivity.class)));
 
         tabLayout = view.findViewById(R.id.tab_layout);
         RecyclerView rvReservas = view.findViewById(R.id.rv_reservas);
@@ -76,7 +77,7 @@ public class ReservasFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                renderReservas(tab.getPosition() == 0);
+                renderReservas(tab.getPosition());
             }
 
             @Override
@@ -86,7 +87,7 @@ public class ReservasFragment extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) { }
         });
 
-        renderReservas(true);
+        renderReservas(0);
     }
 
     @Override
@@ -95,7 +96,7 @@ public class ReservasFragment extends Fragment {
         vincularReservas();
         // refresca por si cambió algo (ej. el estado de una reserva) mientras el usuario estaba en otra pantalla
         configurarTabs();
-        renderReservas(tabLayout.getSelectedTabPosition() == 0);
+        renderReservas(tabLayout.getSelectedTabPosition());
     }
 
     @Override
@@ -113,7 +114,7 @@ public class ReservasFragment extends Fragment {
             resultado.removeObservers(owner);
             if (correcto) {
                 configurarTabs();
-                renderReservas(tabLayout.getSelectedTabPosition() == 0);
+                renderReservas(tabLayout.getSelectedTabPosition());
             }
         });
         ReservaRepository repository = reservaRepository;
@@ -134,7 +135,7 @@ public class ReservasFragment extends Fragment {
         if (!hidden && getView() != null && tabLayout != null) {
             vincularReservas();
             configurarTabs();
-            renderReservas(tabLayout.getSelectedTabPosition() == 0);
+            renderReservas(tabLayout.getSelectedTabPosition());
         }
     }
 
@@ -151,10 +152,10 @@ public class ReservasFragment extends Fragment {
         reservasSource.observe(getViewLifecycleOwner(), rows -> {
             reservas = rows;
             configurarTabs();
-            renderReservas(tabLayout.getSelectedTabPosition() == 0);
+            renderReservas(tabLayout.getSelectedTabPosition());
         });
         configurarTabs();
-        renderReservas(tabLayout.getSelectedTabPosition() == 0);
+        renderReservas(tabLayout.getSelectedTabPosition());
     }
 
     private void configurarTabs() {
@@ -171,59 +172,37 @@ public class ReservasFragment extends Fragment {
         if (tabLayout.getTabCount() == 0) {
             tabLayout.addTab(tabLayout.newTab());
             tabLayout.addTab(tabLayout.newTab());
+            tabLayout.addTab(tabLayout.newTab());
         }
-        tabLayout.getTabAt(0).setText(getString(R.string.tab_activas_conteo, activas));
-        tabLayout.getTabAt(1).setText(getString(R.string.tab_finalizadas_conteo, finalizadas));
+        tabLayout.getTabAt(0).setText(getString(R.string.tab_todas_conteo, reservas.size()));
+        tabLayout.getTabAt(1).setText(getString(R.string.tab_activas_conteo, activas));
+        tabLayout.getTabAt(2).setText(getString(R.string.tab_finalizadas_conteo, finalizadas));
     }
 
-    private void renderReservas(boolean activas) {
+    private void renderReservas(int filtro) {
         List<ReservaAdapter.Item> items = new ArrayList<>();
-
-        if (activas) {
-            List<Reserva> proximas = new ArrayList<>();
-            List<Reserva> enCurso = new ArrayList<>();
-            for (Reserva reserva : reservas) {
-                if (!reserva.esActiva()) {
-                    continue;
-                }
-                if (!reserva.esProxima() || reserva.estado == Reserva.Estado.EN_CHECKOUT) {
-                    enCurso.add(reserva);
-                } else {
-                    proximas.add(reserva);
-                }
-            }
-            Comparator<Reserva> porFechaEntrada = Comparator.comparing(r -> r.fechaEntrada);
-            Collections.sort(proximas, porFechaEntrada);
-            Collections.sort(enCurso, porFechaEntrada);
-
-            vacioView.setVisibility(proximas.isEmpty() && enCurso.isEmpty() ? View.VISIBLE : View.GONE);
-            vacioView.setText(R.string.sin_reservas_activas);
-
-            if (!proximas.isEmpty()) {
-                items.add(ReservaAdapter.Item.encabezado(R.string.seccion_proximas_estadias));
-                agregarReservas(items, proximas);
-            }
-            if (!enCurso.isEmpty()) {
-                items.add(ReservaAdapter.Item.encabezado(R.string.seccion_en_curso));
-                agregarReservas(items, enCurso);
-            }
-        } else {
-            List<Reserva> pasadas = new ArrayList<>();
-            for (Reserva reserva : reservas) {
-                if (!reserva.esActiva()) {
-                    pasadas.add(reserva);
-                }
-            }
-            Collections.sort(pasadas, (a, b) -> b.fechaEntrada.compareTo(a.fechaEntrada));
-
-            vacioView.setVisibility(pasadas.isEmpty() ? View.VISIBLE : View.GONE);
-            vacioView.setText(R.string.sin_reservas_historial);
-
-            if (!pasadas.isEmpty()) {
-                items.add(ReservaAdapter.Item.encabezado(R.string.seccion_pasadas));
-                agregarReservas(items, pasadas);
-            }
+        List<Reserva> proximas = new ArrayList<>(), enCurso = new ArrayList<>(), pasadas = new ArrayList<>();
+        for(Reserva reserva:reservas){
+            if(reserva.esActiva()){
+                if(filtro==2)continue;
+                if(reserva.esProxima()&&reserva.estado!=Reserva.Estado.EN_CHECKOUT)proximas.add(reserva);
+                else enCurso.add(reserva);
+            }else if(filtro!=1)pasadas.add(reserva);
         }
+        proximas.sort(Comparator.comparing(row->row.fechaEntrada));
+        enCurso.sort(Comparator.comparing(row->row.fechaEntrada));
+        pasadas.sort((a,b)->b.fechaSalida.compareTo(a.fechaSalida));
+        if(!proximas.isEmpty()){
+            items.add(ReservaAdapter.Item.encabezado(R.string.seccion_proximas_estadias));agregarReservas(items,proximas);
+        }
+        if(!enCurso.isEmpty()){
+            items.add(ReservaAdapter.Item.encabezado(R.string.seccion_en_curso));agregarReservas(items,enCurso);
+        }
+        if(!pasadas.isEmpty()){
+            items.add(ReservaAdapter.Item.encabezado(R.string.seccion_finalizadas_canceladas));agregarReservas(items,pasadas);
+        }
+        vacioView.setVisibility(items.isEmpty()?View.VISIBLE:View.GONE);
+        vacioView.setText(filtro==0?R.string.sin_reservas_todas:filtro==1?R.string.sin_reservas_activas:R.string.sin_reservas_historial);
         reservaAdapter.submitList(items);
     }
 

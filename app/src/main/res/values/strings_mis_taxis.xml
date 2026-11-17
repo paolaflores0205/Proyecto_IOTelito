@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mis_taxis_title">Mis solicitudes de taxi</string>
+    <string name="mis_taxis_heading">Tus traslados, en un lugar</string>
+    <string name="mis_taxis_intro">Consulta el estado de tus solicitudes y comunícate con tu conductor cuando se asigne.</string>
+    <string name="mis_taxis_loading">Cargando tus solicitudes…</string>
+    <string name="mis_taxis_empty">Aún no tienes solicitudes de taxi. Cuando solicites un traslado desde tu reserva, aparecerá aquí.</string>
+    <string name="mis_taxis_retry">Reintentar</string>
+    <string name="mis_taxis_reference">Reserva #%1$d · Taxi #%2$d</string>
+    <string name="mis_taxis_pickup">Recojo: %1$s</string>
+    <string name="mis_taxis_driver">Conductor: %1$s</string>
+    <string name="mis_taxis_waiting">Buscando un conductor para tu traslado</string>
+    <string name="mis_taxis_tracking">Ver seguimiento</string>
+    <string name="mis_taxis_history">Ver detalle del viaje</string>
+    <string name="mis_taxis_access_description">Seguimiento y chat con tu conductor</string>
+    <string name="mis_taxis_unspecified">Por confirmar</string>
+</resources>

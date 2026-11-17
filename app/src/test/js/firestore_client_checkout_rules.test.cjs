@@ -40,8 +40,8 @@ const request = (id, changes={}) => {
  await put('reservations/5002',{...booking(5002),fechaEntrada:'2099-01-01',fechaSalida:'2099-01-02'});
  await expect(await commit([request(5002)],'client'),false,'No solicita antes de salida');
  const old=booking(5003);for(const k of Object.keys(card))delete old[k];await put('reservations/5003',old);
- await expect(await commit([request(5003)],'client'),false,'Reserva anterior necesita registrar tarjeta');
- await expect(await commit([request(5003,card)],'client'),true,'Reserva anterior registra tarjeta simulada al solicitar');
+ await expect(await commit([request(5003)],'client'),false,'Reserva sin tarjeta requiere revisión del hotel');
+ await expect(await commit([request(5003,card)],'client'),false,'No registra otra tarjeta durante el checkout');
  await put('reservations/5004',{...booking(5004),estado:'CANCELADA'});
  await expect(await commit([request(5004)],'client'),false,'No solicita cancelada');
  await put('reservations/5005',{...booking(5005),estado:'ACTIVA'});

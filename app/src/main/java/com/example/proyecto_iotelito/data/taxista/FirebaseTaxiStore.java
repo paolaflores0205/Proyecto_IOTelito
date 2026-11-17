@@ -50,14 +50,20 @@ public final class FirebaseTaxiStore {
         return data.exists() && uid.equals(data.getString("clientUid")) ? reservaId : -1;
     }
 
-    public static int crear(Reserva reserva,String nombre,String hotel,String origen,String hora,int pasajeros,int maletas) {
+    public static int crear(Reserva reserva,String nombre,com.example.proyecto_iotelito.model.Hotel hotel,
+            com.example.proyecto_iotelito.data.AeropuertosCliente.Aeropuerto aeropuerto,String hora,int pasajeros,int maletas) {
+        if(hotel==null||hotel.id!=reserva.hotelId||aeropuerto==null)throw new IllegalArgumentException("Revisa el hotel y aeropuerto seleccionados.");
+        com.example.proyecto_iotelito.data.AeropuertosCliente.Aeropuerto destination=
+                com.example.proyecto_iotelito.data.AeropuertosCliente.elegir(hotel.city,aeropuerto.codigo);
         FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
         String uid=uid();
         // Una reserva remota tiene un ID global; una solicitud usa ese mismo documento.
         Map<String,Object> data=new HashMap<>();
         data.put("id",reserva.id);data.put("reserva",reserva.id);data.put("clientUid",uid);
-        data.put("cliente",user.getEmail());data.put("nombre",nombre);data.put("hotel",hotel);
-        data.put("origen",origen);data.put("destino","Aeropuerto Jorge Chávez");data.put("hora",hora);
+        data.put("cliente",user.getEmail());data.put("nombre",nombre);data.put("hotel",hotel.name);
+        data.put("origen",hotel.address);data.put("destino",destination.etiqueta());data.put("hora",hora);
+        data.put("hotelId",hotel.id);data.put("hotelCity",hotel.city);
+        data.put("airportCode",destination.codigo);data.put("airportName",destination.nombre);data.put("airportCity",destination.ciudad);
         data.put("pasajeros",pasajeros);data.put("maletas",maletas);data.put("estado","SOLICITADO");
         data.put("creado",FieldValue.serverTimestamp());data.put("taxistaUid","");
         data.put("taxista","");data.put("conductor","");data.put("finalizado",null);
@@ -69,6 +75,12 @@ public final class FirebaseTaxiStore {
                 if(!uid.equals(existing.getString("clientUid")))throw new IllegalStateException("Reserva de otra cuenta");
                 return reserva.id;
             }
+            DocumentSnapshot booking=transaction.get(db().collection("reservations").document(String.valueOf(reserva.id)));
+            if(!booking.exists()||!uid.equals(booking.getString("clientUid")))throw new IllegalStateException("No se encontró una reserva propia.");
+            Number amount=booking.get("precioTotal") instanceof Number?(Number)booking.get("precioTotal"):null;
+            if(!com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(booking.getString("estado"),
+                    amount==null?Double.NaN:amount.doubleValue()))
+                throw new IllegalArgumentException("El taxi gratuito requiere un alojamiento de al menos S/ 1000 y el checkout solicitado.");
             transaction.set(ref,data);
             return reserva.id;
         }));

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,14 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.ReservaRepository;
-import com.example.proyecto_iotelito.data.SampleData;
-import com.example.proyecto_iotelito.data.TaxiRepository;
-import com.example.proyecto_iotelito.ui.taxi.TaxistaAsignadoActivity;
-import com.example.proyecto_iotelito.ui.reservas.DetalleReservaActivity;
-import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
-import com.example.proyecto_iotelito.ui.taxi.BeneficioTaxiActivity;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,7 +21,6 @@ import java.util.Locale;
 public class CheckoutActivity extends AppCompatActivity {
 
     public static final String EXTRA_RESERVA_ID = "extra_reserva_id";
-    private static final double MONTO_MINIMO_TAXI_GRATIS = 1000.0;
 
     private Reserva reserva;
     private ReservaRepository reservaRepository;
@@ -61,6 +52,10 @@ public class CheckoutActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_habitacion)).setText(
                 getString(R.string.habitacion_con_numero, reserva.roomName, reserva.roomNumber));
 
+        TextView tarjetaGuardada=findViewById(R.id.tv_tarjeta_checkout);
+        tarjetaGuardada.setText(reserva.tarjeta==null?getString(R.string.checkout_tarjeta_no_guardada)
+                :getString(R.string.checkout_tarjeta_reserva,reserva.tarjeta.etiqueta()));
+        findViewById(R.id.btn_confirmar_checkout).setEnabled(reserva.tarjeta!=null);
         configurarEstrellas();
         if (checkoutRemoto) {
             ((TextView) findViewById(R.id.tv_comentarios_checkout)).setText(R.string.comentario_checkout_requerido);
@@ -71,7 +66,7 @@ public class CheckoutActivity extends AppCompatActivity {
         bindRow(R.id.row_consumos_adicionales, R.string.label_consumos_adicionales, formatMoney(0));
         ((TextView) findViewById(R.id.tv_total_liquidar)).setText(formatMoney(reserva.precioTotal));
 
-        elegibleTaxi = reserva.precioTotal >= MONTO_MINIMO_TAXI_GRATIS;
+        elegibleTaxi = com.example.proyecto_iotelito.data.TaxiBenefitPolicy.cumpleMonto(reserva);
         MaterialCheckBox checkTaxi = findViewById(R.id.check_taxi);
         checkTaxi.setChecked(elegibleTaxi);
         checkTaxi.setEnabled(false);
@@ -123,37 +118,16 @@ public class CheckoutActivity extends AppCompatActivity {
         catch (IllegalArgumentException error) {
             Toast.makeText(this, error.getMessage(), Toast.LENGTH_LONG).show(); return;
         }
-        if (reserva.tarjeta == null) { solicitarTarjeta(comentario); return; }
-        enviarCheckout(comentario, reserva.tarjeta);
+        if (reserva.tarjeta == null) {
+            Toast.makeText(this, R.string.checkout_tarjeta_no_guardada, Toast.LENGTH_LONG).show(); return;
+        }
+        enviarCheckout(comentario);
     }
 
-    private void solicitarTarjeta(String comentario) {
-        View form = getLayoutInflater().inflate(R.layout.dialog_tarjeta_prueba, null);
-        androidx.appcompat.app.AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle("Registrar tarjeta de prueba")
-                .setView(form).setNegativeButton(R.string.btn_cancelar, null)
-                .setPositiveButton("Solicitar checkout", null).create();
-        dialog.setOnShowListener(ignored -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            try {
-                com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta = com.example.proyecto_iotelito.data.TarjetaSimulada.validar(
-                        ((android.widget.EditText)form.findViewById(R.id.et_numero_tarjeta)).getText().toString(),
-                        ((android.widget.EditText)form.findViewById(R.id.et_vencimiento)).getText().toString(),
-                        ((android.widget.EditText)form.findViewById(R.id.et_cvv)).getText().toString(),
-                        java.time.YearMonth.now(java.time.ZoneId.of("America/Lima")));
-                dialog.dismiss(); enviarCheckout(comentario, tarjeta);
-            } catch (IllegalArgumentException error) {
-                TextView label = form.findViewById(R.id.tv_error_tarjeta);
-                label.setText(error.getMessage()); label.setVisibility(View.VISIBLE);
-            }
-        }));
-        dialog.show();
-        if (dialog.getWindow() != null) dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-    }
-
-    private void enviarCheckout(String comentario, com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta) {
+    private void enviarCheckout(String comentario) {
         findViewById(R.id.btn_confirmar_checkout).setEnabled(false);
         com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this, () -> {
-            reservaRepository.solicitarCheckout(reserva.id, calificacion, comentario, tarjeta);
+            reservaRepository.solicitarCheckout(reserva.id, calificacion, comentario);
             return true;
         }, saved -> abrirComprobante(), () -> findViewById(R.id.btn_confirmar_checkout).setEnabled(true));
     }

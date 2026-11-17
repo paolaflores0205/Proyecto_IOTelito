@@ -27,16 +27,26 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
     private int minutoRecojo = 30;
     private Reserva reserva;
     private Hotel hotel;
+    private com.example.proyecto_iotelito.data.AeropuertosCliente.Aeropuerto aeropuerto;
+    private String codigoRestaurado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_solicitud_taxi);
+        if(savedInstanceState!=null){
+            codigoRestaurado=savedInstanceState.getString("airport_code");
+            pasajeros=savedInstanceState.getInt("passengers",pasajeros);maletas=savedInstanceState.getInt("bags",maletas);
+            horaRecojo=savedInstanceState.getInt("pickup_hour",horaRecojo);minutoRecojo=savedInstanceState.getInt("pickup_minute",minutoRecojo);
+        }
 
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
         com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, loadedHotel) -> {
         reserva = value;
         hotel = loadedHotel;
+        if(!com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reserva)){
+            android.widget.Toast.makeText(this,R.string.taxi_requisito_estadia,android.widget.Toast.LENGTH_LONG).show();finish();return;
+        }
         TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), existente -> {
             if (existente >= 0) abrirSolicitud(existente);
         });
@@ -47,6 +57,7 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
 
         setupHeader();
         setupReservaHotel();
+        setupAeropuerto();
         setupHoraRecojo();
         setupSteppers();
         setupConfirmButton();
@@ -66,6 +77,28 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
     private void setupReservaHotel() {
         TextView tvDireccionHotel = findViewById(R.id.tv_direccion_hotel);
         tvDireccionHotel.setText(hotel.address);
+    }
+
+    private void setupAeropuerto(){
+        java.util.List<com.example.proyecto_iotelito.data.AeropuertosCliente.Aeropuerto> options=
+                com.example.proyecto_iotelito.data.AeropuertosCliente.paraCiudad(hotel.city);
+        TextView label=findViewById(R.id.tv_aeropuerto_destino),help=findViewById(R.id.tv_ayuda_aeropuerto);
+        View selector=findViewById(R.id.container_aeropuerto);
+        if(options.isEmpty()){
+            label.setText("Sin aeropuerto configurado");
+            help.setText("Todavía no hay un aeropuerto configurado para "+hotel.city+". Consulta con el hotel antes de solicitar el traslado.");
+            findViewById(R.id.iv_elegir_aeropuerto).setVisibility(View.GONE);return;
+        }
+        aeropuerto=options.stream().filter(a->a.codigo.equals(codigoRestaurado)).findFirst().orElse(options.get(0));
+        label.setText(aeropuerto.etiqueta());
+        help.setText("Destino según la ubicación del hotel: "+hotel.city+". Verifica que coincida con tu vuelo.");
+        findViewById(R.id.iv_elegir_aeropuerto).setVisibility(options.size()>1?View.VISIBLE:View.GONE);
+        selector.setClickable(options.size()>1);selector.setFocusable(options.size()>1);
+        if(options.size()>1)selector.setOnClickListener(v->{
+            String[] labels=options.stream().map(a->a.etiqueta()).toArray(String[]::new);
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Aeropuerto de destino")
+                .setItems(labels,(dialog,which)->{aeropuerto=options.get(which);label.setText(aeropuerto.etiqueta());}).show();
+        });
     }
 
     private void setupHoraRecojo() {
@@ -114,12 +147,13 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
 
     private void setupConfirmButton() {
         MaterialButton btnConfirmar = findViewById(R.id.btn_confirmar_solicitud);
+        btnConfirmar.setEnabled(aeropuerto!=null);
         btnConfirmar.setOnClickListener(v -> {
             String hora = formatearHoraRecojo();
             int cantidadPasajeros = pasajeros;
             int cantidadMaletas = maletas;
             TaxiRepository.ejecutar(this, this, () -> TaxiRepository.crear(
-                    this, reserva, hotel.name, hotel.address, hora, cantidadPasajeros, cantidadMaletas), solicitudId -> {
+                    this, reserva, hotel, aeropuerto, hora, cantidadPasajeros, cantidadMaletas), solicitudId -> {
                 if (solicitudId < 0) {
                     android.widget.Toast.makeText(this, R.string.taxi_guardar_error, android.widget.Toast.LENGTH_LONG).show();
                     return;
@@ -127,6 +161,13 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
                 abrirSolicitud(solicitudId);
             });
         });
+    }
+
+    @Override protected void onSaveInstanceState(Bundle state){
+        super.onSaveInstanceState(state);
+        state.putString("airport_code",aeropuerto==null?codigoRestaurado:aeropuerto.codigo);
+        state.putInt("passengers",pasajeros);state.putInt("bags",maletas);
+        state.putInt("pickup_hour",horaRecojo);state.putInt("pickup_minute",minutoRecojo);
     }
 
     private void abrirSolicitud(int id) {

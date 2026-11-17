@@ -16,10 +16,12 @@ public final class RemoteUserProfile {
     }
 
     public static RemoteUserProfile parse(String documentId, Map<String, Object> data) {
-        if (documentId == null || documentId.isEmpty() || data == null
-                || !documentId.equals(data.get("uid")) || !(data.get("active") instanceof Boolean)) {
-            throw new IllegalArgumentException("Perfil incompleto: revisa uid y active en users.");
-        }
+        if (documentId == null || documentId.isEmpty() || data == null)
+            throw new IllegalArgumentException("No se encontró un perfil válido en users.");
+        if (!documentId.equals(data.get("uid")))
+            throw new IllegalArgumentException("El campo uid debe coincidir con el ID del documento y Authentication.");
+        if (!(data.get("active") instanceof Boolean))
+            throw new IllegalArgumentException("El campo active debe ser de tipo boolean (true o false).");
         UserRole role;
         try { role = UserRole.valueOf(String.valueOf(data.get("role"))); }
         catch (IllegalArgumentException error) { throw new IllegalArgumentException("El perfil no tiene un rol válido."); }
@@ -28,7 +30,7 @@ public final class RemoteUserProfile {
         Object rawHotelId = data.get("hotelId");
         Integer hotelId = null;
         if (rawHotelId != null) {
-            if (!(rawHotelId instanceof Number)) throw new IllegalArgumentException("El hotel asignado no es válido.");
+            if (!(rawHotelId instanceof Number)) throw new IllegalArgumentException("El campo hotelId debe ser de tipo null si no tiene hotel, o un número entero si está asignado.");
             double number = ((Number) rawHotelId).doubleValue();
             if (!Double.isFinite(number) || number != Math.rint(number) || number <= 0
                     || number > Integer.MAX_VALUE) throw new IllegalArgumentException("El hotel asignado no es válido.");

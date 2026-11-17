@@ -34,6 +34,9 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
         com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, loadedHotel) -> {
         reserva = value;
         hotel = loadedHotel;
+        if(!com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reserva)){
+            android.widget.Toast.makeText(this,R.string.taxi_requisito_estadia,android.widget.Toast.LENGTH_LONG).show();finish();return;
+        }
 
         TextView tvDescripcion = findViewById(R.id.tv_desc_taxi_gratuito);
         tvDescripcion.setText(getString(R.string.desc_taxi_gratuito_dinamico, hotel.name));
@@ -62,7 +65,9 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
     private List<BeneficioTaxi> createStaticBenefits() {
         return Arrays.asList(
                 new BeneficioTaxi(
-                        getString(R.string.item_valido_aeropuerto),
+                        com.example.proyecto_iotelito.data.AeropuertosCliente.paraCiudad(hotel.city).isEmpty()
+                            ? "Consulta con el hotel la disponibilidad de traslado en "+hotel.city
+                            : "Válido para salidas a "+com.example.proyecto_iotelito.data.AeropuertosCliente.paraCiudad(hotel.city).get(0).etiqueta(),
                         R.drawable.ic_check
                 ),
                 new BeneficioTaxi(

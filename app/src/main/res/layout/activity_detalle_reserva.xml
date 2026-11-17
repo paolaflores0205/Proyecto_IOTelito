@@ -84,6 +84,11 @@
                     <include layout="@layout/item_summary_row" android:id="@+id/row_noches" android:layout_marginTop="6dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_huespedes" android:layout_marginTop="6dp" />
                     <include layout="@layout/item_summary_row" android:id="@+id/row_codigo" android:layout_marginTop="6dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_alojamiento_detalle" android:layout_marginTop="12dp" />
+                    <include layout="@layout/item_summary_row" android:id="@+id/row_adicionales_detalle" android:layout_marginTop="6dp" android:visibility="gone" />
+                    <TextView android:id="@+id/tv_motivo_adicional_detalle" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textSize="13sp"
+                        android:textColor="@color/io_text_secondary" android:visibility="gone" />
 
                     <View
                         android:layout_width="match_parent"
@@ -97,7 +102,7 @@
                         android:layout_marginTop="12dp"
                         android:orientation="horizontal">
 
-                        <TextView
+                        <TextView android:id="@+id/tv_label_monto_total"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"

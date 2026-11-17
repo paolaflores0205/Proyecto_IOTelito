@@ -17,6 +17,7 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
     private Reserva reserva;
     private int version;
     private String estadoObservado;
+    private boolean comprobanteMostrado;
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_cobro_confirmado);
@@ -28,7 +29,7 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
         cargar();
         ReservaRepository.getInstance(this).observarTodas().observe(this, rows -> {
             for (Reserva row : rows) if (row.id == getIntent().getIntExtra(EXTRA_RESERVA_ID, -1)) {
-                if (!row.estado.name().equals(estadoObservado)) cargar();
+                if (!row.estado.name().equals(estadoObservado) || (row.comprobante!=null&&!comprobanteMostrado)) cargar();
                 estadoObservado = row.estado.name();
                 break;
             }
@@ -47,25 +48,25 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
             if (row == null) throw new IllegalArgumentException("No se encontró tu reserva.");
             com.example.proyecto_iotelito.model.Hotel hotel = HotelCatalogRepository.buscar(this, row.hotelId);
             if (hotel == null) throw new IllegalArgumentException("No se encontró el hotel.");
-            ComprobanteCheckout receipt = CheckoutPolicy.finalizada(row.estado.name())
-                    ? ReservaRepository.getInstance(this).comprobante(id) : null;
+            ComprobanteCheckout receipt = row.comprobante;
             return new Object[]{row, hotel.name, receipt};
         }, data -> {
             if (request != version) return;
             reserva = (Reserva)data[0];
             estadoObservado = reserva.estado.name();
             ComprobanteCheckout receipt = (ComprobanteCheckout)data[2];
+            comprobanteMostrado=receipt!=null;
             bind(R.id.row_hotel, "Hotel", (String)data[1]);
             bind(R.id.row_habitacion, "Habitación", reserva.roomName + " · " + reserva.roomNumber);
             bind(R.id.row_fechas, "Fechas", reserva.rangoFechasTexto());
-            bind(R.id.row_base_checkout, "Alojamiento", money(reserva.precioTotal));
+            bind(R.id.row_base_checkout, "Alojamiento", money(receipt==null?reserva.precioTotal:receipt.base));
             bind(R.id.row_valoracion_checkout, "Tu valoración", reserva.valoracion == null ? "No registrada" : reserva.valoracion + "/5 estrellas");
             bind(R.id.row_observaciones_checkout, "Tus observaciones", reserva.observaciones == null ? "No registradas" : reserva.observaciones);
             bind(R.id.row_tarjeta, "Tarjeta de prueba", reserva.tarjeta == null ? "No registrada · Reserva anterior" : reserva.tarjeta.etiqueta());
             boolean pending = reserva.estado == Reserva.Estado.EN_CHECKOUT;
-            findViewById(R.id.btn_taxi_checkout).setVisibility((pending || CheckoutPolicy.finalizada(reserva.estado.name()))
-                    && reserva.precioTotal >= 1000 ? View.VISIBLE : View.GONE);
+            findViewById(R.id.btn_taxi_checkout).setVisibility(TaxiBenefitPolicy.puedeSolicitar(reserva)?View.VISIBLE:View.GONE);
             if (receipt == null) {
+                findViewById(R.id.btn_reintentar_cobro).setVisibility(pending?View.GONE:View.VISIBLE);
                 text(R.id.tv_titulo_cobro, pending ? "Checkout solicitado" : "Sin comprobante de cobro");
                 text(R.id.tv_estado_cobro, pending ? getString(R.string.checkout_pendiente_cliente)
                         : "No hay un comprobante administrativo confirmado para esta reserva. No se acredita ningún cobro.");

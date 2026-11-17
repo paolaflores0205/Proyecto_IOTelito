@@ -47,6 +47,11 @@ public class ChatPasajeroTaxistaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(!TaxistaFlujo.sesion(this))return;
+        if(com.example.proyecto_iotelito.data.taxista.FirebaseTaxiStore.usaFirebase(this)){
+            startActivity(new Intent(this,com.example.proyecto_iotelito.ui.taxi.TaxiChatActivity.class)
+                    .putExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID,getIntent().getIntExtra(TaxistaFlujo.ID,-1)));
+            finish();return;
+        }
         setContentView(R.layout.activity_chat_pasajero_taxista);
         vm=TaxistaFlujo.model(this);servicio=getIntent().getIntExtra(TaxistaFlujo.ID,0);
 

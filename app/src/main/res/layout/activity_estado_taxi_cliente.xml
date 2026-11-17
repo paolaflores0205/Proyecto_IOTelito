@@ -207,7 +207,10 @@
     </androidx.core.widget.NestedScrollView>
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:background="@color/white" android:paddingHorizontal="16dp" android:paddingVertical="10dp">
+        android:orientation="vertical" android:background="@color/white" android:paddingHorizontal="16dp" android:paddingVertical="10dp">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_chat_taxi_cliente"
+            style="@style/Widget.IoTelito.Button.Outline" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:text="Chatear con el conductor" android:visibility="gone" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_volver_taxi"
             style="@style/Widget.IoTelito.Button.Primary"

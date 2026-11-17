@@ -6,6 +6,16 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class CheckoutPolicyTest {
+    @Test public void checkoutReutilizaLaTarjetaGuardadaSinGenerarOtra() {
+        TarjetaSimulada original=TarjetaSimulada.validar("5555555555554444","12/39","123",YearMonth.of(2026,11));
+        Map<String,Object> booking=new HashMap<>(original.campos());
+        TarjetaSimulada checkout=CheckoutPolicy.tarjetaDeReserva(booking);
+        assertEquals("Mastercard",checkout.tipo);assertEquals("4444",checkout.ultimos4);
+        assertEquals(original.token,checkout.token);assertEquals(original.campos(),booking);
+        booking.remove("cardToken");
+        assertThrows(IllegalArgumentException.class,()->CheckoutPolicy.tarjetaDeReserva(booking));
+        assertThrows(IllegalArgumentException.class,()->CheckoutPolicy.tarjetaDeReserva(Collections.emptyMap()));
+    }
     @Test public void tarjetaSoloConservaCamposEnmascarados() {
         TarjetaSimulada card = TarjetaSimulada.validar("4242 4242 4242 4242", "12/39", "123", YearMonth.of(2026,11));
         assertEquals("Visa", card.tipo); assertEquals("4242", card.ultimos4);

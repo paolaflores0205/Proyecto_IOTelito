@@ -34,6 +34,11 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
   await expect(await commit([change(1, { photos: [...photos, photo(5, 2)] })], 'admin'), false, 'Galería rechaza foto ajena');
   await expect(await commit([change(1, { photos, rooms: 999 })], 'admin'), false, 'Galería no modifica inventario');
   await expect(await commit([change(1, { photos })], 'admin'), true, 'Admin actualiza su galería');
+  const s3Photo=(n,hotelId=1)=>`s3://iot-telito-imagenes/hotelPhotos/${hotelId}/12345678-1234-1234-1234-${String(n).padStart(12,'0')}.jpg`;
+  const ownS3Photos=[1,2,3,4].map(n=>s3Photo(n));
+  await expect(await commit([change(1,{photos:[...ownS3Photos,s3Photo(5,2)]})],'admin'),false,'S3 rechaza fotos de otro hotel');
+  await expect(await commit([change(1,{photos:ownS3Photos.map(value=>value.replace('iot-telito-imagenes','otro-bucket'))})],'admin'),false,'S3 rechaza otro bucket');
+  await expect(await commit([change(1,{photos:ownS3Photos})],'admin'),true,'Conserva soporte de galería S3 propia');
   await expect(await commit([change(2, { photos })], 'admin'), false, 'Admin no actualiza otra galería');
   const s3 = (n, folder = 1, bucket = 'iot-telito-imagenes') =>
     `s3://${bucket}/hotelPhotos/${folder}/${String(n).padStart(8, '0')}-1234-1234-1234-123456789abc.jpg`;

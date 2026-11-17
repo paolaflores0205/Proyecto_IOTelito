@@ -148,17 +148,15 @@ public class ExplorarFragment extends Fragment {
     }
 
     /**
-     * Abre un MaterialDatePicker restringido para que la fecha de entrada nunca
-     * pueda quedar después de la de salida (y viceversa), además de bloquear
-     * fechas pasadas.
+     * Mantiene al menos una noche. La política compartida habilita temporalmente fechas pasadas.
      */
     private void mostrarSelectorFecha(boolean esEntrada) {
         List<CalendarConstraints.DateValidator> validadores = new ArrayList<>();
-        validadores.add(DateValidatorPointForward.now());
+        validadores.add(DateValidatorPointForward.from(com.example.proyecto_iotelito.data.BookingDatePolicy.inicioCalendarioMillis()));
         if (esEntrada) {
-            validadores.add(DateValidatorPointBackward.before(fechaSalidaMillis));
+            validadores.add(DateValidatorPointBackward.before(fechaSalidaMillis - ONE_DAY_MS));
         } else {
-            validadores.add(DateValidatorPointForward.from(fechaEntradaMillis));
+            validadores.add(DateValidatorPointForward.from(fechaEntradaMillis + ONE_DAY_MS));
         }
 
         CalendarConstraints constraints = new CalendarConstraints.Builder()
@@ -174,7 +172,7 @@ public class ExplorarFragment extends Fragment {
         picker.addOnPositiveButtonClickListener(seleccionMillis -> {
             if (esEntrada) {
                 fechaEntradaMillis = seleccionMillis;
-                if (fechaEntradaMillis > fechaSalidaMillis) {
+                if (fechaEntradaMillis >= fechaSalidaMillis) {
                     fechaSalidaMillis = fechaEntradaMillis + ONE_DAY_MS;
                 }
             } else {

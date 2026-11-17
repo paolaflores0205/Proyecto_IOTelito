@@ -140,7 +140,9 @@ public class ReservaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             hotelNombre.setText(hotel == null ? "Cargando hotel…" : hotel.name);
             habitacion.setText(reserva.roomName);
             fechasHuespedes.setText(reserva.rangoFechasTexto() + " · " + reserva.huespedes);
-            precioTotal.setText("S/ " + String.format(Locale.US, "%,.0f", reserva.precioTotal));
+            boolean finalizada=com.example.proyecto_iotelito.data.CheckoutPolicy.finalizada(reserva.estado.name());
+            precioTotal.setText(finalizada&&reserva.comprobante==null?"Total por consultar"
+                    :String.format(Locale.US,"S/ %,.2f",reserva.importeMostrado()));
 
             boolean enCurso = reserva.esActiva() && reserva.estado != Reserva.Estado.EN_CHECKOUT && reserva.estaEnCurso();
             int colorFondo = enCurso ? R.color.io_teal : EstadoUi.colorFondo(reserva.estado);

@@ -41,6 +41,22 @@
             android:text="elito" />
     </LinearLayout>
 
+    <com.google.android.material.card.MaterialCardView android:id="@+id/btn_mis_taxis"
+        style="@style/Widget.IoTelito.Card.Action" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp" app:cardBackgroundColor="@color/io_navy" app:strokeWidth="0dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical" android:padding="16dp">
+            <ImageView android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp"
+                android:background="@drawable/bg_info_box_teal" android:src="@drawable/ic_taxi" app:tint="@color/io_teal" android:contentDescription="@null" />
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="12dp" android:orientation="vertical">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/mis_taxis_title" android:textSize="15sp" android:textStyle="bold" android:textColor="@color/white" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/mis_taxis_access_description" android:textSize="12sp" android:textColor="@color/io_border" />
+            </LinearLayout>
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_chevron_right" app:tint="@color/white" android:contentDescription="@null" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <!-- segmented control: contenedor gris con "pastilla" blanca en el tab activo -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -56,6 +72,9 @@
             android:layout_height="40dp"
             android:background="@android:color/transparent"
             app:tabMode="fixed"
+            app:tabPaddingStart="4dp"
+            app:tabPaddingEnd="4dp"
+            app:tabTextAppearance="@style/TextAppearance.IoTelito.ReservasTab"
             app:tabGravity="fill"
             app:tabIndicatorHeight="0dp"
             app:tabRippleColor="@android:color/transparent"

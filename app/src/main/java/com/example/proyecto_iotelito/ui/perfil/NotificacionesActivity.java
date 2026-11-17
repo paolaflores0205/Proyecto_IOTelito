@@ -68,6 +68,7 @@ public class NotificacionesActivity extends AppCompatActivity {
     private void render() {
         List<NotificacionCliente> rows = new ArrayList<>(local);
         for (NotificacionCliente item : checkouts) {
+            rows.removeIf(existing -> existing.tipo==NotificacionCliente.Tipo.CHECKOUT && existing.id==item.id);
             rows.add(new NotificacionCliente(item.id, item.tipo, item.titulo, item.creadaEn,
                     ClientCheckoutAlerts.isRead(this, item.id), item.reservaId));
         }
