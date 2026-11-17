@@ -143,3 +143,9 @@ No cambiaron los layouts, colores ni lógica de navegación de superadmin, ni su
 Verificación de esta integración: assembleDebug, testDebugUnitTest y assembleDebugAndroidTest correctos; 119 pruebas unitarias sin fallos y 43 pruebas de la API AWS con dobles locales sin fallos. No se ejecutó nuevamente la instrumentación en dispositivos ni se instaló en el A55. No se desplegaron reglas ni recursos cloud durante esta integración. La guía aws/imagenes/README.md de la rama integrada comunica que las rutas de hotel ya fueron desplegadas por el equipo; queda comprobarlas desde la app real.
 
 Prueba siguiente: superadmin agrega una foto en un hotel de prueba, guarda y vuelve a abrir; cliente comprueba el carrusel desde otro dispositivo; administrador asignado prueba galería/servicios. Firestore debe guardar referencias s3:// estables y la API entregar enlaces temporales para lectura. Confirmar además disponibilidad por huéspedes/fechas y checkout. No se asegura que AWS real funcione hasta completar esa prueba.
+
+## Teclado en formularios de superadmin
+
+Se amplió a las actividades de superadmin la reserva del espacio ocupado por el teclado (IME) en el contenedor global, usando el mayor espacio entre teclado y barra del sistema sin sumarlos. Se aplica adjustResize y se desplaza el campo enfocado dentro de su contenedor desplazable, incluyendo NestedScrollView, conservando la edición multilínea. El menú se oculta temporalmente al abrir el teclado y recupera su tamaño y posición anteriores al cerrarlo. El diálogo de motivo de desactivación también solicita adjustResize.
+
+Prueba manual pendiente en el A55: crear/editar hotel y escribir en correo, teléfono y descripción; cambiar de campo con teclado abierto; buscar administrador y usuarios; abrir/cerrar teclado repetidamente y comprobar el menú; escribir el motivo de desactivación y cancelar. No se cambiaron los datos ni se instaló automáticamente la app en el teléfono.

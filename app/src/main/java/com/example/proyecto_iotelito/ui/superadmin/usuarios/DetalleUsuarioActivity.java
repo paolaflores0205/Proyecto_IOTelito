@@ -90,7 +90,10 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
         if (selected.active) {
             dialog.setView(reason);
         }
-        dialog.show();
+        androidx.appcompat.app.AlertDialog shown = dialog.show();
+        if (shown.getWindow() != null) {
+            shown.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
     }
 
     private boolean canChange() {
