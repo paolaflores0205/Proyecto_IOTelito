@@ -1,8 +1,7 @@
 package com.iotelito.taxiweb.model;
 
+/** Roles con cuenta en la base del sistema web. Clientes y admins de hotel viven en Firebase. */
 public enum Rol {
-    CLIENTE,
-    TAXISTA,
-    ADMIN_HOTEL,
-    SUPERADMIN
+    SUPERADMIN,
+    TAXISTA
 }

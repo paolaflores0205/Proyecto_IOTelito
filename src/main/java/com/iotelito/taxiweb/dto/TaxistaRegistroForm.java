@@ -1,5 +1,6 @@
 package com.iotelito.taxiweb.dto;
 
+import com.iotelito.taxiweb.model.TipoDocumento;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -13,7 +14,8 @@ public class TaxistaRegistroForm {
     private String telefono;
 
     // Taxista
-    private String dni;
+    private TipoDocumento tipoDocumento = TipoDocumento.DNI;
+    private String numeroDocumento;
     private LocalDate fechaNacimiento;
     private String domicilio;
 
@@ -71,12 +73,20 @@ public class TaxistaRegistroForm {
         this.telefono = telefono;
     }
 
-    public String getDni() {
-        return dni;
+    public TipoDocumento getTipoDocumento() {
+        return tipoDocumento;
     }
 
-    public void setDni(String dni) {
-        this.dni = dni;
+    public void setTipoDocumento(TipoDocumento tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
+
+    public String getNumeroDocumento() {
+        return numeroDocumento;
+    }
+
+    public void setNumeroDocumento(String numeroDocumento) {
+        this.numeroDocumento = numeroDocumento;
     }
 
     public LocalDate getFechaNacimiento() {

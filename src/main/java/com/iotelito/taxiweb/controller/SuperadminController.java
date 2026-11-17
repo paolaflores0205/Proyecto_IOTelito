@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/superadmin")
@@ -39,17 +39,11 @@ public class SuperadminController {
         this.usuarioRepository = usuarioRepository;
     }
 
+    /** El superadmin con la sesión iniciada; las vistas muestran su nombre. */
     @ModelAttribute("usuarioActual")
-    public Usuario usuarioActual() {
-        return usuarioRepository.findByCorreo("admin@iotelito.com")
-                .orElseGet(() -> {
-                    Usuario usuario = new Usuario();
-                    usuario.setNombres("Super");
-                    usuario.setApellidos("Administrador");
-                    usuario.setCorreo("admin@iotelito.com");
-                    usuario.setTelefono("999999999");
-                    return usuario;
-                });
+    public Usuario usuarioActual(Principal principal) {
+        return usuarioRepository.findByCorreo(principal.getName())
+                .orElseThrow(() -> new IllegalStateException("La cuenta de la sesión ya no existe"));
     }
 
     @GetMapping("/dashboard")
@@ -154,9 +148,10 @@ public class SuperadminController {
     @PostMapping("/taxistas/{id}/aprobar")
     public String aprobarTaxista(
             @PathVariable Long id,
+            Principal principal,
             RedirectAttributes redirectAttributes
     ) {
-        taxistaService.aprobarTaxista(id);
+        taxistaService.aprobarTaxista(id, principal.getName());
         redirectAttributes.addFlashAttribute("mensaje", "Taxista aprobado correctamente");
 
         return "redirect:/superadmin/taxistas/" + id;
@@ -165,9 +160,10 @@ public class SuperadminController {
     @PostMapping("/taxistas/{id}/rechazar")
     public String rechazarTaxista(
             @PathVariable Long id,
+            Principal principal,
             RedirectAttributes redirectAttributes
     ) {
-        taxistaService.rechazarTaxista(id);
+        taxistaService.rechazarTaxista(id, principal.getName());
         redirectAttributes.addFlashAttribute("mensaje", "Solicitud rechazada correctamente");
 
         return "redirect:/superadmin/taxistas/" + id;
@@ -177,9 +173,10 @@ public class SuperadminController {
     public String cambiarDisponibilidad(
             @PathVariable Long id,
             @RequestParam boolean disponible,
+            Principal principal,
             RedirectAttributes redirectAttributes
     ) {
-        taxistaService.cambiarDisponibilidad(id, disponible);
+        taxistaService.cambiarDisponibilidad(id, disponible, principal.getName());
         redirectAttributes.addFlashAttribute("mensaje", "Disponibilidad actualizada");
 
         return "redirect:/superadmin/taxistas/flota";
@@ -218,13 +215,14 @@ public class SuperadminController {
     @GetMapping("/reportes/exportar")
     public ResponseEntity<byte[]> exportarReporte() {
         StringBuilder csv = new StringBuilder();
-        csv.append("id,nombres,apellidos,dni,placa,estado,disponible,calificacion,servicios\n");
+        csv.append("id,nombres,apellidos,tipo_documento,numero_documento,placa,estado,disponible,calificacion,servicios\n");
 
         for (Taxista taxista : taxistaService.listarTaxistas(null, null)) {
             csv.append(taxista.getId()).append(",");
             csv.append(escaparCsv(taxista.getUsuario().getNombres())).append(",");
             csv.append(escaparCsv(taxista.getUsuario().getApellidos())).append(",");
-            csv.append(escaparCsv(taxista.getDni())).append(",");
+            csv.append(taxista.getTipoDocumento()).append(",");
+            csv.append(escaparCsv(taxista.getNumeroDocumento())).append(",");
             csv.append(escaparCsv(taxista.getPlacaVehiculo())).append(",");
             csv.append(taxista.getEstadoSolicitud()).append(",");
             csv.append(taxista.getDisponible()).append(",");

@@ -12,5 +12,5 @@ public interface UsuarioRepository
 
     Optional<Usuario> findByCorreo(String correo);
 
-    Optional<Usuario> findByCorreoAndPassword(String correo, String password);
+    Optional<Usuario> findByFirebaseUid(String firebaseUid);
 }

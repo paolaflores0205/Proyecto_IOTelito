@@ -122,7 +122,7 @@
 
         <div class="sidebar-bottom">
 
-            <a th:href="@{/}"
+            <a th:href="@{/logout}"
                class="menu-item">
 
                 <span class="material-symbols-rounded">
@@ -473,7 +473,7 @@
                             </th>
 
                             <th>
-                                DNI
+                                DOCUMENTO
                             </th>
 
                             <th>
@@ -517,7 +517,7 @@
                                     </strong>
                                 </div>
                             </td>
-                            <td th:text="${taxista.dni}">DNI</td>
+                            <td th:text="${taxista.documento}">DNI</td>
                             <td th:text="${taxista.categoriaLicencia}">Categoría</td>
                             <td th:text="${#temporals.format(taxista.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">Fecha</td>
                             <td>

@@ -1262,3 +1262,23 @@ body {
         justify-content: center !important;
     }
 }
+
+
+/* Tipo de documento: mismo aspecto que los campos de texto. */
+.field select {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--figma-border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text-primary);
+    font-family: "Roboto", sans-serif;
+    font-size: 14px;
+    outline: none;
+}
+
+.field select:focus {
+    border-color: var(--figma-primary);
+    box-shadow: 0 0 0 2px rgba(0, 194, 168, 0.14);
+}

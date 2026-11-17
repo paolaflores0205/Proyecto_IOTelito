@@ -129,7 +129,7 @@
 
         <div class="sidebar-bottom">
 
-            <a th:href="@{/}"
+            <a th:href="@{/logout}"
                class="menu-item">
 
                 <span class="material-symbols-rounded">
@@ -242,7 +242,7 @@
                     <thead>
                     <tr>
                         <th>Taxista</th>
-                        <th>DNI</th>
+                        <th>Documento</th>
                         <th>Licencia</th>
                         <th>Vehiculo</th>
                         <th>Fecha</th>
@@ -271,7 +271,7 @@
                             </div>
                         </td>
 
-                        <td th:text="${solicitud.dni}">
+                        <td th:text="${solicitud.documento}">
                             71234567
                         </td>
 

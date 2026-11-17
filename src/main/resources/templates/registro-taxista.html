@@ -234,21 +234,39 @@
                 </div>
 
 
-                <div class="form-row">
+                <div class="form-row three">
 
                     <div class="field">
 
-                        <label for="dni">
-                            Documento Nacional de Identidad (DNI) *
+                        <label for="tipoDocumento">
+                            Tipo de documento *
+                        </label>
+
+                        <select
+                                id="tipoDocumento"
+                                th:field="*{tipoDocumento}"
+                                required>
+                            <option th:each="tipo : ${T(com.iotelito.taxiweb.model.TipoDocumento).values()}"
+                                    th:value="${tipo}"
+                                    th:text="${tipo.etiqueta}">DNI</option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="numeroDocumento">
+                            Número de documento *
                         </label>
 
                         <input
-                                id="dni"
+                                id="numeroDocumento"
                                 type="text"
-                                th:field="*{dni}"
-                                placeholder="8 dígitos (Ej. 71234567)"
-                                maxlength="8"
-                                pattern="[0-9]{8}"
+                                th:field="*{numeroDocumento}"
+                                placeholder="DNI: 8 dígitos (Ej. 71234567)"
+                                maxlength="12"
+                                pattern="[A-Za-z0-9]{6,12}"
                                 required>
 
                     </div>

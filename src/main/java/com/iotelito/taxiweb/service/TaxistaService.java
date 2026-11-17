@@ -1,150 +1,106 @@
 package com.iotelito.taxiweb.service;
 
 import com.iotelito.taxiweb.dto.TaxistaRegistroForm;
-import com.iotelito.taxiweb.model.*;
+import com.iotelito.taxiweb.model.EstadoSolicitudTaxista;
+import com.iotelito.taxiweb.model.LogSistema;
+import com.iotelito.taxiweb.model.Rol;
+import com.iotelito.taxiweb.model.Taxista;
+import com.iotelito.taxiweb.model.TipoDocumento;
+import com.iotelito.taxiweb.model.Usuario;
+import com.iotelito.taxiweb.repository.LogSistemaRepository;
 import com.iotelito.taxiweb.repository.TaxistaRepository;
 import com.iotelito.taxiweb.repository.UsuarioRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
+import java.util.Locale;
 
 @Service
 public class TaxistaService {
 
     private final TaxistaRepository taxistaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final LogSistemaRepository logRepository;
 
     public TaxistaService(
             TaxistaRepository taxistaRepository,
-            UsuarioRepository usuarioRepository
+            UsuarioRepository usuarioRepository,
+            LogSistemaRepository logRepository
     ) {
         this.taxistaRepository = taxistaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.logRepository = logRepository;
     }
 
+    /**
+     * Autorregistro desde la web. El taxista queda PENDIENTE y sin acceso a la app hasta que
+     * el superadmin lo apruebe. No se le pide ni se le guarda contraseña: al aprobarlo se le
+     * crea su cuenta de Firebase para la app.
+     */
+    @Transactional
     public Taxista registrarTaxista(TaxistaRegistroForm form) {
+        TipoDocumento tipo = form.getTipoDocumento();
+        String numero = recortar(form.getNumeroDocumento());
+        String correo = recortar(form.getCorreo()).toLowerCase(Locale.ROOT);
+        String placa = recortar(form.getPlacaVehiculo()).toUpperCase(Locale.ROOT);
+        String licencia = recortar(form.getNumeroLicencia()).toUpperCase(Locale.ROOT);
 
-        if (usuarioRepository.existsByCorreo(form.getCorreo())) {
-            throw new RuntimeException(
-                    "Ya existe un usuario registrado con ese correo"
-            );
+        if (tipo == null) {
+            throw new RuntimeException("Elige el tipo de documento de identidad");
         }
-
-        if (taxistaRepository.existsByDni(form.getDni())) {
-            throw new RuntimeException(
-                    "Ya existe una solicitud con ese DNI"
-            );
+        if (!tipo.valida(numero)) {
+            throw new RuntimeException(switch (tipo) {
+                case DNI -> "El DNI debe tener 8 dígitos";
+                case PASAPORTE -> "El pasaporte debe tener de 6 a 12 letras o números";
+                case CARNET_EXTRANJERIA -> "El carné de extranjería debe tener de 9 a 12 letras o números";
+            });
         }
-
-        if (taxistaRepository.existsByNumeroLicencia(
-                form.getNumeroLicencia()
-        )) {
-            throw new RuntimeException(
-                    "Ya existe una solicitud con esa licencia"
-            );
+        if (!Boolean.TRUE.equals(form.getAceptaTerminos())) {
+            throw new RuntimeException("Debes aceptar los términos para registrarte");
         }
-
-        if (taxistaRepository.existsByPlacaVehiculo(
-                form.getPlacaVehiculo()
-        )) {
-            throw new RuntimeException(
-                    "Ya existe un vehículo registrado con esa placa"
-            );
+        if (usuarioRepository.existsByCorreo(correo)) {
+            throw new RuntimeException("Ya existe un usuario registrado con ese correo");
         }
-
-        // =====================
-        // CREAR USUARIO
-        // =====================
+        if (taxistaRepository.existsByTipoDocumentoAndNumeroDocumento(tipo, numero)) {
+            throw new RuntimeException("Ya existe una solicitud con ese documento");
+        }
+        if (taxistaRepository.existsByNumeroLicencia(licencia)) {
+            throw new RuntimeException("Ya existe una solicitud con esa licencia");
+        }
+        if (taxistaRepository.existsByPlacaVehiculo(placa)) {
+            throw new RuntimeException("Ya existe un vehículo registrado con esa placa");
+        }
 
         Usuario usuario = new Usuario();
-
-        usuario.setNombres(form.getNombres());
-        usuario.setApellidos(form.getApellidos());
-        usuario.setCorreo(form.getCorreo());
-        usuario.setTelefono(form.getTelefono());
-
+        usuario.setNombres(recortar(form.getNombres()));
+        usuario.setApellidos(recortar(form.getApellidos()));
+        usuario.setCorreo(correo);
+        usuario.setTelefono(recortar(form.getTelefono()));
         usuario.setRol(Rol.TAXISTA);
-
-        // Todavía pendiente de aprobación
         usuario.setActivo(false);
 
-        /*
-         * Tu Figma no pide contraseña en el registro.
-         * Por ahora generamos una clave interna.
-         * Después, al aprobarlo, se puede enviar un flujo
-         * para crear contraseña.
-         */
-        usuario.setPassword(UUID.randomUUID().toString());
-        usuario.marcarCreacion();
-
-        usuario = usuarioRepository.save(usuario);
-
-
-        // =====================
-        // CREAR TAXISTA
-        // =====================
-
         Taxista taxista = new Taxista();
-
         taxista.setUsuario(usuario);
-
-        taxista.setDni(form.getDni());
-
-        taxista.setFechaNacimiento(
-                form.getFechaNacimiento()
-        );
-
-        taxista.setDomicilio(
-                form.getDomicilio()
-        );
-
-        taxista.setNumeroLicencia(
-                form.getNumeroLicencia()
-        );
-
-        taxista.setCategoriaLicencia(
-                form.getCategoriaLicencia()
-        );
-
-        taxista.setFechaVencimientoLicencia(
-                form.getFechaVencimientoLicencia()
-        );
-
-        taxista.setMarcaVehiculo(
-                form.getMarcaVehiculo()
-        );
-
-        taxista.setModeloVehiculo(
-                form.getModeloVehiculo()
-        );
-
-        taxista.setAnioVehiculo(
-                form.getAnioVehiculo()
-        );
-
-        taxista.setColorVehiculo(
-                form.getColorVehiculo()
-        );
-
-        taxista.setPlacaVehiculo(
-                form.getPlacaVehiculo()
-        );
-
-        taxista.setAceptaTerminos(
-                Boolean.TRUE.equals(form.getAceptaTerminos())
-        );
-
-        taxista.setEstadoSolicitud(
-                EstadoSolicitudTaxista.PENDIENTE
-        );
-
+        taxista.setTipoDocumento(tipo);
+        taxista.setNumeroDocumento(numero);
+        taxista.setFechaNacimiento(form.getFechaNacimiento());
+        taxista.setDomicilio(recortar(form.getDomicilio()));
+        taxista.setNumeroLicencia(licencia);
+        taxista.setCategoriaLicencia(recortar(form.getCategoriaLicencia()));
+        taxista.setFechaVencimientoLicencia(form.getFechaVencimientoLicencia());
+        taxista.setMarcaVehiculo(recortar(form.getMarcaVehiculo()));
+        taxista.setModeloVehiculo(recortar(form.getModeloVehiculo()));
+        taxista.setAnioVehiculo(form.getAnioVehiculo());
+        taxista.setColorVehiculo(recortar(form.getColorVehiculo()));
+        taxista.setPlacaVehiculo(placa);
+        taxista.setAceptaTerminos(true);
+        taxista.setEstadoSolicitud(EstadoSolicitudTaxista.PENDIENTE);
         taxista.setDisponible(false);
-        taxista.marcarSolicitud();
 
         return taxistaRepository.save(taxista);
     }
@@ -153,17 +109,10 @@ public class TaxistaService {
         List<Taxista> taxistas;
 
         if (busqueda != null && !busqueda.isBlank()) {
-            String termino = busqueda.trim();
-            taxistas = taxistaRepository
-                    .findByDniContainingIgnoreCaseOrPlacaVehiculoContainingIgnoreCaseOrUsuarioNombresContainingIgnoreCaseOrUsuarioApellidosContainingIgnoreCaseOrderByFechaSolicitudDesc(
-                            termino,
-                            termino,
-                            termino,
-                            termino
-                    );
+            taxistas = taxistaRepository.buscarPorTermino(busqueda.trim());
         } else if (estado != null && !estado.isBlank()) {
             taxistas = taxistaRepository.findByEstadoSolicitudOrderByFechaSolicitudDesc(
-                    EstadoSolicitudTaxista.valueOf(estado.toUpperCase())
+                    EstadoSolicitudTaxista.valueOf(estado.toUpperCase(Locale.ROOT))
             );
         } else {
             taxistas = taxistaRepository.findAllByOrderByFechaSolicitudDesc();
@@ -174,7 +123,7 @@ public class TaxistaService {
         }
 
         EstadoSolicitudTaxista estadoSolicitud =
-                EstadoSolicitudTaxista.valueOf(estado.toUpperCase());
+                EstadoSolicitudTaxista.valueOf(estado.toUpperCase(Locale.ROOT));
 
         return taxistas.stream()
                 .filter(taxista -> taxista.getEstadoSolicitud() == estadoSolicitud)
@@ -186,36 +135,26 @@ public class TaxistaService {
             String busqueda,
             Pageable pageable
     ) {
-        Page<Taxista> taxistas;
+        boolean conBusqueda = busqueda != null && !busqueda.isBlank();
+        boolean conEstado = estado != null && !estado.isBlank();
 
-        if (busqueda != null && !busqueda.isBlank()
-                && estado != null && !estado.isBlank()) {
-            String termino = busqueda.trim();
-            taxistas = taxistaRepository.buscarPorEstadoYTermino(
-                    EstadoSolicitudTaxista.valueOf(estado.toUpperCase()),
-                    termino,
+        if (conBusqueda && conEstado) {
+            return taxistaRepository.buscarPorEstadoYTermino(
+                    EstadoSolicitudTaxista.valueOf(estado.toUpperCase(Locale.ROOT)),
+                    busqueda.trim(),
                     pageable
             );
-        } else if (busqueda != null && !busqueda.isBlank()) {
-            String termino = busqueda.trim();
-            taxistas = taxistaRepository
-                    .findByDniContainingIgnoreCaseOrPlacaVehiculoContainingIgnoreCaseOrUsuarioNombresContainingIgnoreCaseOrUsuarioApellidosContainingIgnoreCase(
-                            termino,
-                            termino,
-                            termino,
-                            termino,
-                            pageable
-                    );
-        } else if (estado != null && !estado.isBlank()) {
-            taxistas = taxistaRepository.findByEstadoSolicitud(
-                    EstadoSolicitudTaxista.valueOf(estado.toUpperCase()),
-                    pageable
-            );
-        } else {
-            taxistas = taxistaRepository.findAll(pageable);
         }
-
-        return taxistas;
+        if (conBusqueda) {
+            return taxistaRepository.buscarPorTermino(busqueda.trim(), pageable);
+        }
+        if (conEstado) {
+            return taxistaRepository.findByEstadoSolicitud(
+                    EstadoSolicitudTaxista.valueOf(estado.toUpperCase(Locale.ROOT)),
+                    pageable
+            );
+        }
+        return taxistaRepository.findAll(pageable);
     }
 
     public List<Taxista> listarPorDisponibilidad(Boolean disponible) {
@@ -239,9 +178,7 @@ public class TaxistaService {
 
     public List<Taxista> listarPendientesRecientes() {
         return taxistaRepository
-                .findByEstadoSolicitudOrderByFechaSolicitudDesc(
-                        EstadoSolicitudTaxista.PENDIENTE
-                )
+                .findByEstadoSolicitudOrderByFechaSolicitudDesc(EstadoSolicitudTaxista.PENDIENTE)
                 .stream()
                 .limit(5)
                 .toList();
@@ -254,10 +191,7 @@ public class TaxistaService {
     }
 
     public Page<Taxista> listarSolicitudesPendientesPaginado(Pageable pageable) {
-        return taxistaRepository.findByEstadoSolicitud(
-                EstadoSolicitudTaxista.PENDIENTE,
-                pageable
-        );
+        return taxistaRepository.findByEstadoSolicitud(EstadoSolicitudTaxista.PENDIENTE, pageable);
     }
 
     public Taxista obtenerTaxista(Long id) {
@@ -265,34 +199,36 @@ public class TaxistaService {
                 .orElseThrow(() -> new RuntimeException("No se encontro el taxista solicitado"));
     }
 
-    public Taxista aprobarTaxista(Long id) {
+    @Transactional
+    public Taxista aprobarTaxista(Long id, String actorCorreo) {
         Taxista taxista = obtenerTaxista(id);
 
         taxista.setEstadoSolicitud(EstadoSolicitudTaxista.APROBADO);
         taxista.setDisponible(true);
         taxista.getUsuario().setActivo(true);
-        taxista.getUsuario().marcarActualizacion();
-        usuarioRepository.save(taxista.getUsuario());
+        registrar(actorCorreo, "APROBAR_TAXISTA", descripcion(taxista));
 
         return taxistaRepository.save(taxista);
     }
 
-    public Taxista rechazarTaxista(Long id) {
+    @Transactional
+    public Taxista rechazarTaxista(Long id, String actorCorreo) {
         Taxista taxista = obtenerTaxista(id);
 
         taxista.setEstadoSolicitud(EstadoSolicitudTaxista.RECHAZADO);
         taxista.setDisponible(false);
         taxista.getUsuario().setActivo(false);
-        taxista.getUsuario().marcarActualizacion();
-        usuarioRepository.save(taxista.getUsuario());
+        registrar(actorCorreo, "RECHAZAR_TAXISTA", descripcion(taxista));
 
         return taxistaRepository.save(taxista);
     }
 
-    public Taxista cambiarDisponibilidad(Long id, boolean disponible) {
+    @Transactional
+    public Taxista cambiarDisponibilidad(Long id, boolean disponible, String actorCorreo) {
         Taxista taxista = obtenerTaxista(id);
 
         taxista.setDisponible(disponible);
+        registrar(actorCorreo, disponible ? "HABILITAR_DISPONIBILIDAD" : "QUITAR_DISPONIBILIDAD", descripcion(taxista));
 
         return taxistaRepository.save(taxista);
     }
@@ -347,5 +283,19 @@ public class TaxistaService {
                         Comparator.nullsLast(Comparator.reverseOrder())))
                 .limit(5)
                 .toList();
+    }
+
+    private void registrar(String actorCorreo, String accion, String detalle) {
+        Usuario actor = actorCorreo == null ? null : usuarioRepository.findByCorreo(actorCorreo).orElse(null);
+        logRepository.save(new LogSistema(actor, accion, detalle));
+    }
+
+    private static String descripcion(Taxista taxista) {
+        return taxista.getUsuario().getNombres() + " " + taxista.getUsuario().getApellidos()
+                + " (" + taxista.getPlacaVehiculo() + ")";
+    }
+
+    private static String recortar(String valor) {
+        return valor == null ? "" : valor.trim();
     }
 }
