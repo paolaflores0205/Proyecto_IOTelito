@@ -54,7 +54,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="GL"
+                    android:id="@+id/taxi_rating_initials"
+                    android:text=""
                     android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -65,7 +66,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:gravity="center"
-                android:text="@string/nombre_conductor"
+                android:id="@+id/taxi_rating_name"
+                android:text=""
                 android:textColor="@color/io_text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -75,7 +77,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:text="@string/vehiculo_placa"
+                android:id="@+id/taxi_rating_vehicle"
+                android:text=""
                 android:textColor="@color/io_text_secondary"
                 android:textSize="13sp" />
 
@@ -162,12 +165,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/label_comentarios_taxi"
+                    android:text="@string/taxi_api_comment"
                     android:textColor="@color/io_text_secondary"
                     android:textSize="12sp" />
 
                 <EditText
                     android:id="@+id/et_comentarios_taxi"
+                    android:maxLength="500"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:layout_marginTop="8dp"

@@ -42,7 +42,7 @@ public final class FirebaseProfileRepository {
             callback.complete(user, null);
             return;
         }
-        // users decide el rol; taxistas conserva la habilitación operativa del conductor.
+        // users decide el rol; la API verifica la habilitación operativa del conductor.
         TaxistaAuthRepository.resolver().addOnSuccessListener(driver -> {
             if (driver.getRole() != UserRole.TAXISTA) {
                 callback.complete(null, "La cuenta no tiene perfil operativo en taxistas.");
@@ -50,9 +50,7 @@ public final class FirebaseProfileRepository {
             }
             callback.complete(user, null);
         }).addOnFailureListener(error -> callback.complete(null,
-                error instanceof TaxistaSessionProfile.TaxistaInactivoException
-                        ? "Tu cuenta de taxista está inactiva."
-                        : "No se pudo verificar el perfil taxista. Revisa conexión y permisos."));
+                com.example.proyecto_iotelito.data.taxiapi.TaxiTasks.message(error)));
     }
 
     public static com.google.android.gms.tasks.Task<Void> createClient(String uid, Map<String, Object> fields) {

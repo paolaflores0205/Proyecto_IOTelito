@@ -39,17 +39,27 @@ public class PerfilTaxistaFragment extends Fragment {
                 com.example.proyecto_iotelito.data.SessionRepository.obtener(requireContext());
         String nombre = usuario == null ? "" : usuario.getDisplayName();
         ((TextView) view.findViewById(R.id.tv_avatar_inicial)).setText(nombre.isEmpty()?"":nombre.substring(0,1));
-        ((TextView) view.findViewById(R.id.tv_rating)).setText("★ 4.8");
+        ((TextView) view.findViewById(R.id.tv_rating)).setText("—");
 
-        bindRow(view, R.id.row_dni, R.string.taxi_label_dni, "68492135");
-        bindRow(view, R.id.row_telefono, R.string.taxi_label_telefono, "+51 987 654 321");
+        bindRow(view, R.id.row_dni, R.string.taxi_label_dni, "—");
+        bindRow(view, R.id.row_telefono, R.string.taxi_label_telefono, "—");
         bindRow(view, R.id.row_correo, R.string.taxi_label_correo, usuario == null ? "" : usuario.getEmail());
 
-        bindRow(view, R.id.row_modelo, R.string.taxi_label_modelo, "Toyota Corolla (2024)");
-        bindRow(view, R.id.row_placa, R.string.taxi_label_placa, "ABC-123");
-        bindRow(view, R.id.row_color, R.string.taxi_label_color, "Gris Metálico");
+        bindRow(view, R.id.row_modelo, R.string.taxi_label_modelo, "—");
+        bindRow(view, R.id.row_placa, R.string.taxi_label_placa, "—");
+        bindRow(view, R.id.row_color, R.string.taxi_label_color, "—");
 
         vm=new androidx.lifecycle.ViewModelProvider(requireActivity()).get(TaxistaViewModel.class);
+        view.findViewById(R.id.row_dni).setVisibility(View.GONE);
+        vm.repo.perfil.observe(getViewLifecycleOwner(),p->{
+            org.json.JSONObject car=p.optJSONObject("vehiculo");
+            ((TextView)view.findViewById(R.id.tv_rating)).setText("★ "+p.optDouble("calificacion"));
+            bindRow(view,R.id.row_telefono,R.string.taxi_label_telefono,p.optString("telefono"));
+            bindRow(view,R.id.row_correo,R.string.taxi_label_correo,p.optString("correo"));
+            bindRow(view,R.id.row_modelo,R.string.taxi_label_modelo,car.optString("marca")+" "+car.optString("modelo")+" ("+car.optInt("anio")+")");
+            bindRow(view,R.id.row_placa,R.string.taxi_label_placa,car.optString("placa"));
+            bindRow(view,R.id.row_color,R.string.taxi_label_color,car.optString("color"));
+        });
         ConductorUi.disponibilidad(this,view,R.id.switch_disponibilidad_perfil,R.id.tv_estado_disponibilidad_perfil,vm);
         View avisos=view.findViewById(R.id.taxista_row_avisos);
         ((ImageView)avisos.findViewById(R.id.iv_icono)).setImageResource(R.drawable.ic_notifications);
@@ -68,6 +78,7 @@ public class PerfilTaxistaFragment extends Fragment {
         rowSoporte.setOnClickListener(v -> mostrarProximamente());
 
         view.findViewById(R.id.tv_cerrar_sesion).setOnClickListener(v -> {
+            TaxistaLocationService.stop(requireContext());
             com.example.proyecto_iotelito.data.SessionRepository.cerrar(requireContext());
             startActivity(new Intent(requireContext(), com.example.proyecto_iotelito.ui.auth.LoginActivity.class)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));

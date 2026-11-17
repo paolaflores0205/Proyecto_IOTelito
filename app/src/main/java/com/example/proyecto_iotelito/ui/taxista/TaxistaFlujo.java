@@ -17,7 +17,11 @@ final class TaxistaFlujo {
     static final String ID=TaxiRepository.EXTRA_ID;
     static TaxistaViewModel model(AppCompatActivity a) {
         TaxistaViewModel vm=new ViewModelProvider(a).get(TaxistaViewModel.class);
-        vm.repo.error.observe(a,error->{if(error!=null) Toast.makeText(a,error,Toast.LENGTH_LONG).show();});
+        com.example.proyecto_iotelito.ui.taxi.TaxiUi.status(a,null);
+        vm.repo.bind(a);
+        TaxistaLocation.bind(a,vm);
+        vm.repo.error.observe(a,error->{if(error!=null) com.example.proyecto_iotelito.ui.taxi.TaxiUi.status(a,error);});
+        a.getLifecycle().addObserver(new androidx.lifecycle.DefaultLifecycleObserver(){public void onResume(androidx.lifecycle.LifecycleOwner owner){vm.disponibilidad.refrescar();}});
         return vm;
     }
     static boolean sesion(Activity a) {
@@ -77,8 +81,13 @@ final class TaxistaFlujo {
         ((TextView)row.findViewById(R.id.tv_avatar_inicial)).setText(e.iniciales);
         ((TextView)row.findViewById(R.id.tv_pasajero_nombre)).setText(e.nombre);
         ((TextView)row.findViewById(R.id.tv_pasajero_detalle)).setText(e.hotel);
-        row.findViewById(R.id.iv_chat).setOnClickListener(v->a.startActivity(
-                ChatPasajeroTaxistaActivity.createIntent(a,e.nombre,e.iniciales).putExtra(ID,e.id)));
+        View chat = row.findViewById(R.id.iv_chat);
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+            chat.setVisibility(View.GONE);
+        } else {
+            chat.setOnClickListener(v -> a.startActivity(
+                    ChatPasajeroTaxistaActivity.createIntent(a, e.nombre, e.iniciales).putExtra(ID, e.id)));
+        }
     }
     static void avanzar(AppCompatActivity a,TaxistaViewModel vm,int button,int id,EstadoServicio estado,Class<?> siguiente) {
         View btn=a.findViewById(button); btn.setOnClickListener(v->{

@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <application
         android:name=".IoTelitoApplication"
@@ -22,6 +24,8 @@
             <intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT" /></intent-filter>
         </service>
         <activity android:name=".notification.ClientNotificationActivity" android:exported="false" />
+        <service android:name=".ui.taxista.TaxistaLocationService" android:exported="false" android:foregroundServiceType="location" />
+        <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode_ui" />
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true"
@@ -141,7 +145,6 @@
             android:parentActivityName=".MainActivity" />
 
         <activity android:name=".ui.taxi.MisTaxisActivity" android:exported="false" />
-        <activity android:name=".ui.taxi.TaxiChatActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <!-- Flujo taxi cliente -->
         <activity
             android:name=".ui.taxi.BeneficioTaxiActivity"

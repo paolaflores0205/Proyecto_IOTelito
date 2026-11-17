@@ -14,7 +14,8 @@ import com.example.proyecto_iotelito.model.taxi.BeneficioTaxi;
 
 import java.util.List;
 
-public class BeneficioTaxiAdapter extends RecyclerView.Adapter<BeneficioTaxiAdapter.BeneficioViewHolder> {
+public class BeneficioTaxiAdapter
+        extends RecyclerView.Adapter<BeneficioTaxiAdapter.BeneficioViewHolder> {
 
     private final List<BeneficioTaxi> beneficios;
 
@@ -25,8 +26,9 @@ public class BeneficioTaxiAdapter extends RecyclerView.Adapter<BeneficioTaxiAdap
     @NonNull
     @Override
     public BeneficioViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_beneficio_taxi, parent, false);
+        View view =
+                LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_beneficio_taxi, parent, false);
         return new BeneficioViewHolder(view);
     }
 

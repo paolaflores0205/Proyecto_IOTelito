@@ -47,12 +47,10 @@ public class DetalleReservaActivity extends AppCompatActivity {
                 :new Intent(this,com.example.proyecto_iotelito.ui.taxi.MisTaxisActivity.class);
             startActivity(intent);
         });
-        com.example.proyecto_iotelito.data.ClientTaxiRepository.observe(this).observe(this,state->{
-            if(state.loading||state.error!=null)return;
-            solicitudTaxi=-1;
-            for(org.json.JSONObject row:state.rows)if(row.optInt("reserva")==reservaId){solicitudTaxi=row.optInt("id");break;}
-            actualizarTaxi();
-        });
+        if (reservaId > 0) com.example.proyecto_iotelito.data.taxiapi.TaxiTasks.poll(this, 5000,
+                () -> TaxiRepository.porReserva(this, reservaId),
+                solicitud -> { solicitudTaxi = solicitud; actualizarTaxi(); },
+                error -> { solicitudTaxi = -1; actualizarTaxi(); });
         ReservaRepository.getInstance(this).observarTodas().observe(this,rows->{
             if(hotelMostrado==null)return;
             for(Reserva row:rows)if(row.id==reservaId){pintarReserva(row,hotelMostrado);break;}
