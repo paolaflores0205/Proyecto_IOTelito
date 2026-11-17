@@ -4,13 +4,16 @@ import com.iotelito.taxiweb.firebase.CuentaFirebaseException;
 import com.iotelito.taxiweb.model.Taxista;
 import com.iotelito.taxiweb.model.Usuario;
 import com.iotelito.taxiweb.repository.UsuarioRepository;
+import com.iotelito.taxiweb.service.DocumentosTaxistaService;
 import com.iotelito.taxiweb.service.TaxistaService;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 
@@ -31,13 +35,16 @@ public class SuperadminController {
 
     private final TaxistaService taxistaService;
     private final UsuarioRepository usuarioRepository;
+    private final DocumentosTaxistaService documentos;
 
     public SuperadminController(
             TaxistaService taxistaService,
-            UsuarioRepository usuarioRepository
+            UsuarioRepository usuarioRepository,
+            DocumentosTaxistaService documentos
     ) {
         this.taxistaService = taxistaService;
         this.usuarioRepository = usuarioRepository;
+        this.documentos = documentos;
     }
 
     /** El superadmin con la sesión iniciada; las vistas muestran su nombre. */
@@ -112,9 +119,28 @@ public class SuperadminController {
             Model model
     ) {
         cargarResumen(model);
-        model.addAttribute("taxista", taxistaService.obtenerTaxista(id));
+        cargarDetalleTaxista(id, model);
 
         return "web-detalle-taxista";
+    }
+
+    @GetMapping("/taxistas/{id}/documentos/{documentoId}")
+    public ResponseEntity<Void> abrirDocumento(@PathVariable Long id, @PathVariable Long documentoId) {
+        try {
+            return documentos.abrir(id, documentoId)
+                    .map(this::redirigirAArchivo)
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (IllegalStateException error) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+    }
+
+    private ResponseEntity<Void> redirigirAArchivo(URI url) {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(url)
+                .cacheControl(CacheControl.noStore())
+                .header("Referrer-Policy", "no-referrer")
+                .build();
     }
 
     @GetMapping("/solicitudes/evaluar")
@@ -141,9 +167,15 @@ public class SuperadminController {
             Model model
     ) {
         cargarResumen(model);
-        model.addAttribute("taxista", taxistaService.obtenerTaxista(id));
+        cargarDetalleTaxista(id, model);
 
         return "web-evaluar-solicitud";
+    }
+
+    private void cargarDetalleTaxista(Long id, Model model) {
+        Taxista taxista = taxistaService.obtenerTaxista(id);
+        model.addAttribute("taxista", taxista);
+        model.addAttribute("documentosTaxista", documentos.listarAdjuntos(taxista));
     }
 
     @PostMapping("/taxistas/{id}/aprobar")

@@ -4,7 +4,9 @@ import com.iotelito.taxiweb.dto.TaxistaRegistroForm;
 import com.iotelito.taxiweb.model.Taxista;
 import com.iotelito.taxiweb.service.TaxistaService;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.TransactionException;
 import org.springframework.ui.Model;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,6 +57,9 @@ public class TaxistaController {
 
             return "registro-exitoso";
 
+        } catch (DataAccessException | TransactionException e) {
+            model.addAttribute("error", "No pudimos guardar la solicitud. Revisa los datos e intenta de nuevo.");
+            return "registro-taxista";
         } catch (RuntimeException e) {
 
             model.addAttribute(
@@ -65,4 +70,5 @@ public class TaxistaController {
             return "registro-taxista";
         }
     }
+
 }

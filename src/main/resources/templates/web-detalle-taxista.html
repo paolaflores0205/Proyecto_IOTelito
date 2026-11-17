@@ -574,63 +574,7 @@
                         <div class="divider"></div>
 
 
-                        <div class="document-list">
-
-
-                            <div class="document-row">
-
-                                <span>
-                                    DNI escaneado
-                                </span>
-
-                                <span class="chip chip-success">
-                                    VÁLIDO
-                                </span>
-
-                            </div>
-
-
-                            <div class="document-row">
-
-                                <span>
-                                    Licencia de conducir
-                                </span>
-
-                                <span class="chip chip-success">
-                                    VÁLIDO
-                                </span>
-
-                            </div>
-
-
-                            <div class="document-row">
-
-                                <span>
-                                    SOAT
-                                </span>
-
-                                <span class="chip chip-warning">
-                                    POR VENCER
-                                </span>
-
-                            </div>
-
-
-                            <div class="document-row">
-
-                                <span>
-                                    Tarjeta de propiedad
-                                </span>
-
-                                <span class="chip chip-success">
-                                    VÁLIDO
-                                </span>
-
-                            </div>
-
-
-                        </div>
-
+                        <div th:replace="~{fragments/documentos-taxista :: lista}"></div>
 
                     </section>
 

@@ -31,6 +31,7 @@ import com.iotelito.taxiweb.repository.ServicioTaxiRepository;
 import com.iotelito.taxiweb.repository.SolicitudTaxiRepository;
 import com.iotelito.taxiweb.repository.TaxistaRepository;
 import com.iotelito.taxiweb.repository.UbicacionTaxistaRepository;
+import com.iotelito.taxiweb.service.DocumentosTaxistaService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -83,12 +84,19 @@ public class TaxiApiService {
     private final CalificacionTaxistaRepository calificaciones;
     private final LogSistemaRepository logs;
     private final com.iotelito.taxiweb.firebase.CuentasFirebase cuentasFirebase;
+    private final DocumentosTaxistaService documentos;
+    private final ChatTaxi chat;
+    private final AvisosTaxi avisos;
 
     public TaxiApiService(FirestoreLector firestore, TaxistaRepository taxistas, SolicitudTaxiRepository solicitudes,
                           ServicioTaxiRepository servicios, UbicacionTaxistaRepository ubicaciones,
                           CalificacionTaxistaRepository calificaciones, LogSistemaRepository logs,
-                          com.iotelito.taxiweb.firebase.CuentasFirebase cuentasFirebase) {
+                          com.iotelito.taxiweb.firebase.CuentasFirebase cuentasFirebase,
+                          DocumentosTaxistaService documentos, ChatTaxi chat, AvisosTaxi avisos) {
         this.cuentasFirebase = cuentasFirebase;
+        this.documentos = documentos;
+        this.chat = chat;
+        this.avisos = avisos;
         this.firestore = firestore;
         this.taxistas = taxistas;
         this.solicitudes = solicitudes;
@@ -195,6 +203,7 @@ public class TaxiApiService {
             }
             throw ApiException.conflicto("SERVICIO_NO_DISPONIBLE", "Otro taxista ya aceptó este pedido.");
         }
+        avisos.cliente(reservaId, ASIGNADO.name(), solicitud.getClienteUid());
         return servicio(solicitud, nuevo);
     }
 
@@ -221,6 +230,7 @@ public class TaxiApiService {
         } else {
             servicio.setHoraTraslado(ahora());
         }
+        avisos.cliente(reservaId, siguiente.name(), servicio.getSolicitud().getClienteUid());
         return servicio(servicio.getSolicitud(), servicio);
     }
 
@@ -245,6 +255,7 @@ public class TaxiApiService {
         servicio.setQrValidado(true);
         servicio.getSolicitud().setEstado(EstadoSolicitudTaxi.FINALIZADA);
         taxista.setCantidadServicios((int) servicios.countByTaxistaAndEstado(taxista, FINALIZADO));
+        avisos.cliente(reservaId, FINALIZADO.name(), servicio.getSolicitud().getClienteUid());
         return servicio(servicio.getSolicitud(), servicio);
     }
 
@@ -335,7 +346,50 @@ public class TaxiApiService {
         solicitud.setCantidadEquipaje(cuerpo.maletas());
         solicitud.setEstado(EstadoSolicitudTaxi.PENDIENTE);
         solicitudes.saveAndFlush(solicitud);
+        avisos.oferta(cuerpo.reservaId());
         return new Creacion(servicio(solicitud, null), true);
+    }
+
+    @Transactional
+    public ChatTaxi.Conversacion mensajes(Llamante llamante, long reservaId) {
+        ServicioTaxi viaje = viajeParaChat(llamante, reservaId, false);
+        return chat.leer(viaje.getId(), llamante.uid(), viaje.getEstado().activo());
+    }
+
+    @Transactional
+    public ChatTaxi.Conversacion enviarMensaje(Llamante llamante, long reservaId, ChatTaxi.NuevoMensaje mensaje) {
+        ServicioTaxi viaje = viajeParaChat(llamante, reservaId, true);
+        if (!viaje.getEstado().activo()) {
+            throw ApiException.conflicto("ESTADO_INVALIDO", "El viaje terminó. Puedes consultar el historial.");
+        }
+        chat.enviar(viaje.getId(), llamante.uid(), mensaje);
+        return chat.leer(viaje.getId(), llamante.uid(), true);
+    }
+
+    @Transactional
+    public void registrarDispositivo(Llamante llamante, AvisosTaxi.Dispositivo dispositivo) {
+        if (llamante.es(TAXISTA)) {
+            taxistaHabilitado(llamante);
+        } else if (!llamante.es(CLIENTE)) {
+            throw ApiException.prohibido("Solo el cliente y el taxista reciben estos avisos.");
+        }
+        avisos.registrar(llamante.uid(), dispositivo);
+    }
+
+    private ServicioTaxi viajeParaChat(Llamante llamante, long reservaId, boolean escritura) {
+        if (!llamante.es(CLIENTE) && !llamante.es(TAXISTA)) {
+            throw ApiException.prohibido("El chat es para el pasajero y el taxista asignado.");
+        }
+        SolicitudTaxi solicitud = solicitud(reservaId);
+        if (llamante.es(CLIENTE) && !llamante.uid().equals(solicitud.getClienteUid())) {
+            throw ApiException.prohibido("Esa reserva no es tuya.");
+        }
+        ServicioTaxi viaje = (escritura ? servicios.findLockedBySolicitud(solicitud) : servicios.findBySolicitud(solicitud))
+                .orElseThrow(() -> ApiException.conflicto("ESTADO_INVALIDO", "El chat se abre al asignar un taxista."));
+        if (llamante.es(TAXISTA) && !viaje.getTaxista().getId().equals(taxistaHabilitado(llamante).getId())) {
+            throw ApiException.prohibido("Este servicio es de otro taxista.");
+        }
+        return viaje;
     }
 
     @Transactional
@@ -472,7 +526,7 @@ public class TaxiApiService {
     }
 
     private ServicioTaxi servicioDe(Taxista taxista, long reservaId) {
-        ServicioTaxi servicio = servicios.findBySolicitud(solicitud(reservaId))
+        ServicioTaxi servicio = servicios.findLockedBySolicitud(solicitud(reservaId))
                 .orElseThrow(() -> ApiException.conflicto("ESTADO_INVALIDO", "Este pedido todavía no tiene taxista."));
         if (!servicio.getTaxista().getId().equals(taxista.getId())) {
             throw ApiException.prohibido("Este servicio es de otro taxista.");
@@ -563,21 +617,25 @@ public class TaxiApiService {
                         calificacion.getComentario(), iso(calificacion.getFecha())));
     }
 
-    private static ApiDtos.Vehiculo vehiculo(Taxista taxista) {
+    private static ApiDtos.Vehiculo vehiculo(Taxista taxista, String fotoUrl) {
         return new ApiDtos.Vehiculo(taxista.getPlacaVehiculo(), taxista.getMarcaVehiculo(), taxista.getModeloVehiculo(),
-                taxista.getColorVehiculo(), taxista.getAnioVehiculo(), null);
+                taxista.getColorVehiculo(), taxista.getAnioVehiculo(), fotoUrl);
     }
 
-    private static TaxistaPublico publico(Taxista taxista) {
+    private TaxistaPublico publico(Taxista taxista) {
         Usuario usuario = taxista.getUsuario();
+        DocumentosTaxistaService.Fotos fotos = documentos.fotos(taxista);
         return new TaxistaPublico(taxista.getId(), usuario.getNombres(), usuario.getApellidos(), usuario.getTelefono(),
-                null, vehiculo(taxista), taxista.getCalificacion().doubleValue(), taxista.getCantidadServicios());
+                fotos.conductor(), vehiculo(taxista, fotos.vehiculo()),
+                taxista.getCalificacion().doubleValue(), taxista.getCantidadServicios());
     }
 
     private TaxistaPerfil perfil(Taxista taxista) {
         Usuario usuario = taxista.getUsuario();
+        DocumentosTaxistaService.Fotos fotos = documentos.fotos(taxista);
         return new TaxistaPerfil(taxista.getId(), usuario.getNombres(), usuario.getApellidos(), usuario.getTelefono(),
-                null, vehiculo(taxista), taxista.getCalificacion().doubleValue(), taxista.getCantidadServicios(),
+                fotos.conductor(), vehiculo(taxista, fotos.vehiculo()),
+                taxista.getCalificacion().doubleValue(), taxista.getCantidadServicios(),
                 usuario.getCorreo(), taxista.getEstadoSolicitud().name(), Boolean.TRUE.equals(usuario.getActivo()),
                 Boolean.TRUE.equals(taxista.getDisponible()),
                 activo(taxista).map(s -> s.getSolicitud().getReservaId()).orElse(null));

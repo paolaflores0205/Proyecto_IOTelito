@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<body>
+<div class="document-list" th:fragment="lista">
+    <p th:if="${#lists.isEmpty(documentosTaxista)}">Esta solicitud no tiene archivos disponibles.</p>
+    <div class="document-row" th:each="documento : ${documentosTaxista}">
+        <a th:href="@{/superadmin/taxistas/{id}/documentos/{doc}(id=${taxista.id},doc=${documento.id})}"
+           th:text="${documento.tipo.etiqueta}" target="_blank" rel="noopener noreferrer">
+            Abrir archivo
+        </a>
+        <span class="chip" th:text="${documento.estado}">PENDIENTE</span>
+    </div>
+</div>
+</body>
+</html>

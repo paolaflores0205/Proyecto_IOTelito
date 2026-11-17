@@ -28,17 +28,20 @@ public class TaxistaService {
     private final UsuarioRepository usuarioRepository;
     private final LogSistemaRepository logRepository;
     private final CuentasFirebase cuentasFirebase;
+    private final DocumentosTaxistaService documentos;
 
     public TaxistaService(
             TaxistaRepository taxistaRepository,
             UsuarioRepository usuarioRepository,
             LogSistemaRepository logRepository,
-            CuentasFirebase cuentasFirebase
+            CuentasFirebase cuentasFirebase,
+            DocumentosTaxistaService documentos
     ) {
         this.taxistaRepository = taxistaRepository;
         this.usuarioRepository = usuarioRepository;
         this.logRepository = logRepository;
         this.cuentasFirebase = cuentasFirebase;
+        this.documentos = documentos;
     }
 
     /**
@@ -80,6 +83,7 @@ public class TaxistaService {
             throw new RuntimeException("Ya existe un vehículo registrado con esa placa");
         }
 
+        var archivos = documentos.validar(form);
         Usuario usuario = new Usuario();
         usuario.setNombres(recortar(form.getNombres()));
         usuario.setApellidos(recortar(form.getApellidos()));
@@ -106,7 +110,9 @@ public class TaxistaService {
         taxista.setEstadoSolicitud(EstadoSolicitudTaxista.PENDIENTE);
         taxista.setDisponible(false);
 
-        return taxistaRepository.save(taxista);
+        Taxista registrado = taxistaRepository.save(taxista);
+        documentos.guardar(registrado, archivos);
+        return registrado;
     }
 
     public List<Taxista> listarTaxistas(String estado, String busqueda) {

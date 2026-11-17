@@ -1,6 +1,7 @@
 package com.iotelito.taxiweb;
 
 import com.iotelito.taxiweb.api.FirestoreLector;
+import com.iotelito.taxiweb.firebase.MensajeriaFirebase;
 import com.iotelito.taxiweb.model.EstadoSolicitudTaxista;
 import com.iotelito.taxiweb.model.Taxista;
 import com.iotelito.taxiweb.repository.TaxistaRepository;
@@ -12,9 +13,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -26,11 +31,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -71,6 +81,10 @@ class TaxiApiTest {
 
     @Autowired
     private TaxistaRepository taxistaRepository;
+
+    @Autowired private JdbcTemplate db;
+    @Autowired private ApplicationContext contexto;
+    @MockitoBean private MensajeriaFirebase fcm;
 
     @BeforeEach
     void documentosDeFirestore() {
@@ -129,6 +143,72 @@ class TaxiApiTest {
     private static String pedido(long reserva, String aeropuerto) {
         return "{\"reservaId\":" + reserva + ",\"aeropuertoCodigo\":\"" + aeropuerto
                 + "\",\"hora\":\"14:30\",\"pasajeros\":2,\"maletas\":1}";
+    }
+
+    @Test
+    void conversacionPrivadaConMensajesIdempotentesYLecturaAlFinalizar() throws Exception {
+        String viaje = API + "/servicios/777";
+        llamar(post(API + "/servicios"), CLIENTE, pedido(777, "LIM")).andExpect(status().isCreated());
+        llamar(get(viaje + "/mensajes"), CLIENTE, null).andExpect(status().isConflict());
+        llamar(post(viaje + "/aceptar"), MARIA, null).andExpect(status().isOk());
+        for (String uid : new String[]{"uid-otro", ANDREA, "uid-admin-1", "uid-super"}) {
+            llamar(get(viaje + "/mensajes"), uid, null).andExpect(status().isForbidden());
+        }
+        llamar(get(viaje + "/mensajes"), null, null).andExpect(status().isUnauthorized());
+        String mensaje = "{\"uuid\":\"9fecadc3-74ad-4df5-8e42-66b2285936db\",\"texto\":\" Hola, espero en recepción. \"}";
+        for (int i = 0; i < 2; i++) {
+            llamar(post(viaje + "/mensajes"), CLIENTE, mensaje).andExpect(status().isOk())
+                    .andExpect(jsonPath("$.mensajes", hasSize(1)));
+        }
+        llamar(get(viaje + "/mensajes"), MARIA, null).andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensajes[0].texto").value("Hola, espero en recepción."))
+                .andExpect(jsonPath("$.mensajes[0].mio").value(false));
+        llamar(post(viaje + "/mensajes"), MARIA, mensaje.replace("Hola, espero en recepción.", "Estoy en camino."))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.mensajes[1].mio").value(true));
+        llamar(post(viaje + "/mensajes"), MARIA, "{\"uuid\":\"inválido\",\"texto\":\"Hola\"}")
+                .andExpect(status().isBadRequest());
+        llamar(post(viaje + "/estado"), MARIA, "{\"estado\":\"EN_CAMINO\"}").andExpect(status().isOk());
+        llamar(post(viaje + "/estado"), MARIA, "{\"estado\":\"EN_TRASLADO\"}").andExpect(status().isOk());
+        String qr = JsonPath.read(llamar(get(viaje + "/qr"), CLIENTE, null).andReturn().getResponse().getContentAsString(), "$.codigo");
+        llamar(post(viaje + "/finalizar"), MARIA, "{\"codigoQr\":\"" + qr + "\"}").andExpect(status().isOk());
+        llamar(get(viaje + "/mensajes"), CLIENTE, null).andExpect(status().isOk())
+                .andExpect(jsonPath("$.permiteEnviar").value(false))
+                .andExpect(jsonPath("$.mensajes", hasSize(2)));
+        llamar(post(viaje + "/mensajes"), CLIENTE, mensaje).andExpect(status().isConflict());
+    }
+
+    @Test
+    void avisosAlDisponibleYAlClienteCorrectoConReintento() throws Exception {
+        String binding = "55c650a6-a92b-4e10-859c-FF2D84798402";
+        for (String uid : new String[]{CLIENTE, MARIA, FERNANDO, "uid-otro"}) {
+            llamar(put(API + "/notificaciones/dispositivo"), uid,
+                    "{\"binding\":\"" + binding + "\",\"token\":\"fcm-token-de-prueba-" + uid + "\"}")
+                    .andExpect(status().isNoContent());
+        }
+        llamar(put(API + "/notificaciones/dispositivo"), "uid-admin-1", "{}").andExpect(status().isForbidden());
+        llamar(post(API + "/servicios"), CLIENTE, pedido(777, "LIM")).andExpect(status().isCreated());
+        llamar(post(API + "/servicios"), CLIENTE, pedido(777, "LIM")).andExpect(status().isOk());
+        assertThat(db.queryForList("SELECT uid FROM avisos_taxi WHERE evento = 'OFERTA'", String.class))
+                .containsExactly(MARIA);
+        when(fcm.habilitada()).thenReturn(true);
+        when(fcm.enviar(eq("fcm-token-de-prueba-" + MARIA), anyMap(), eq(true)))
+                .thenReturn(MensajeriaFirebase.Resultado.ENVIADO);
+        Object emisor = contexto.getBean("avisosTaxi");
+        ReflectionTestUtils.invokeMethod(emisor, "despachar");
+        verify(fcm).enviar(eq("fcm-token-de-prueba-" + MARIA), anyMap(), eq(true));
+        assertThat(db.queryForObject("SELECT completado FROM avisos_taxi WHERE evento = 'OFERTA'", Boolean.class)).isTrue();
+
+        llamar(post(API + "/servicios/777/aceptar"), MARIA, null).andExpect(status().isOk());
+        llamar(post(API + "/servicios/777/aceptar"), MARIA, null).andExpect(status().isOk());
+        assertThat(db.queryForList("SELECT uid FROM avisos_taxi WHERE evento = 'ASIGNADO'", String.class))
+                .containsExactly(CLIENTE);
+        when(fcm.enviar(eq("fcm-token-de-prueba-" + CLIENTE), anyMap(), eq(false)))
+                .thenReturn(MensajeriaFirebase.Resultado.REINTENTAR, MensajeriaFirebase.Resultado.ENVIADO);
+        ReflectionTestUtils.invokeMethod(emisor, "despachar");
+        assertThat(db.queryForObject("SELECT completado FROM avisos_taxi WHERE evento = 'ASIGNADO'", Boolean.class)).isFalse();
+        db.update("UPDATE avisos_taxi SET siguiente_intento = CURRENT_TIMESTAMP WHERE evento = 'ASIGNADO'");
+        ReflectionTestUtils.invokeMethod(emisor, "despachar");
+        assertThat(db.queryForObject("SELECT completado FROM avisos_taxi WHERE evento = 'ASIGNADO'", Boolean.class)).isTrue();
     }
 
     @Test

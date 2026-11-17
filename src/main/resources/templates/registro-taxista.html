@@ -518,6 +518,7 @@
                     4. Documentación requerida
                 </h2>
 
+                <p>El total de los archivos debe pesar 8 MB o menos.</p>
 
                 <div class="documents-row">
 
@@ -555,6 +556,8 @@
                             <input
                                     type="file"
                                     name="fotoConductorFile"
+                                    aria-label="Fotografía del conductor"
+                                    data-max-mb="2"
                                     accept=".jpg,.jpeg,.png">
 
                         </label>
@@ -562,12 +565,35 @@
                     </div>
 
 
-                    <!-- DNI -->
+                    <div class="document-column">
+                        <label class="document-label">
+                            Fotografía del vehículo
+                        </label>
+
+                        <label class="upload-card photo-upload">
+                            <div class="photo-icon">
+                                <span class="material-symbols-rounded">directions_car</span>
+                            </div>
+                            <div class="upload-info">
+                                <strong>Subir foto del vehículo</strong>
+                                <span>Formatos JPG, PNG • Máx 2MB</span>
+                            </div>
+                            <input type="file"
+                                   name="fotoVehiculoFile"
+                                   aria-label="Fotografía del vehículo"
+                                   data-max-mb="2"
+                                   accept=".jpg,.jpeg,.png">
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="documents-row">
 
                     <div class="document-column">
 
                         <label class="document-label">
-                            DNI Escaneado (Ambas caras) *
+                            Documento de identidad *
                         </label>
 
                         <label class="upload-card drop-upload">
@@ -577,7 +603,7 @@
                             </span>
 
                             <strong>
-                                DNI Escaneado (Ambas caras) *
+                                Documento de identidad *
                             </strong>
 
                             <span>
@@ -594,12 +620,6 @@
                         </label>
 
                     </div>
-
-                </div>
-
-
-                <div class="documents-row">
-
 
                     <!-- LICENCIA -->
 
@@ -631,6 +651,10 @@
                     </div>
 
 
+                </div>
+
+                <div class="documents-row">
+
                     <!-- SOAT -->
 
                     <div class="document-column">
@@ -660,33 +684,16 @@
 
                     </div>
 
+                    <div class="document-column">
+                        <label class="upload-card drop-upload">
+                            <span class="material-symbols-rounded upload-symbol">cloud_upload</span>
+                            <strong>Tarjeta de propiedad vehicular *</strong>
+                            <span>Arrastrar archivo o seleccionar (PDF, JPG, PNG máx. 5MB)</span>
+                            <input type="file" name="tarjetaPropiedadFile" accept=".pdf,.jpg,.jpeg,.png" required>
+                        </label>
+                    </div>
+
                 </div>
-
-
-                <!-- TARJETA -->
-
-                <label class="upload-card drop-upload property-upload">
-
-                    <span class="material-symbols-rounded upload-symbol">
-                        cloud_upload
-                    </span>
-
-                    <strong>
-                        Tarjeta de propiedad vehicular *
-                    </strong>
-
-                    <span>
-                        Arrastrar archivo o seleccionar
-                        (PDF, JPG, PNG máx. 5MB)
-                    </span>
-
-                    <input
-                            type="file"
-                            name="tarjetaPropiedadFile"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            required>
-
-                </label>
 
             </section>
 
@@ -800,6 +807,31 @@
         if (terms && sections.length > 0) {
             sections[sections.length - 1].appendChild(terms);
         }
+
+        const archivos = Array.from(form.querySelectorAll('input[type="file"]'));
+        const mib = 1024 * 1024;
+        archivos.forEach(function (campo) {
+            const tarjeta = campo.closest(".upload-card");
+            const resumen = document.createElement("small");
+            resumen.setAttribute("aria-live", "polite");
+            tarjeta.after(resumen);
+
+            campo.addEventListener("change", function () {
+                const archivo = campo.files[0];
+                resumen.textContent = archivo ? archivo.name : "";
+                const total = archivos.reduce((suma, input) => suma + (input.files[0]?.size || 0), 0);
+                archivos.forEach(function (input) {
+                    const maximo = Number(input.dataset.maxMb || 5);
+                    const peso = input.files[0]?.size || 0;
+                    const error = peso > maximo * mib ? "El archivo debe pesar " + maximo + " MB o menos." : "";
+                    input.setCustomValidity(error);
+                });
+                if (!campo.validationMessage && total > 8 * mib) {
+                    campo.setCustomValidity("El total de los archivos debe pesar 8 MB o menos.");
+                }
+                campo.reportValidity();
+            });
+        });
 
         function fieldsForStep(index) {
             return Array.from(sections[index].querySelectorAll("input, select, textarea"));

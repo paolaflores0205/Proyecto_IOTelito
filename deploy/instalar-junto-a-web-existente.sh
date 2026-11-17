@@ -44,6 +44,7 @@ CREATE USER IF NOT EXISTS 'taxiweb'@'%' IDENTIFIED BY '$DB_PW' REQUIRE SSL;
 ALTER USER 'taxiweb'@'%' IDENTIFIED BY '$DB_PW' REQUIRE SSL;
 GRANT SELECT, INSERT, UPDATE, DELETE ON iotelito_taxis.* TO 'taxiweb'@'%';"
 $M iotelito_taxis < /opt/taxiweb/db/schema.sql
+$M iotelito_taxis < /opt/taxiweb/db/01-chat-y-avisos-taxi.sql
 $M iotelito_taxis < /opt/taxiweb/db/data.sql
 $M -N -e "SELECT CONCAT(table_name, ': ', table_rows) FROM information_schema.tables WHERE table_schema='iotelito_taxis' ORDER BY table_name"
 echo "Tablas de la base de Mariana despues: $($M -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='iotelito'")"

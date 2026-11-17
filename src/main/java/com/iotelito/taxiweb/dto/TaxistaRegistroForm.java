@@ -33,6 +33,7 @@ public class TaxistaRegistroForm {
 
     // Documentos
     private MultipartFile fotoConductorFile;
+    private MultipartFile fotoVehiculoFile;
     private MultipartFile dniFile;
     private MultipartFile licenciaFile;
     private MultipartFile soatFile;
@@ -183,6 +184,14 @@ public class TaxistaRegistroForm {
 
     public void setFotoConductorFile(MultipartFile fotoConductorFile) {
         this.fotoConductorFile = fotoConductorFile;
+    }
+
+    public MultipartFile getFotoVehiculoFile() {
+        return fotoVehiculoFile;
+    }
+
+    public void setFotoVehiculoFile(MultipartFile fotoVehiculoFile) {
+        this.fotoVehiculoFile = fotoVehiculoFile;
     }
 
     public MultipartFile getDniFile() {

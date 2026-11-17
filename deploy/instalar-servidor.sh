@@ -63,6 +63,7 @@ mysql -e "CREATE USER IF NOT EXISTS 'taxiweb'@'localhost' IDENTIFIED BY '${DB_PA
           GRANT SELECT, INSERT, UPDATE, DELETE ON iotelito.* TO 'taxiweb'@'localhost';
           FLUSH PRIVILEGES;"
 mysql iotelito < /opt/taxiweb/db/schema.sql
+mysql iotelito < /opt/taxiweb/db/01-chat-y-avisos-taxi.sql
 mysql iotelito < /opt/taxiweb/db/data.sql
 
 id taxiweb >/dev/null 2>&1 || useradd --system --home /opt/taxiweb --shell /usr/sbin/nologin taxiweb

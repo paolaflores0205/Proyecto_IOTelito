@@ -360,78 +360,7 @@
                     </h2>
 
 
-                    <div class="document-list"
-                         style="margin-top:20px">
-
-
-                        <div class="document-row">
-
-
-                            <div class="document-name">
-
-                                <span class="material-symbols-rounded">
-                                    description
-                                </span>
-
-                                Documento de Identidad (DNI) escaneado
-
-                            </div>
-
-
-                            <span class="chip chip-success">
-                                VÁLIDO
-                            </span>
-
-
-                        </div>
-
-
-                        <div class="document-row">
-
-
-                            <div class="document-name">
-
-                                <span class="material-symbols-rounded">
-                                    description
-                                </span>
-
-                                Licencia de conducir vigente
-
-                            </div>
-
-
-                            <span class="chip chip-success">
-                                VÁLIDO
-                            </span>
-
-
-                        </div>
-
-
-                        <div class="document-row">
-
-
-                            <div class="document-name">
-
-                                <span class="material-symbols-rounded">
-                                    warning
-                                </span>
-
-                                Seguro obligatorio de accidentes (SOAT)
-
-                            </div>
-
-
-                            <span class="chip chip-warning">
-                                POR VENCER (4 Días)
-                            </span>
-
-
-                        </div>
-
-
-                    </div>
-
+                    <div th:replace="~{fragments/documentos-taxista :: lista}"></div>
 
                     <div class="divider"></div>
 

@@ -121,6 +121,24 @@ public class TaxiApiController {
         return api.ver(api.llamante(jwt), id);
     }
 
+    @GetMapping("/servicios/{id}/mensajes")
+    public ChatTaxi.Conversacion mensajes(@AuthenticationPrincipal Jwt jwt, @PathVariable long id) {
+        return api.mensajes(api.llamante(jwt), id);
+    }
+
+    @PostMapping("/servicios/{id}/mensajes")
+    public ChatTaxi.Conversacion enviarMensaje(@AuthenticationPrincipal Jwt jwt, @PathVariable long id,
+                                              @RequestBody(required = false) ChatTaxi.NuevoMensaje cuerpo) {
+        return api.enviarMensaje(api.llamante(jwt), id, cuerpo);
+    }
+
+    @PutMapping("/notificaciones/dispositivo")
+    public ResponseEntity<Void> registrarDispositivo(@AuthenticationPrincipal Jwt jwt,
+                                                      @RequestBody(required = false) AvisosTaxi.Dispositivo cuerpo) {
+        api.registrarDispositivo(api.llamante(jwt), cuerpo);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/servicios/{id}/qr")
     public QrServicio qr(@AuthenticationPrincipal Jwt jwt, @PathVariable long id) {
         return api.qr(api.llamante(jwt), id);

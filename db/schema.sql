@@ -7,6 +7,9 @@
 -- sin llave foránea.
 -- La web usa spring.jpa.hibernate.ddl-auto=validate: este script es la fuente de verdad.
 
+DROP TABLE IF EXISTS avisos_taxi;
+DROP TABLE IF EXISTS dispositivos_taxi;
+DROP TABLE IF EXISTS mensajes_taxi;
 DROP TABLE IF EXISTS calificaciones_taxista;
 DROP TABLE IF EXISTS ubicaciones_taxista;
 DROP TABLE IF EXISTS servicios_taxi;
