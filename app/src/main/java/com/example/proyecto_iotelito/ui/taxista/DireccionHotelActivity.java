@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.proyecto_iotelito.R;
 public class DireccionHotelActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle state){
-        super.onCreate(state);if(!TaxistaFlujo.sesion(this))return;setContentView(R.layout.activity_direccion_hotel);
+        super.onCreate(state);if(!TaxistaFlujo.sesion(this))return;setContentView(R.layout.activity_direccion_hotel);TaxistaMapa.montar(this,true);
         TaxistaViewModel vm=TaxistaFlujo.model(this);
         TaxistaFlujo.cargar(this,vm,e->{
             if(!"EN_CAMINO".equals(e.estado)){TaxistaFlujo.abrir(this,e);finish();return;}

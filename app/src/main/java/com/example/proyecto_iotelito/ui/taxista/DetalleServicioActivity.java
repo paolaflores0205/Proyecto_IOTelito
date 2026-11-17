@@ -9,7 +9,7 @@ public class DetalleServicioActivity extends AppCompatActivity {
     public static Intent createIntent(Context c,int id){return TaxistaFlujo.intent(c,DetalleServicioActivity.class,id);}
     @Override protected void onCreate(Bundle state){
         super.onCreate(state); if(!TaxistaFlujo.sesion(this))return;
-        setContentView(R.layout.activity_detalle_servicio);
+        setContentView(R.layout.activity_detalle_servicio);TaxistaMapa.montar(this,false);
         TaxistaViewModel vm=TaxistaFlujo.model(this);
         TaxistaFlujo.cargar(this,vm,e->{
             if(!"SOLICITADO".equals(e.estado)){TaxistaFlujo.abrir(this,e);finish();return;}

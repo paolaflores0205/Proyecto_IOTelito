@@ -8,7 +8,7 @@ import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
 public class ServicioAsignadoActivity extends AppCompatActivity {
     public static Intent createIntent(Context c,SolicitudServicio s){return TaxistaFlujo.intent(c,ServicioAsignadoActivity.class,s.id);}
     @Override protected void onCreate(Bundle state){
-        super.onCreate(state);if(!TaxistaFlujo.sesion(this))return;setContentView(R.layout.activity_servicio_asignado);
+        super.onCreate(state);if(!TaxistaFlujo.sesion(this))return;setContentView(R.layout.activity_servicio_asignado);TaxistaMapa.montar(this,false);
         TaxistaViewModel vm=TaxistaFlujo.model(this);
         TaxistaFlujo.cargar(this,vm,e->{
             if(!"ASIGNADO".equals(e.estado)){TaxistaFlujo.abrir(this,e);finish();return;}
