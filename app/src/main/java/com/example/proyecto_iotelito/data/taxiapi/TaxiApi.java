@@ -37,4 +37,10 @@ public interface TaxiApi {
     JSONObject verQr(long id);
 
     JSONObject calificarServicio(long id, int puntuacion, String comentario);
+
+    JSONObject mensajes(long id);
+
+    JSONObject enviarMensaje(long id, String uuid, String texto);
+
+    void registrarDispositivo(String binding, String token);
 }

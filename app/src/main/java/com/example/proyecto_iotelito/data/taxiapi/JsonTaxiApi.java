@@ -99,4 +99,16 @@ public abstract class JsonTaxiApi implements TaxiApi {
                 json("puntuacion", p, "comentario", c),
                 true);
     }
+
+    public JSONObject mensajes(long id) {
+        return request("GET", "/servicios/" + id + "/mensajes", null, true);
+    }
+
+    public JSONObject enviarMensaje(long id, String uuid, String texto) {
+        return request("POST", "/servicios/" + id + "/mensajes", json("uuid", uuid, "texto", texto), true);
+    }
+
+    public void registrarDispositivo(String binding, String token) {
+        request("PUT", "/notificaciones/dispositivo", json("binding", binding, "token", token), true);
+    }
 }

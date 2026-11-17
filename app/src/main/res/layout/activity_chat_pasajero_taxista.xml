@@ -68,7 +68,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/io_teal"
                 android:textSize="11sp"
-                android:text="@string/taxi_estado_en_linea" />
+                android:accessibilityLiveRegion="polite"
+                android:text="@string/taxi_chat_cargando" />
         </LinearLayout>
     </LinearLayout>
 
@@ -107,6 +108,7 @@
             android:textColorHint="@color/io_text_muted"
             android:textColor="@color/io_text_primary"
             android:textSize="14sp"
+            android:maxLength="1000"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLines="3" />
 

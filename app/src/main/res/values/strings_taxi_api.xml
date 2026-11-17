@@ -14,4 +14,9 @@
     <string name="taxi_api_location_channel">Ubicación del servicio de taxi</string>
     <string name="taxi_api_location_active">Compartiendo ubicación durante tu servicio</string>
     <string name="taxi_api_comment">Comentario sobre el viaje (opcional)</string>
+    <string name="taxi_chat_conductor">Chat con el taxista</string>
+    <string name="taxi_chat_cargando">Cargando conversación…</string>
+    <string name="taxi_chat_listo">Chat del viaje</string>
+    <string name="taxi_chat_finalizado">Viaje finalizado. Historial disponible.</string>
+    <string name="taxi_chat_sin_identificador">Abre el chat desde un viaje asignado.</string>
 </resources>

@@ -217,6 +217,36 @@ public class HttpTaxiApiTest {
     }
 
     @Test
+    public void chatYDispositivosUsanLaApiAutenticada() {
+        String uuid = "55c650a6-a92b-4e10-859c-ff2d84798402";
+        server.createContext("/api/v1/servicios/123/mensajes", e -> {
+            assertEquals("Bearer test-token", e.getRequestHeaders().getFirst("Authorization"));
+            if ("POST".equals(e.getRequestMethod())) {
+                org.json.JSONObject body = new org.json.JSONObject(
+                        new String(e.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+                assertEquals(uuid, body.getString("uuid"));
+                assertEquals("Estoy en recepción", body.getString("texto"));
+            } else {
+                assertEquals("GET", e.getRequestMethod());
+            }
+            reply(e, 200, "{\"mensajes\":[],\"permiteEnviar\":true}");
+        });
+        server.createContext("/api/v1/notificaciones/dispositivo", e -> {
+            assertEquals("PUT", e.getRequestMethod());
+            assertEquals("Bearer test-token", e.getRequestHeaders().getFirst("Authorization"));
+            org.json.JSONObject body = new org.json.JSONObject(
+                    new String(e.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            assertEquals(uuid, body.getString("binding"));
+            assertEquals("token-fcm-de-prueba", body.getString("token"));
+            reply(e, 204, "");
+        });
+        TaxiApi api = api();
+        assertTrue(api.mensajes(123).optBoolean("permiteEnviar"));
+        assertTrue(api.enviarMensaje(123, uuid, "Estoy en recepción").optBoolean("permiteEnviar"));
+        api.registrarDispositivo(uuid, "token-fcm-de-prueba");
+    }
+
+    @Test
     public void renuevaTokenUnaVezCon401() {
         AtomicInteger requests = new AtomicInteger();
         List<Boolean> refreshes = new ArrayList<>();

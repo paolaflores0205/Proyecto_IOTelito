@@ -63,14 +63,20 @@ Para obtener GPS en el AVD puede ser necesario repetir `geo fix` mientras la pan
 
 En la rama integrada, «Mis taxis» consulta el servicio de cada reserva propia por REST. La app
 conserva el requisito del beneficio de cortesía (alojamiento desde S/ 1000 y checkout solicitado
-o finalizado). El chat pasajero–taxista requiere una operación nueva en el contrato. La función
-FCM existente sigue leyendo los viajes legados de Firestore y requiere eventos del backend REST
-para avisar de los viajes nuevos con la app cerrada.
+o finalizado). El chat pasajero–taxista consulta y envía mensajes desde **Seguimiento** para
+el cliente y desde el servicio asignado para el taxista. Los avisos de viajes REST los
+envía el servidor por FCM. Los avisos de reservas y checkout mantienen su integración actual.
+
+Para probar los avisos con Android, habilita el permiso en ambos dispositivos y abre una vez
+cada sesión con el APK actualizado. Deja al taxista aprobado y disponible y vuelve a la pantalla
+de inicio del dispositivo. Desde el cliente pide taxi y abre el aviso en el otro dispositivo.
+Acepta el viaje, comprueba el aviso del cliente y envía un mensaje desde cada uno. Finaliza el
+viaje con el QR y confirma que el historial sigue visible en el chat del cliente.
 
 Las dudas del contrato están en `api-taxis-dudas.md`. La rama original del cliente REST conservó las pantallas de hotel-admin y superadmin sin cambios. El ajuste del login compartido conserva los roles y muestra el error operativo del taxista devuelto por la API.
 
 El compañero debe aportar el backend real, aprobar/vincular cuentas, integrar admin/superadmin y decidir la migración/limpieza de viajes anteriores. La app ya no consulta las colecciones antiguas; no se borraron sus documentos ni se publicaron reglas. No se importó el SQL ni se desplegó infraestructura.
 
-Los mapas de las pantallas de indicaciones del conductor siguen siendo ilustrativos; el mapa conectado solicitado en este alcance es el del cliente. No se implementó navegación vial paso a paso ni chat remoto taxista/pasajero. Fotos y documentos se administran en la web: el contrato móvil no permite editarlos.
+Los mapas de las pantallas de indicaciones del conductor siguen siendo ilustrativos. Fotos y documentos se administran en la web.
 
 Referencias contrastadas: [Google Code Scanner](https://developers.google.com/ml-kit/vision/barcode-scanning/code-scanner), [servicios de ubicación Android](https://developer.android.com/about/versions/14/changes/fgs-types-required), [política de mapas OSM](https://operations.osmfoundation.org/policies/tiles/), [osmdroid](https://github.com/osmdroid/osmdroid/releases), [ZXing](https://github.com/zxing/zxing/releases).

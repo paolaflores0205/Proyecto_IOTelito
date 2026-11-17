@@ -82,12 +82,8 @@ final class TaxistaFlujo {
         ((TextView)row.findViewById(R.id.tv_pasajero_nombre)).setText(e.nombre);
         ((TextView)row.findViewById(R.id.tv_pasajero_detalle)).setText(e.hotel);
         View chat = row.findViewById(R.id.iv_chat);
-        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
-            chat.setVisibility(View.GONE);
-        } else {
-            chat.setOnClickListener(v -> a.startActivity(
-                    ChatPasajeroTaxistaActivity.createIntent(a, e.nombre, e.iniciales).putExtra(ID, e.id)));
-        }
+        chat.setOnClickListener(v -> a.startActivity(
+                ChatPasajeroTaxistaActivity.createIntent(a, e.nombre, e.iniciales).putExtra(ID, e.id)));
     }
     static void avanzar(AppCompatActivity a,TaxistaViewModel vm,int button,int id,EstadoServicio estado,Class<?> siguiente) {
         View btn=a.findViewById(button); btn.setOnClickListener(v->{
