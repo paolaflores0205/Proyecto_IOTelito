@@ -34,3 +34,5 @@ firestore-para-publicar-chat-taxi.txt
 
 /firestore-publicadas-antes-notificaciones*.txt
 /firestore-para-publicar-notificaciones.txt
+
+/tmp/

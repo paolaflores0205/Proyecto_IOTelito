@@ -1,27 +1,23 @@
 package com.example.proyecto_iotelito.data;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
+
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
+
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.local.cliente.TaxiDao;
-import com.example.proyecto_iotelito.data.local.cliente.TaxiDatabase;
-import com.example.proyecto_iotelito.data.local.cliente.TaxiEntity;
-import com.example.proyecto_iotelito.data.local.cliente.TaxiLegacyMigration;
+import com.example.proyecto_iotelito.data.taxiapi.*;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
 import com.example.proyecto_iotelito.model.auth.UserRole;
 import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
-import com.example.proyecto_iotelito.notification.ClienteNotificationManager;
-import com.example.proyecto_iotelito.data.taxista.FirebaseTaxiStore;
-import com.example.proyecto_iotelito.data.taxista.TaxiStorageRoute;
+
 import org.json.JSONObject;
+
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,14 +28,19 @@ import java.util.function.Consumer;
 
 public final class TaxiRepository {
     public static final String EXTRA_ID = "taxi_solicitud_id";
-    private static final String PREFS_ANTERIORES = "solicitudes_taxi";
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
     public enum Estado {
-        SOLICITADO(R.string.cliente_taxi_estado_solicitado), ASIGNADO(R.string.cliente_taxi_estado_asignado),
-        EN_CAMINO(R.string.taxi_estado_camino), FINALIZADO(R.string.cliente_taxi_estado_finalizado);
+        SOLICITADO(R.string.cliente_taxi_estado_solicitado),
+        ASIGNADO(R.string.cliente_taxi_estado_asignado),
+        EN_CAMINO(R.string.taxi_estado_camino),
+        FINALIZADO(R.string.cliente_taxi_estado_finalizado);
         public final int texto;
-        Estado(int texto) { this.texto = texto; }
+
+        Estado(int texto) {
+            this.texto = texto;
+        }
+
         public boolean permite(Estado siguiente) {
             return (this == SOLICITADO && siguiente == ASIGNADO)
                     || (this == ASIGNADO && siguiente == EN_CAMINO)
@@ -47,160 +48,231 @@ public final class TaxiRepository {
         }
     }
 
-    private TaxiRepository() { }
+    private TaxiRepository() {}
 
-    public static <T> void ejecutar(Context context, LifecycleOwner owner,
-                                    Callable<T> tarea, Consumer<T> resultado) {
+    public static <T> void ejecutar(
+            Context context, LifecycleOwner owner, Callable<T> tarea, Consumer<T> resultado) {
         Context app = context.getApplicationContext();
         MutableLiveData<Resultado<T>> live = new MutableLiveData<>();
-        live.observe(owner, value -> {
-            live.removeObservers(owner);
-            if (value.error != null) {
-                Log.e("TaxiRepository", "Error de almacenamiento de taxi", value.error);
-                Toast.makeText(app, R.string.taxi_guardar_error, Toast.LENGTH_LONG).show();
-            } else {
-                resultado.accept(value.dato);
-            }
-        });
-        EXECUTOR.execute(() -> {
-            try {
-                live.postValue(new Resultado<>(tarea.call(), null));
-            } catch (Exception exception) {
-                live.postValue(new Resultado<>(null, exception));
-            }
-        });
-    }
-
-    @WorkerThread
-    private static synchronized TaxiDao dao(Context context) {
-        TaxiDatabase database = TaxiDatabase.getInstance(context);
-        TaxiDao dao = database.taxiDao();
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_ANTERIORES, Context.MODE_PRIVATE);
-        TaxiLegacyMigration.migrar(database, prefs);
-        return dao;
+        live.observe(
+                owner,
+                value -> {
+                    live.removeObservers(owner);
+                    if (value.error != null) {
+                        Log.e("TaxiRepository", "Error de almacenamiento de taxi", value.error);
+                        if (context instanceof android.app.Activity)
+                            com.example.proyecto_iotelito.ui.taxi.TaxiUi.status(
+                                    (android.app.Activity) context, TaxiTasks.message(value.error));
+                        else
+                            Toast.makeText(app, TaxiTasks.message(value.error), Toast.LENGTH_LONG)
+                                    .show();
+                    } else {
+                        resultado.accept(value.dato);
+                    }
+                });
+        EXECUTOR.execute(
+                () -> {
+                    try {
+                        live.postValue(new Resultado<>(tarea.call(), null));
+                    } catch (Exception exception) {
+                        live.postValue(new Resultado<>(null, exception));
+                    }
+                });
     }
 
     public static LiveData<JSONObject> observar(Context context, int id) {
-        if(FirebaseTaxiStore.usaFirebase(context)) {
-            AuthenticatedUser user=SessionRepository.obtener(context);
-            return Transformations.switchMap(TaxiDatabase.getInstance(context).taxiDao().observar(id),entity->{
-                if(entity!=null&&TaxiStorageRoute.usarLocal(true,user.getRole(),user.getEmail(),entity.clienteId))
-                    return new MutableLiveData<>(entity.comoJson());
-                return FirebaseTaxiStore.observar(id);
-            });
-        }
-        return Transformations.map(TaxiDatabase.getInstance(context).taxiDao().observar(id),
-                entity -> entity == null ? null : entity.comoJson());
+        Context app = context.getApplicationContext();
+        return new MutableLiveData<JSONObject>() {
+            final android.os.Handler main =
+                    new android.os.Handler(android.os.Looper.getMainLooper());
+            boolean active;
+            int generation;
+            final Runnable tick =
+                    new Runnable() {
+                        public void run() {
+                            if (!active) return;
+                            int g = generation;
+                            EXECUTOR.execute(
+                                    () -> {
+                                        try {
+                                            JSONObject p = buscar(app, id);
+                                            main.post(
+                                                    () -> {
+                                                        if (active && g == generation) {
+                                                            setValue(p);
+                                                            main.postDelayed(this, 5000);
+                                                        }
+                                                    });
+                                        } catch (Exception e) {
+                                            main.post(
+                                                    () -> {
+                                                        if (active && g == generation) {
+                                                            android.widget.Toast.makeText(
+                                                                            app,
+                                                                            TaxiTasks.message(e),
+                                                                            android.widget.Toast
+                                                                                    .LENGTH_LONG)
+                                                                    .show();
+                                                            main.postDelayed(this, 5000);
+                                                        }
+                                                    });
+                                        }
+                                    });
+                        }
+                    };
+
+            protected void onActive() {
+                active = true;
+                generation++;
+                main.post(tick);
+            }
+
+            protected void onInactive() {
+                active = false;
+                generation++;
+                main.removeCallbacks(tick);
+            }
+        };
     }
 
     @WorkerThread
     public static JSONObject buscar(Context context, int id) {
-        TaxiEntity entity = dao(context).buscar(id);
-        if(FirebaseTaxiStore.usaFirebase(context)) {
-            AuthenticatedUser user=SessionRepository.obtener(context);
-            if(entity==null||!TaxiStorageRoute.usarLocal(true,user.getRole(),user.getEmail(),entity.clienteId))
-                return FirebaseTaxiStore.buscar(id,true);
+        AuthenticatedUser user = SessionRepository.obtener(context);
+        if (user == null)
+            throw new TaxiApiException(
+                    401, TaxiApiException.Codigo.NO_AUTENTICADO, "Inicia sesión nuevamente.");
+        try {
+            return TaxiCodec.legacy(
+                    TaxiApis.get(context).verServicio(id),
+                    user.getEmail(),
+                    user.getRole() == UserRole.CLIENT);
+        } catch (TaxiApiException e) {
+            if (e.status == 404) return null;
+            throw e;
         }
-        return entity == null ? null : entity.comoJson();
     }
 
     @WorkerThread
-    public static int crear(Context context, Reserva reserva, com.example.proyecto_iotelito.model.Hotel hotel,
-                            AeropuertosCliente.Aeropuerto aeropuerto,
-                            String hora, int pasajeros, int maletas) {
-        if(hotel==null||hotel.id!=reserva.hotelId||aeropuerto==null)throw new IllegalArgumentException("Revisa el hotel y aeropuerto seleccionados.");
-        if(!TaxiBenefitPolicy.puedeSolicitar(reserva))throw new IllegalArgumentException("El taxi gratuito requiere un alojamiento de al menos S/ 1000 y el checkout solicitado.");
-        AeropuertosCliente.Aeropuerto destino=AeropuertosCliente.elegir(hotel.city,aeropuerto.codigo);
+    public static int crear(
+            Context context,
+            Reserva reserva,
+            String hotel,
+            String origen,
+            String hora,
+            int pasajeros,
+            int maletas) {
+        String codigo = null;
+        try {
+            com.example.proyecto_iotelito.model.Hotel h =
+                    HotelCatalogRepository.buscar(context, reserva.hotelId);
+            org.json.JSONArray a =
+                    TaxiApis.get(context).listarAeropuertos().optJSONArray("aeropuertos");
+            for (int i = 0; i < a.length(); i++) {
+                JSONObject airport = a.optJSONObject(i);
+                org.json.JSONArray cities = airport.optJSONArray("ciudadesHotel");
+                for (int j = 0; j < cities.length(); j++)
+                    if (h.city.trim()
+                            .toLowerCase(java.util.Locale.ROOT)
+                            .equals(cities.optString(j))) codigo = airport.optString("codigo");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw TaxiApiException.noDisponible();
+        }
+        if (codigo == null)
+            throw new TaxiApiException(
+                    400,
+                    TaxiApiException.Codigo.AEROPUERTO_NO_CORRESPONDE,
+                    "No hay aeropuerto disponible para la ciudad del hotel.");
+        return crear(context, reserva, codigo, hora, pasajeros, maletas);
+    }
+
+    @WorkerThread
+    public static int crear(
+            Context context,
+            Reserva reserva,
+            String aeropuerto,
+            String hora,
+            int pasajeros,
+            int maletas) {
+        if (!TaxiBenefitPolicy.puedeSolicitar(reserva))
+            throw new IllegalArgumentException("El taxi gratuito requiere una estadía de al menos S/ 1000 y el checkout solicitado.");
         AuthenticatedUser user = SessionRepository.obtener(context);
         if (user == null || user.getRole() != UserRole.CLIENT) return -1;
-        TaxiDao dao = dao(context);
-        if(FirebaseTaxiStore.usaFirebase(context)) {
-            TaxiEntity anterior=dao.porReserva(user.getEmail(),reserva.id);
-            if(anterior!=null)return anterior.id;
-            int id=FirebaseTaxiStore.crear(reserva,PerfilRepository.cargar(context).name,hotel,destino,hora,pasajeros,maletas);
-            ClienteNotificationManager.mostrarEstadoTaxi(context,id,reserva.id,Estado.SOLICITADO);
-            return id;
-        }
-        TaxiEntity[] guardada = new TaxiEntity[1];
-        boolean[] creada = {false};
-        TaxiDatabase.getInstance(context).runInTransaction(() -> {
-            TaxiEntity existing = dao.porReserva(user.getEmail(), reserva.id);
-            if (existing != null) {
-                guardada[0] = existing;
-                return;
-            }
-            TaxiEntity entity = new TaxiEntity();
-            entity.id = dao.siguienteId();
-            entity.reservaId = reserva.id;
-            entity.clienteId = user.getEmail();
-            entity.nombreCliente = PerfilRepository.cargar(context).name;
-            entity.hotel = hotel.name;
-            entity.origen = hotel.address;
-            entity.destino = destino.etiqueta();
-            entity.hotelId=hotel.id;entity.hotelCity=hotel.city;
-            entity.airportCode=destino.codigo;entity.airportName=destino.nombre;entity.airportCity=destino.ciudad;
-            entity.hora = hora;
-            entity.pasajeros = pasajeros;
-            entity.maletas = maletas;
-            entity.estado = Estado.SOLICITADO.name();
-            entity.creado = System.currentTimeMillis();
-            entity.taxistaId = "";
-            entity.conductor = "";
-            if (dao.insertar(entity) < 0) throw new IllegalStateException("No se pudo crear la solicitud");
-            guardada[0] = entity;
-            creada[0] = true;
-        });
-        if (creada[0]) ClienteNotificationManager.mostrarEstadoTaxi(context, guardada[0].id, reserva.id, Estado.SOLICITADO);
-        return guardada[0].id;
+        JSONObject service =
+                TaxiApis.get(context)
+                        .crearServicio(reserva.id, aeropuerto, hora, pasajeros, maletas);
+        return Math.toIntExact(service.optLong("id"));
     }
 
     @WorkerThread
     public static int porReserva(Context context, int reservaId) {
-        AuthenticatedUser user = SessionRepository.obtener(context);
-        if (user == null || user.getRole() != UserRole.CLIENT) return -1;
-        TaxiEntity entity = dao(context).porReserva(user.getEmail(), reservaId);
-        if(entity==null&&FirebaseTaxiStore.usaFirebase(context))return FirebaseTaxiStore.porReserva(reservaId);
-        return entity == null ? -1 : entity.id;
+        return buscar(context, reservaId) == null ? -1 : reservaId;
+    }
+
+    @WorkerThread
+    public static int crear(Context context, Reserva reserva, com.example.proyecto_iotelito.model.Hotel hotel,
+            AeropuertosCliente.Aeropuerto airport, String hora, int pasajeros, int maletas) {
+        if (hotel == null || hotel.id != reserva.hotelId || airport == null)
+            throw new IllegalArgumentException("Revisa el hotel y aeropuerto seleccionados.");
+        AeropuertosCliente.elegir(hotel.city, airport.codigo);
+        return crear(context, reserva, airport.codigo, hora, pasajeros, maletas);
     }
 
     @WorkerThread
     public static List<SolicitudServicio> disponibles(Context context) {
-        List<SolicitudServicio> resultado = new ArrayList<>();
-        AuthenticatedUser user = SessionRepository.obtener(context);
-        if (user == null || user.getRole() != UserRole.TAXISTA) return resultado;
-        for (TaxiEntity entity : dao(context).disponibles(user.getEmail())) resultado.add(convertir(entity.comoJson()));
-        return resultado;
+        List<SolicitudServicio> rows = new ArrayList<>();
+        org.json.JSONArray a = TaxiApis.get(context).listarDisponibles().optJSONArray("servicios");
+        for (int i = 0; i < a.length(); i++)
+            rows.add(convertir(TaxiCodec.legacy(a.optJSONObject(i), "", false)));
+        return rows;
     }
 
     public static SolicitudServicio convertir(JSONObject pedido) {
         String nombre = pedido.optString("nombre");
-        String detalle = pedido.optInt("pasajeros") + " pasajeros · " + pedido.optInt("maletas") + " maletas";
+        String detalle =
+                pedido.optInt("pasajeros")
+                        + " pasajeros · "
+                        + pedido.optInt("maletas")
+                        + " maletas";
         LocalTime recojo = LocalTime.parse(pedido.optString("hora"));
         LocalTime ahora = LocalTime.now();
-        int minutos = Math.floorMod(recojo.getHour() * 60 + recojo.getMinute()
-                - ahora.getHour() * 60 - ahora.getMinute(), 24 * 60);
-        return new SolicitudServicio(pedido.optInt("id"), minutos, pedido.optString("hotel"),
-                pedido.optString("destino"), pedido.optString("hora"), nombre,
-                nombre.isEmpty() ? "C" : nombre.substring(0, 1), detalle, 0);
+        int minutos =
+                Math.floorMod(
+                        recojo.getHour() * 60
+                                + recojo.getMinute()
+                                - ahora.getHour() * 60
+                                - ahora.getMinute(),
+                        24 * 60);
+        return new SolicitudServicio(
+                pedido.optInt("id"),
+                minutos,
+                pedido.optString("hotel"),
+                pedido.optString("destino"),
+                pedido.optString("hora"),
+                nombre,
+                nombre.isEmpty() ? "C" : nombre.substring(0, 1),
+                detalle,
+                0);
     }
 
     @WorkerThread
     public static boolean avanzar(Context context, int id, Estado siguiente) {
-        AuthenticatedUser user = SessionRepository.obtener(context);
-        if (user == null || user.getRole() != UserRole.TAXISTA) return false;
-        TaxiDao dao = dao(context);
-        TaxiEntity pedido = dao.buscar(id);
-        if (pedido == null) return false;
-        Estado actual = Estado.valueOf(pedido.estado);
-        if (!actual.permite(siguiente)) return false;
-        if (dao.avanzar(id, actual.name(), siguiente.name(), user.getEmail(), user.getDisplayName()) != 1) return false;
-        ClienteNotificationManager.mostrarEstadoTaxi(context, id, pedido.reservaId, siguiente);
+        TaxiApi api = TaxiApis.get(context);
+        if (siguiente == Estado.ASIGNADO) api.aceptarServicio(id);
+        else if (siguiente == Estado.EN_CAMINO) api.avanzarServicio(id, "EN_CAMINO");
+        else
+            throw new TaxiApiException(
+                    409,
+                    TaxiApiException.Codigo.ESTADO_INVALIDO,
+                    "El servicio requiere validar el QR para finalizar.");
         return true;
     }
 
     private static final class Resultado<T> {
         final T dato;
         final Exception error;
+
         Resultado(T dato, Exception error) {
             this.dato = dato;
             this.error = error;

@@ -9,7 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelAdminRepository;
 import com.example.proyecto_iotelito.data.superadmin.*;
-import com.example.proyecto_iotelito.data.taxista.FirebaseTaxiStore;
+import com.example.proyecto_iotelito.data.taxiapi.TaxiApis;
 import com.example.proyecto_iotelito.model.*;
 import com.example.proyecto_iotelito.model.auth.*;
 import com.example.proyecto_iotelito.model.hoteladmin.*;
@@ -128,10 +128,10 @@ public class FirebaseLiveRolesTest {
                     assertEquals(Boolean.TRUE, hotel.getBoolean("active"));
                     result("HOTEL_ADMIN hotel=" + user.getHotelId() + " asignacion_consistente");
                 } else if (role == UserRole.TAXISTA) {
-                    DocumentSnapshot driver = get("taxistas/" + user.getUid());
-                    assertEquals(Boolean.TRUE, driver.getBoolean("activo"));
-                    assertTrue(driver.get("disponible") instanceof Boolean);
-                    result("TAXISTA perfil_operativo_valido");
+                    JSONObject driverProfile = TaxiApis.get(context).miPerfilTaxista();
+                    assertTrue(driverProfile.getBoolean("activo"));
+                    assertEquals("APROBADO",driverProfile.getString("estadoSolicitud"));
+                    result(TaxiApis.fake()?"TAXISTA API_FAKE no_equivale_a_validacion_del_backend":"TAXISTA perfil_API_valido");
                 } else {
                     QuerySnapshot bookings = Tasks.await(db.collection("reservations").whereEqualTo("clientUid", user.getUid())
                             .get(Source.SERVER), 30, TimeUnit.SECONDS);
@@ -146,20 +146,14 @@ public class FirebaseLiveRolesTest {
             ins.runOnMainSync(() -> SessionRepository.cerrar(context)); return;
         }
 
-        // No tocar un servicio real en curso ni cambiar su conductor.
-        AuthenticatedUser driver = login(UserRole.TAXISTA);
-        DocumentSnapshot driverLock = get("taxiDrivers/" + driver.getUid());
-        assertTrue("El conductor tiene otro servicio: prueba detenida sin modificarlo", !driverLock.exists()
-                || driverLock.getString("activeRequestId") == null || driverLock.getString("activeRequestId").isEmpty());
-        boolean originalAvailability = Boolean.TRUE.equals(get("taxistas/" + driver.getUid()).getBoolean("disponible"));
+        // El recorrido taxi se prueba por separado en TaxiApiEmulatorTest.
+        // Esta prueba real conserva únicamente las operaciones de hotel/reserva.
         AuthenticatedUser admin = login(UserRole.HOTEL_ADMIN);
         int hotelId = admin.getHotelId(); int roomId = FirebaseHotelAdminRepository.newId();
         int serviceId = FirebaseHotelAdminRepository.newId();
         String marker = "QA-" + Long.toString(System.currentTimeMillis(), 36).toUpperCase(Locale.ROOT);
         FirebaseHotelAdminRepository adminRepo = new FirebaseHotelAdminRepository(context);
         boolean roomCreated = false, serviceCreated = false;
-        Integer createdTaxiId = null;
-        boolean availabilityChanged = false;
         try {
             Habitacion room = new Habitacion(roomId, hotelId, "Prueba QA", marker, 24, 2, 0, 151.50,
                     "Registro de prueba de integración; no es inventario comercial.", R.drawable.superadmin_hotel_hero, true);
@@ -192,31 +186,7 @@ public class FirebaseLiveRolesTest {
                     175.75, marker, "Prueba QA", marker, Collections.singletonList(roomId), TarjetaSimulada.validar("4242424242424242", "12/39", "123", java.time.YearMonth.now()));
             assertTrue(get("reservations/" + booking.id).exists());
             result("RESERVA id=" + booking.id + " hotel=" + hotelId + " entrada=" + arrival + " codigo=" + marker);
-            if (TaxiBenefitPolicy.puedeSolicitar(booking)) {
-                int taxiId = FirebaseTaxiStore.crear(booking, "PRUEBA QA", hotel,
-                        AeropuertosCliente.paraCiudad(hotel.city).get(0), "14:30", 2, 1);
-                createdTaxiId = taxiId;
-                result("TAXI solicitud_creada id=" + taxiId);
-                driver = login(UserRole.TAXISTA);
-                final String driverUid = driver.getUid();
-                Tasks.await(db.runTransaction(tx -> {
-                    DocumentReference ref = db.collection("taxistas").document(driverUid); tx.get(ref);
-                    tx.update(ref, "disponible", true); return null;
-                }), 30, TimeUnit.SECONDS);
-                availabilityChanged = true;
-                for (String state : Arrays.asList("ASIGNADO", "EN_CAMINO", "EN_TRASLADO", "FINALIZADO")) {
-                    assertTrue("Estado " + state, FirebaseTaxiStore.avanzar(driverUid, taxiId, state, driver.getEmail(), "PRUEBA QA"));
-                    assertEquals(state, get("taxiRequests/" + taxiId).getString("estado")); result("TAXI " + state);
-                }
-                assertEquals("", get("taxiDrivers/" + driverUid).getString("activeRequestId"));
-                Tasks.await(db.collection("taxistas").document(driverUid).update("disponible", originalAvailability), 30, TimeUnit.SECONDS);
-                login(UserRole.CLIENT);
-                assertEquals("FINALIZADO", get("taxiRequests/" + taxiId).getString("estado"));
-                result("CLIENT estado_final_compartido_confirmado");
-            } else {
-                assertFalse(TaxiBenefitPolicy.cumpleMonto(booking));
-                result("TAXI no_corresponde_a_reserva_QA_inferior_al_minimo; probar_con_checkout_desde_S1000");
-            }
+            result("TAXI omitido: usar la prueba de API dedicada");
             if (!excludeSuperadmin) {
                 login(UserRole.SUPERADMIN);
                 QuerySnapshot reservations = Tasks.await(db.collection("reservations").get(Source.SERVER), 30, TimeUnit.SECONDS);
@@ -225,23 +195,6 @@ public class FirebaseLiveRolesTest {
             }
         } finally {
             try {
-                if (availabilityChanged) {
-                    try {
-                        AuthenticatedUser cleanupDriver = login(UserRole.TAXISTA);
-                        if (createdTaxiId != null) {
-                            DocumentSnapshot lock = get("taxiDrivers/" + cleanupDriver.getUid());
-                            if (lock.exists() && String.valueOf(createdTaxiId).equals(lock.getString("activeRequestId"))) {
-                                String current = get("taxiRequests/" + createdTaxiId).getString("estado");
-                                List<String> sequence = Arrays.asList("ASIGNADO", "EN_CAMINO", "EN_TRASLADO", "FINALIZADO");
-                                int position = sequence.indexOf(current);
-                                if (position >= 0) for (int next = position + 1; next < sequence.size(); next++)
-                                    assertTrue(FirebaseTaxiStore.avanzar(cleanupDriver.getUid(), createdTaxiId, sequence.get(next), cleanupDriver.getEmail(), "PRUEBA QA"));
-                            }
-                        }
-                        Tasks.await(db.collection("taxistas").document(cleanupDriver.getUid()).update("disponible", originalAvailability), 30, TimeUnit.SECONDS);
-                        result("TAXISTA disponibilidad_original_restaurada");
-                    } catch (Exception | AssertionError cleanupError) { result("ATENCION limpieza_taxi " + safe(cleanupError)); }
-                }
                 login(UserRole.HOTEL_ADMIN);
                 FirebaseHotelAdminRepository cleanup = new FirebaseHotelAdminRepository(context);
                 if (serviceCreated) { operation(done -> cleanup.archiveService(serviceId, done)); result("SERVICIO archivado=" + serviceId); }

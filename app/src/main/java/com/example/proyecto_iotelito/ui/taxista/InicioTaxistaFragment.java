@@ -33,8 +33,14 @@ public class InicioTaxistaFragment extends Fragment {
         ((TextView)view.findViewById(R.id.tv_saludo)).setText(getString(R.string.taxi_saludo,nombre));
         ((TextView)view.findViewById(R.id.tv_avatar_inicial)).setText(nombre.isEmpty()?"":nombre.substring(0,1));
         ((TextView)view.findViewById(R.id.tv_nombre_conductor)).setText(nombre);
-        ((TextView)view.findViewById(R.id.tv_rating_vehiculo)).setText("★ 4.8 · Toyota Corolla (ABC-123)");
-        ((TextView)view.findViewById(R.id.tv_stat_calificacion)).setText("4.8");
+        ((TextView)view.findViewById(R.id.tv_rating_vehiculo)).setText("Cargando perfil…");
+        ((TextView)view.findViewById(R.id.tv_stat_calificacion)).setText("—");
+        vm.repo.perfil.observe(getViewLifecycleOwner(),p->{
+            org.json.JSONObject car=p.optJSONObject("vehiculo");
+            ((TextView)view.findViewById(R.id.tv_nombre_conductor)).setText(p.optString("nombres")+" "+p.optString("apellidos"));
+            ((TextView)view.findViewById(R.id.tv_rating_vehiculo)).setText("★ "+p.optDouble("calificacion")+" · "+car.optString("marca")+" "+car.optString("modelo")+" ("+car.optString("placa")+")");
+            ((TextView)view.findViewById(R.id.tv_stat_calificacion)).setText(String.valueOf(p.optDouble("calificacion")));
+        });
         ConductorUi.disponibilidad(this,view,R.id.switch_disponibilidad,R.id.tv_estado_disponibilidad,vm);
         vm.repo.servicios.observe(getViewLifecycleOwner(),rows->{servicios=rows;pintar(view);});
         vm.repo.avisos.observe(getViewLifecycleOwner(),rows->{

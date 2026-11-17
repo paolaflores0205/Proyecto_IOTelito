@@ -15,6 +15,8 @@ public final class ClientPushRegistration {
     private static volatile long generation;
     private static SharedPreferences prefs(Context c) { return c.getSharedPreferences("client_push_binding", Context.MODE_PRIVATE); }
     public static void register(Context context) {
+        String project=com.google.firebase.FirebaseApp.getInstance().getOptions().getProjectId();
+        if(project!=null && project.startsWith("demo-"))return; // FCM no tiene emulador local.
         long ticket=generation;
         Context app=context.getApplicationContext();
         AuthenticatedUser user=SessionRepository.obtener(app);
@@ -26,7 +28,9 @@ public final class ClientPushRegistration {
             if(!uid.equals(p.getString("uid",null))) p.edit().putString("uid",uid).putString("binding",UUID.randomUUID().toString()).commit();
             binding=p.getString("binding","");
         }
-        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token -> upload(app,uid,binding,token));
+        FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token -> upload(app,uid,binding,token))
+                .addOnFailureListener(error -> android.util.Log.w("ClientPush","No se pudo registrar el dispositivo; se reintentará al abrir la app."));
     }
     public static void refresh(Context context,String token) {
         String uid=prefs(context).getString("uid",null),binding=prefs(context).getString("binding",null);

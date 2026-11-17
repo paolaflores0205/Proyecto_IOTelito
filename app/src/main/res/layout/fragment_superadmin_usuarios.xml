@@ -64,6 +64,9 @@
         </LinearLayout>
     </LinearLayout>
 
+    <com.google.android.material.button.MaterialButton android:id="@+id/btn_manage_taxi_api"
+        style="@style/Widget.IoTelito.Button.Outline" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginHorizontal="16dp" android:text="Gestionar taxistas" />
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.IoTelito.Input"
         android:layout_width="match_parent"

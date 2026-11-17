@@ -1,3 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:networkSecurityConfig="@xml/debug_network_security" />
+    <application android:networkSecurityConfig="@xml/debug_network_security">
+        <!-- En debug, no pedir tokens hasta tener una sesión cliente real; los proyectos demo no tienen FCM. -->
+        <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
+    </application>
 </manifest>

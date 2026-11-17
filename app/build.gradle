@@ -3,6 +3,12 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+def taxiProperties = new Properties()
+def taxiPropertiesFile = rootProject.file('local.properties')
+if (taxiPropertiesFile.exists()) taxiPropertiesFile.withInputStream { taxiProperties.load(it) }
+def taxiUrl = providers.gradleProperty('taxiApi.url').orElse(taxiProperties.getProperty('taxiApi.url', '')).get().trim()
+def taxiFake = providers.gradleProperty('taxiApi.fake').orElse(taxiProperties.getProperty('taxiApi.fake', 'true')).get().toBoolean()
+
 android {
     namespace 'com.example.proyecto_iotelito'
     compileSdk {
@@ -15,11 +21,16 @@ android {
         targetSdk 37
         versionCode 1
         versionName "1.0"
+        buildConfigField 'String', 'TAXI_API_URL', groovy.json.JsonOutput.toJson(taxiUrl)
+        buildConfigField 'boolean', 'TAXI_API_FAKE', 'false'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            buildConfigField 'boolean', 'TAXI_API_FAKE', taxiFake.toString()
+        }
         release {
             optimization {
                 enable false
@@ -32,6 +43,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 
@@ -45,6 +57,9 @@ dependencies {
     implementation libs.navigation.fragment
     implementation libs.navigation.ui
     implementation libs.play.services.location
+    implementation libs.play.services.code.scanner
+    implementation libs.osmdroid
+    implementation libs.zxing.core
     implementation libs.room.runtime
     annotationProcessor libs.room.compiler
     implementation platform(libs.firebase.bom)
@@ -53,6 +68,7 @@ dependencies {
     implementation libs.firebase.firestore
     implementation 'com.google.firebase:firebase-storage'
     testImplementation libs.junit
+    testImplementation libs.json
     androidTestImplementation libs.espresso.core
     androidTestImplementation libs.ext.junit
 }

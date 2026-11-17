@@ -13,8 +13,9 @@ import java.io.File;
 final class ConductorUi {
     static void disponibilidad(Fragment f,View root,int switchId,int textId,TaxistaViewModel vm) {
         MaterialSwitch toggle=root.findViewById(switchId); TextView label=root.findViewById(textId);
+        vm.disponibilidad.error.observe(f.getViewLifecycleOwner(),e->{if(e!=null)label.setText(e);});
         vm.disponibilidad.estado().observe(f.getViewLifecycleOwner(),estado->{
-            // Desconectar el callback evita escrituras al reflejar cambios de Firestore en ambos menús.
+            // Desconectar el callback evita escrituras al reflejar la respuesta de la API en ambos menús.
             toggle.setOnCheckedChangeListener(null);
             toggle.setChecked(estado.disponible);
             toggle.setEnabled(estado.editable());

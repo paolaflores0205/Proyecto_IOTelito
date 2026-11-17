@@ -1,0 +1,17 @@
+<resources>
+    <string name="taxi_api_back">Volver</string>
+    <string name="taxi_api_map_title">Seguimiento del taxi</string>
+    <string name="taxi_api_wait_location">Esperando la ubicación del conductor</string>
+    <string name="taxi_api_qr">Mostrar código QR</string>
+    <string name="taxi_api_rating">Calificar servicio</string>
+    <string name="taxi_api_scan">Escanear QR del cliente</string>
+    <string name="taxi_api_final_title">Finalizar servicio</string>
+    <string name="taxi_api_final_desc">Al llegar al destino, escanea el código QR que muestra el cliente para confirmar la finalización.</string>
+    <string name="taxi_api_manual">O ingresa el código completo del QR</string>
+    <string name="taxi_api_validate">Validar código</string>
+    <string name="taxi_api_qr_desc">Muestra este código al conductor al llegar al aeropuerto. El viaje finaliza cuando el conductor lo valida.</string>
+    <string name="taxi_api_attribution">© OpenStreetMap contributors</string>
+    <string name="taxi_api_location_channel">Ubicación del servicio de taxi</string>
+    <string name="taxi_api_location_active">Compartiendo ubicación durante tu servicio</string>
+    <string name="taxi_api_comment">Comentario sobre el viaje (opcional)</string>
+</resources>

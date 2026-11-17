@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" style="@style/Widget.IoTelito.Card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <TextView android:id="@+id/tv_taxi_admin_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/io_navy" android:textStyle="bold" android:textSize="17sp" />
+        <TextView android:id="@+id/tv_taxi_admin_details" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textColor="@color/io_text_secondary" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_taxi_admin_toggle" style="@style/Widget.IoTelito.Button.Outline" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
