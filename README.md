@@ -71,10 +71,35 @@ Firestore en memoria y tokens simulados.
 3. La primera vez que abre la app, `GET /api/v1/taxistas/me` enlaza esa cuenta con su ficha
    por el correo y guarda el `firebase_uid`.
 
+## Despliegue en AWS (Learner Lab)
+
+Desplegado el 16/11/2026 en la misma EC2 y el mismo RDS de la web anterior, **sin tocarla**:
+
+| Pieza | Valor |
+| --- | --- |
+| URL pública (HTTPS) | `https://bkmx72ue4k.execute-api.us-east-1.amazonaws.com` (API Gateway HTTP) |
+| Servidor | EC2 `servidor-proyecto-web`, servicio `taxiweb` en el puerto 8081 |
+| Base | RDS `iotelito-db`, base `iotelito_taxis`, usuario `taxiweb` (la base `iotelito` sigue intacta) |
+| Contraseña del superadmin | Parameter Store `/iotelito/taxiweb/admin-password` (SecureString) |
+| Artefactos | `s3://iotelito-taxiweb-102343456181/deploy/` (privado) |
+
+La web anterior sigue en el puerto 8080 y se enciende a mano como antes. La nueva arranca sola
+con el lab (`systemctl status taxiweb`). Si hace falta memoria: `sudo systemctl stop taxiweb`.
+
+Para actualizar la versión nueva:
+
+1. `./mvnw -DskipTests package` y subir `target/taxiweb-0.0.1-SNAPSHOT.jar` como
+   `s3://iotelito-taxiweb-102343456181/deploy/taxiweb.jar`.
+2. En el servidor (Session Manager): `sudo aws s3 cp s3://iotelito-taxiweb-102343456181/deploy/taxiweb.jar /opt/taxiweb/taxiweb.jar && sudo systemctl restart taxiweb`.
+
+Instalación desde cero: `deploy/instalar-junto-a-web-existente.sh` (pide la contraseña de admin de
+RDS, crea la base y el usuario, aplica `schema.sql` y `data.sql` e instala el servicio).
+`deploy/instalar-servidor.sh` es la alternativa para una EC2 Ubuntu nueva con MySQL local.
+
 ## Pendiente
 
 - Automatizar el paso 2 al aprobar (requiere una cuenta de servicio de Firebase en el servidor),
   y deshabilitar la cuenta de Firebase al desactivar un taxista (hoy la API ya le niega el acceso).
 - Guardar en S3 los documentos del registro (hoy el formulario los recibe pero no los guarda) y
   devolver las fotos en `fotoUrl` (hoy `null`).
-- Despliegue en AWS.
+- Probar la API con un token real de Firebase desde la app.
