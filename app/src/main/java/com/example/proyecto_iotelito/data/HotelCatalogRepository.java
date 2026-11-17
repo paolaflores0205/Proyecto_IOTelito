@@ -4,14 +4,22 @@ import android.content.Context;
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
+import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminFirestoreCodec;
 import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.data.superadmin.local.AdminHotelEntity;
 import com.example.proyecto_iotelito.data.superadmin.local.SuperadminDatabase;
 import com.example.proyecto_iotelito.model.Attraction;
 import com.example.proyecto_iotelito.model.Hotel;
+import com.example.proyecto_iotelito.model.hoteladmin.Servicio;
 import com.example.proyecto_iotelito.model.superadmin.ManagedHotel;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Source;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /** Comparte catálogo e inventario de Firestore con sesión; conserva ejemplos para uso local sin sesión. */
 public final class HotelCatalogRepository {
@@ -50,6 +58,27 @@ public final class HotelCatalogRepository {
         AdminHotelEntity row = SuperadminDatabase.getInstance(context).dao().hotel(id);
         return row == null ? null : combinar(row.toModel());
     }
+
+    @WorkerThread public static List<Servicio> serviciosDisponibles(int hotelId) throws InterruptedException {
+        List<Servicio> services = new ArrayList<>();
+        try {
+            for (DocumentSnapshot doc : Tasks.await(FirebaseFirestore.getInstance()
+                    .collection("hotels").document(String.valueOf(hotelId)).collection("services")
+                    .whereEqualTo("activo", true).get(Source.SERVER))) {
+                if (Boolean.TRUE.equals(doc.getBoolean("archived"))) continue;
+                try {
+                    services.add(HotelAdminFirestoreCodec.service(doc.getId(), hotelId, doc.getData(),
+                            R.drawable.superadmin_hotel_sol));
+                } catch (IllegalArgumentException malformed) {
+                    android.util.Log.w("HotelCatalog", "Servicio de hotel con datos inválidos.");
+                }
+            }
+        } catch (ExecutionException error) {
+            throw new IllegalStateException("No se pudieron cargar los servicios del hotel.", error);
+        }
+        return services;
+    }
+
     public static Hotel combinar(ManagedHotel row) {
         if (row.remote) {
             Hotel remote = new Hotel(row.id, row.city, row.name, row.address, row.rating, row.reviews,

@@ -85,6 +85,7 @@
 
     <!-- Detalle de hotel -->
     <string name="servicios_conectados">Servicios conectados</string>
+    <string name="cliente_servicios_adicionales">Servicios adicionales</string>
     <string name="atracciones_cercanas">Atracciones cercanas</string>
     <string name="btn_ver_habitaciones">Ver habitaciones</string>
     <string name="opiniones">(%1$d opiniones)</string>
