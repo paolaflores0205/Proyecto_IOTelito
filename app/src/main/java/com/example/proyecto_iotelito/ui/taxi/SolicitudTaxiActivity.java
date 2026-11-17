@@ -6,10 +6,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.ReservaRepository;
-import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
@@ -27,30 +27,40 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
     private int minutoRecojo = 30;
     private Reserva reserva;
     private Hotel hotel;
+    private String aeropuertoCodigo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_solicitud_taxi);
+        TaxiUi.status(this, null);
 
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
-        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, loadedHotel) -> {
-        reserva = value;
-        hotel = loadedHotel;
-        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), existente -> {
-            if (existente >= 0) abrirSolicitud(existente);
-        });
-        maxPasajeros = Math.max(1, obtenerCantidadHuespedes(reserva.huespedes));
-        maxMaletas = maxPasajeros * 2;
-        pasajeros = Math.min(pasajeros, maxPasajeros);
-        maletas = Math.min(maletas, maxMaletas);
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(
+                this,
+                reservaId,
+                (value, loadedHotel) -> {
+                    reserva = value;
+                    hotel = loadedHotel;
+                    TaxiRepository.ejecutar(
+                            this,
+                            this,
+                            () -> TaxiRepository.porReserva(this, reserva.id),
+                            existente -> {
+                                if (existente >= 0) abrirSolicitud(existente);
+                            });
+                    maxPasajeros = Math.max(1, obtenerCantidadHuespedes(reserva.huespedes));
+                    maxMaletas = maxPasajeros * 2;
+                    pasajeros = Math.min(pasajeros, maxPasajeros);
+                    maletas = Math.min(maletas, maxMaletas);
 
-        setupHeader();
-        setupReservaHotel();
-        setupHoraRecojo();
-        setupSteppers();
-        setupConfirmButton();
-        });
+                    setupHeader();
+                    setupReservaHotel();
+                    setupHoraRecojo();
+                    setupSteppers();
+                    setupConfirmButton();
+                    cargarAeropuertos();
+                });
     }
 
     private void setupHeader() {
@@ -72,20 +82,21 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
         TextView tvHoraRecojo = findViewById(R.id.tv_hora_recojo);
         View containerHoraRecojo = findViewById(R.id.container_hora_recojo);
         tvHoraRecojo.setText(formatearHoraRecojo());
-        containerHoraRecojo.setOnClickListener(v -> {
-            TimePickerDialog dialog = new TimePickerDialog(
-                    this,
-                    (view, hourOfDay, minute) -> {
-                        horaRecojo = hourOfDay;
-                        minutoRecojo = minute;
-                        tvHoraRecojo.setText(formatearHoraRecojo());
-                    },
-                    horaRecojo,
-                    minutoRecojo,
-                    true
-            );
-            dialog.show();
-        });
+        containerHoraRecojo.setOnClickListener(
+                v -> {
+                    TimePickerDialog dialog =
+                            new TimePickerDialog(
+                                    this,
+                                    (view, hourOfDay, minute) -> {
+                                        horaRecojo = hourOfDay;
+                                        minutoRecojo = minute;
+                                        tvHoraRecojo.setText(formatearHoraRecojo());
+                                    },
+                                    horaRecojo,
+                                    minutoRecojo,
+                                    true);
+                    dialog.show();
+                });
     }
 
     private String formatearHoraRecojo() {
@@ -94,44 +105,141 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
 
     private void setupSteppers() {
         TextView tvPasajeros = findViewById(R.id.tv_pasajeros);
-        TextView tvMaletas   = findViewById(R.id.tv_maletas);
+        TextView tvMaletas = findViewById(R.id.tv_maletas);
         tvPasajeros.setText(String.valueOf(pasajeros));
         tvMaletas.setText(String.valueOf(maletas));
 
-        findViewById(R.id.btn_menos_pasajeros).setOnClickListener(v -> {
-            if (pasajeros > 1) { pasajeros--; tvPasajeros.setText(String.valueOf(pasajeros)); }
-        });
-        findViewById(R.id.btn_mas_pasajeros).setOnClickListener(v -> {
-            if (pasajeros < maxPasajeros) { pasajeros++; tvPasajeros.setText(String.valueOf(pasajeros)); }
-        });
-        findViewById(R.id.btn_menos_maletas).setOnClickListener(v -> {
-            if (maletas > 0) { maletas--; tvMaletas.setText(String.valueOf(maletas)); }
-        });
-        findViewById(R.id.btn_mas_maletas).setOnClickListener(v -> {
-            if (maletas < maxMaletas) { maletas++; tvMaletas.setText(String.valueOf(maletas)); }
-        });
+        findViewById(R.id.btn_menos_pasajeros)
+                .setOnClickListener(
+                        v -> {
+                            if (pasajeros > 1) {
+                                pasajeros--;
+                                tvPasajeros.setText(String.valueOf(pasajeros));
+                            }
+                        });
+        findViewById(R.id.btn_mas_pasajeros)
+                .setOnClickListener(
+                        v -> {
+                            if (pasajeros < maxPasajeros) {
+                                pasajeros++;
+                                tvPasajeros.setText(String.valueOf(pasajeros));
+                            }
+                        });
+        findViewById(R.id.btn_menos_maletas)
+                .setOnClickListener(
+                        v -> {
+                            if (maletas > 0) {
+                                maletas--;
+                                tvMaletas.setText(String.valueOf(maletas));
+                            }
+                        });
+        findViewById(R.id.btn_mas_maletas)
+                .setOnClickListener(
+                        v -> {
+                            if (maletas < maxMaletas) {
+                                maletas++;
+                                tvMaletas.setText(String.valueOf(maletas));
+                            }
+                        });
     }
 
     private void setupConfirmButton() {
         MaterialButton btnConfirmar = findViewById(R.id.btn_confirmar_solicitud);
-        btnConfirmar.setOnClickListener(v -> {
-            String hora = formatearHoraRecojo();
-            int cantidadPasajeros = pasajeros;
-            int cantidadMaletas = maletas;
-            TaxiRepository.ejecutar(this, this, () -> TaxiRepository.crear(
-                    this, reserva, hotel.name, hotel.address, hora, cantidadPasajeros, cantidadMaletas), solicitudId -> {
-                if (solicitudId < 0) {
-                    android.widget.Toast.makeText(this, R.string.taxi_guardar_error, android.widget.Toast.LENGTH_LONG).show();
-                    return;
-                }
-                abrirSolicitud(solicitudId);
-            });
-        });
+        btnConfirmar.setOnClickListener(
+                v -> {
+                    if (aeropuertoCodigo == null) return;
+                    btnConfirmar.setEnabled(false);
+                    String hora = formatearHoraRecojo();
+                    int cantidadPasajeros = pasajeros;
+                    int cantidadMaletas = maletas;
+                    com.example.proyecto_iotelito.data.taxiapi.TaxiTasks.run(
+                            this,
+                            () ->
+                                    TaxiRepository.crear(
+                                            this,
+                                            reserva,
+                                            aeropuertoCodigo,
+                                            hora,
+                                            cantidadPasajeros,
+                                            cantidadMaletas),
+                            solicitudId -> {
+                                btnConfirmar.setEnabled(true);
+                                if (solicitudId < 0) {
+                                    android.widget.Toast.makeText(
+                                                    this,
+                                                    R.string.taxi_guardar_error,
+                                                    android.widget.Toast.LENGTH_LONG)
+                                            .show();
+                                    return;
+                                }
+                                abrirSolicitud(solicitudId);
+                            },
+                            error -> {
+                                btnConfirmar.setEnabled(true);
+                                TaxiUi.status(this, error);
+                            });
+                });
+    }
+
+    private void cargarAeropuertos() {
+        MaterialButton button = findViewById(R.id.btn_confirmar_solicitud);
+        button.setEnabled(false);
+        TextView select = findViewById(R.id.taxi_aeropuerto_selector);
+        com.example.proyecto_iotelito.data.taxiapi.TaxiTasks.run(
+                this,
+                () ->
+                        com.example.proyecto_iotelito.data.taxiapi.TaxiApis.get(this)
+                                .listarAeropuertos(),
+                response -> {
+                    org.json.JSONArray list = response.optJSONArray("aeropuertos");
+                    java.util.List<String> codes = new java.util.ArrayList<>(),
+                            names = new java.util.ArrayList<>();
+                    String city = hotel.city.trim().toLowerCase(java.util.Locale.ROOT);
+                    for (int i = 0; i < list.length(); i++) {
+                        org.json.JSONObject a = list.optJSONObject(i);
+                        org.json.JSONArray cities = a.optJSONArray("ciudadesHotel");
+                        for (int n = 0; n < cities.length(); n++)
+                            if (city.equals(cities.optString(n))) {
+                                codes.add(a.optString("codigo"));
+                                names.add(a.optString("nombre"));
+                                break;
+                            }
+                    }
+                    if (codes.isEmpty()) {
+                        select.setText("Sin aeropuerto para esta ciudad");
+                        TaxiUi.status(
+                                this, "No hay aeropuerto disponible para la ciudad del hotel.");
+                        return;
+                    }
+                    aeropuertoCodigo = codes.get(0);
+                    select.setText(names.get(0));
+                    button.setEnabled(true);
+                    select.setOnClickListener(
+                            v ->
+                                    new com.google.android.material.dialog
+                                                    .MaterialAlertDialogBuilder(this)
+                                            .setTitle(R.string.label_aeropuerto_destino)
+                                            .setItems(
+                                                    names.toArray(new String[0]),
+                                                    (d, index) -> {
+                                                        aeropuertoCodigo = codes.get(index);
+                                                        select.setText(names.get(index));
+                                                    })
+                                            .show());
+                    TaxiUi.status(this, null);
+                },
+                error -> {
+                    TaxiUi.status(this, error);
+                    select.setText("Reintentar cargar aeropuertos");
+                    select.setOnClickListener(v -> cargarAeropuertos());
+                });
     }
 
     private void abrirSolicitud(int id) {
         if (isFinishing()) return;
-        startActivity(new Intent(this, TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID, id));
+        startActivity(
+                new Intent(this, TaxistaAsignadoActivity.class)
+                        .putExtra(TaxiRepository.EXTRA_ID, id));
         finish();
     }
 

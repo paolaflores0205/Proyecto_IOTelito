@@ -17,7 +17,11 @@ final class TaxistaFlujo {
     static final String ID=TaxiRepository.EXTRA_ID;
     static TaxistaViewModel model(AppCompatActivity a) {
         TaxistaViewModel vm=new ViewModelProvider(a).get(TaxistaViewModel.class);
-        vm.repo.error.observe(a,error->{if(error!=null) Toast.makeText(a,error,Toast.LENGTH_LONG).show();});
+        com.example.proyecto_iotelito.ui.taxi.TaxiUi.status(a,null);
+        vm.repo.bind(a);
+        TaxistaLocation.bind(a,vm);
+        vm.repo.error.observe(a,error->{if(error!=null) com.example.proyecto_iotelito.ui.taxi.TaxiUi.status(a,error);});
+        a.getLifecycle().addObserver(new androidx.lifecycle.DefaultLifecycleObserver(){public void onResume(androidx.lifecycle.LifecycleOwner owner){vm.disponibilidad.refrescar();}});
         return vm;
     }
     static boolean sesion(Activity a) {

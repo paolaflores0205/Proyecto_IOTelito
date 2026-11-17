@@ -42,7 +42,12 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/valor_aeropuerto"
+                    android:id="@+id/taxi_aeropuerto_selector"
+                    android:text="Cargando aeropuertos…"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:minHeight="48dp"
+                    android:gravity="center_vertical"
                     android:textColor="@color/io_text_primary"
                     android:textSize="13sp" />
 

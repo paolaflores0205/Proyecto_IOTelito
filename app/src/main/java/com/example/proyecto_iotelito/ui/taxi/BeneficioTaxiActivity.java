@@ -3,13 +3,12 @@ package com.example.proyecto_iotelito.ui.taxi;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
-import com.example.proyecto_iotelito.data.ReservaRepository;
-import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.model.taxi.BeneficioTaxi;
@@ -31,25 +30,30 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
         setContentView(R.layout.activity_beneficio_taxi);
 
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
-        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, reservaId, (value, loadedHotel) -> {
-        reserva = value;
-        hotel = loadedHotel;
+        com.example.proyecto_iotelito.data.ClientDataLoader.reserva(
+                this,
+                reservaId,
+                (value, loadedHotel) -> {
+                    reserva = value;
+                    hotel = loadedHotel;
 
-        TextView tvDescripcion = findViewById(R.id.tv_desc_taxi_gratuito);
-        tvDescripcion.setText(getString(R.string.desc_taxi_gratuito_dinamico, hotel.name));
+                    TextView tvDescripcion = findViewById(R.id.tv_desc_taxi_gratuito);
+                    tvDescripcion.setText(
+                            getString(R.string.desc_taxi_gratuito_dinamico, hotel.name));
 
-        setupBeneficiosList();
-        MaterialButton btnSolicitar = findViewById(R.id.btn_solicitar_taxi);
-        MaterialButton btnNoGracias = findViewById(R.id.btn_no_gracias);
+                    setupBeneficiosList();
+                    MaterialButton btnSolicitar = findViewById(R.id.btn_solicitar_taxi);
+                    MaterialButton btnNoGracias = findViewById(R.id.btn_no_gracias);
 
-        btnSolicitar.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SolicitudTaxiActivity.class);
-            intent.putExtra(SolicitudTaxiActivity.EXTRA_RESERVA_ID, reserva.id);
-            startActivity(intent);
-        });
+                    btnSolicitar.setOnClickListener(
+                            v -> {
+                                Intent intent = new Intent(this, SolicitudTaxiActivity.class);
+                                intent.putExtra(SolicitudTaxiActivity.EXTRA_RESERVA_ID, reserva.id);
+                                startActivity(intent);
+                            });
 
-        btnNoGracias.setOnClickListener(v -> finish());
-        });
+                    btnNoGracias.setOnClickListener(v -> finish());
+                });
     }
 
     private void setupBeneficiosList() {
@@ -61,14 +65,8 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
 
     private List<BeneficioTaxi> createStaticBenefits() {
         return Arrays.asList(
+                new BeneficioTaxi(getString(R.string.item_valido_aeropuerto), R.drawable.ic_check),
                 new BeneficioTaxi(
-                        getString(R.string.item_valido_aeropuerto),
-                        R.drawable.ic_check
-                ),
-                new BeneficioTaxi(
-                        getString(R.string.item_monitoreo_satelital),
-                        R.drawable.ic_check
-                )
-        );
+                        getString(R.string.item_monitoreo_satelital), R.drawable.ic_check));
     }
 }
