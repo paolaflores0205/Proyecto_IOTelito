@@ -141,7 +141,15 @@ public final class FirebaseHotelsRepository {
     }
     public void save(ManagedHotel hotel, SuperadminRepository.Callback callback) {
         final String uid;
-        try { uid = actor(); HotelFirestoreCodec.editable(hotel, false); }
+        try {
+            uid = actor();
+            Map<String,String> errors = SuperadminFormValidation.hotel(hotel.name, hotel.address,
+                    hotel.district, hotel.city, hotel.phone, hotel.email, hotel.description);
+            if (!errors.isEmpty()) throw new IllegalArgumentException(errors.values().iterator().next());
+            if (hotel.photos == null || hotel.photos.isEmpty() || hotel.photos.size() > 8)
+                throw new IllegalArgumentException("Añade entre 1 y 8 fotos del hotel.");
+            HotelFirestoreCodec.editable(hotel, false);
+        }
         catch (IllegalArgumentException error) { callback.complete(0, error.getMessage()); return; }
         List<String> original = new ArrayList<>(hotel.photos);
         HotelCloudPhotos.upload(context, original).addOnSuccessListener(photos -> {

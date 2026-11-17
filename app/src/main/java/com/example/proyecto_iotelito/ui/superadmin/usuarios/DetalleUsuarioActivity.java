@@ -84,13 +84,19 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
                 .setTitle(selected.active ? R.string.superadmin_deactivate_question : R.string.superadmin_activate_question)
                 .setMessage(getString(selected.active ? R.string.superadmin_deactivate_message : R.string.superadmin_activate_message, selected.name))
                 .setNegativeButton(R.string.superadmin_cancel, null)
-                .setPositiveButton(R.string.superadmin_confirm, (d, which) -> {
-                    model.remoteUserStatus(selected.uid, !selected.active, reason.getText().toString());
-                });
+                .setPositiveButton(R.string.superadmin_confirm, null);
         if (selected.active) {
             dialog.setView(reason);
         }
         androidx.appcompat.app.AlertDialog shown = dialog.show();
+        reason.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(500)});
+        shown.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String error = selected.active ? com.example.proyecto_iotelito.data.superadmin.SuperadminFormValidation
+                    .reason(reason.getText().toString()) : null;
+            if (error != null) { reason.setError(error); reason.requestFocus(); return; }
+            model.remoteUserStatus(selected.uid, !selected.active, reason.getText().toString().trim());
+            shown.dismiss();
+        });
         if (shown.getWindow() != null) {
             shown.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }

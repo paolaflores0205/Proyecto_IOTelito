@@ -82,7 +82,7 @@ public final class FirebaseUsersRepository {
     }
     public void setActive(String uid, boolean active, String reason, SuperadminRepository.Callback callback) {
         FirebaseUser actor = FirebaseAuth.getInstance().getCurrentUser();
-        if (actor == null || uid == null || uid.isEmpty() || (!active && reason.trim().isEmpty())) {
+        if (actor == null || uid == null || uid.isEmpty() || (!active && SuperadminFormValidation.reason(reason) != null)) {
             callback.complete(-1, "Verifica tu sesión, el usuario y el motivo de desactivación."); return;
         }
         String actorUid = actor.getUid();

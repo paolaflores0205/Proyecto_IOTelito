@@ -49,14 +49,18 @@
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout style="@style/Widget.IoTelito.Input" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="16dp" android:hint="@string/superadmin_hotels_search_hint" app:startIconDrawable="@drawable/ic_search">
-            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_hotel_search" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" android:maxLines="1" />
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_hotel_search" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" android:maxLines="1"  android:maxLength="500" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.chip.ChipGroup android:id="@+id/chip_group_districts" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" app:singleSelection="true">
-            <com.google.android.material.chip.Chip android:id="@+id/chip_miraflores" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_miraflores" />
-            <com.google.android.material.chip.Chip android:id="@+id/chip_san_isidro" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_san_isidro" />
-            <com.google.android.material.chip.Chip android:id="@+id/chip_barranco" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/superadmin_filter_barranco" />
-        </com.google.android.material.chip.ChipGroup>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.IoTelito.Input" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginHorizontal="16dp"
+            android:hint="Distrito" app:endIconMode="dropdown_menu">
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/actv_district_filter" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="none"
+                android:paddingStart="16dp" android:paddingEnd="48dp" android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.chip.Chip android:id="@+id/chip_unassigned" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:checkable="true" android:text="Sin administrador asignado" />
         <TextView android:id="@+id/tv_hotels_sync_state" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:paddingVertical="4dp" android:textSize="12sp" android:textColor="@color/io_text_secondary" />
@@ -90,16 +94,16 @@
         </FrameLayout>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_hotel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         android:contentDescription="@string/superadmin_cd_add_hotel"
-        android:text="@string/superadmin_add_hotel"
+
         android:textColor="@color/io_navy"
-        app:icon="@drawable/ic_add"
+        app:srcCompat="@drawable/ic_add"
         app:backgroundTint="@color/io_teal"
-        app:iconTint="@color/io_navy" />
+        app:tint="@color/io_navy" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -74,8 +74,9 @@ public class IoTelitoApplication extends Application implements Application.Acti
             if (hideNavigationForKeyboard && navigationView != null) {
                 navigationView.setVisibility(keyboardVisible ? View.GONE : View.VISIBLE);
             }
-            if (hasAdminChat || hasPaymentForm || hasProfileForm || hasRegistrationForm || isSuperadmin) {
+            if (keyboardVisible && (hasAdminChat || hasPaymentForm || hasProfileForm || hasRegistrationForm || isSuperadmin)) {
                 // El IME ya incluye la zona inferior: no sumar también la barra de navegación.
+                // Sin teclado, el menú ya reserva la barra con su margen: no duplicarlo aquí.
                 bottomInset = Math.max(safeInsets.bottom,
                         windowInsets.getInsets(WindowInsetsCompat.Type.ime()).bottom);
             }

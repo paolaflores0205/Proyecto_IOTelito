@@ -28,6 +28,7 @@ public class HotelesAdminFragment extends Fragment {
     private HotelesAdapter adapter;
     private List<ManagedHotel> hotels = new ArrayList<>();
     private boolean loading = true;
+    private String districtFilter;
     private String syncError;
 
     @Nullable
@@ -49,17 +50,22 @@ public class HotelesAdminFragment extends Fragment {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
             @Override public void afterTextChanged(Editable s) { renderHotels(); }
         });
-        binding.chipGroupDistricts.setOnCheckedStateChangeListener((group, checkedIds) -> renderHotels());
+        if (savedInstanceState != null) districtFilter = savedInstanceState.getString("district_filter");
+        binding.actvDistrictFilter.setOnItemClickListener((parent, row, position, id) -> {
+            districtFilter = position == 0 ? null : parent.getItemAtPosition(position).toString();
+            renderHotels();
+        });
         binding.chipUnassigned.setOnCheckedChangeListener((button, checked) -> renderHotels());
         if (savedInstanceState == null && getArguments() != null
                 && "unassigned".equals(getArguments().getString("alert_filter"))) {
-            binding.chipGroupDistricts.clearCheck();
+            districtFilter = null;
             binding.chipUnassigned.setChecked(true);
         }
         binding.fabAddHotel.setOnClickListener(v -> startActivity(new Intent(requireContext(), FormularioHotelActivity.class)));
         SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
         model.hotelsState().observe(getViewLifecycleOwner(), state -> {
             hotels = state.hotels;
+            updateDistricts();
             loading = state.loading; syncError = state.error;
             long active = state.hotels.stream().filter(hotel -> hotel.active).count();
             binding.tvHotelsSyncState.setText(state.loading ? "Cargando hoteles…"
@@ -112,12 +118,21 @@ public class HotelesAdminFragment extends Fragment {
         startActivity(intent);
     }
 
-    private String selectedDistrict() {
-        int id = binding.chipGroupDistricts.getCheckedChipId();
-        if (id == R.id.chip_miraflores) return "Miraflores";
-        if (id == R.id.chip_san_isidro) return "San Isidro";
-        if (id == R.id.chip_barranco) return "Barranco";
-        return null;
+    private String selectedDistrict() { return districtFilter; }
+
+    private void updateDistricts() {
+        java.util.Set<String> districts = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (ManagedHotel hotel : hotels) if (hotel.district != null && !hotel.district.trim().isEmpty()) districts.add(hotel.district.trim());
+        if (districtFilter != null) districts.add(districtFilter);
+        List<String> choices = new ArrayList<>();
+        choices.add("Todos los distritos"); choices.addAll(districts);
+        binding.actvDistrictFilter.setAdapter(new android.widget.ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, choices));
+        binding.actvDistrictFilter.setText(districtFilter == null ? choices.get(0) : districtFilter, false);
+    }
+
+    @Override public void onSaveInstanceState(@NonNull Bundle out) {
+        super.onSaveInstanceState(out);
+        out.putString("district_filter", districtFilter);
     }
 
     @Override

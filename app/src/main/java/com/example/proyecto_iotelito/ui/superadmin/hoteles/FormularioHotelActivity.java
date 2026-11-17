@@ -4,7 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Patterns;
+
 import android.widget.ArrayAdapter;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -235,43 +235,33 @@ public class FormularioHotelActivity extends AppCompatActivity {
 
     private void save() {
         if (!formLoaded || !remoteAvailable || importingPhotos || Boolean.TRUE.equals(model.busy().getValue())) return;
-        binding.tilName.setError(null);
-        binding.tilAddress.setError(null);
         String name = String.valueOf(binding.etName.getText()).trim();
         String address = String.valueOf(binding.etAddress.getText()).trim();
         String email = String.valueOf(binding.etEmail.getText()).trim();
         String district = binding.actvDistrict.getText().toString().trim();
         String city = binding.actvCity.getText().toString().trim();
         String phone = String.valueOf(binding.etPhone.getText()).trim();
-        binding.actvDistrict.setError(null);
-        binding.actvCity.setError(null);
-        binding.etEmail.setError(null);
-        binding.etPhone.setError(null);
-        boolean valid = true;
-        if (name.isEmpty()) {
-            binding.tilName.setError(getString(R.string.superadmin_required_field));
+        String description = String.valueOf(binding.etDescription.getText()).trim();
+        java.util.Map<String,String> errors = com.example.proyecto_iotelito.data.superadmin.SuperadminFormValidation
+                .hotel(name, address, district, city, phone, email, description);
+        binding.tilName.setError(errors.get("name"));
+        binding.tilAddress.setError(errors.get("address"));
+        android.widget.EditText[] fields = {binding.etName, binding.etAddress, binding.actvDistrict,
+                binding.actvCity, binding.etPhone, binding.etEmail, binding.etDescription};
+        String[] keys = {"name", "address", "district", "city", "phone", "email", "description"};
+        android.view.View firstError = null;
+        for (int i = 0; i < fields.length; i++) {
+            if (i > 1) fields[i].setError(errors.get(keys[i]));
+            if (firstError == null && errors.containsKey(keys[i])) firstError = fields[i];
+        }
+        boolean valid = errors.isEmpty();
+        if (photos.isEmpty()) {
+            Snackbar.make(binding.getRoot(), "Añade al menos una foto del hotel.", Snackbar.LENGTH_LONG).show();
             valid = false;
         }
-        if (address.isEmpty()) {
-            binding.tilAddress.setError(getString(R.string.superadmin_required_field));
-            valid = false;
-        }
-        if (!email.isEmpty() && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.etEmail.setError("Correo no válido");
-            valid = false;
-        }
-        if (district.isEmpty()) {
-            binding.actvDistrict.setError(getString(R.string.superadmin_required_field));
-            valid = false;
-        }
-        if (city.isEmpty()) {
-            binding.actvCity.setError(getString(R.string.superadmin_required_field));
-            valid = false;
-        }
-        int phoneDigits = phone.replaceAll("\\D", "").length();
-        if (!phone.isEmpty() && (!phone.matches("[+0-9() .-]{7,25}") || phoneDigits < 7 || phoneDigits > 15)) {
-            binding.etPhone.setError("Ingresa un teléfono válido");
-            valid = false;
+        if (firstError != null) {
+            firstError.requestFocus();
+            firstError.requestRectangleOnScreen(new android.graphics.Rect(0, 0, firstError.getWidth(), firstError.getHeight()), false);
         }
         if (!hasSelectedLocation()) {
             binding.tvLocationStatus.setTextColor(ContextCompat.getColor(this,
