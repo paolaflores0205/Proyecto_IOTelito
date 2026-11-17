@@ -14,8 +14,16 @@ playServicesLocation = "21.0.1"
 room = "2.8.5"
 firebaseBom = "35.1.0"
 googleServices = "4.5.0"
+codeScanner = "16.1.0"
+osmdroid = "6.1.20"
+zxing = "3.5.4"
+json = "20260814"
 
 [libraries]
+play-services-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "codeScanner" }
+osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+json = { group = "org.json", name = "json", version.ref = "json" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
