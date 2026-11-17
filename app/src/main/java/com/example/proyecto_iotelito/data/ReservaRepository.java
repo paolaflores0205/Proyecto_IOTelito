@@ -85,6 +85,7 @@ public final class ReservaRepository {
                                    String huespedes, double precioTotal, String codigo,
                                    String habitaciones, String codigosHabitaciones,
                                    List<Integer> roomIds, TarjetaSimulada tarjeta) {
+        BookingDatePolicy.validar(fechaEntrada,fechaSalida);
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             return FirebaseReservaStore.agregar(hotel, fechaEntrada, fechaSalida,
                     huespedes, precioTotal, codigo, habitaciones, codigosHabitaciones, roomIds, tarjeta);
@@ -107,11 +108,6 @@ public final class ReservaRepository {
     }
 
     @androidx.annotation.WorkerThread
-    public void solicitarCheckout(int id, int estrellas, String observaciones, TarjetaSimulada tarjeta) {
-        FirebaseReservaStore.solicitarCheckout(id, estrellas, observaciones, tarjeta);
-    }
-
-    @androidx.annotation.WorkerThread
     public ComprobanteCheckout comprobante(int id) { return FirebaseReservaStore.comprobante(id); }
 
     public void actualizarEstado(int reservaId, Reserva.Estado estado) {
@@ -123,7 +119,7 @@ public final class ReservaRepository {
 
     @androidx.annotation.WorkerThread
     public void solicitarCheckout(int reservaId, int calificacion, String comentario) {
-        FirebaseReservaStore.solicitarCheckout(reservaId, calificacion, comentario, null);
+        FirebaseReservaStore.solicitarCheckout(reservaId, calificacion, comentario);
     }
 
     @androidx.annotation.WorkerThread

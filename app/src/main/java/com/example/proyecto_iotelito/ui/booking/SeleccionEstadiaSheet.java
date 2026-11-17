@@ -79,12 +79,11 @@ public class SeleccionEstadiaSheet extends BottomSheetDialogFragment {
     }
     private void elegirFechas() {
         if (getChildFragmentManager().findFragmentByTag("rango_estadia") != null) return;
-        long hoy = LocalDate.now(ZoneId.of("America/Lima")).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
         MaterialDatePicker<Pair<Long, Long>> picker = MaterialDatePicker.Builder.dateRangePicker()
                 .setTitleText(R.string.fechas_estadia_hotel)
                 .setSelection(new Pair<>(entrada, salida))
                 .setCalendarConstraints(new CalendarConstraints.Builder()
-                        .setValidator(DateValidatorPointForward.from(hoy)).build()).build();
+                        .setValidator(DateValidatorPointForward.from(com.example.proyecto_iotelito.data.BookingDatePolicy.inicioCalendarioMillis())).build()).build();
         escuchar(picker);
         picker.show(getChildFragmentManager(), "rango_estadia");
     }

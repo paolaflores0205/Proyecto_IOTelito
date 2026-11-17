@@ -16,6 +16,8 @@ public class TaxiEntity {
     public String hotel;
     public String origen;
     public String destino;
+    public Integer hotelId;
+    public String hotelCity, airportCode, airportName, airportCity;
     public String hora;
     public int pasajeros;
     public int maletas;
@@ -30,7 +32,9 @@ public class TaxiEntity {
                     .put("nombre", nombreCliente).put("hotel", hotel).put("origen", origen)
                     .put("destino", destino).put("hora", hora).put("pasajeros", pasajeros)
                     .put("maletas", maletas).put("estado", estado).put("creado", creado)
-                    .put("taxista", taxistaId).put("conductor", conductor);
+                    .put("taxista", taxistaId).put("conductor", conductor)
+                    .put("hotelId",hotelId).put("hotelCity",hotelCity).put("airportCode",airportCode)
+                    .put("airportName",airportName).put("airportCity",airportCity);
         } catch (JSONException exception) {
             throw new IllegalStateException(exception);
         }
@@ -44,7 +48,10 @@ public class TaxiEntity {
         entity.nombreCliente = pedido.getString("nombre");
         entity.hotel = pedido.getString("hotel");
         entity.origen = pedido.optString("origen", entity.hotel);
-        entity.destino = pedido.optString("destino", "Aeropuerto Jorge Chávez");
+        entity.destino = pedido.optString("destino", "Destino no registrado");
+        entity.hotelId=pedido.has("hotelId")&&!pedido.isNull("hotelId")?pedido.getInt("hotelId"):null;
+        entity.hotelCity=pedido.optString("hotelCity",null);entity.airportCode=pedido.optString("airportCode",null);
+        entity.airportName=pedido.optString("airportName",null);entity.airportCity=pedido.optString("airportCity",null);
         entity.hora = pedido.getString("hora");
         entity.pasajeros = pedido.getInt("pasajeros");
         entity.maletas = pedido.getInt("maletas");

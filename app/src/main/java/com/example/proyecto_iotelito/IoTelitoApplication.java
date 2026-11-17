@@ -20,6 +20,8 @@ import com.example.proyecto_iotelito.data.PerfilRepository;
 /** Aplica a todas las pantallas el espacio seguro de las barras del sistema. */
 public class IoTelitoApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
+    private final java.util.WeakHashMap<Activity,Boolean> checkoutObservers=new java.util.WeakHashMap<>();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -50,7 +52,8 @@ public class IoTelitoApplication extends Application implements Application.Acti
         }
         boolean hasBottomNavigation = bottomNavigation != null;
         View navigationView = bottomNavigation;
-        boolean hasAdminChat = activity.findViewById(R.id.hoteladmin_chat_root) != null;
+        boolean hasAdminChat = activity.findViewById(R.id.hoteladmin_chat_root) != null
+                || activity instanceof com.example.proyecto_iotelito.ui.taxi.TaxiChatActivity;
         boolean hasPaymentForm = activity.findViewById(R.id.scroll_confirmacion) != null;
         boolean hasProfileForm = activity.findViewById(R.id.scroll_editar_perfil) != null;
         boolean hasRegistrationForm = activity.findViewById(R.id.scroll_registro) != null;
@@ -118,6 +121,13 @@ public class IoTelitoApplication extends Application implements Application.Acti
 
     @Override public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) { }
     @Override public void onActivityStarted(@NonNull Activity activity) {
+        com.example.proyecto_iotelito.model.auth.AuthenticatedUser user=com.example.proyecto_iotelito.data.SessionRepository.obtener(activity);
+        if(activity instanceof androidx.lifecycle.LifecycleOwner&&user!=null&&user.getRole()==com.example.proyecto_iotelito.model.auth.UserRole.CLIENT&&!checkoutObservers.containsKey(activity)){
+            checkoutObservers.put(activity,true);
+            com.example.proyecto_iotelito.notification.ClientPushRegistration.register(activity);
+            com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.observe(activity).observe((androidx.lifecycle.LifecycleOwner)activity,
+                rows->com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.show(activity,rows));
+        }
         com.example.proyecto_iotelito.ui.superadmin.SuperadminAccessGuard.verify(activity);
         com.example.proyecto_iotelito.ui.hoteladmin.HotelAdminAccessGuard.verify(activity);
     }

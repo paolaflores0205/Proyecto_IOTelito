@@ -30,11 +30,33 @@ public class DetalleReservaActivity extends AppCompatActivity {
 
     public static final String EXTRA_RESERVA_ID = "extra_reserva_id";
     public static final String EXTRA_NOTIFICACION_ID = "extra_notificacion_id";
+    private Hotel hotelMostrado;
+    private Reserva reservaMostrada;
+    private int solicitudTaxi=-1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalle_reserva);
+        int reservaId=getIntent().getIntExtra(EXTRA_RESERVA_ID,-1);
+        findViewById(R.id.btn_estado_taxi_reserva).setVisibility(View.VISIBLE);
+        findViewById(R.id.btn_estado_taxi_reserva).setOnClickListener(v->{
+            Intent intent=solicitudTaxi>=0?new Intent(this,TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID,solicitudTaxi)
+                :reservaMostrada!=null&&com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reservaMostrada)
+                ?new Intent(this,com.example.proyecto_iotelito.ui.taxi.BeneficioTaxiActivity.class).putExtra(com.example.proyecto_iotelito.ui.taxi.BeneficioTaxiActivity.EXTRA_RESERVA_ID,reservaId)
+                :new Intent(this,com.example.proyecto_iotelito.ui.taxi.MisTaxisActivity.class);
+            startActivity(intent);
+        });
+        com.example.proyecto_iotelito.data.ClientTaxiRepository.observe(this).observe(this,state->{
+            if(state.loading||state.error!=null)return;
+            solicitudTaxi=-1;
+            for(org.json.JSONObject row:state.rows)if(row.optInt("reserva")==reservaId){solicitudTaxi=row.optInt("id");break;}
+            actualizarTaxi();
+        });
+        ReservaRepository.getInstance(this).observarTodas().observe(this,rows->{
+            if(hotelMostrado==null)return;
+            for(Reserva row:rows)if(row.id==reservaId){pintarReserva(row,hotelMostrado);break;}
+        });
 
         int notificacionId = getIntent().getIntExtra(EXTRA_NOTIFICACION_ID, -1);
         if (notificacionId != -1) {
@@ -43,6 +65,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
     }
 
     private void pintarReserva(Reserva reserva, Hotel hotel) {
+        hotelMostrado=hotel;reservaMostrada=reserva;actualizarTaxi();
         if (getIntent().getBooleanExtra(com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.EXTRA_CHECKOUT_ALERT, false)) {
             com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.markRead(this, reserva.id);
         }
@@ -67,7 +90,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
                 getResources().getQuantityString(R.plurals.noches_plural, reserva.noches, reserva.noches));
         bindRow(R.id.row_huespedes, R.string.label_huespedes_dp, reserva.huespedes);
         bindRow(R.id.row_codigo, R.string.label_codigo, reserva.codigo);
-        ((TextView) findViewById(R.id.tv_monto_total)).setText(formatMoney(reserva.precioTotal));
+        pintarImportes(reserva);
 
         View btnCheckout = findViewById(R.id.btn_realizar_checkout);
         View btnVerHotel = findViewById(R.id.btn_ver_hotel);
@@ -85,13 +108,6 @@ public class DetalleReservaActivity extends AppCompatActivity {
         ((TextView)comprobante).setText(reserva.estado == Reserva.Estado.EN_CHECKOUT ? "Ver estado del checkout" : "Ver comprobante");
         comprobante.setOnClickListener(v -> startActivity(new Intent(this, com.example.proyecto_iotelito.ui.pago.CobroConfirmadoActivity.class)
                 .putExtra(com.example.proyecto_iotelito.ui.pago.CobroConfirmadoActivity.EXTRA_RESERVA_ID, reserva.id)));
-        View taxi = findViewById(R.id.btn_estado_taxi_reserva);
-        taxi.setVisibility(View.GONE);
-        TaxiRepository.ejecutar(this, this, () -> TaxiRepository.porReserva(this, reserva.id), solicitudId -> {
-            if (solicitudId < 0) return;
-            taxi.setVisibility(View.VISIBLE);
-            taxi.setOnClickListener(v -> startActivity(new Intent(this, TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID, solicitudId)));
-        });
         findViewById(R.id.btn_chatear).setVisibility(reserva.esActiva() ? View.VISIBLE : View.GONE);
         findViewById(R.id.btn_chatear).setOnClickListener(v -> {
             Intent intent = new Intent(this, ChatHotelActivity.class);
@@ -117,6 +133,26 @@ public class DetalleReservaActivity extends AppCompatActivity {
         com.example.proyecto_iotelito.data.ClientDataLoader.reserva(this, id, this::pintarReserva);
     }
 
+    private void actualizarTaxi(){
+        ((TextView)findViewById(R.id.btn_estado_taxi_reserva)).setText(solicitudTaxi>=0?"Seguir mi taxi":reservaMostrada!=null&&com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reservaMostrada)?"Solicitar taxi de cortesía":"Mis solicitudes de taxi");
+    }
+
+    private void pintarImportes(Reserva reserva){
+        com.example.proyecto_iotelito.data.ComprobanteCheckout receipt=reserva.comprobante;
+        boolean finalized=com.example.proyecto_iotelito.data.CheckoutPolicy.finalizada(reserva.estado.name());
+        bindRow(R.id.row_alojamiento_detalle,R.string.label_alojamiento_reserva,formatMoney(reserva.precioTotal));
+        View extras=findViewById(R.id.row_adicionales_detalle);
+        TextView note=findViewById(R.id.tv_motivo_adicional_detalle);
+        extras.setVisibility(receipt!=null||finalized||reserva.estado==Reserva.Estado.EN_CHECKOUT?View.VISIBLE:View.GONE);
+        bindRow(R.id.row_adicionales_detalle,R.string.label_adicionales_reserva,
+                receipt!=null?formatMoney(receipt.extra):"Por confirmar");
+        ((TextView)findViewById(R.id.tv_label_monto_total)).setText(receipt!=null?"Total cobrado (simulado)":finalized?"Total del cobro":"Total de alojamiento");
+        ((TextView)findViewById(R.id.tv_monto_total)).setText(finalized&&receipt==null?"Por consultar":formatMoney(reserva.importeMostrado()));
+        note.setVisibility(finalized||receipt!=null?View.VISIBLE:View.GONE);
+        note.setText(receipt==null?"No se pudo confirmar el comprobante. Vuelve a consultar con conexión."
+                :receipt.extra>0?"Motivo: "+receipt.motivo+"\nObservación: "+receipt.observacion:"Sin cargos adicionales.");
+    }
+
     private String mensajeEstado(Reserva reserva) {
         if (reserva.estado == Reserva.Estado.EN_CHECKOUT) return getString(R.string.checkout_pendiente_cliente);
         if (reserva.esActiva() && reserva.puedeHacerCheckout()) {
@@ -140,6 +176,6 @@ public class DetalleReservaActivity extends AppCompatActivity {
     }
 
     private String formatMoney(double amount) {
-        return "S/ " + String.format(Locale.US, "%,.0f", amount);
+        return "S/ " + String.format(Locale.US, "%,.2f", amount);
     }
 }

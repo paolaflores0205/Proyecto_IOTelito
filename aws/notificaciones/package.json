@@ -1,0 +1,5 @@
+{
+  "name": "iot-telito-notificaciones", "private": true, "version": "1.0.0", "type": "module",
+  "scripts": {"test": "node --test"},
+  "dependencies": {"firebase-admin": "^13.0.0", "@aws-sdk/client-secrets-manager": "^3.0.0"}
+}

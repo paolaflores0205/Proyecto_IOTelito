@@ -1,0 +1,4 @@
+node_modules/
+*.zip
+service-account*.json
+.env*

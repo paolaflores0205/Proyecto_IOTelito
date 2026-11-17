@@ -48,6 +48,7 @@ public final class FirebaseUsersRepository {
                                 }
                                 List<AdminUser> users = new ArrayList<>();
                                 int invalid = 0;
+                                List<String> invalidDetails = new ArrayList<>();
                                 for (DocumentSnapshot doc : snapshot.getDocuments()) {
                                     try {
                                         RemoteUserProfile p = RemoteUserProfile.parse(doc.getId(), doc.getData());
@@ -58,11 +59,19 @@ public final class FirebaseUsersRepository {
                                         user.uid = p.uid;
                                         if (doc.get("hotelId") != null) user.hotelId = HotelFirestoreCodec.integer(doc.get("hotelId"));
                                         users.add(user);
-                                    } catch (RuntimeException malformed) { invalid++; }
+                                    } catch (RuntimeException malformed) {
+                                        invalid++;
+                                        if (invalidDetails.size() < 3) {
+                                            String name = RemoteUserProfile.text(doc.get("name"));
+                                            String reason = malformed instanceof IllegalArgumentException
+                                                    ? malformed.getMessage() : "Revisa los tipos de los campos y las fechas de auditoría.";
+                                            invalidDetails.add((name.isEmpty() ? doc.getId() : name) + ": " + reason);
+                                        }
+                                    }
                                 }
                                 users.sort(Comparator.comparing(u -> u.name.toLowerCase(Locale.ROOT)));
                                 setValue(new State(users, false, invalid == 0 ? null
-                                        : "Hay " + invalid + " cuentas con información incompleta. Revisa sus datos de acceso."));
+                                        : "Hay " + invalid + " perfiles que requieren revisión en Firestore:\n" + String.join("\n", invalidDetails)));
                             });
                 };
                 FirebaseAuth.getInstance().addAuthStateListener(authListener);

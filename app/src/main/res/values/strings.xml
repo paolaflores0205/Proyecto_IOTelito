@@ -183,7 +183,7 @@
     <string name="label_consumos_adicionales">Consumos adicionales</string>
     <string name="label_total_liquidar">Total a liquidar</string>
     <string name="label_taxi_cortesia">¿Deseas taxi de cortesía al aeropuerto?</string>
-    <string name="desc_taxi_cortesia">Beneficio gratis para reservas de 3+ noches</string>
+    <string name="desc_taxi_cortesia">Beneficio gratis para reservas desde S/ 1000</string>
     <string name="aviso_cargos_adicionales">Cualquier daño a la propiedad o domótica puede aplicar cargos adicionales. Liquidación académica ficticia.</string>
     <string name="btn_confirmar_checkout">Solicitar checkout</string>
     <string name="toast_calificacion_requerida">Por favor califica tu estadía antes de continuar</string>
@@ -234,8 +234,8 @@
     <string name="titulo_beneficios">Beneficios</string>
     <string name="badge_beneficio_exclusivo">BENEFICIO EXCLUSIVO</string>
     <string name="titulo_taxi_gratuito">Taxi gratuito al aeropuerto</string>
-    <string name="desc_taxi_gratuito">¡Felicitaciones! Tu reserva de estadía en el <b>Hotel Miraflores Park</b> superó el monto mínimo de consumo acumulado y has desbloqueado un traslado privado 100% cubierto.</string>
-    <string name="desc_taxi_gratuito_dinamico">¡Felicitaciones! Tu reserva de estadía en el %1$s superó el monto mínimo de consumo acumulado y has desbloqueado un traslado privado 100%% cubierto.</string>
+    <string name="desc_taxi_gratuito">¡Felicitaciones! Tu reserva en el <b>Hotel Miraflores Park</b> alcanza el monto mínimo de S/ 1000 e incluye un traslado privado al aeropuerto 100% cubierto.</string>
+    <string name="desc_taxi_gratuito_dinamico">¡Felicitaciones! Tu reserva en el %1$s alcanza el monto mínimo de S/ 1000 e incluye un traslado privado al aeropuerto 100%% cubierto.</string>
     <string name="item_valido_aeropuerto">Válido para salidas al Aeropuerto Jorge Chávez</string>
     <string name="item_monitoreo_satelital">Monitoreo satelital y domótica vinculada</string>
     <string name="taxi_beneficios_listado_titulo">Servicios incluidos</string>
@@ -932,8 +932,8 @@
     <string name="hoteladmin_notif_checkout_titulo">Checkout pendiente de cobro</string>
     <string name="hoteladmin_notif_checkout_texto">La reserva de %1$s requiere atención.</string>
     <string name="hoteladmin_checkout_aviso_remoto">Tu hotel tiene una solicitud de salida por revisar.</string>
-    <string name="cliente_checkout_confirmado">El hotel registró un cobro simulado de S/ %1$s por el cierre de tu reserva.</string>
-    <string name="cliente_checkout_titulo">Checkout confirmado</string>
+    <string name="cliente_checkout_confirmado">El administrador aprobó tu checkout. Total del cobro simulado: S/ %1$s.</string>
+    <string name="cliente_checkout_titulo">Checkout aprobado por el administrador</string>
     <string name="hoteladmin_error_monto_dano">Ingresa un monto mayor que cero</string>
     <string name="hoteladmin_campo_obligatorio">Este campo es obligatorio</string>
     <string name="hoteladmin_cobro_dano_concepto">Cobro por daños</string>
@@ -1018,4 +1018,12 @@
     <string name="ayuda_tarjeta_prueba">Demostración sin dinero real. Usa 4242 4242 4242 4242, un vencimiento futuro y CVV 123. Solo guardamos tipo, últimos cuatro dígitos y un token ficticio.</string>
     <string name="perfil_identidad_bloqueada">Documento, nacimiento y correo son datos de solo lectura. Para corregirlos, contacta al administrador. Los datos faltantes de cuentas antiguas deben completarse con su ayuda.</string>
     <string name="perfil_cache_sin_conexion">Sin conexión. Mostramos la última copia guardada de tu perfil.</string>
+    <string name="checkout_tarjeta_reserva">Tarjeta de la reserva: %1$s\nSe usará la misma tarjeta para el cobro simulado.</string>
+    <string name="checkout_tarjeta_no_guardada">Esta reserva no tiene una tarjeta de pago guardada válida. Solicita al hotel revisar la reserva. No necesitas registrar otra tarjeta en el checkout.</string>
+    <string name="tab_todas_conteo">Todas (%1$d)</string>
+    <string name="sin_reservas_todas">Todavía no tienes reservas.</string>
+    <string name="seccion_finalizadas_canceladas">Finalizadas y canceladas</string>
+    <string name="label_alojamiento_reserva">Alojamiento</string>
+    <string name="label_adicionales_reserva">Cargos adicionales</string>
+    <string name="taxi_requisito_estadia">El taxi gratuito requiere un alojamiento de al menos S/ 1000 y haber solicitado el checkout.</string>
 </resources>

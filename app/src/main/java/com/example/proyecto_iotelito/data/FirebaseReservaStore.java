@@ -39,22 +39,47 @@ final class FirebaseReservaStore {
     static LiveData<List<Reserva>> observarTodas() {
         String uid = requireUid();
         return new LiveData<List<Reserva>>() {
-            private ListenerRegistration listener;
-
-            @Override protected void onActive() {
-                listener = DB.collection("reservations").whereEqualTo("clientUid", uid)
-                        .addSnapshotListener((snapshot, error) -> {
-                            if (error != null) {
-                                Log.e("FirebaseReserva", "No se pudieron cargar las reservas", error);
-                                return;
-                            }
-                            setValue(convertir(snapshot));
-                        });
+            private ListenerRegistration bookingsListener, receiptsListener;
+            private List<Reserva> rows = new ArrayList<>();
+            private Map<String,DocumentSnapshot> receipts = new HashMap<>();
+            private int generation;
+            private void publish() {
+                FirebaseUser current=FirebaseAuth.getInstance().getCurrentUser();
+                if (current==null||!uid.equals(current.getUid())) return;
+                for (Reserva row : rows) {
+                    row.comprobante = null;
+                    DocumentSnapshot receipt = receipts.get(String.valueOf(row.id));
+                    if (CheckoutPolicy.finalizada(row.estado.name()) && receipt != null) {
+                        try { row.comprobante = convertirComprobante(row,receipt,uid); }
+                        catch (RuntimeException invalid) { Log.w("FirebaseReserva","No se pudo validar el comprobante de " + row.id); }
+                    }
+                }
+                setValue(new ArrayList<>(rows));
             }
-
+            @Override protected void onActive() {
+                int ticket=++generation;
+                bookingsListener=DB.collection("reservations").whereEqualTo("clientUid",uid)
+                    .addSnapshotListener((snapshot,error)->{
+                        FirebaseUser current=FirebaseAuth.getInstance().getCurrentUser();
+                        if(ticket!=generation||current==null||!uid.equals(current.getUid()))return;
+                        if(error!=null){Log.e("FirebaseReserva","No se pudieron cargar las reservas",error);return;}
+                        rows=convertir(snapshot);publish();
+                    });
+                receiptsListener=DB.collection("hotelCheckouts").whereEqualTo("clientUid",uid)
+                    .addSnapshotListener((snapshot,error)->{
+                        FirebaseUser current=FirebaseAuth.getInstance().getCurrentUser();
+                        if(ticket!=generation||current==null||!uid.equals(current.getUid()))return;
+                        if(error!=null){Log.e("FirebaseReserva","No se pudieron cargar los comprobantes",error);return;}
+                        receipts.clear();
+                        if(snapshot!=null)for(DocumentSnapshot doc:snapshot.getDocuments())receipts.put(doc.getId(),doc);
+                        publish();
+                    });
+            }
             @Override protected void onInactive() {
-                if (listener != null) listener.remove();
-                listener = null;
+                generation++;
+                if(bookingsListener!=null)bookingsListener.remove();
+                if(receiptsListener!=null)receiptsListener.remove();
+                bookingsListener=null;receiptsListener=null;
             }
         };
     }
@@ -71,9 +96,21 @@ final class FirebaseReservaStore {
     static Reserva buscarPorId(int id) {
         try {
             DocumentSnapshot document = Tasks.await(DB.collection("reservations")
-                    .document(String.valueOf(id)).get());
-            return document.exists() && requireUid().equals(document.getString("clientUid"))
-                    ? convertir(document) : null;
+                    .document(String.valueOf(id)).get(com.google.firebase.firestore.Source.SERVER));
+            String uid=requireUid();
+            if(!document.exists()||!uid.equals(document.getString("clientUid")))return null;
+            Reserva row=convertir(document);
+            if(CheckoutPolicy.finalizada(row.estado.name())){
+                try {
+                    DocumentSnapshot receipt=Tasks.await(DB.collection("hotelCheckouts").document(String.valueOf(id))
+                            .get(com.google.firebase.firestore.Source.SERVER));
+                    if(!uid.equals(requireUid()))throw new IllegalStateException("La sesión cambió.");
+                    if(receipt.exists())row.comprobante=convertirComprobante(row,receipt,uid);
+                } catch(ExecutionException|IllegalArgumentException unavailable) {
+                    Log.w("FirebaseReserva","No se pudo confirmar el total de la reserva "+id);
+                }
+            }
+            return row;
         } catch (ExecutionException | InterruptedException error) {
             throw fallo(error);
         }
@@ -89,9 +126,10 @@ final class FirebaseReservaStore {
                            double total, String codigo, String habitaciones, String codigos,
                            List<Integer> roomIds, TarjetaSimulada tarjeta) {
         if (tarjeta == null) throw new IllegalArgumentException("Registra una tarjeta de prueba para confirmar la reserva.");
+        BookingDatePolicy.validar(entrada,salida);
         String uid = requireUid();
         long noches = ChronoUnit.DAYS.between(entrada, salida);
-        if (entrada.isBefore(LocalDate.now()) || noches < 1 || roomIds.isEmpty()
+        if (noches < 1 || roomIds.isEmpty()
                 || new HashSet<>(roomIds).size() != roomIds.size()
                 || 1 + noches * (roomIds.size() + 1) > 400) {
             throw new IllegalArgumentException("Revisa las fechas y habitaciones seleccionadas.");
@@ -100,7 +138,7 @@ final class FirebaseReservaStore {
         int id = ThreadLocalRandom.current().nextInt(1_000_000, Integer.MAX_VALUE);
         DocumentReference reservaRef = DB.collection("reservations").document(String.valueOf(id));
         List<DocumentReference> bloqueos = new ArrayList<>();
-        for (LocalDate date = entrada; date.isBefore(salida); date = date.plusDays(1)) {
+        for (LocalDate date : ReservationNightPolicy.noches(entrada,salida)) {
             bloqueos.add(DB.collection("clientNights").document(uid + "_" + date));
             for (int roomId : roomIds) {
                 bloqueos.add(DB.collection("roomNights")
@@ -142,11 +180,23 @@ final class FirebaseReservaStore {
                     throw new IllegalArgumentException("Intenta confirmar la reserva nuevamente.");
                 }
                 for (DocumentReference bloqueo : bloqueos) {
-                    if (transaction.get(bloqueo).exists()) {
-                        throw new IllegalArgumentException(
-                                bloqueo.getPath().startsWith("clientNights/")
-                                        ? "Ya tienes una reserva para esas fechas. Revisa Mis reservas."
-                                        : "Esta habitación ya fue reservada para esas fechas.");
+                    DocumentSnapshot lock=transaction.get(bloqueo);
+                    if(!lock.exists())continue;
+                    if(bloqueo.getPath().startsWith("clientNights/")){
+                        if(!uid.equals(lock.getString("clientUid")))throw new IllegalStateException("No se pudo verificar la disponibilidad de tu cuenta.");
+                        String previousId=lock.getString("reservationId");
+                        if(previousId==null||previousId.isEmpty())throw new IllegalArgumentException("Una reserva anterior necesita revisión del hotel.");
+                        DocumentSnapshot previous=transaction.get(DB.collection("reservations").document(previousId));
+                        if(!previous.exists())continue;
+                        if(!uid.equals(previous.getString("clientUid")))throw new IllegalStateException("El bloqueo no corresponde a tu cuenta.");
+                        LocalDate night=LocalDate.parse(bloqueo.getId().substring(uid.length()+1));
+                        if(ReservationNightPolicy.bloquea(previous.getString("estado"),
+                                LocalDate.parse(previous.getString("fechaEntrada")),LocalDate.parse(previous.getString("fechaSalida")),night))
+                            throw new IllegalArgumentException("Ya tienes una reserva vigente del "+previous.getString("fechaEntrada")
+                                    +" al "+previous.getString("fechaSalida")+" que ocupa la noche del "+night
+                                    +". Puedes ingresar a otro hotel desde el día de salida.");
+                    }else{
+                        throw new IllegalArgumentException("Esta habitación ya fue reservada para esas fechas.");
                     }
                 }
                 transaction.set(reservaRef, data);
@@ -210,7 +260,7 @@ final class FirebaseReservaStore {
         throw new IllegalArgumentException("Solicita el checkout; el cierre corresponde al administrador.");
     }
 
-    static void solicitarCheckout(int id, int estrellas, String comentario, TarjetaSimulada tarjeta) {
+    static void solicitarCheckout(int id, int estrellas, String comentario) {
         String uid = requireUid();
         CheckoutPolicy.validarOpinion(estrellas, comentario);
         DocumentReference ref = DB.collection("reservations").document(String.valueOf(id));
@@ -224,12 +274,10 @@ final class FirebaseReservaStore {
                 if (!CheckoutPolicy.puedeSolicitar(estado, LocalDate.parse(before.getString("fechaSalida")),
                         LocalDate.now(java.time.ZoneId.of("America/Lima"))))
                     throw new IllegalArgumentException("El checkout está disponible desde el día de salida.");
-                TarjetaSimulada existing = TarjetaSimulada.leer(before.getData());
-                if (existing == null && tarjeta == null) throw new IllegalArgumentException("Registra una tarjeta de prueba.");
+                CheckoutPolicy.tarjetaDeReserva(before.getData());
                 Map<String,Object> changes = new HashMap<>();
                 changes.put("estado", "EN_CHECKOUT"); changes.put("rating", estrellas);
                 changes.put("review", comentario.trim()); changes.put("checkoutRequestedAt", FieldValue.serverTimestamp());
-                if (existing == null) changes.putAll(tarjeta.campos());
                 tx.update(ref, changes);
                 return null;
             }));
@@ -237,24 +285,16 @@ final class FirebaseReservaStore {
     }
 
     static ComprobanteCheckout comprobante(int id) {
-        String uid = requireUid();
-        try {
-            DocumentSnapshot booking = Tasks.await(DB.collection("reservations").document(String.valueOf(id))
-                    .get(com.google.firebase.firestore.Source.SERVER));
-            if (!booking.exists() || !uid.equals(booking.getString("clientUid")))
-                throw new IllegalArgumentException("No se encontró tu reserva.");
-            DocumentSnapshot doc = Tasks.await(DB.collection("hotelCheckouts").document(String.valueOf(id))
-                    .get(com.google.firebase.firestore.Source.SERVER));
-            if (!uid.equals(requireUid())) throw new IllegalArgumentException("La sesión cambió.");
-            if (!doc.exists()) return null;
-            if (!uid.equals(doc.getString("clientUid")) || !CheckoutPolicy.finalizada(booking.getString("estado"))
-                    || !String.valueOf(id).equals(doc.getString("reservationId"))
-                    || !java.util.Objects.equals(booking.getLong("hotelId"), doc.getLong("hotelId")))
-                throw new IllegalArgumentException("El comprobante no corresponde a una reserva finalizada propia.");
-            com.google.firebase.Timestamp fecha = doc.getTimestamp("createdAt");
-            if (fecha == null) throw new IllegalArgumentException("El comprobante aún no fue confirmado por el servidor.");
-            return new ComprobanteCheckout(doc.getData(), fecha.toDate().getTime());
-        } catch (ExecutionException | InterruptedException error) { throw fallo(error); }
+        Reserva row=buscarPorId(id);
+        if(row==null)throw new IllegalArgumentException("No se encontró tu reserva.");
+        return row.comprobante;
+    }
+
+    private static ComprobanteCheckout convertirComprobante(Reserva row,DocumentSnapshot doc,String uid){
+        com.google.firebase.Timestamp date=doc.getTimestamp("createdAt");
+        if(date==null||doc.getMetadata().hasPendingWrites())
+            throw new IllegalArgumentException("El comprobante aún no está confirmado.");
+        return ComprobanteCheckout.deReserva(row,doc.getData(),date.toDate().getTime(),uid);
     }
 
     private static List<Reserva> convertir(QuerySnapshot snapshot) {

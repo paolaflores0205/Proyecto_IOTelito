@@ -192,25 +192,31 @@ public class FirebaseLiveRolesTest {
                     175.75, marker, "Prueba QA", marker, Collections.singletonList(roomId), TarjetaSimulada.validar("4242424242424242", "12/39", "123", java.time.YearMonth.now()));
             assertTrue(get("reservations/" + booking.id).exists());
             result("RESERVA id=" + booking.id + " hotel=" + hotelId + " entrada=" + arrival + " codigo=" + marker);
-            int taxiId = FirebaseTaxiStore.crear(booking, "PRUEBA QA", hotel.name, hotel.address, "14:30", 2, 1);
-            createdTaxiId = taxiId;
-            result("TAXI solicitud_creada id=" + taxiId);
-            driver = login(UserRole.TAXISTA);
-            final String driverUid = driver.getUid();
-            Tasks.await(db.runTransaction(tx -> {
-                DocumentReference ref = db.collection("taxistas").document(driverUid); tx.get(ref);
-                tx.update(ref, "disponible", true); return null;
-            }), 30, TimeUnit.SECONDS);
-            availabilityChanged = true;
-            for (String state : Arrays.asList("ASIGNADO", "EN_CAMINO", "EN_TRASLADO", "FINALIZADO")) {
-                assertTrue("Estado " + state, FirebaseTaxiStore.avanzar(driverUid, taxiId, state, driver.getEmail(), "PRUEBA QA"));
-                assertEquals(state, get("taxiRequests/" + taxiId).getString("estado")); result("TAXI " + state);
+            if (TaxiBenefitPolicy.puedeSolicitar(booking)) {
+                int taxiId = FirebaseTaxiStore.crear(booking, "PRUEBA QA", hotel,
+                        AeropuertosCliente.paraCiudad(hotel.city).get(0), "14:30", 2, 1);
+                createdTaxiId = taxiId;
+                result("TAXI solicitud_creada id=" + taxiId);
+                driver = login(UserRole.TAXISTA);
+                final String driverUid = driver.getUid();
+                Tasks.await(db.runTransaction(tx -> {
+                    DocumentReference ref = db.collection("taxistas").document(driverUid); tx.get(ref);
+                    tx.update(ref, "disponible", true); return null;
+                }), 30, TimeUnit.SECONDS);
+                availabilityChanged = true;
+                for (String state : Arrays.asList("ASIGNADO", "EN_CAMINO", "EN_TRASLADO", "FINALIZADO")) {
+                    assertTrue("Estado " + state, FirebaseTaxiStore.avanzar(driverUid, taxiId, state, driver.getEmail(), "PRUEBA QA"));
+                    assertEquals(state, get("taxiRequests/" + taxiId).getString("estado")); result("TAXI " + state);
+                }
+                assertEquals("", get("taxiDrivers/" + driverUid).getString("activeRequestId"));
+                Tasks.await(db.collection("taxistas").document(driverUid).update("disponible", originalAvailability), 30, TimeUnit.SECONDS);
+                login(UserRole.CLIENT);
+                assertEquals("FINALIZADO", get("taxiRequests/" + taxiId).getString("estado"));
+                result("CLIENT estado_final_compartido_confirmado");
+            } else {
+                assertFalse(TaxiBenefitPolicy.cumpleMonto(booking));
+                result("TAXI no_corresponde_a_reserva_QA_inferior_al_minimo; probar_con_checkout_desde_S1000");
             }
-            assertEquals("", get("taxiDrivers/" + driverUid).getString("activeRequestId"));
-            Tasks.await(db.collection("taxistas").document(driverUid).update("disponible", originalAvailability), 30, TimeUnit.SECONDS);
-            login(UserRole.CLIENT);
-            assertEquals("FINALIZADO", get("taxiRequests/" + taxiId).getString("estado"));
-            result("CLIENT estado_final_compartido_confirmado");
             if (!excludeSuperadmin) {
                 login(UserRole.SUPERADMIN);
                 QuerySnapshot reservations = Tasks.await(db.collection("reservations").get(Source.SERVER), 30, TimeUnit.SECONDS);

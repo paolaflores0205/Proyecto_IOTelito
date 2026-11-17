@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict');
+const {call,expect,write,commit,runAuthRules,countChecks}=require('./firestore_auth_rules.test.cjs');
+const binding='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+const path=`users/client/notificationDevices/${binding}`;
+const data={binding,token:'token-de-prueba-con-longitud-valida',platform:'ANDROID'};
+(async()=>{
+ await runAuthRules();const start=countChecks();
+ await expect(await commit([write(path,data,null,['updatedAt'])],'client'),true,'Registra dispositivo propio');
+ await expect(await call('GET','/'+path,undefined,'client'),true,'Lee dispositivo propio');
+ await expect(await call('GET','/'+path,undefined,'other'),false,'Otra cuenta no lee token');
+ await expect(await call('GET','/users/client/notificationDevices',undefined,'admin'),false,'Admin hotel no lista tokens ajenos');
+ await expect(await commit([write(path,data,null,['updatedAt'])],'other'),false,'No registra en otra cuenta');
+ await expect(await commit([write(path,{...data,token:'corto'},null,['updatedAt'])],'client'),false,'Token acotado');
+ await expect(await commit([write(path,{...data,binding:'otro'},null,['updatedAt'])],'client'),false,'No falsea la sesión');
+ await expect(await commit([write(path,{...data,uid:'other'},null,['updatedAt'])],'client'),false,'Sin campos extra');
+ await expect(await commit([write(path,{...data,updatedAt:'ayer'})],'client'),false,'Fecha del servidor');
+ await expect(await call('DELETE','/'+path,undefined,'other'),false,'No borra token ajeno');
+ await expect(await call('DELETE','/'+path,undefined,'client'),true,'Revoca dispositivo propio');
+ await expect(await commit([write('pushDeliveries/falso',{sent:true})],'client'),false,'No suplanta emisor');
+ await expect(await call('GET','/pushDeliveries',undefined,'client'),false,'Estado del emisor privado');
+ console.log(`Notificaciones cliente: ${countChecks()-start} comprobaciones correctas, solo emulador.`);
+})().catch(e=>{console.error(e);process.exitCode=1;});

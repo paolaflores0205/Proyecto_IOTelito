@@ -49,12 +49,14 @@ public final class ClienteNotificationManager {
     }
 
     public static void mostrarReservaConfirmada(Context context, Reserva reserva) {
+        String owner=owner(context);
         com.example.proyecto_iotelito.data.ClientLocalTasks.execute(() -> {
+        if(!sameAccount(owner))return;
         try {
         Hotel hotel = com.example.proyecto_iotelito.data.HotelCatalogRepository.buscar(context, reserva.hotelId);
         if (hotel == null) return;
-        publicar(
-                context,
+        publicarEnHilo(
+                context, owner,
                 10_000 + reserva.id,
                 NotificacionCliente.Tipo.RESERVA,
                 reserva.id,
@@ -94,48 +96,57 @@ public final class ClienteNotificationManager {
                                  NotificacionCliente.Tipo tipo, int reservaId,
                                  String titulo, String texto) {
         Context app = context.getApplicationContext();
+        String uid=owner(context);
+        if(uid==null)return;
         com.example.proyecto_iotelito.data.ClientLocalTasks.execute(() ->
-                publicarEnHilo(app, notificationId, tipo, reservaId, titulo, texto));
+                publicarEnHilo(app, uid, notificationId, tipo, reservaId, titulo, texto));
     }
 
-    private static void publicarEnHilo(Context context, int notificationId,
-                                 NotificacionCliente.Tipo tipo, int reservaId,
-                                 String titulo, String texto) {
-        NotificacionRepository.getInstance(context).guardarSiNoExiste(
-                notificationId, tipo, texto, reservaId);
-        if (!tienePermiso(context)) {
-            return;
-        }
+    private static void publicarEnHilo(Context context, String uid, int notificationId,
+                                      NotificacionCliente.Tipo tipo, int reservaId, String titulo, String texto) {
+        NotificacionRepository.forOwner(context,uid).guardarSiNoExiste(notificationId,tipo,texto,reservaId);
+        int taxi=tipo==NotificacionCliente.Tipo.TAXI?(notificationId-1_000_000)/4:-1;
+        mostrarPush(context,uid,notificationId,tipo,reservaId,taxi,titulo,texto);
+    }
 
-        Intent intent = new Intent(context, DetalleReservaActivity.class);
-        if (tipo == NotificacionCliente.Tipo.TAXI) {
-            intent = new Intent(context, com.example.proyecto_iotelito.ui.taxi.TaxistaAsignadoActivity.class);
-            intent.putExtra(com.example.proyecto_iotelito.data.TaxiRepository.EXTRA_ID,
-                    (notificationId - 1_000_000) / 4);
-        }
-        intent.putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reservaId);
-        intent.putExtra(DetalleReservaActivity.EXTRA_NOTIFICACION_ID, notificationId);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                context,
-                notificationId,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    private static String owner(Context context) {
+        com.example.proyecto_iotelito.model.auth.AuthenticatedUser user=com.example.proyecto_iotelito.data.SessionRepository.obtener(context);
+        return user!=null&&user.getRole()==com.example.proyecto_iotelito.model.auth.UserRole.CLIENT?user.getUid():null;
+    }
+    private static boolean sameAccount(String uid) {
+        return uid!=null&&com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser()!=null
+            &&uid.equals(com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid());
+    }
 
-        boolean esTaxi = tipo == NotificacionCliente.Tipo.TAXI;
-        NotificationCompat.Builder notification = new NotificationCompat.Builder(context, esTaxi ? CHANNEL_TAXI : CHANNEL_RESERVAS)
-                .setSmallIcon(R.drawable.ic_notifications)
-                .setContentTitle(titulo)
-                .setContentText(texto)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(texto))
-                .setPriority(esTaxi ? NotificationCompat.PRIORITY_HIGH : NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
+    public static synchronized void mostrarPush(Context context,String uid,int id,NotificacionCliente.Tipo type,
+                                                int reservation,int taxi,String title,String body) {
+        synchronized(ClientPushRegistration.class) {
+        if(!sameAccount(uid)||!ClientPushRegistration.isOwner(context,uid)||!tienePermiso(context))return;
+        crearCanal(context);
+        android.content.SharedPreferences prefs=context.getSharedPreferences("client_notice_delivery",Context.MODE_PRIVATE);
+        String key=uid+":"+id;
+        if(prefs.getBoolean(key,false))return;
+        Intent intent=ClientNotificationActivity.intent(context,uid,id,reservation,taxi,false);
+        PendingIntent link=PendingIntent.getActivity(context,id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         try {
-            NotificationManagerCompat.from(context).notify(notificationId, notification.build());
-        } catch (SecurityException ignored) {
-            // El permiso puede revocarse entre la comprobación y esta llamada.
+            NotificationManagerCompat.from(context).notify("client-notice:"+uid,id,
+                new NotificationCompat.Builder(context,type==NotificacionCliente.Tipo.TAXI?CHANNEL_TAXI:CHANNEL_RESERVAS)
+                    .setSmallIcon(R.drawable.ic_notifications).setContentTitle(title).setContentText(body)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
+                    .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(link).setAutoCancel(true).build());
+            prefs.edit().putBoolean(key,true).apply();
+        }catch(SecurityException ignored){ }
+        }
+    }
+
+    public static synchronized void cancelSession(Context context) {
+        NotificationManager manager=context.getSystemService(NotificationManager.class);
+        for(android.service.notification.StatusBarNotification notice:manager.getActiveNotifications()) {
+            String tag=notice.getTag();
+            // Retirar también avisos heredados sin propietario de los canales del cliente.
+            if((tag!=null&&(tag.startsWith("client-notice:")||tag.startsWith("client-checkout:")))
+                ||(tag==null&&(CHANNEL_RESERVAS.equals(notice.getNotification().getChannelId())
+                    ||CHANNEL_TAXI.equals(notice.getNotification().getChannelId()))))manager.cancel(tag,notice.getId());
         }
     }
 }

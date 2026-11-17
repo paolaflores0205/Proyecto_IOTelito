@@ -37,7 +37,9 @@ service cloud.firestore {
     }
     function managedPhoto(value, hotelId) {
       return value is string && value.size() <= 2048
-        && value.matches('gs://[^/]+/hotelAdminPhotos/' + hotelId + '/[^/]+/[a-zA-Z0-9-]+[.]jpg');
+        && (value.matches('gs://[^/]+/hotelAdminPhotos/' + hotelId + '/[^/]+/[a-zA-Z0-9-]+[.]jpg')
+          || value.matches('s3://iot-telito-imagenes/hotelPhotos/' + hotelId
+            + '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[.]jpg'));
     }
     function validGallery(hotelId) {
       let photos = request.resource.data.photos;
@@ -308,15 +310,16 @@ service cloud.firestore {
         && resource.data.estado in ['CONFIRMADA','ACTIVA']
         && request.resource.data.estado == 'EN_CHECKOUT' && departureReached(resource.data)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
-          ['estado','rating','review','checkoutRequestedAt','cardType','cardLast4','cardToken','paymentMode'])
+          ['estado','rating','review','checkoutRequestedAt'])
         && request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
         && request.resource.data.review is string && request.resource.data.review.size() <= 4000
         && request.resource.data.review.matches('[\\s\\S]*\\S[\\s\\S]*')
         && request.resource.data.checkoutRequestedAt == request.time
         && validDemoCard(request.resource.data)
-        && (resource.data.get('cardToken', '') == '' || (
+        && validDemoCard(resource.data)
+        && (
           request.resource.data.cardToken == resource.data.cardToken && request.resource.data.cardLast4 == resource.data.cardLast4
-          && request.resource.data.cardType == resource.data.cardType && request.resource.data.paymentMode == resource.data.paymentMode));
+          && request.resource.data.cardType == resource.data.cardType && request.resource.data.paymentMode == resource.data.paymentMode);
       // El administrador solo finaliza una solicitud junto con su comprobante inmutable.
       allow update: if hotelAdmin(string(resource.data.hotelId))
         && resource.data.estado == 'EN_CHECKOUT' && request.resource.data.estado == 'FINALIZADA'
@@ -374,15 +377,32 @@ service cloud.firestore {
     }
 
     match /clientNights/{nightId} {
+      function validClientNight() {
+        let next = getAfter(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId)).data;
+        let date = nightId.split(request.auth.uid + '_')[1];
+        return request.resource.data.keys().hasOnly(['clientUid','reservationId'])
+          && request.resource.data.clientUid == request.auth.uid
+          && next.clientUid == request.auth.uid
+          && next.estado in ['CONFIRMADA','ACTIVA']
+          && date >= next.fechaEntrada && date < next.fechaSalida;
+      }
+      function reusableNight() {
+        let path = /databases/$(database)/documents/reservations/$(resource.data.reservationId);
+        let date = nightId.split(request.auth.uid + '_')[1];
+        return !exists(path) || (get(path).data.clientUid == request.auth.uid
+          && (get(path).data.estado in ['FINALIZADA','COMPLETADA','CANCELADA']
+            || date < get(path).data.fechaEntrada || date >= get(path).data.fechaSalida));
+      }
       allow get: if activeUser()
         && nightId.matches(request.auth.uid + '_.*');
       allow list: if false;
       allow create: if activeUser() && profile().role == 'CLIENT'
         && nightId.matches(request.auth.uid + '_.*')
-        && request.resource.data.clientUid == request.auth.uid
-        && getAfter(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId))
-             .data.clientUid == request.auth.uid;
-      allow update, delete: if false;
+        && validClientNight();
+      allow update: if activeUser() && profile().role == 'CLIENT'
+        && nightId.matches(request.auth.uid + '_.*') && resource.data.clientUid == request.auth.uid
+        && validClientNight() && reusableNight();
+      allow delete: if false;
     }
 
     match /roomNights/{nightId} {
@@ -429,6 +449,35 @@ service cloud.firestore {
     }
 
     match /taxiRequests/{requestId} {
+      function airportForCity(city, code) {
+        let value = city.lower().trim();
+        return (code == 'LIM' && value in ['lima','lima metropolitana','callao'])
+          || (code == 'CUZ' && value in ['cusco','cuzco'])
+          || (code == 'AQP' && value == 'arequipa')
+          || (code == 'TRU' && value == 'trujillo')
+          || (code == 'PIO' && value in ['paracas','pisco']);
+      }
+      function validAirport() {
+        let data = request.resource.data;
+        let booking = get(/databases/$(database)/documents/reservations/$(requestId)).data;
+        let hotel = get(/databases/$(database)/documents/hotels/$(string(booking.hotelId))).data;
+        return data.hotelId == booking.hotelId && hotel.id == data.hotelId && hotel.active == true
+          && data.hotelCity == hotel.city && data.hotel == hotel.name && data.origen == hotel.address
+          && airportForCity(hotel.city, data.airportCode)
+          && data.destino == data.airportName + ' (' + data.airportCode + ')'
+          && ((data.airportCode == 'LIM' && data.airportName == 'Aeropuerto Internacional Jorge Chávez' && data.airportCity == 'Callao')
+            || (data.airportCode == 'CUZ' && data.airportName == 'Aeropuerto Internacional Alejandro Velasco Astete' && data.airportCity == 'Cusco')
+            || (data.airportCode == 'AQP' && data.airportName == 'Aeropuerto Internacional Alfredo Rodríguez Ballón' && data.airportCity == 'Arequipa')
+            || (data.airportCode == 'TRU' && data.airportName == 'Aeropuerto Internacional Capitán FAP Carlos Martínez de Pinillos' && data.airportCity == 'Trujillo')
+            || (data.airportCode == 'PIO' && data.airportName == 'Aeropuerto Capitán FAP Renán Elías Olivera' && data.airportCity == 'Pisco'));
+      }
+      function validDestination() {
+        let data = request.resource.data;
+        let keys = ['hotelId','hotelCity','airportCode','airportName','airportCity'];
+        // Compatibilidad con las versiones anteriores de las pantallas de taxi.
+        return (!data.keys().hasAny(keys) && data.destino == 'Aeropuerto Jorge Chávez')
+          || (data.keys().hasAll(keys) && validAirport());
+      }
       function ownsReservation() {
         return exists(/databases/$(database)/documents/reservations/$(requestId))
           && get(/databases/$(database)/documents/reservations/$(requestId)).data.clientUid == request.auth.uid;
@@ -446,7 +495,8 @@ service cloud.firestore {
           || resource.data.taxistaUid == request.auth.uid)));
       allow create: if request.auth != null && ownsReservation()
         && request.resource.data.keys().hasOnly(['id','reserva','clientUid','cliente','nombre','hotel',
-             'origen','destino','hora','pasajeros','maletas','estado','creado','taxistaUid','taxista','conductor','finalizado'])
+             'origen','destino','hora','pasajeros','maletas','estado','creado','taxistaUid','taxista','conductor','finalizado',
+             'hotelId','hotelCity','airportCode','airportName','airportCity'])
         && request.resource.data.id is int && request.resource.data.id > 0
         && requestId == string(request.resource.data.id)
         && request.resource.data.reserva == request.resource.data.id
@@ -454,7 +504,7 @@ service cloud.firestore {
         && request.resource.data.cliente == request.auth.token.email
         && request.resource.data.nombre is string && request.resource.data.nombre.size() > 0
         && request.resource.data.hotel is string && request.resource.data.origen is string
-        && request.resource.data.destino == 'Aeropuerto Jorge Chávez'
+        && validDestination()
         && request.resource.data.hora is string
         && request.resource.data.hora.matches('([01][0-9]|2[0-3]):[0-5][0-9]')
         && request.resource.data.pasajeros is int && request.resource.data.pasajeros >= 1
@@ -482,7 +532,40 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','finalizado'])
           && request.resource.data.finalizado == request.time && driverLockAfter() == ''));
       allow delete: if false;
+      match /messages/{messageId} {
+        function participant() {
+          let trip = get(/databases/$(database)/documents/taxiRequests/$(requestId)).data;
+          return activeUser() && trip.taxistaUid != ''
+            && trip.estado in ['ASIGNADO','EN_CAMINO','EN_TRASLADO','FINALIZADO']
+            && ((profile().role == 'CLIENT' && trip.clientUid == request.auth.uid)
+              || (profile().role == 'TAXISTA' && trip.taxistaUid == request.auth.uid && taxiDriver()));
+        }
+        allow read: if participant();
+        allow create: if participant()
+          && get(/databases/$(database)/documents/taxiRequests/$(requestId)).data.estado != 'FINALIZADO'
+          && request.resource.data.keys().hasOnly(['senderUid','senderRole','text','createdAt'])
+          && request.resource.data.senderUid == request.auth.uid
+          && request.resource.data.senderRole == profile().role
+          && request.resource.data.text is string && request.resource.data.text.size() <= 4000
+          && request.resource.data.text.matches('[\\s\\S]*\\S[\\s\\S]*')
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
     }
+
+    // Dispositivos de una sesión cliente; las credenciales del emisor nunca van en la app.
+    match /users/{uid}/notificationDevices/{binding} {
+      allow read: if activeUser() && profile().role == 'CLIENT' && request.auth.uid == uid;
+      allow create, update: if activeUser() && profile().role == 'CLIENT' && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['token','binding','platform','updatedAt'])
+        && request.resource.data.token is string && request.resource.data.token.size() > 20
+        && request.resource.data.token.size() <= 4096
+        && request.resource.data.binding == binding && binding.size() == 36
+        && request.resource.data.platform == 'ANDROID' && request.resource.data.updatedAt == request.time;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+    // Estado interno del emisor AWS: solo Firebase Admin SDK puede acceder.
+    match /pushDeliveries/{delivery} { allow read, write: if false; }
 
     match /taxiDrivers/{uid} {
       function validLock() {

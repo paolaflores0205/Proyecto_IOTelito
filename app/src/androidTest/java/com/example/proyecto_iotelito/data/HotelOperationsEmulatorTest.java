@@ -170,12 +170,11 @@ public class HotelOperationsEmulatorTest {
         seed("hotels/2",fields("id",2,"name","Hotel ajeno","address","Otra","city","Lima","active",true,"administratorUid","other-admin"));
         seed("hotels/1/rooms/101",fields("id",101,"hotelId",1,"tipo","Doble","nombreCodigo","101","areaM2",20,"adultos",2,"ninos",0,"precioNoche",100.25,"descripcion","QA","disponible",true,"archived",false));
         LocalDate today=LocalDate.now(FirebaseHotelOperations.ZONE);
-        seed("reservations/2001",fields("id",2001,"hotelId",1,"clientUid",clientUid,"clientName","Cliente QA","hotelName","Hotel QA","roomIds",new int[]{101},"roomName","Doble","roomNumber","101","fechaEntrada",today.minusDays(1).toString(),"fechaSalida",today.toString(),"precioTotal",100.25,"estado","CONFIRMADA","codigo","LOCAL-2001"));
+        seed("reservations/2001",fields("id",2001,"hotelId",1,"clientUid",clientUid,"clientName","Cliente QA","hotelName","Hotel QA","roomIds",new int[]{101},"roomName","Doble","roomNumber","101","fechaEntrada",today.minusDays(1).toString(),"fechaSalida",today.toString(),"precioTotal",100.25,"estado","CONFIRMADA","codigo","LOCAL-2001","cardType","Visa","cardLast4","4242","cardToken","DEMO_local-2001","paymentMode","SIMULATED"));
         seed("reservations/3001",fields("id",3001,"hotelId",2,"clientUid","other-client","roomIds",new int[]{201},"roomName","Simple","roomNumber","201","fechaEntrada",today.toString(),"fechaSalida",today.plusDays(1).toString(),"precioTotal",999.0,"estado","CONFIRMADA","codigo","AJENO"));
         login("client-hotel@example.test",UserRole.CLIENT,clientUid,null);
         Tasks.await(new FirebaseHotelChat(context).send(2001,"Pregunta del huésped"),20,TimeUnit.SECONDS);
-        com.example.proyecto_iotelito.data.ReservaRepository.getInstance(context).solicitarCheckout(2001,5,"Estadía de prueba satisfactoria",
-                TarjetaSimulada.validar("4242424242424242","12/39","123",java.time.YearMonth.now()));
+        com.example.proyecto_iotelito.data.ReservaRepository.getInstance(context).solicitarCheckout(2001,5,"Estadía de prueba satisfactoria");
         login("admin-hotel@example.test",UserRole.HOTEL_ADMIN,adminUid,1);
         AdminChatActivity chat=open(AdminChatActivity.class,new Intent(context,AdminChatActivity.class).putExtra(AdminChatActivity.EXTRA_CONVERSACION_ID,2001));
         waitFor(()->chat.findViewById(R.id.btn_enviar).isEnabled()&&((LinearLayout)chat.findViewById(R.id.ll_mensajes)).getChildCount()==1);

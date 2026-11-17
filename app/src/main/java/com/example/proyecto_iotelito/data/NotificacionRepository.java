@@ -13,27 +13,29 @@ import java.util.List;
 /** Acceso a la bandeja persistente de notificaciones del cliente. */
 public final class NotificacionRepository {
 
-    private static volatile NotificacionRepository instance;
+    private final String uid;
     private final NotificacionDao dao;
 
-    private NotificacionRepository(Context context) {
+    private NotificacionRepository(Context context, String uid) {
+        this.uid = uid;
         dao = IoTelitoDatabase.getInstance(context).notificacionDao();
     }
 
     public static NotificacionRepository getInstance(Context context) {
-        if (instance == null) {
-            synchronized (NotificacionRepository.class) {
-                if (instance == null) {
-                    instance = new NotificacionRepository(context.getApplicationContext());
-                }
-            }
-        }
-        return instance;
+        com.example.proyecto_iotelito.model.auth.AuthenticatedUser user = SessionRepository.obtener(context);
+        return forOwner(context, user != null && user.getRole() == com.example.proyecto_iotelito.model.auth.UserRole.CLIENT
+                ? user.getUid() : "");
+    }
+
+    /** Propietario capturado antes de iniciar una tarea asíncrona o recibir un push. */
+    public static NotificacionRepository forOwner(Context context, String uid) {
+        return new NotificacionRepository(context.getApplicationContext(), uid == null ? "" : uid);
     }
 
     public List<NotificacionCliente> obtenerTodas() {
         List<NotificacionCliente> resultado = new ArrayList<>();
-        for (NotificacionEntity entity : dao.obtenerTodas()) {
+        if (uid.isEmpty()) return resultado;
+        for (NotificacionEntity entity : dao.obtenerTodas(uid)) {
             resultado.add(new NotificacionCliente(
                     entity.id,
                     NotificacionCliente.Tipo.valueOf(entity.tipo),
@@ -46,8 +48,9 @@ public final class NotificacionRepository {
     }
 
     public androidx.lifecycle.LiveData<List<NotificacionCliente>> observarTodas() {
-        return androidx.lifecycle.Transformations.map(dao.observarTodas(), rows -> {
+        return androidx.lifecycle.Transformations.map(dao.observarTodas(uid), rows -> {
             List<NotificacionCliente> result = new ArrayList<>();
+            if (uid.isEmpty()) return result;
             for (NotificacionEntity row : rows) result.add(new NotificacionCliente(row.id,
                     NotificacionCliente.Tipo.valueOf(row.tipo), row.titulo, row.creadaEn, row.leida, row.reservaId));
             return result;
@@ -56,7 +59,9 @@ public final class NotificacionRepository {
 
     public void guardarSiNoExiste(int id, NotificacionCliente.Tipo tipo,
                                   String titulo, int reservaId) {
+        if (uid.isEmpty()) return;
         NotificacionEntity entity = new NotificacionEntity();
+        entity.ownerUid = uid;
         entity.id = id;
         entity.tipo = tipo.name();
         entity.titulo = titulo;
@@ -67,10 +72,10 @@ public final class NotificacionRepository {
     }
 
     public void marcarLeida(int id) {
-        ClientLocalTasks.execute(() -> dao.marcarLeida(id));
+        ClientLocalTasks.execute(() -> dao.marcarLeida(uid, id));
     }
 
     public void marcarTodasLeidas() {
-        ClientLocalTasks.execute(() -> dao.marcarTodasLeidas());
+        ClientLocalTasks.execute(() -> dao.marcarTodasLeidas(uid));
     }
 }

@@ -24,3 +24,13 @@ local.properties
 /.idea/deviceManager.xml
 /firestore-publicadas-antes-aws.txt
 /firestore-para-publicar-aws.txt
+/firestore-publicadas-antes-aeropuertos*.txt
+/firestore-para-publicar-aeropuertos.txt
+/firestore-para-publicar-checkout.txt
+/firestore-publicadas-antes-reservas-consecutivas*.txt
+/firestore-para-publicar-reservas-consecutivas.txt
+firestore-publicadas-antes-chat-taxi*.txt
+firestore-para-publicar-chat-taxi.txt
+
+/firestore-publicadas-antes-notificaciones*.txt
+/firestore-para-publicar-notificaciones.txt

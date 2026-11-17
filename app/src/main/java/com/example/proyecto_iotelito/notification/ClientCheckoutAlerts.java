@@ -101,38 +101,45 @@ public final class ClientCheckoutAlerts {
         String uid = clientUid(context);
         if (uid == null || reservation <= 0) return;
         preferences(context).edit().putBoolean(key(uid, reservation, "read"), true).apply();
+        com.example.proyecto_iotelito.data.NotificacionRepository.forOwner(context,uid).marcarLeida(reservation);
         context.getSystemService(NotificationManager.class).cancel(tag(uid), reservation);
     }
 
     public static Intent reservationIntent(Context context, int reservation) {
-        return new Intent(context, DetalleReservaActivity.class)
-                .setData(Uri.parse("iotelito://client-checkout/" + reservation))
-                .putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reservation)
-                .putExtra(EXTRA_CHECKOUT_ALERT, true);
+        String uid=clientUid(context);
+        return ClientNotificationActivity.intent(context,uid==null?"":uid,reservation,reservation,-1,true);
     }
 
     public static void show(Context context, List<NotificacionCliente> notices) {
-        String uid = clientUid(context);
+        showForOwner(context,clientUid(context),notices);
+    }
+
+    public static synchronized void showForOwner(Context context,String uid,List<NotificacionCliente> notices) {
+        synchronized(ClientPushRegistration.class) {
         NotificationManager manager = context.getSystemService(NotificationManager.class);
-        if (uid == null || !ClienteNotificationManager.tienePermiso(context) || !manager.areNotificationsEnabled()) return;
+        if (!ClientPushRegistration.isOwner(context,uid) || com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser()==null
+                || !uid.equals(com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid())
+                || !ClienteNotificationManager.tienePermiso(context) || !manager.areNotificationsEnabled()) return;
         ClienteNotificationManager.crearCanal(context);
         SharedPreferences prefs = preferences(context);
         for (NotificacionCliente notice : notices) {
             String sent = key(uid, notice.id, "sent");
-            if (isRead(context, notice.id) || prefs.getBoolean(sent, false)) continue;
+            if (prefs.getBoolean(key(uid,notice.id,"read"),false) || prefs.getBoolean(sent, false)) continue;
             PendingIntent link = PendingIntent.getActivity(context, notice.id,
-                    reservationIntent(context, notice.reservaId), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    ClientNotificationActivity.intent(context,uid,notice.id,notice.reservaId,-1,true), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             try {
                 manager.notify(tag(uid), notice.id, new NotificationCompat.Builder(context, ClienteNotificationManager.CHANNEL_RESERVAS)
                         .setSmallIcon(R.drawable.ic_notifications)
                         .setContentTitle(context.getString(R.string.cliente_checkout_titulo))
                         .setContentText(notice.titulo)
+                        .setStyle(new NotificationCompat.BigTextStyle().bigText(notice.titulo))
                         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                         .setContentIntent(link).setAutoCancel(true).build());
                 prefs.edit().putBoolean(sent, true).apply();
             } catch (SecurityException ignored) {
                 // El comprobante sigue en la bandeja si se revoca el permiso.
             }
+        }
         }
     }
 
