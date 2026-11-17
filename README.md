@@ -29,6 +29,7 @@ Las credenciales van en variables de entorno, nunca en el repositorio:
 | `DB_USER` | Usuario de MySQL | `root` |
 | `DB_PASSWORD` | Contraseña de MySQL | vacía |
 | `IOTELITO_ADMIN_PASSWORD` | Contraseña del superadmin en producción (12 caracteres o más) | no se usa |
+| `FIREBASE_PROJECT_ID` | Proyecto de Firebase cuyos tokens acepta la API | `iot-telito` |
 
 ```bash
 ./mvnw spring-boot:run
@@ -46,11 +47,34 @@ reemplazarla.
 
 Usan H2 en modo MySQL con los mismos `schema.sql` y `data.sql`, y comprueban: que las
 entidades coinciden con el DDL, que un pedido lo gana un solo taxista, que un taxista no
-tiene dos servicios activos, el login del panel con CSRF y el registro por tipo de documento.
+tiene dos servicios activos, el login del panel con CSRF, el registro por tipo de documento
+y la API completa (del pedido a la calificación, con cada rechazo por rol y estado) con un
+Firestore en memoria y tokens simulados.
+
+## API REST para la app
+
+`/api/v1`, con las 17 operaciones del contrato `docs/api-taxis-v1.yaml` (rama `main`).
+
+- La app envía `Authorization: Bearer <token de Firebase>`. La web verifica la firma con las
+  claves públicas de Google, el emisor y la audiencia del proyecto (`FIREBASE_PROJECT_ID`,
+  por defecto `iot-telito`). No guarda ninguna clave de Firebase.
+- El rol sale de `users/{uid}` en Firestore. La web lo lee por REST con el mismo token del
+  usuario, así que se aplican las reglas publicadas. Igual con la reserva y el hotel al pedir
+  un taxi: el hotel, la dirección y la ciudad nunca se toman de lo que envía la app.
+- Todo error responde `{"codigo": "...", "mensaje": "..."}` con los códigos del contrato.
+
+### Cómo entra un taxista a la app
+
+1. Se registra en la web y el superadmin lo aprueba.
+2. Se le crea su cuenta de Firebase con el **mismo correo** y su `users/{uid}` con
+   `role: TAXISTA` y `active: true` (hoy a mano, en la consola de Firebase).
+3. La primera vez que abre la app, `GET /api/v1/taxistas/me` enlaza esa cuenta con su ficha
+   por el correo y guarda el `firebase_uid`.
 
 ## Pendiente
 
-- API REST `/api/v1` con el token de Firebase (contrato en `docs/api-taxis-v1.yaml`).
-- Guardar en S3 los documentos del registro (hoy el formulario los recibe pero no los guarda).
-- Crear la cuenta de Firebase del taxista al aprobarlo.
+- Automatizar el paso 2 al aprobar (requiere una cuenta de servicio de Firebase en el servidor),
+  y deshabilitar la cuenta de Firebase al desactivar un taxista (hoy la API ya le niega el acceso).
+- Guardar en S3 los documentos del registro (hoy el formulario los recibe pero no los guarda) y
+  devolver las fotos en `fotoUrl` (hoy `null`).
 - Despliegue en AWS.

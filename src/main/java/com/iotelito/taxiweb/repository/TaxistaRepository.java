@@ -22,6 +22,8 @@ public interface TaxistaRepository
 
     Optional<Taxista> findByUsuarioFirebaseUid(String firebaseUid);
 
+    Optional<Taxista> findByUsuarioCorreo(String correo);
+
     long countByEstadoSolicitud(EstadoSolicitudTaxista estadoSolicitud);
 
     long countByUsuarioActivoTrue();

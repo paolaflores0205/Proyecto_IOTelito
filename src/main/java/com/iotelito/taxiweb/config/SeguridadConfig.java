@@ -2,6 +2,7 @@ package com.iotelito.taxiweb.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,8 +13,8 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 
 /**
  * Panel web: solo el superadmin, con sesión y contraseña BCrypt. El registro de taxistas
- * es público. Todo lo demás se rechaza hasta que tenga su propia regla (la API REST tendrá
- * su cadena aparte, con el token de Firebase).
+ * es público. La API /api/** tiene su propia cadena (ApiSeguridadConfig, orden 1); todo lo
+ * demás se rechaza.
  */
 @Configuration
 @EnableWebSecurity
@@ -25,6 +26,7 @@ public class SeguridadConfig {
     }
 
     @Bean
+    @Order(2)
     SecurityFilterChain panelWeb(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(peticion -> peticion
