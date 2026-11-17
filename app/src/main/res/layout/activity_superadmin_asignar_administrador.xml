@@ -23,7 +23,7 @@
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/superadmin_search_new_admin" android:textColor="@color/io_navy" android:textStyle="bold" />
             <com.google.android.material.textfield.TextInputLayout style="@style/Widget.IoTelito.Input" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:hint="@string/superadmin_admin_search_hint" app:startIconDrawable="@drawable/ic_search">
-                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_search" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" />
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_search" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text"  android:maxLength="500" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView android:id="@+id/tv_assignment_state" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textColor="@color/io_text_secondary" android:textSize="12sp" />

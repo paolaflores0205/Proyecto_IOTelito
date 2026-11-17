@@ -5,7 +5,7 @@
   <TextView style="@style/TextAppearance.IoTelito.SectionTitle" android:text="Reportes de hoteles"/>
   <TextView android:id="@+id/tv_report_source" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Cargando reservas…" android:textColor="@color/io_text_secondary" android:textSize="12sp"/>
   <com.google.android.material.textfield.TextInputLayout style="@style/Widget.IoTelito.Input" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:hint="Hotel" app:endIconMode="dropdown_menu">
-   <com.google.android.material.textfield.MaterialAutoCompleteTextView android:id="@+id/actv_hotel_selector" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="none"/>
+   <com.google.android.material.textfield.MaterialAutoCompleteTextView android:id="@+id/actv_hotel_selector" android:paddingStart="16dp" android:paddingEnd="48dp" android:maxLines="1" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="none"/>
   </com.google.android.material.textfield.TextInputLayout>
   <com.google.android.material.chip.ChipGroup android:id="@+id/chip_group_period" android:layout_width="match_parent" android:layout_height="wrap_content" app:singleSelection="true" app:selectionRequired="true">
    <com.google.android.material.chip.Chip android:id="@+id/chip_daily" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:checked="false" android:text="Diario"/>
@@ -42,7 +42,7 @@
    <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="3dp"><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="114dp" android:padding="12dp" android:orientation="vertical">
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Cobros de checkout" android:textColor="@color/io_text_secondary" android:textSize="12sp"/>
     <TextView android:id="@+id/tv_checkout_income" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="—" android:textColor="@color/io_navy" android:textSize="23sp" android:textStyle="bold"/>
-    <TextView android:id="@+id/tv_checkout_count" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Pagos simulados registrados" android:textColor="@color/io_text_secondary" android:textSize="11sp"/>
+    <TextView android:id="@+id/tv_checkout_count" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Comprobantes registrados" android:textColor="@color/io_text_secondary" android:textSize="11sp"/>
    </LinearLayout></com.google.android.material.card.MaterialCardView>
    <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="3dp"><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="114dp" android:padding="12dp" android:orientation="vertical">
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Extras de checkout" android:textColor="@color/io_text_secondary" android:textSize="12sp"/>
@@ -55,7 +55,7 @@
   <TextView android:id="@+id/tv_report_empty" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Sin reservas para este filtro y período." android:textColor="@color/io_text_secondary"/>
   <HorizontalScrollView android:layout_width="match_parent" android:layout_height="250dp" android:fillViewport="true"><com.example.proyecto_iotelito.ui.superadmin.reportes.WeeklyBookingsChartView android:id="@+id/weekly_bookings_chart" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/io_surface" android:padding="12dp"/></HorizontalScrollView>
   <TextView style="@style/TextAppearance.IoTelito.SectionTitle" android:layout_marginTop="20dp" android:text="Ranking de ocupación"/>
-  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Noches-habitación reservadas / capacidad del período. Salida no incluida. Sin inventario: no calculable." android:textSize="11sp" android:textColor="@color/io_text_secondary"/>
+  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Compara la ocupación estimada de los hoteles según las habitaciones reservadas y las fechas elegidas. Para calcularla, el hotel debe tener habitaciones registradas." android:textSize="11sp" android:textColor="@color/io_text_secondary"/>
   <LinearLayout android:id="@+id/ranking_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp" android:background="@color/io_surface"/>
  </LinearLayout>
 </androidx.core.widget.NestedScrollView>

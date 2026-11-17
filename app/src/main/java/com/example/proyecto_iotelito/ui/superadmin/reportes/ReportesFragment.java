@@ -84,7 +84,7 @@ public class ReportesFragment extends Fragment {
             checkouts = stateRows.rows;
             checkoutsReady = !stateRows.loading && stateRows.error == null;
             checkoutStatus = stateRows.error != null ? stateRows.error : stateRows.loading
-                    ? "Consultando comprobantes…" : "Por fecha del checkout en Lima · pagos simulados";
+                    ? "Consultando comprobantes…" : "Comprobantes por fecha de cierre de estadía";
             render();
         });
         render();
@@ -114,7 +114,7 @@ public class ReportesFragment extends Fragment {
         boolean receiptsReady = checkoutsReady && hotelsReady;
         binding.tvCheckoutIncome.setText(receiptsReady ? String.format(locale, "S/ %,.2f", data.checkoutAmount) : "—");
         binding.tvCheckoutExtras.setText(receiptsReady ? String.format(locale, "S/ %,.2f", data.checkoutExtras) : "—");
-        binding.tvCheckoutCount.setText(receiptsReady ? "Comprobantes: " + data.checkouts + " · pago simulado" : "Esperando datos confirmados");
+        binding.tvCheckoutCount.setText(receiptsReady ? "Comprobantes: " + data.checkouts : "Esperando datos confirmados");
         binding.tvCheckoutStatus.setText(checkoutStatus);
         binding.tvChartTitle.setText(data.title);
         binding.weeklyBookingsChart.setData(data.labels, data.values);
@@ -126,8 +126,8 @@ public class ReportesFragment extends Fragment {
         if (!ready) return;
         for (ReportCalculator.Ranking rank : data.ranking) {
             TextView label = new TextView(requireContext());
-            label.setText(rank.hotel.name + " · " + (rank.hotel.rooms == 0 ? "Sin inventario"
-                    : String.format(locale, "%.1f%%", rank.occupancy)));
+            label.setText(rank.hotel.name + " · " + (rank.hotel.rooms == 0 ? "Ocupación no calculable: registra habitaciones"
+                    : String.format(locale, "%.1f%% de ocupación en el período", rank.occupancy)));
             label.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.io_navy));
             label.setPadding(0, 16, 0, 6);
             binding.rankingContainer.addView(label);
