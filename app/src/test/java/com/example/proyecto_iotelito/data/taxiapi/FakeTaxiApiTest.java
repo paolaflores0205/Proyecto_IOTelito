@@ -56,6 +56,31 @@ public class FakeTaxiApiTest {
         driver.avanzarServicio(123, "EN_TRASLADO");
     }
 
+    @Test public void chatSoloEntreParticipantesYReintentosSinDuplicados() {
+        assertEquals(409, assertThrows(TaxiApiException.class, () -> client.mensajes(123)).status);
+        driver.aceptarServicio(123);
+        String uuid=UUID.randomUUID().toString();
+        client.enviarMensaje(123,uuid,"Nos vemos en recepción.");
+        client.enviarMensaje(123,uuid,"Nos vemos en recepción.");
+        assertEquals(1,driver.mensajes(123).optJSONArray("mensajes").length());
+        assertFalse(driver.mensajes(123).optJSONArray("mensajes").optJSONObject(0).optBoolean("mio"));
+        driver.enviarMensaje(123,UUID.randomUUID().toString(),"Estoy en camino.");
+        assertEquals(2,client.mensajes(123).optJSONArray("mensajes").length());
+        assertEquals(403,assertThrows(TaxiApiException.class,()->other.mensajes(123)).status);
+        assertEquals(403,assertThrows(TaxiApiException.class,()->api("another","CLIENT").mensajes(123)).status);
+        assertEquals(400,assertThrows(TaxiApiException.class,()->client.enviarMensaje(123,UUID.randomUUID().toString()," ")).status);
+    }
+
+    @Test public void chatFinalizadoConservaHistorialPeroNoAceptaNuevosMensajes() {
+        stateToFinal();
+        client.enviarMensaje(123,UUID.randomUUID().toString(),"Gracias por el viaje.");
+        String qr=client.verQr(123).optString("codigo");
+        driver.finalizarServicio(123,qr);
+        assertFalse(client.mensajes(123).optBoolean("permiteEnviar"));
+        assertEquals(1,client.mensajes(123).optJSONArray("mensajes").length());
+        assertEquals(409,assertThrows(TaxiApiException.class,()->driver.enviarMensaje(123,UUID.randomUUID().toString(),"Otro mensaje")).status);
+    }
+
     @Test
     public void unSoloGanadorConcurrente() throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(2);

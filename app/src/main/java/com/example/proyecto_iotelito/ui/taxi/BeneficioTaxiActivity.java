@@ -3,12 +3,14 @@ package com.example.proyecto_iotelito.ui.taxi;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.TaxiBenefitPolicy;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.model.taxi.BeneficioTaxi;
@@ -36,9 +38,10 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
                 (value, loadedHotel) -> {
                     reserva = value;
                     hotel = loadedHotel;
-                    if (!com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reserva)) {
-                        android.widget.Toast.makeText(this, "El traslado requiere una estadía de al menos S/ 1000 y el checkout solicitado.", android.widget.Toast.LENGTH_LONG).show();
-                        finish();return;
+                    if (!TaxiBenefitPolicy.puedeSolicitar(reserva)) {
+                        Toast.makeText(this, R.string.taxi_requisito_estadia, Toast.LENGTH_LONG).show();
+                        finish();
+                        return;
                     }
 
                     TextView tvDescripcion = findViewById(R.id.tv_desc_taxi_gratuito);

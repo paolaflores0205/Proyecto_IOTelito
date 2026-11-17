@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: API de gestión de taxistas - IoTelito
-  version: 1.0.0
+  version: 1.1.0
   description: |
     Contrato entre la app Android (cliente HTTP) y la web de gestión de taxistas
     (servidor Spring Boot + MySQL). Este archivo manda: si el código y el contrato no
@@ -256,6 +256,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Servicio'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+  /servicios/{id}/mensajes:
+    parameters:
+      - $ref: '#/components/parameters/ServicioId'
+    get:
+      tags: [Compartido]
+      operationId: mensajesTaxi
+      summary: Lee hasta los últimos 100 mensajes del viaje
+      description: Solo el cliente dueño de la reserva y el taxista asignado pueden leer el chat.
+      responses:
+        '200':
+          $ref: '#/components/responses/ConversacionTaxi'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+    post:
+      tags: [Compartido]
+      operationId: enviarMensajeTaxi
+      summary: Envía un mensaje al otro participante de un viaje activo
+      description: Reenviar el mismo UUID para el mismo autor y viaje devuelve la conversación sin duplicar el mensaje.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [uuid, texto]
+              properties:
+                uuid: {type: string, format: uuid}
+                texto: {type: string, minLength: 1, maxLength: 1000}
+      responses:
+        '200':
+          $ref: '#/components/responses/ConversacionTaxi'
+        '400':
+          $ref: '#/components/responses/Validacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+
+  /notificaciones/dispositivo:
+    put:
+      tags: [Compartido]
+      operationId: registrarDispositivoTaxi
+      summary: Registra o actualiza el token FCM de la sesión en Android
+      description: Disponible para clientes y taxistas aprobados. El UID se toma del token de Firebase.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [binding, token]
+              properties:
+                binding: {type: string, format: uuid}
+                token: {type: string, minLength: 20, maxLength: 4096}
+      responses:
+        '204':
+          description: Dispositivo registrado.
+        '400':
+          $ref: '#/components/responses/Validacion'
         '401':
           $ref: '#/components/responses/NoAutenticado'
         '403':
@@ -534,6 +610,25 @@ components:
         minimum: 1
 
   responses:
+    ConversacionTaxi:
+      description: Mensajes en orden de envío. El historial sigue disponible al finalizar el viaje.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [mensajes, permiteEnviar]
+            properties:
+              permiteEnviar: {type: boolean}
+              mensajes:
+                type: array
+                maxItems: 100
+                items:
+                  type: object
+                  required: [id, texto, mio]
+                  properties:
+                    id: {type: integer, format: int64}
+                    texto: {type: string}
+                    mio: {type: boolean}
     Validacion:
       description: Datos inválidos (VALIDACION, AEROPUERTO_NO_CORRESPONDE o QR_INVALIDO).
       content:

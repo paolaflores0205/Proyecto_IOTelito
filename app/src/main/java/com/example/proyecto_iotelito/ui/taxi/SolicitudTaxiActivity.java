@@ -6,10 +6,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.TaxiBenefitPolicy;
 import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.example.proyecto_iotelito.model.Hotel;
 import com.example.proyecto_iotelito.model.Reserva;
@@ -34,6 +36,13 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_solicitud_taxi);
         TaxiUi.status(this, null);
+        if (savedInstanceState != null) {
+            aeropuertoCodigo = savedInstanceState.getString("airport_code");
+            pasajeros = savedInstanceState.getInt("passengers", pasajeros);
+            maletas = savedInstanceState.getInt("bags", maletas);
+            horaRecojo = savedInstanceState.getInt("pickup_hour", horaRecojo);
+            minutoRecojo = savedInstanceState.getInt("pickup_minute", minutoRecojo);
+        }
 
         int reservaId = getIntent().getIntExtra(EXTRA_RESERVA_ID, -1);
         com.example.proyecto_iotelito.data.ClientDataLoader.reserva(
@@ -42,6 +51,11 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
                 (value, loadedHotel) -> {
                     reserva = value;
                     hotel = loadedHotel;
+                    if (!TaxiBenefitPolicy.puedeSolicitar(reserva)) {
+                        Toast.makeText(this, R.string.taxi_requisito_estadia, Toast.LENGTH_LONG).show();
+                        finish();
+                        return;
+                    }
                     TaxiRepository.ejecutar(
                             this,
                             this,
@@ -184,7 +198,12 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
     private void cargarAeropuertos() {
         MaterialButton button = findViewById(R.id.btn_confirmar_solicitud);
         button.setEnabled(false);
-        TextView select = findViewById(R.id.taxi_aeropuerto_selector);
+        TextView select = findViewById(R.id.tv_aeropuerto_destino);
+        TextView help = findViewById(R.id.tv_ayuda_aeropuerto);
+        View selector = findViewById(R.id.container_aeropuerto);
+        View chevron = findViewById(R.id.iv_elegir_aeropuerto);
+        selector.setOnClickListener(null);
+        chevron.setVisibility(View.GONE);
         com.example.proyecto_iotelito.data.taxiapi.TaxiTasks.run(
                 this,
                 () ->
@@ -211,10 +230,15 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
                                 this, "No hay aeropuerto disponible para la ciudad del hotel.");
                         return;
                     }
-                    aeropuertoCodigo = codes.get(0);
-                    select.setText(names.get(0));
+                    int current = Math.max(0, codes.indexOf(aeropuertoCodigo));
+                    aeropuertoCodigo = codes.get(current);
+                    select.setText(names.get(current));
+                    help.setText("Destino según la ciudad del hotel: " + hotel.city);
                     button.setEnabled(true);
-                    select.setOnClickListener(
+                    selector.setClickable(codes.size() > 1);
+                    selector.setFocusable(codes.size() > 1);
+                    chevron.setVisibility(codes.size() > 1 ? View.VISIBLE : View.GONE);
+                    if (codes.size() > 1) selector.setOnClickListener(
                             v ->
                                     new com.google.android.material.dialog
                                                     .MaterialAlertDialogBuilder(this)
@@ -231,8 +255,17 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
                 error -> {
                     TaxiUi.status(this, error);
                     select.setText("Reintentar cargar aeropuertos");
-                    select.setOnClickListener(v -> cargarAeropuertos());
+                    selector.setOnClickListener(v -> cargarAeropuertos());
                 });
+    }
+
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putString("airport_code", aeropuertoCodigo);
+        state.putInt("passengers", pasajeros);
+        state.putInt("bags", maletas);
+        state.putInt("pickup_hour", horaRecojo);
+        state.putInt("pickup_minute", minutoRecojo);
     }
 
     private void abrirSolicitud(int id) {

@@ -5,6 +5,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.SessionRepository;
+import com.example.proyecto_iotelito.data.TaxiRepository;
+import com.example.proyecto_iotelito.model.auth.UserRole;
+import com.example.proyecto_iotelito.ui.taxista.ChatPasajeroTaxistaActivity;
 
 import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
@@ -104,6 +108,15 @@ public class SeguimientoTaxiActivity extends TaxiServiceScreen {
         boolean done = "FINALIZADO".equals(s.optString("estado"));
         findViewById(R.id.taxi_map_rate).setVisibility(done ? View.VISIBLE : View.GONE);
         findViewById(R.id.btn_ver_qr).setEnabled(p != null && !done);
+        View chat = findViewById(R.id.taxi_map_chat);
+        var usuario = SessionRepository.obtener(this);
+        boolean cliente = usuario != null && usuario.getRole() == UserRole.CLIENT;
+        chat.setVisibility(p != null && cliente ? View.VISIBLE : View.GONE);
+        if (p != null && cliente) {
+            String nombre = (p.optString("nombres") + " " + p.optString("apellidos")).trim();
+            chat.setOnClickListener(v -> startActivity(ChatPasajeroTaxistaActivity.createIntent(this, nombre, null)
+                    .putExtra(TaxiRepository.EXTRA_ID, serviceId)));
+        }
     }
 
     @Override

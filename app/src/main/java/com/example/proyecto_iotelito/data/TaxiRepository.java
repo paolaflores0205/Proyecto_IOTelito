@@ -15,6 +15,7 @@ import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.model.auth.AuthenticatedUser;
 import com.example.proyecto_iotelito.model.auth.UserRole;
 import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
+import com.example.proyecto_iotelito.notification.ClienteNotificationManager;
 
 import org.json.JSONObject;
 
@@ -196,27 +197,21 @@ public final class TaxiRepository {
             int pasajeros,
             int maletas) {
         if (!TaxiBenefitPolicy.puedeSolicitar(reserva))
-            throw new IllegalArgumentException("El taxi gratuito requiere una estadía de al menos S/ 1000 y el checkout solicitado.");
+            throw new TaxiApiException(409, TaxiApiException.Codigo.ESTADO_INVALIDO,
+                    context.getString(R.string.taxi_requisito_estadia));
         AuthenticatedUser user = SessionRepository.obtener(context);
         if (user == null || user.getRole() != UserRole.CLIENT) return -1;
         JSONObject service =
                 TaxiApis.get(context)
                         .crearServicio(reserva.id, aeropuerto, hora, pasajeros, maletas);
-        return Math.toIntExact(service.optLong("id"));
+        int id = Math.toIntExact(service.optLong("id"));
+        ClienteNotificationManager.mostrarEstadoTaxi(context, id, reserva.id, Estado.SOLICITADO);
+        return id;
     }
 
     @WorkerThread
     public static int porReserva(Context context, int reservaId) {
         return buscar(context, reservaId) == null ? -1 : reservaId;
-    }
-
-    @WorkerThread
-    public static int crear(Context context, Reserva reserva, com.example.proyecto_iotelito.model.Hotel hotel,
-            AeropuertosCliente.Aeropuerto airport, String hora, int pasajeros, int maletas) {
-        if (hotel == null || hotel.id != reserva.hotelId || airport == null)
-            throw new IllegalArgumentException("Revisa el hotel y aeropuerto seleccionados.");
-        AeropuertosCliente.elegir(hotel.city, airport.codigo);
-        return crear(context, reserva, airport.codigo, hora, pasajeros, maletas);
     }
 
     @WorkerThread

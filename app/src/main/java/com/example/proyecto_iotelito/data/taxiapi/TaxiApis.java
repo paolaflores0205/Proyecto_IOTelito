@@ -40,6 +40,11 @@ public final class TaxiApis {
                         f.getUid()));
     }
 
+    public static TaxiApi forPushDevice(FirebaseUser firebase, UserRole role) {
+        return create(null, new AuthenticatedUser(
+                firebase.getEmail(), firebase.getDisplayName(), role, firebase.getUid()));
+    }
+
     private static TaxiApi create(Context context, AuthenticatedUser user) {
         try {
             return createChecked(context, user);

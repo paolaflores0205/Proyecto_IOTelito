@@ -51,6 +51,73 @@ public final class FakeTaxiApi implements TaxiApi {
     private static final class Trip {
         JSONObject data;
         String owner, driver, qr;
+        final List<Mensaje> messages = new ArrayList<>();
+    }
+
+    private static final class Mensaje {
+        final String uid, uuid, texto;
+
+        Mensaje(String uid, String uuid, String texto) {
+            this.uid = uid;
+            this.uuid = uuid;
+            this.texto = texto;
+        }
+    }
+
+    @Override
+    public JSONObject mensajes(long id) {
+        synchronized (store) {
+            Caller c = caller();
+            return conversacion(chat(id, c), c);
+        }
+    }
+
+    @Override
+    public JSONObject enviarMensaje(long id, String uuid, String texto) {
+        synchronized (store) {
+            Caller c = caller();
+            Trip t = chat(id, c);
+            if (!active(t)) throw error(409, ESTADO_INVALIDO, "El viaje terminó.");
+            String clean = texto == null ? "" : texto.trim();
+            if (clean.isEmpty() || clean.length() > 1000)
+                throw error(400, VALIDACION, "Escribe un mensaje de hasta 1000 caracteres.");
+            String key;
+            try {
+                key = UUID.fromString(uuid).toString();
+                if (uuid.length() != 36) throw new IllegalArgumentException();
+            } catch (IllegalArgumentException | NullPointerException ex) {
+                throw error(400, VALIDACION, "El identificador debe ser un UUID válido.");
+            }
+            if (t.messages.stream().noneMatch(m -> m.uid.equals(c.uid) && m.uuid.equals(key))) {
+                t.messages.add(new Mensaje(c.uid, key, clean));
+            }
+            return conversacion(t, c);
+        }
+    }
+
+    @Override
+    public void registrarDispositivo(String binding, String token) {
+        // El simulador no registra dispositivos ni envía avisos remotos.
+    }
+
+    private Trip chat(long id, Caller c) {
+        Trip t = trip(id);
+        if ("TAXISTA".equals(c.role)) {
+            assigned(t, c);
+        } else {
+            owner(t, c);
+            if (t.driver == null) throw error(409, ESTADO_INVALIDO, "El chat se abre al asignar un taxista.");
+        }
+        return t;
+    }
+
+    private JSONObject conversacion(Trip t, Caller c) {
+        JSONArray rows = new JSONArray();
+        for (int i = Math.max(0, t.messages.size() - 100); i < t.messages.size(); i++) {
+            Mensaje m = t.messages.get(i);
+            rows.put(json("id", i + 1, "texto", m.texto, "mio", m.uid.equals(c.uid)));
+        }
+        return json("mensajes", rows, "permiteEnviar", active(t));
     }
 
     private final Store store;

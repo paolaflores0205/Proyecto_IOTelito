@@ -8,6 +8,7 @@
             <TextView android:id="@+id/taxi_map_info" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" android:text="@string/taxi_api_wait_location" android:textColor="@color/io_navy" android:textSize="14sp" android:lineSpacingExtra="3dp"/>
             <com.google.android.material.button.MaterialButton android:id="@+id/btn_ver_qr" style="@style/Widget.IoTelito.Button.Primary" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/taxi_api_qr"/>
             <com.google.android.material.button.MaterialButton android:id="@+id/taxi_map_rate" style="@style/Widget.IoTelito.Button.Primary" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/taxi_api_rating"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/taxi_map_chat" style="@style/Widget.IoTelito.Button.Primary" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/taxi_chat_conductor" android:visibility="gone"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

@@ -53,7 +53,7 @@ public class IoTelitoApplication extends Application implements Application.Acti
         boolean hasBottomNavigation = bottomNavigation != null;
         View navigationView = bottomNavigation;
         boolean hasAdminChat = activity.findViewById(R.id.hoteladmin_chat_root) != null
-                || activity instanceof com.example.proyecto_iotelito.ui.taxi.TaxiChatActivity;
+                || activity instanceof com.example.proyecto_iotelito.ui.taxista.ChatPasajeroTaxistaActivity;
         boolean hasPaymentForm = activity.findViewById(R.id.scroll_confirmacion) != null;
         boolean hasProfileForm = activity.findViewById(R.id.scroll_editar_perfil) != null;
         boolean hasRegistrationForm = activity.findViewById(R.id.scroll_registro) != null;

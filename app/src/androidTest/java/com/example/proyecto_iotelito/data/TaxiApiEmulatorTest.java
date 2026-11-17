@@ -216,6 +216,7 @@ public class TaxiApiEmulatorTest {
     public void recorridoTaxiConApiFalsaYReservasLocalesEmuladas() throws Exception {
         assumeTrue(
                 "true".equals(InstrumentationRegistry.getArguments().getString("taxiApiEmulator")));
+        assumeTrue("La prueba demo requiere -PtaxiApi.fake=true; no se ejecuta contra el backend real.", BuildConfig.TAXI_API_FAKE);
         HttpURLConnection patch=(HttpURLConnection)new URL("https://example.invalid").openConnection();
         patch.setRequestMethod("PATCH");
         assertEquals("PATCH",patch.getRequestMethod());
@@ -350,7 +351,7 @@ public class TaxiApiEmulatorTest {
             return;
         }
         open(SolicitudTaxiActivity.class, 1001);
-        waitFor(() -> text(R.id.taxi_aeropuerto_selector, "Jorge Chávez"));
+        waitFor(() -> text(R.id.tv_aeropuerto_destino, "Jorge Chávez"));
         screenshot("taxi-api-solicitud");
         click(R.id.btn_confirmar_solicitud);
         waitFor(() -> current() instanceof TaxistaAsignadoActivity);
@@ -373,6 +374,11 @@ public class TaxiApiEmulatorTest {
                 });
         click(R.id.btn_aceptar_servicio);
         waitFor(() -> current() instanceof ServicioAsignadoActivity);
+        open(ChatPasajeroTaxistaActivity.class,1001);
+        ins.runOnMainSync(()->((EditText)current().findViewById(R.id.et_mensaje)).setText("Conductor en recepción"));
+        click(R.id.btn_enviar);
+        waitFor(()->TaxiApis.get(context).mensajes(1001).optJSONArray("mensajes").length()==1);
+        open(ServicioAsignadoActivity.class,1001);
         click(R.id.btn_iniciar_recorrido);
         waitFor(() -> current() instanceof DireccionHotelActivity);
         click(R.id.btn_llegue_al_hotel);
@@ -383,6 +389,14 @@ public class TaxiApiEmulatorTest {
         login(clientEmail, UserRole.CLIENT, clientUid);
         open(SeguimientoTaxiActivity.class, 1001);
         waitFor(() -> text(R.id.taxi_map_info, "DEMO-001"));
+        click(R.id.taxi_map_chat);
+        waitFor(()->current() instanceof ChatPasajeroTaxistaActivity);
+        ins.runOnMainSync(()->((EditText)current().findViewById(R.id.et_mensaje)).setText("Cliente listo para el recojo"));
+        click(R.id.btn_enviar);
+        waitFor(()->TaxiApis.get(context).mensajes(1001).optJSONArray("mensajes").length()==2);
+        screenshot("taxi-chat-integrado");
+        ins.runOnMainSync(()->current().finish());
+        waitFor(()->current() instanceof SeguimientoTaxiActivity);
         SystemClock.sleep(4000);
         screenshot("taxi-api-mapa");
         click(R.id.btn_ver_qr);

@@ -7,10 +7,12 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.LiveData;
 import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.ClientTaxiRepository;
 import com.example.proyecto_iotelito.data.TaxiRepository;
+import com.example.proyecto_iotelito.data.taxiapi.TaxiTasks;
+import java.util.Collections;
+import java.util.List;
 import org.json.JSONObject;
 
 /** Solicitudes propias con el mismo diseño y navegación del resto del cliente. */
@@ -18,7 +20,7 @@ public class MisTaxisActivity extends AppCompatActivity {
     private LinearLayout list;
     private TextView status;
     private View loading, retry;
-    private LiveData<ClientTaxiRepository.State> source;
+    private int requestVersion;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -30,21 +32,29 @@ public class MisTaxisActivity extends AppCompatActivity {
         loading = findViewById(R.id.taxi_list_loading);
         retry = findViewById(R.id.taxi_list_retry);
         retry.setOnClickListener(v -> load());
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
         load();
     }
 
     private void load() {
-        if (source != null) source.removeObservers(this);
-        source = ClientTaxiRepository.observe(this);
-        source.observe(this, state -> {
-            list.removeAllViews();
-            loading.setVisibility(state.loading ? View.VISIBLE : View.GONE);
-            retry.setVisibility(state.error != null ? View.VISIBLE : View.GONE);
-            status.setVisibility(state.loading || state.error != null || state.rows.isEmpty() ? View.VISIBLE : View.GONE);
-            status.setText(state.loading ? getString(R.string.mis_taxis_loading)
-                    : state.error != null ? state.error : getString(R.string.mis_taxis_empty));
-            for (JSONObject row : state.rows) addCard(row);
-        });
+        int version = ++requestVersion;
+        render(Collections.emptyList(), true, null);
+        TaxiTasks.run(this, () -> ClientTaxiRepository.listar(this),
+                rows -> { if (version == requestVersion) render(rows, false, null); },
+                error -> { if (version == requestVersion) render(Collections.emptyList(), false, error); });
+    }
+
+    private void render(List<JSONObject> rows, boolean busy, String error) {
+        list.removeAllViews();
+        loading.setVisibility(busy ? View.VISIBLE : View.GONE);
+        retry.setVisibility(error != null ? View.VISIBLE : View.GONE);
+        status.setVisibility(busy || error != null || rows.isEmpty() ? View.VISIBLE : View.GONE);
+        status.setText(busy ? getString(R.string.mis_taxis_loading)
+                : error != null ? error : getString(R.string.mis_taxis_empty));
+        for (JSONObject row : rows) addCard(row);
     }
 
     private void addCard(JSONObject row) {

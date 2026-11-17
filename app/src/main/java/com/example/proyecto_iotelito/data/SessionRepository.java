@@ -32,7 +32,8 @@ public final class SessionRepository {
         if (user.getRole() == UserRole.SUPERADMIN && user.getUid() == null)
             throw new IllegalArgumentException("Superadmin requiere una identidad Firebase verificada.");
         current = user;
-        if (user.getRole() == UserRole.CLIENT) com.example.proyecto_iotelito.notification.ClientPushRegistration.register(context);
+        if (user.getRole() == UserRole.CLIENT || user.getRole() == UserRole.TAXISTA)
+            com.example.proyecto_iotelito.notification.ClientPushRegistration.register(context);
         TaxistaAuthRepository.recordar(context, user);
         if (user.getUid() != null) watchProfile(context.getApplicationContext(), user);
     }
@@ -85,6 +86,8 @@ public final class SessionRepository {
             com.example.proyecto_iotelito.notification.ClientCheckoutAlerts.cancelSession(context, uid);
         }
         com.example.proyecto_iotelito.notification.ClientPushRegistration.clear(context);
+        if (firebaseUser != null) com.example.proyecto_iotelito.ui.taxista.TaxistaNotificaciones
+                .cancelarSesion(context, firebaseUser.getEmail());
         com.example.proyecto_iotelito.notification.ClienteNotificationManager.cancelSession(context);
         stopWatching();
         current = null;

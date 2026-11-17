@@ -30,6 +30,7 @@
                 android:textSize="12sp" />
 
             <LinearLayout
+                android:id="@+id/container_aeropuerto"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="6dp"
@@ -39,25 +40,28 @@
                 android:paddingHorizontal="14dp">
 
                 <TextView
+                    android:id="@+id/tv_aeropuerto_destino"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:id="@+id/taxi_aeropuerto_selector"
                     android:text="Cargando aeropuertos…"
-                    android:clickable="true"
-                    android:focusable="true"
                     android:minHeight="48dp"
                     android:gravity="center_vertical"
                     android:textColor="@color/io_text_primary"
                     android:textSize="13sp" />
 
                 <ImageView
+                    android:id="@+id/iv_elegir_aeropuerto"
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@drawable/ic_chevron_down"
                     android:tint="@color/io_text_muted"
                     android:contentDescription="@null" />
             </LinearLayout>
+
+            <TextView android:id="@+id/tv_ayuda_aeropuerto" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                android:textColor="@color/io_text_secondary" android:textSize="12sp" />
 
             <!-- Hora estimada de salida -->
             <TextView

@@ -97,7 +97,11 @@ public class TaxistaMainActivity extends AppCompatActivity {
         procesarAviso(intent);
     }
 
-    @Override protected void onResume(){super.onResume();if(vm!=null)vm.repo.refrescar();}
+    @Override protected void onResume(){
+        super.onResume();
+        com.example.proyecto_iotelito.notification.ClientPushRegistration.register(this);
+        if(vm!=null)vm.repo.refrescar();
+    }
     @Override protected void onSaveInstanceState(@NonNull Bundle state){
         if(bottomNav!=null)state.putInt(EXTRA_OPEN_TAB,bottomNav.getSelectedItemId());super.onSaveInstanceState(state);
     }
