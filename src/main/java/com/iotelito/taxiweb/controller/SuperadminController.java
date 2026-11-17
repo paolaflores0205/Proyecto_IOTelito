@@ -1,5 +1,6 @@
 package com.iotelito.taxiweb.controller;
 
+import com.iotelito.taxiweb.firebase.CuentaFirebaseException;
 import com.iotelito.taxiweb.model.Taxista;
 import com.iotelito.taxiweb.model.Usuario;
 import com.iotelito.taxiweb.repository.UsuarioRepository;
@@ -151,8 +152,12 @@ public class SuperadminController {
             Principal principal,
             RedirectAttributes redirectAttributes
     ) {
-        taxistaService.aprobarTaxista(id, principal.getName());
-        redirectAttributes.addFlashAttribute("mensaje", "Taxista aprobado correctamente");
+        try {
+            taxistaService.aprobarTaxista(id, principal.getName());
+            redirectAttributes.addFlashAttribute("mensaje", "Taxista aprobado correctamente");
+        } catch (CuentaFirebaseException error) {
+            redirectAttributes.addFlashAttribute("mensaje", "No se aprobó: " + error.getMessage());
+        }
 
         return "redirect:/superadmin/taxistas/" + id;
     }
@@ -163,8 +168,12 @@ public class SuperadminController {
             Principal principal,
             RedirectAttributes redirectAttributes
     ) {
-        taxistaService.rechazarTaxista(id, principal.getName());
-        redirectAttributes.addFlashAttribute("mensaje", "Solicitud rechazada correctamente");
+        try {
+            taxistaService.rechazarTaxista(id, principal.getName());
+            redirectAttributes.addFlashAttribute("mensaje", "Solicitud rechazada correctamente");
+        } catch (CuentaFirebaseException error) {
+            redirectAttributes.addFlashAttribute("mensaje", "No se rechazó: " + error.getMessage());
+        }
 
         return "redirect:/superadmin/taxistas/" + id;
     }

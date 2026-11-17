@@ -98,7 +98,7 @@ RDS, crea la base y el usuario, aplica `schema.sql` y `data.sql` e instala el se
 
 ## Pendiente
 
-- Automatizar el paso 2 al aprobar (requiere una cuenta de servicio de Firebase en el servidor),
+- Probar en real la creación automática de cuentas al aprobar (activa desde el 16/11),
   y deshabilitar la cuenta de Firebase al desactivar un taxista (hoy la API ya le niega el acceso).
 - Guardar en S3 los documentos del registro (hoy el formulario los recibe pero no los guarda) y
   devolver las fotos en `fotoUrl` (hoy `null`).

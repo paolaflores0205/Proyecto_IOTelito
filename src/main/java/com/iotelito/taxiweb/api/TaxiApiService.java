@@ -82,10 +82,13 @@ public class TaxiApiService {
     private final UbicacionTaxistaRepository ubicaciones;
     private final CalificacionTaxistaRepository calificaciones;
     private final LogSistemaRepository logs;
+    private final com.iotelito.taxiweb.firebase.CuentasFirebase cuentasFirebase;
 
     public TaxiApiService(FirestoreLector firestore, TaxistaRepository taxistas, SolicitudTaxiRepository solicitudes,
                           ServicioTaxiRepository servicios, UbicacionTaxistaRepository ubicaciones,
-                          CalificacionTaxistaRepository calificaciones, LogSistemaRepository logs) {
+                          CalificacionTaxistaRepository calificaciones, LogSistemaRepository logs,
+                          com.iotelito.taxiweb.firebase.CuentasFirebase cuentasFirebase) {
+        this.cuentasFirebase = cuentasFirebase;
         this.firestore = firestore;
         this.taxistas = taxistas;
         this.solicitudes = solicitudes;
@@ -422,9 +425,14 @@ public class TaxiApiService {
         }
         Taxista taxista = taxistas.findById(taxistaId)
                 .orElseThrow(() -> ApiException.noEncontrado("No encontramos ese taxista."));
-        taxista.getUsuario().setActivo(cuerpo.activo());
+        Usuario usuario = taxista.getUsuario();
+        usuario.setActivo(cuerpo.activo());
         if (!cuerpo.activo()) {
             taxista.setDisponible(false);
+            cuentasFirebase.bloquear(usuario.getFirebaseUid());
+        } else if (taxista.getEstadoSolicitud() == EstadoSolicitudTaxista.APROBADO) {
+            cuentasFirebase.prepararCuentaTaxista(com.iotelito.taxiweb.service.TaxistaService.datos(usuario))
+                    .ifPresent(usuario::setFirebaseUid);
         }
         String motivo = cuerpo.motivo() == null || cuerpo.motivo().isBlank() ? "" : ": " + cuerpo.motivo().trim();
         logs.save(new LogSistema(null, cuerpo.activo() ? "ACTIVAR_TAXISTA" : "DESACTIVAR_TAXISTA",

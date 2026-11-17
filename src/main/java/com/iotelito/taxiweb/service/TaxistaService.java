@@ -1,6 +1,7 @@
 package com.iotelito.taxiweb.service;
 
 import com.iotelito.taxiweb.dto.TaxistaRegistroForm;
+import com.iotelito.taxiweb.firebase.CuentasFirebase;
 import com.iotelito.taxiweb.model.EstadoSolicitudTaxista;
 import com.iotelito.taxiweb.model.LogSistema;
 import com.iotelito.taxiweb.model.Rol;
@@ -26,15 +27,18 @@ public class TaxistaService {
     private final TaxistaRepository taxistaRepository;
     private final UsuarioRepository usuarioRepository;
     private final LogSistemaRepository logRepository;
+    private final CuentasFirebase cuentasFirebase;
 
     public TaxistaService(
             TaxistaRepository taxistaRepository,
             UsuarioRepository usuarioRepository,
-            LogSistemaRepository logRepository
+            LogSistemaRepository logRepository,
+            CuentasFirebase cuentasFirebase
     ) {
         this.taxistaRepository = taxistaRepository;
         this.usuarioRepository = usuarioRepository;
         this.logRepository = logRepository;
+        this.cuentasFirebase = cuentasFirebase;
     }
 
     /**
@@ -199,13 +203,20 @@ public class TaxistaService {
                 .orElseThrow(() -> new RuntimeException("No se encontro el taxista solicitado"));
     }
 
+    /**
+     * Aprueba y deja lista su cuenta de la app: si la automatización está configurada, Firebase
+     * crea la cuenta y le envía al taxista un correo para elegir su contraseña. Si Firebase falla,
+     * no se aprueba (CuentaFirebaseException con el motivo para el superadmin).
+     */
     @Transactional
     public Taxista aprobarTaxista(Long id, String actorCorreo) {
         Taxista taxista = obtenerTaxista(id);
+        Usuario usuario = taxista.getUsuario();
 
         taxista.setEstadoSolicitud(EstadoSolicitudTaxista.APROBADO);
         taxista.setDisponible(true);
-        taxista.getUsuario().setActivo(true);
+        usuario.setActivo(true);
+        cuentasFirebase.prepararCuentaTaxista(datos(usuario)).ifPresent(usuario::setFirebaseUid);
         registrar(actorCorreo, "APROBAR_TAXISTA", descripcion(taxista));
 
         return taxistaRepository.save(taxista);
@@ -218,9 +229,15 @@ public class TaxistaService {
         taxista.setEstadoSolicitud(EstadoSolicitudTaxista.RECHAZADO);
         taxista.setDisponible(false);
         taxista.getUsuario().setActivo(false);
+        cuentasFirebase.bloquear(taxista.getUsuario().getFirebaseUid());
         registrar(actorCorreo, "RECHAZAR_TAXISTA", descripcion(taxista));
 
         return taxistaRepository.save(taxista);
+    }
+
+    public static CuentasFirebase.DatosTaxista datos(Usuario usuario) {
+        return new CuentasFirebase.DatosTaxista(usuario.getFirebaseUid(), usuario.getCorreo(),
+                usuario.getNombres(), usuario.getApellidos(), usuario.getTelefono());
     }
 
     @Transactional

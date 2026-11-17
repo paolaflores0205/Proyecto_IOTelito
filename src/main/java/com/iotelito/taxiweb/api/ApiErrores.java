@@ -42,6 +42,12 @@ public class ApiErrores {
                 .body(new ApiDtos.Error("ESTADO_INVALIDO", "Otro cambio se adelantó. Vuelve a intentarlo."));
     }
 
+    @ExceptionHandler(com.iotelito.taxiweb.firebase.CuentaFirebaseException.class)
+    ResponseEntity<ApiDtos.Error> cuentaFirebase(com.iotelito.taxiweb.firebase.CuentaFirebaseException error) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ApiDtos.Error("NO_DISPONIBLE", error.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiDtos.Error> inesperado(Exception error) {
         LOG.error("Error no controlado en la API", error);
