@@ -44,6 +44,7 @@ public class CodigoQrTaxiActivity extends TaxiServiceScreen {
                                 + s.optJSONObject("aeropuerto").optString("nombre"));
         if (done) {
             ((ImageView) findViewById(R.id.taxi_qr_image)).setImageDrawable(null);
+            mostrarCodigo(null);
             shown = false;
             return;
         }
@@ -60,15 +61,17 @@ public class CodigoQrTaxiActivity extends TaxiServiceScreen {
                         for (int y = 0; y < 640; y++)
                             for (int x = 0; x < 640; x++)
                                 pixels[y * 640 + x] = bits.get(x, y) ? 0xff000000 : 0xffffffff;
-                        return Bitmap.createBitmap(pixels, 640, 640, Bitmap.Config.ARGB_8888);
+                        return new android.util.Pair<>(code,
+                                Bitmap.createBitmap(pixels, 640, 640, Bitmap.Config.ARGB_8888));
                     },
-                    bitmap -> {
+                    qr -> {
                         loading = false;
                         if (!getLifecycle()
                                 .getCurrentState()
                                 .isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) return;
                         shown = true;
-                        ((ImageView) findViewById(R.id.taxi_qr_image)).setImageBitmap(bitmap);
+                        ((ImageView) findViewById(R.id.taxi_qr_image)).setImageBitmap(qr.second);
+                        mostrarCodigo(qr.first);
                     },
                     error -> {
                         loading = false;
@@ -80,7 +83,15 @@ public class CodigoQrTaxiActivity extends TaxiServiceScreen {
     @Override
     protected void onPause() {
         ((ImageView) findViewById(R.id.taxi_qr_image)).setImageDrawable(null);
+        mostrarCodigo(null);
         shown = false;
         super.onPause();
+    }
+
+    /** Código del QR en texto, para que el taxista lo escriba si no puede escanearlo. */
+    private void mostrarCodigo(String codigo) {
+        TextView texto = findViewById(R.id.taxi_qr_codigo);
+        texto.setText(codigo == null ? "" : codigo);
+        texto.setVisibility(codigo == null || codigo.isEmpty() ? View.GONE : View.VISIBLE);
     }
 }

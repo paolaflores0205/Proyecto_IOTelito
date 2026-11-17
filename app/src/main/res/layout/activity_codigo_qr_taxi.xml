@@ -4,6 +4,8 @@
     <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:padding="20dp">
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:text="@string/taxi_api_qr_desc" android:textColor="@color/io_navy" android:textSize="14sp"/>
         <ImageView android:id="@+id/taxi_qr_image" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:padding="12dp" android:contentDescription="@string/taxi_api_qr" android:scaleType="fitCenter" android:background="@color/white"/>
+        <!-- Código del QR en texto: respaldo si la cámara del taxista no puede escanearlo. -->
+        <TextView android:id="@+id/taxi_qr_codigo" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:gravity="center" android:fontFamily="monospace" android:textStyle="bold" android:textSize="17sp" android:textColor="@color/io_navy" android:textIsSelectable="true" android:visibility="gone"/>
         <TextView android:id="@+id/taxi_qr_details" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="16dp" android:textColor="@color/io_navy" android:textSize="14sp"/>
         <com.google.android.material.button.MaterialButton android:id="@+id/tv_finalizar_viaje" style="@style/Widget.IoTelito.Button.Primary" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/taxi_api_rating"/>
     </LinearLayout>

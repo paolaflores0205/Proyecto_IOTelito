@@ -54,10 +54,10 @@ public class FinalizarServicioActivity extends AppCompatActivity {
                 .setOnClickListener(
                         v ->
                                 finalizar(
-                                        ((EditText) findViewById(R.id.et_codigo_manual))
-                                                .getText()
-                                                .toString()
-                                                .trim()));
+                                        codigoEscrito(
+                                                ((EditText) findViewById(R.id.et_codigo_manual))
+                                                        .getText()
+                                                        .toString())));
         vm.repo.error.observe(
                 this,
                 error -> {
@@ -66,6 +66,14 @@ public class FinalizarServicioActivity extends AppCompatActivity {
                         enable(true);
                     }
                 });
+    }
+
+    /** Acepta el código escrito con espacios o en mayúsculas: TX1- seguido de hexadecimal en minúsculas. */
+    static String codigoEscrito(String texto) {
+        String limpio = texto.replaceAll("\\s+", "");
+        return limpio.regionMatches(true, 0, "TX1-", 0, 4)
+                ? "TX1-" + limpio.substring(4).toLowerCase(java.util.Locale.ROOT)
+                : limpio;
     }
 
     private void enable(boolean value) {

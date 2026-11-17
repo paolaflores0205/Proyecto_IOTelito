@@ -9,7 +9,7 @@
     <string name="taxi_api_final_desc">Al llegar al destino, escanea el código QR que muestra el cliente para confirmar la finalización.</string>
     <string name="taxi_api_manual">O ingresa el código completo del QR</string>
     <string name="taxi_api_validate">Validar código</string>
-    <string name="taxi_api_qr_desc">Muestra este código al conductor al llegar al aeropuerto. El viaje finaliza cuando el conductor lo valida.</string>
+    <string name="taxi_api_qr_desc">Muestra este código al conductor al llegar al aeropuerto. Si no puede escanearlo, que escriba el código que aparece debajo. El viaje finaliza cuando el conductor lo valida.</string>
     <string name="taxi_api_attribution">© OpenStreetMap contributors</string>
     <string name="taxi_api_location_channel">Ubicación del servicio de taxi</string>
     <string name="taxi_api_location_active">Compartiendo ubicación durante tu servicio</string>
