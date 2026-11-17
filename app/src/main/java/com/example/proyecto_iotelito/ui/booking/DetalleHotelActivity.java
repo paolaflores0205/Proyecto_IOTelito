@@ -16,10 +16,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.ClientLocalTasks;
+import com.example.proyecto_iotelito.data.HotelCatalogRepository;
+import com.example.proyecto_iotelito.data.HotelImageLoader;
 import com.example.proyecto_iotelito.data.HotelMedia;
 import com.example.proyecto_iotelito.data.SampleData;
 import com.example.proyecto_iotelito.model.Attraction;
 import com.example.proyecto_iotelito.model.Hotel;
+import com.example.proyecto_iotelito.model.hoteladmin.Servicio;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
@@ -65,6 +69,7 @@ public class DetalleHotelActivity extends AppCompatActivity {
 
         poblarGaleria(hotel);
         poblarServicios(hotel);
+        if (hotel.remote) cargarServiciosAdicionales(hotel.id);
         poblarAtracciones(hotel);
 
         findViewById(R.id.btn_ver_habitaciones).setOnClickListener(v -> {
@@ -102,6 +107,26 @@ public class DetalleHotelActivity extends AppCompatActivity {
         for (int i = 0; i < hotel.services.length; i++) {
             chipGroup.addView(createServiceChip(hotel.services[i], SERVICE_ICONS[i % SERVICE_ICONS.length]));
         }
+    }
+
+    private void cargarServiciosAdicionales(int hotelId) {
+        LinearLayout section = findViewById(R.id.additional_services);
+        LinearLayout rows = findViewById(R.id.additional_services_rows);
+        ClientLocalTasks.run(this, this, () -> HotelCatalogRepository.serviciosDisponibles(hotelId), services -> {
+            if (services.isEmpty()) return;
+            LayoutInflater inflater = LayoutInflater.from(this);
+            for (Servicio service : services) {
+                View row = inflater.inflate(R.layout.item_cliente_servicio_hotel, rows, false);
+                ((TextView) row.findViewById(R.id.tv_servicio_catalogo_nombre)).setText(service.nombre);
+                if (service.fotoUrl != null) {
+                    ImageView photo = row.findViewById(R.id.iv_servicio_catalogo_foto);
+                    photo.setVisibility(View.VISIBLE);
+                    HotelImageLoader.show(photo, service.fotoUrl);
+                }
+                rows.addView(row);
+            }
+            section.setVisibility(View.VISIBLE);
+        });
     }
 
     private Chip createServiceChip(String label, int iconRes) {

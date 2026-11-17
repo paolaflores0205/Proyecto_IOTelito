@@ -15,6 +15,36 @@ import com.google.android.material.textfield.TextInputLayout;
 /** El contenedor de la aplicación reserva el IME; aquí se mantiene visible el campo y su etiqueta. */
 public final class FormKeyboard {
     private FormKeyboard() { }
+    /** También admite NestedScrollView y campos multilínea sin cambiar su configuración. */
+    public static void keepFocusedFieldVisible(Activity activity, View root) {
+        Runnable reveal = () -> {
+            WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(root);
+            View focused = activity.getCurrentFocus();
+            if (insets == null || !insets.isVisible(WindowInsetsCompat.Type.ime())
+                    || !(focused instanceof EditText) || !focused.isShown()) return;
+            int margin = Math.round(24 * root.getResources().getDisplayMetrics().density);
+            int viewportHeight = root.getHeight() - root.getPaddingTop() - root.getPaddingBottom();
+            View target = focused;
+            ViewParent parent = focused.getParent();
+            while (parent instanceof View && parent != root) {
+                if (parent instanceof TextInputLayout) {
+                    if (((View) parent).getHeight() + 2 * margin < viewportHeight) target = (View) parent;
+                    break;
+                }
+                parent = parent.getParent();
+            }
+            Rect rectangle = new Rect();
+            if (target == focused) focused.getFocusedRect(rectangle);
+            else rectangle.set(0, 0, target.getWidth(), target.getHeight());
+            rectangle.top -= margin;
+            rectangle.bottom += margin;
+            target.requestRectangleOnScreen(rectangle, false);
+        };
+        // El contenedor mantiene su tamaño y cambia su padding al recibir el IME;
+        // observar el árbol también detecta la reducción de sus hijos desplazables.
+        root.getViewTreeObserver().addOnGlobalLayoutListener(() -> root.post(reveal));
+        root.getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> root.post(reveal));
+    }
     public static void attach(Activity activity, ScrollView scroll, EditText... fields) {
         Runnable reveal = () -> {
             View focused = activity.getCurrentFocus();

@@ -221,6 +221,36 @@ final class FirebaseReservaStore {
                                                        List<OpcionHabitaciones> opciones) {
         String uid = requireUid();
         if (!entrada.isBefore(salida)) throw new IllegalArgumentException("Revisa las fechas de tu búsqueda.");
+        Map<String, DocumentSnapshot> previousBookings = new HashMap<>();
+        for (LocalDate date = entrada; date.isBefore(salida); date = date.plusDays(1)) {
+            try {
+                DocumentSnapshot lock = Tasks.await(DB.collection("clientNights").document(uid + "_" + date)
+                        .get(com.google.firebase.firestore.Source.SERVER));
+                if (!uid.equals(requireUid())) throw new IllegalStateException("La sesión cambió. Vuelve a buscar.");
+                if (!lock.exists()) continue;
+                if (!uid.equals(lock.getString("clientUid")))
+                    throw new IllegalStateException("No se pudo verificar la disponibilidad de tu cuenta.");
+                String previousId = lock.getString("reservationId");
+                if (previousId == null || previousId.isEmpty())
+                    throw new IllegalArgumentException("Una reserva anterior necesita revisión del hotel.");
+                DocumentSnapshot previous = previousBookings.get(previousId);
+                if (previous == null) {
+                    previous = Tasks.await(DB.collection("reservations").document(previousId)
+                            .get(com.google.firebase.firestore.Source.SERVER));
+                    previousBookings.put(previousId, previous);
+                }
+                if (!uid.equals(requireUid())) throw new IllegalStateException("La sesión cambió. Vuelve a buscar.");
+                if (!previous.exists()) continue;
+                if (!uid.equals(previous.getString("clientUid")))
+                    throw new IllegalStateException("El bloqueo no corresponde a tu cuenta.");
+                if (ReservationNightPolicy.bloquea(previous.getString("estado"),
+                        LocalDate.parse(previous.getString("fechaEntrada")),
+                        LocalDate.parse(previous.getString("fechaSalida")), date))
+                    throw new IllegalArgumentException("Ya tienes una reserva que se cruza con estas fechas. Elige otro período, aunque la habitación esté libre.");
+            } catch (ExecutionException | InterruptedException error) {
+                throw fallo(error);
+            }
+        }
         Set<String> keys = new java.util.LinkedHashSet<>();
         for (OpcionHabitaciones opcion : opciones) for (Habitacion room : opcion.habitaciones())
             for (LocalDate date = entrada; date.isBefore(salida); date = date.plusDays(1))

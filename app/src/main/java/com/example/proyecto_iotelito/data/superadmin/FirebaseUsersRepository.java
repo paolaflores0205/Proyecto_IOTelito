@@ -43,8 +43,8 @@ public final class FirebaseUsersRepository {
                                             "No se pudieron cargar los usuarios. Revisa tu conexión o vuelve a iniciar sesión.")); return;
                                 }
                                 if (snapshot.getMetadata().isFromCache()) {
-                                    setValue(new State(Collections.emptyList(), false,
-                                            "Conectando para actualizar los usuarios…")); return;
+                                    State previous = getValue();
+                                    setValue(new State(previous == null ? Collections.emptyList() : previous.users, true, null)); return;
                                 }
                                 List<AdminUser> users = new ArrayList<>();
                                 int invalid = 0;

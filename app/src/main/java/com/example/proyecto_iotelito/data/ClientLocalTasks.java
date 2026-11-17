@@ -20,6 +20,10 @@ public final class ClientLocalTasks {
     }
     public static <T> void run(Context context, LifecycleOwner owner, Callable<T> task,
                                Consumer<T> success, Runnable failed) {
+        runWithError(context, owner, task, success, error -> failed.run());
+    }
+    public static <T> void runWithError(Context context, LifecycleOwner owner, Callable<T> task,
+                                       Consumer<T> success, Consumer<Exception> failed) {
         Context app = context.getApplicationContext();
         MutableLiveData<Result<T>> result = new MutableLiveData<>();
         result.observe(owner, value -> {
@@ -29,7 +33,7 @@ public final class ClientLocalTasks {
                 Log.e("ClientLocalStorage", "No se completó la operación local", value.error);
                 Toast.makeText(app, value.error instanceof IllegalArgumentException
                         ? value.error.getMessage() : "No se pudo cargar o guardar. Intenta nuevamente.", Toast.LENGTH_LONG).show();
-                failed.run();
+                failed.accept(value.error);
             }
         });
         IO.execute(() -> {

@@ -73,3 +73,75 @@ test('unknown route never authorizes', async () => {
   const { handler, calls } = setup(); assert.equal((await handler(event('/other'))).statusCode, 404);
   assert.equal(calls.length, 0);
 });
+
+// Fotos de hotel: superadmin al catálogo, admin solo a su hotel asignado, lectura para cuentas activas.
+const admin = { uid: 'admin1', active: true, role: 'HOTEL_ADMIN', hotelId: 7 };
+const assigned = { id: 7, active: true, administratorUid: 'admin1' };
+function hotelSetup(user, current = assigned) {
+  return setup({ verify: async () => user.uid, profile: async () => user, hotel: async () => current });
+}
+const hotelUpload = (extra = {}) => event('/hotel-photos/upload-url', { contentType: 'image/jpeg', sizeBytes: 500, ...extra });
+test('superadmin uploads hotel photos to the catalog folder', async () => {
+  const { handler, calls } = hotelSetup({ uid: 'sa1', active: true, role: 'SUPERADMIN' });
+  const result = await handler(hotelUpload({ hotelId: 7 }));
+  assert.equal(result.statusCode, 200);
+  assert.equal(JSON.parse(result.body).reference, `s3://photos/hotelPhotos/catalog/${id}.jpg`);
+  assert.deepEqual(calls, [['photos', `hotelPhotos/catalog/${id}.jpg`]]);
+});
+test('assigned hotel admin uploads only to own hotel folder', async () => {
+  const { handler, calls } = hotelSetup(admin);
+  const result = await handler(hotelUpload({ hotelId: 7, key: 'hotelPhotos/catalog/x.jpg' }));
+  assert.equal(result.statusCode, 200);
+  assert.equal(JSON.parse(result.body).reference, `s3://photos/hotelPhotos/7/${id}.jpg`);
+  assert.deepEqual(calls, [['photos', `hotelPhotos/7/${id}.jpg`]]);
+});
+for (const [name, user, current, body] of [
+  ['other hotel id', admin, assigned, { hotelId: 8 }],
+  ['missing hotel id', admin, assigned, {}],
+  ['string hotel id', admin, assigned, { hotelId: '7' }],
+  ['hotel assigned to someone else', admin, { ...assigned, administratorUid: 'admin2' }, { hotelId: 7 }],
+  ['inactive hotel', admin, { ...assigned, active: false }, { hotelId: 7 }],
+  ['client', { uid: 'client1', active: true, role: 'CLIENT' }, assigned, { hotelId: 7 }],
+  ['taxista', { uid: 't1', active: true, role: 'TAXISTA' }, assigned, { hotelId: 7 }],
+  ['inactive superadmin', { uid: 'sa1', active: false, role: 'SUPERADMIN' }, assigned, {}],
+]) {
+  test(`hotel upload rejects ${name}`, async () => {
+    const { handler, calls } = hotelSetup(user, current);
+    assert.equal((await handler(hotelUpload(body))).statusCode, 403); assert.equal(calls.length, 0);
+  });
+}
+test('hotel upload keeps JPEG and size limits', async () => {
+  const { handler, calls } = hotelSetup(admin);
+  assert.equal((await handler(hotelUpload({ hotelId: 7, contentType: 'image/png' }))).statusCode, 400);
+  assert.equal((await handler(hotelUpload({ hotelId: 7, sizeBytes: 2097152 }))).statusCode, 400);
+  assert.equal(calls.length, 0);
+});
+for (const role of ['CLIENT', 'TAXISTA', 'HOTEL_ADMIN', 'SUPERADMIN']) {
+  test(`active ${role} reads hotel photos`, async () => {
+    const { handler, calls } = hotelSetup({ uid: 'u1', active: true, role, hotelId: null });
+    for (const folder of ['catalog', '12']) {
+      const ref = `s3://photos/hotelPhotos/${folder}/${id}.jpg`;
+      assert.equal((await handler(event('/hotel-photos/read-url', { reference: ref }))).statusCode, 200);
+    }
+    assert.deepEqual(calls, [['photos', `hotelPhotos/catalog/${id}.jpg`], ['photos', `hotelPhotos/12/${id}.jpg`]]);
+  });
+}
+for (const bad of [`s3://photos/profilePhotos/client1/${id}.jpg`, `s3://other/hotelPhotos/catalog/${id}.jpg`,
+  `s3://photos/hotelPhotos/0/${id}.jpg`, `s3://photos/hotelPhotos/../${id}.jpg`, `s3://photos/hotelPhotos/7/x.jpg`,
+  `s3://photos/hotelPhotos/7/${id}.jpg/extra`, `s3://photosXhotelPhotos/7/${id}.jpg`]) {
+  test(`hotel read rejects ${bad}`, async () => {
+    const { handler, calls } = hotelSetup(admin);
+    assert.equal((await handler(event('/hotel-photos/read-url', { reference: bad }))).statusCode, 403);
+    assert.equal(calls.length, 0);
+  });
+}
+test('inactive account cannot read hotel photos', async () => {
+  const { handler, calls } = hotelSetup({ ...admin, active: false });
+  const ref = `s3://photos/hotelPhotos/7/${id}.jpg`;
+  assert.equal((await handler(event('/hotel-photos/read-url', { reference: ref }))).statusCode, 403);
+  assert.equal(calls.length, 0);
+});
+test('profile routes still require CLIENT', async () => {
+  const { handler, calls } = hotelSetup({ uid: 'sa1', active: true, role: 'SUPERADMIN' });
+  assert.equal((await handler(event())).statusCode, 403); assert.equal(calls.length, 0);
+});

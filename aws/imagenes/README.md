@@ -11,9 +11,29 @@ La app Android ya está adaptada localmente a esta API; requiere publicar manual
 revisado de Firestore para aceptar referencias S3 propias. Ver PERFIL_CLIENTE_AWS.md en la raíz
 del proyecto. No anunciar que las fotos funcionan antes de la prueba real desde la app.
 
-El mismo bucket puede alojar hotelPhotos más adelante, pero esta API solo permite profilePhotos
-de clientes activos. Las rutas de hoteles no están implementadas y no se conceden permisos a
-administradores de hotel mediante estas rutas.
+El mismo bucket aloja también las fotos de hotel (`hotelPhotos/`), que reemplazan a Firebase Storage:
+- `hotelPhotos/catalog/{uuid}.jpg`: fotos que sube un SUPERADMIN activo al crear o editar hoteles.
+- `hotelPhotos/{hotelId}/{uuid}.jpg`: galería y fotos de servicios que sube el HOTEL_ADMIN activo
+  asignado a ese hotel (users.hotelId y hotels/{id}.administratorUid coinciden y el hotel está activo).
+- Cualquier cuenta activa (cliente, taxista, admin o superadmin) puede pedir un enlace de lectura
+  temporal, porque el catálogo es visible para todos los roles.
+Las rutas de perfil siguen permitiendo solo a clientes y solo su propia carpeta.
+
+### Actualizar la Lambda para fotos de hotel
+
+1. Subir el nuevo `iot-telito-imagenes-api.zip` (Lambda > Código > Cargar desde > Archivo .zip).
+   Se genera con `npm ci --ignore-scripts` y comprimiendo index.mjs, package.json,
+   package-lock.json y node_modules en la raíz del ZIP (el ZIP está en .gitignore).
+   En Windows usar `tar.exe -a -c -f iot-telito-imagenes-api.zip index.mjs package.json package-lock.json node_modules`.
+   No usar `Compress-Archive` de Windows PowerShell: guarda las rutas con `\` y Lambda (Linux) no encuentra los módulos.
+2. En API Gateway, en la misma HTTP API, agregar las rutas `POST /hotel-photos/upload-url` y
+   `POST /hotel-photos/read-url` con la misma integración Lambda. Las rutas de perfil no cambian.
+3. Prueba sin sesión de `POST /hotel-photos/upload-url`: debe responder 401.
+4. Probar desde la app: superadmin edita fotos de un hotel; admin agrega una foto a la galería y a un
+   servicio; cliente ve las fotos en el catálogo; un admin de otro hotel recibe 403.
+Estado (16/11/2026): pasos 1 a 3 hechos con AWS CLI. La versión publicada 1 de la Lambda guarda el código
+anterior (solo perfil) por si hay que volver atrás. Falta el paso 4.
+No hay borrado: una subida que no llega a guardarse en Firestore deja un objeto privado sin referencia.
 
 ## Despliegue manual
 
@@ -61,6 +81,12 @@ Esperado: statusCode 401. Es el rechazo correcto por falta de sesión, no un fal
 - `POST /profile-photos/read-url`, mismo Bearer, JSON `{ "reference": "s3://..." }`.
   Solo acepta ruta propia con UUID; comprueba existencia, tamaño y Content-Type del objeto.
   Devuelve URL GET de 120 segundos. No persistir URL firmada en Firestore ni registros.
+- `POST /hotel-photos/upload-url`, mismo Bearer, JSON `{ "contentType": "image/jpeg", "sizeBytes": 12345,
+  "hotelId": 7 }`. `hotelId` es obligatorio para HOTEL_ADMIN y se ignora para SUPERADMIN (catálogo).
+  Devuelve la misma forma que la subida de perfil, con reference `s3://bucket/hotelPhotos/.../uuid.jpg`.
+- `POST /hotel-photos/read-url`, mismo Bearer, JSON `{ "reference": "s3://bucket/hotelPhotos/..." }`.
+  Solo acepta `hotelPhotos/catalog/` o `hotelPhotos/{número}/` con nombre UUID. URL GET de 120 segundos;
+  la app la reutiliza en memoria hasta 90 segundos y no la guarda.
 - No hay borrado ni sobrescritura: una carga fallida al guardar perfil puede dejar un objeto privado
   sin referencia. Definir limpieza posterior. Reemplazar foto no elimina el archivo anterior.
 

@@ -37,16 +37,48 @@ export async function verifyFirebaseToken(token, project) {
   return payload.sub;
 }
 
-async function loadProfile(uid, token, project) {
+const ROLES = ['CLIENT', 'HOTEL_ADMIN', 'TAXISTA', 'SUPERADMIN'];
+const UUID_JPG = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.jpg';
+
+function integer(value) {
+  const parsed = value?.integerValue === undefined ? NaN : Number(value.integerValue);
+  return Number.isSafeInteger(parsed) ? parsed : null;
+}
+
+async function firestoreDocument(path, token, project, denied) {
   const response = await fetch(
-    `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents/users/${encodeURIComponent(uid)}`,
+    `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents/${path}`,
     { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(5000) });
   if (response.status === 401) throw new HttpError(401, 'Tu sesión ha vencido.');
-  if ([403, 404].includes(response.status)) throw new HttpError(403, 'No se pudo acceder a tu perfil.');
-  if (!response.ok) throw new HttpError(503, 'No se pudo consultar el perfil. Reintenta.');
+  if ([403, 404].includes(response.status)) throw new HttpError(403, denied);
+  if (!response.ok) throw new HttpError(503, 'No se pudo consultar Firestore. Reintenta.');
   const { fields = {} } = await response.json();
+  return fields;
+}
+
+async function loadProfile(uid, token, project) {
+  const fields = await firestoreDocument(`users/${encodeURIComponent(uid)}`, token, project,
+    'No se pudo acceder a tu perfil.');
   return { uid: fields.uid?.stringValue, active: fields.active?.booleanValue,
-    role: fields.role?.stringValue };
+    role: fields.role?.stringValue, hotelId: integer(fields.hotelId) };
+}
+
+async function loadHotel(hotelId, token, project) {
+  const fields = await firestoreDocument(`hotels/${hotelId}`, token, project,
+    'No se pudo acceder al hotel.');
+  return { id: integer(fields.id), active: fields.active?.booleanValue,
+    administratorUid: fields.administratorUid?.stringValue };
+}
+
+// Superadmin sube al catálogo; el administrador solo a la carpeta del hotel que tiene asignado.
+async function hotelPhotoFolder(user, uid, body, token, project, hotel) {
+  if (user.role === 'SUPERADMIN') return 'catalog';
+  if (user.role !== 'HOTEL_ADMIN' || !Number.isSafeInteger(body.hotelId) || body.hotelId < 1
+      || user.hotelId !== body.hotelId) throw new HttpError(403, 'No tienes permiso para subir fotos de este hotel.');
+  const current = await hotel(body.hotelId, token, project);
+  if (current.id !== body.hotelId || current.active !== true || current.administratorUid !== uid)
+    throw new HttpError(403, 'No tienes permiso para subir fotos de este hotel.');
+  return String(body.hotelId);
 }
 
 async function signUpload(bucket, key) {
@@ -71,8 +103,11 @@ async function signRead(bucket, key) {
     { expiresIn: EXPIRY_SECONDS });
 }
 
+const ROUTES = ['/profile-photos/upload-url', '/profile-photos/read-url',
+  '/hotel-photos/upload-url', '/hotel-photos/read-url'];
+
 export function createHandler({ bucket, project, verify = verifyFirebaseToken,
-  profile = loadProfile, upload = signUpload, read = signRead, uuid = randomUUID }) {
+  profile = loadProfile, hotel = loadHotel, upload = signUpload, read = signRead, uuid = randomUUID }) {
   return async (event = {}) => {
     const reply = (statusCode, body) => ({ statusCode,
       headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
@@ -82,7 +117,7 @@ export function createHandler({ bucket, project, verify = verifyFirebaseToken,
       const method = event.requestContext?.http?.method ?? event.httpMethod;
       const path = event.rawPath ?? event.path;
       if (method === 'GET' && path === '/health') return reply(200, { ok: true });
-      if (method !== 'POST' || !['/profile-photos/upload-url', '/profile-photos/read-url'].includes(path))
+      if (method !== 'POST' || !ROUTES.includes(path))
         throw new HttpError(404, 'Ruta no encontrada.');
       const authorization = Object.entries(event.headers ?? {})
         .find(([name]) => name.toLowerCase() === 'authorization')?.[1];
@@ -91,19 +126,29 @@ export function createHandler({ bucket, project, verify = verifyFirebaseToken,
       const token = authorization.slice(7);
       const uid = await verify(token, project);
       const user = await profile(uid, token, project);
-      if (user.uid !== uid || user.active !== true || user.role !== 'CLIENT')
-        throw new HttpError(403, 'El perfil cliente no está habilitado.');
+      const hotelRoute = path.startsWith('/hotel-photos/');
+      if (user.uid !== uid || user.active !== true
+          || (hotelRoute ? !ROLES.includes(user.role) : user.role !== 'CLIENT'))
+        throw new HttpError(403, hotelRoute ? 'Tu cuenta no está habilitada.' : 'El perfil cliente no está habilitado.');
       let body;
       try {
         if (typeof event.body !== 'string' || event.body.length > 8192) throw new Error();
         body = JSON.parse(event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString('utf8') : event.body);
         if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error();
       } catch { throw new HttpError(400, 'Solicitud JSON inválida.'); }
-      if (path === '/profile-photos/upload-url') {
+      if (path === '/hotel-photos/read-url') {
+        const pattern = new RegExp(`^s3://${bucket.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/(hotelPhotos/(?:catalog|[1-9][0-9]{0,9})/${UUID_JPG})$`);
+        const match = typeof body.reference === 'string' ? pattern.exec(body.reference) : null;
+        if (!match) throw new HttpError(403, 'Referencia de foto de hotel inválida.');
+        return reply(200, { url: await read(bucket, match[1]), expiresIn: EXPIRY_SECONDS });
+      }
+      if (path.endsWith('/upload-url')) {
         if (body.contentType !== 'image/jpeg' || !Number.isInteger(body.sizeBytes)
             || body.sizeBytes < 1 || body.sizeBytes > MAX_BYTES)
           throw new HttpError(400, 'Selecciona una imagen JPEG de menos de 2 MiB.');
-        const key = `profilePhotos/${uid}/${uuid()}.jpg`;
+        const key = hotelRoute
+          ? `hotelPhotos/${await hotelPhotoFolder(user, uid, body, token, project, hotel)}/${uuid()}.jpg`
+          : `profilePhotos/${uid}/${uuid()}.jpg`;
         const signed = await upload(bucket, key);
         return reply(200, { reference: `s3://${bucket}/${key}`, method: 'POST',
           url: signed.url, fields: signed.fields, expiresIn: EXPIRY_SECONDS, maxBytes: MAX_BYTES });

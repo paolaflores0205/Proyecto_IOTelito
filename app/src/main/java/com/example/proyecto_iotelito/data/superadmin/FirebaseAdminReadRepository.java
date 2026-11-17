@@ -5,7 +5,7 @@ import com.google.firebase.auth.*;
 import com.google.firebase.firestore.*;
 import com.example.proyecto_iotelito.model.Reserva;
 import com.example.proyecto_iotelito.model.superadmin.ActivityLog;
-import java.time.LocalDate;
+import com.example.proyecto_iotelito.model.superadmin.HotelCheckout;
 import java.util.*;
 
 /** Lecturas administrativas separadas de la consulta personal del cliente. */
@@ -33,7 +33,8 @@ public final class FirebaseAdminReadRepository {
                             setValue(new State<>(Collections.emptyList(), false, "No se pudo actualizar la información. Revisa tu conexión o vuelve a iniciar sesión.")); return;
                         }
                         if (snapshot.getMetadata().isFromCache()) {
-                            setValue(new State<>(Collections.emptyList(), true, null)); return;
+                            State<T> previous = getValue();
+                            setValue(new State<>(previous == null ? Collections.emptyList() : previous.rows, true, null)); return;
                         }
                         List<T> rows = new ArrayList<>(); int invalid = 0;
                         for (DocumentSnapshot doc : snapshot) {
@@ -52,16 +53,12 @@ public final class FirebaseAdminReadRepository {
         };
     }
     public LiveData<State<Reserva>> reservations() {
-        return observe(FirebaseFirestore.getInstance().collection("reservations"), doc -> {
-            int id = HotelFirestoreCodec.integer(doc.get("id"));
-            if (!String.valueOf(id).equals(doc.getId())) throw new IllegalArgumentException("ID inconsistente");
-            double total = ((Number) doc.get("precioTotal")).doubleValue();
-            LocalDate start = LocalDate.parse(doc.getString("fechaEntrada")), end = LocalDate.parse(doc.getString("fechaSalida"));
-            if (!Double.isFinite(total) || total < 0 || !start.isBefore(end)) throw new IllegalArgumentException("Reserva inválida");
-            return new Reserva(id, HotelFirestoreCodec.integer(doc.get("hotelId")), doc.getString("roomName"),
-                    doc.getString("roomNumber"), start, end, doc.getString("huespedes"), total,
-                    Reserva.Estado.desdeFirestore(doc.getString("estado")), doc.getString("codigo"));
-        });
+        return observe(FirebaseFirestore.getInstance().collection("reservations"),
+                doc -> AdminReportCodec.reservation(doc.getId(), doc.getData()));
+    }
+    public LiveData<State<HotelCheckout>> checkouts() {
+        return observe(FirebaseFirestore.getInstance().collection("hotelCheckouts"),
+                doc -> AdminReportCodec.checkout(doc.getId(), doc.getData(), doc.getDate("createdAt")));
     }
     public LiveData<State<ActivityLog>> logs() {
         return observe(FirebaseFirestore.getInstance().collection("logs").orderBy("createdAt", Query.Direction.DESCENDING).limit(200), doc -> {

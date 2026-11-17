@@ -35,6 +35,19 @@ public class Reserva implements Serializable {
     public final double precioTotal;
     public Estado estado;
     public final String codigo;
+    private int cantidadHabitaciones;
+
+    /** El inventario remoto prevalece sobre los códigos de presentación. */
+    public void setCantidadHabitaciones(int cantidad) {
+        if (cantidad < 1) throw new IllegalArgumentException("La reserva requiere habitaciones.");
+        cantidadHabitaciones = cantidad;
+    }
+
+    public int cantidadHabitaciones() {
+        if (cantidadHabitaciones > 0) return cantidadHabitaciones;
+        if (roomNumber == null || roomNumber.trim().isEmpty()) return 1;
+        return Math.max(1, roomNumber.split(",").length);
+    }
     public com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta;
     public Integer valoracion;
     public String observaciones;

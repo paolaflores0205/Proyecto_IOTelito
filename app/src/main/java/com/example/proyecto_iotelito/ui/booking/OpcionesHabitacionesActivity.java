@@ -77,12 +77,13 @@ public class OpcionesHabitacionesActivity extends AppCompatActivity {
                 estado.setVisibility(View.VISIBLE);
                 estado.setOnClickListener(null);
                 findViewById(R.id.rv_opciones_habitaciones).setVisibility(View.GONE);
-                com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this,
+                com.example.proyecto_iotelito.data.ClientLocalTasks.runWithError(this, this,
                         () -> com.example.proyecto_iotelito.data.ReservaRepository.getInstance(this)
                                 .opcionesDisponibles(hotel, seleccion.fechaEntrada(),
                                         seleccion.fechaSalida(), seleccion.adultos, seleccion.ninos),
-                        mostrarOpciones, () -> {
-                            estado.setText(R.string.error_disponibilidad_reintentar);
+                        mostrarOpciones, error -> {
+                            estado.setText(error instanceof IllegalArgumentException
+                                    ? error.getMessage() : getString(R.string.error_disponibilidad_reintentar));
                             estado.setOnClickListener(v -> recreate());
                         });
             };

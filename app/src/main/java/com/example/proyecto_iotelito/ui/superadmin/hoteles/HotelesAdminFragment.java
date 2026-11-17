@@ -58,16 +58,13 @@ public class HotelesAdminFragment extends Fragment {
         }
         binding.fabAddHotel.setOnClickListener(v -> startActivity(new Intent(requireContext(), FormularioHotelActivity.class)));
         SuperadminViewModel model = new ViewModelProvider(this).get(SuperadminViewModel.class);
-        model.hotels().observe(getViewLifecycleOwner(), rows -> {
-            hotels = rows;
-            updateSummary();
-            renderHotels();
-        });
         model.hotelsState().observe(getViewLifecycleOwner(), state -> {
+            hotels = state.hotels;
             loading = state.loading; syncError = state.error;
             long active = state.hotels.stream().filter(hotel -> hotel.active).count();
             binding.tvHotelsSyncState.setText(state.loading ? "Cargando hoteles…"
                     : state.error == null ? active + " activos · " + (state.hotels.size() - active) + " inactivos" : state.error);
+            updateSummary();
             renderHotels();
         });
         renderHotels();
@@ -78,8 +75,9 @@ public class HotelesAdminFragment extends Fragment {
         for (ManagedHotel hotel : hotels) {
             if (!hotel.hasAdministrator()) unassigned++;
         }
-        binding.tvHotelsTotal.setText(String.valueOf(hotels.size()));
-        binding.tvHotelsUnassigned.setText(String.valueOf(unassigned));
+        boolean waiting = hotels.isEmpty() && (loading || syncError != null);
+        binding.tvHotelsTotal.setText(waiting ? "—" : String.valueOf(hotels.size()));
+        binding.tvHotelsUnassigned.setText(waiting ? "—" : String.valueOf(unassigned));
     }
 
     @Override

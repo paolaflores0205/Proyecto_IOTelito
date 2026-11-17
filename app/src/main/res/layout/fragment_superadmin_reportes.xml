@@ -38,6 +38,19 @@
     <TextView android:id="@+id/tv_income_note" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/io_text_secondary" android:textSize="11sp"/>
    </LinearLayout></com.google.android.material.card.MaterialCardView>
   </LinearLayout>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="12dp">
+   <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="3dp"><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="114dp" android:padding="12dp" android:orientation="vertical">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Cobros de checkout" android:textColor="@color/io_text_secondary" android:textSize="12sp"/>
+    <TextView android:id="@+id/tv_checkout_income" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="—" android:textColor="@color/io_navy" android:textSize="23sp" android:textStyle="bold"/>
+    <TextView android:id="@+id/tv_checkout_count" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Pagos simulados registrados" android:textColor="@color/io_text_secondary" android:textSize="11sp"/>
+   </LinearLayout></com.google.android.material.card.MaterialCardView>
+   <com.google.android.material.card.MaterialCardView style="@style/Widget.IoTelito.Card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="3dp"><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="114dp" android:padding="12dp" android:orientation="vertical">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Extras de checkout" android:textColor="@color/io_text_secondary" android:textSize="12sp"/>
+    <TextView android:id="@+id/tv_checkout_extras" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="—" android:textColor="@color/io_navy" android:textSize="23sp" android:textStyle="bold"/>
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Incluidos en el cobro total" android:textColor="@color/io_text_secondary" android:textSize="11sp"/>
+   </LinearLayout></com.google.android.material.card.MaterialCardView>
+  </LinearLayout>
+  <TextView android:id="@+id/tv_checkout_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Consultando comprobantes…" android:textColor="@color/io_text_secondary" android:textSize="12sp"/>
   <TextView android:id="@+id/tv_chart_title" style="@style/TextAppearance.IoTelito.SectionTitle" android:layout_marginTop="20dp" android:text="Reservas del mes"/>
   <TextView android:id="@+id/tv_report_empty" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Sin reservas para este filtro y período." android:textColor="@color/io_text_secondary"/>
   <HorizontalScrollView android:layout_width="match_parent" android:layout_height="250dp" android:fillViewport="true"><com.example.proyecto_iotelito.ui.superadmin.reportes.WeeklyBookingsChartView android:id="@+id/weekly_bookings_chart" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/io_surface" android:padding="12dp"/></HorizontalScrollView>

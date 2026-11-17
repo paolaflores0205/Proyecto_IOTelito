@@ -49,4 +49,11 @@ public class HotelAdminFirestoreCodecTest {
         Servicio decoded = HotelAdminFirestoreCodec.service("4", 17, HotelAdminFirestoreCodec.service(service), 0);
         assertEquals("persona", decoded.unidad); assertFalse(decoded.activo); assertEquals(42.5, decoded.precio, 0.0);
     }
+    @Test public void serviceAcceptsOnlyS3PhotosOfItsOwnHotel() {
+        String own = "s3://iot-telito-imagenes/hotelPhotos/17/12345678-1234-1234-1234-123456789abc.jpg";
+        Servicio service = new Servicio(4, 17, "Spa", "Masajes", 80, "sesión", 0, true, own);
+        assertEquals(own, HotelAdminFirestoreCodec.service("4", 17, HotelAdminFirestoreCodec.service(service), 0).fotoUrl);
+        Servicio foreign = new Servicio(4, 17, "Spa", "Masajes", 80, "sesión", 0, true, own.replace("/17/", "/18/"));
+        assertThrows(IllegalArgumentException.class, () -> HotelAdminFirestoreCodec.service(foreign));
+    }
 }

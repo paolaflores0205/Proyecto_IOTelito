@@ -34,5 +34,25 @@ const { call, expect, fields, write, commit, runAuthRules, countChecks } = requi
   await expect(await commit([finish()], 'driver'), false, 'Finalización exige liberar bloqueo');
   await expect(await commit([finish(), lock('')], 'driver'), true, 'Finaliza y libera conductor juntos');
   await expect(await call('DELETE', '/taxiRequests/1001', undefined, 'driver'), false, 'No borra servicio');
+  // Formato con aeropuerto según la ciudad del hotel (el formato anterior sigue aceptado arriba).
+  const hotelDoc = { id: 1, name: 'Hotel de prueba', active: true, hasInventory: true, city: 'Lima', address: 'Av. prueba' };
+  assert.ok((await call('PATCH', '/hotels/1', { fields: fields(hotelDoc) }, 'owner')).ok);
+  assert.ok((await call('PATCH', '/reservations/1002', { fields: fields({ id: 1002, clientUid: 'client', hotelId: 1 }) }, 'owner')).ok);
+  const lima = { hotelId: 1, hotelCity: 'Lima', airportCode: 'LIM', airportName: 'Aeropuerto Internacional Jorge Chávez',
+    airportCity: 'Callao', destino: 'Aeropuerto Internacional Jorge Chávez (LIM)' };
+  const airport = extra => write('taxiRequests/1002', { ...request, id: 1002, reserva: 1002, hotel: hotelDoc.name,
+    origen: hotelDoc.address, ...lima, ...extra }, null, ['creado']);
+  await expect(await commit([airport({ airportCode: 'CUZ', airportName: 'Aeropuerto Internacional Alejandro Velasco Astete',
+    airportCity: 'Cusco', destino: 'Aeropuerto Internacional Alejandro Velasco Astete (CUZ)' })], 'client'), false,
+    'Aeropuerto debe corresponder a la ciudad del hotel');
+  await expect(await commit([airport({ airportName: 'Otro aeropuerto', destino: 'Otro aeropuerto (LIM)' })], 'client'), false,
+    'Nombre de aeropuerto debe ser el oficial');
+  await expect(await commit([airport({ destino: 'Aeropuerto Jorge Chávez' })], 'client'), false, 'Destino debe coincidir con el aeropuerto');
+  await expect(await commit([airport({ hotel: 'Otro hotel' })], 'client'), false, 'Hotel debe coincidir con la reserva');
+  await expect(await commit([airport({ hotelCity: 'Cusco' })], 'client'), false, 'Ciudad debe coincidir con el hotel');
+  await expect(await commit([write('taxiRequests/1002', { ...request, id: 1002, reserva: 1002, hotelId: 1 }, null, ['creado'])], 'client'),
+    false, 'Formato nuevo exige todos los campos del aeropuerto');
+  await expect(await commit([airport({})], 'other'), false, 'Formato nuevo exige propietario de reserva');
+  await expect(await commit([airport({})], 'client'), true, 'Cliente solicita taxi al aeropuerto de su ciudad');
   console.log(`Compatibilidad taxi: ${countChecks() - start} comprobaciones correctas, solo emulador.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

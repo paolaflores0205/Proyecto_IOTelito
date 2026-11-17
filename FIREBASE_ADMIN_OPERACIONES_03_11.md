@@ -23,7 +23,7 @@ Las pantallas de ejemplo siguen disponibles únicamente para los fixtures locale
 
 ## Reglas de Firestore
 
-Las reglas de checkout y chat mantienen el contrato publicado en `iot-telito` consultado el 16 de noviembre. Limitan las operaciones al hotel asignado, exigen la solicitud del huésped antes del cierre y conservan los mensajes como historial después de finalizar una reserva. Las ampliaciones para fotos se probaron localmente y están pendientes de publicación.
+Las reglas de checkout y chat mantienen el contrato publicado en `iot-telito` consultado el 16 de noviembre. Limitan las operaciones al hotel asignado, exigen la solicitud del huésped antes del cierre y conservan los mensajes como historial después de finalizar una reserva. Las reglas publicadas también aceptan las referencias de fotos de Amazon S3.
 
 ## Prueba manual en el proyecto real
 
@@ -56,15 +56,15 @@ Queda por ejecutar el recorrido manual con cuentas y reservas de prueba del equi
 
 - La portada de admin muestra las solicitudes `EN_CHECKOUT` de su hotel y abre el checkout correspondiente. Android publica un aviso por solicitud y lo retira al sincronizar el cierre. El cliente ve el aviso con el importe simulado en su bandeja y puede abrir la reserva.
 - Los avisos del sistema requieren el permiso de Android. Llegan al sincronizar la app con la sesión activa y se deduplican por cuenta y reserva en el dispositivo. La tarjeta de admin y la bandeja del cliente siguen disponibles con el permiso denegado.
-- Desde Hotel → Datos del hotel → Fotos, admin puede agregar, reemplazar y quitar fotos, con un mínimo de cuatro y un máximo de ocho. Desde el formulario de servicios puede seleccionar o reemplazar una imagen. La app reduce las imágenes a JPEG localmente, las sube a Storage y guarda las rutas de los archivos en Firestore.
-- Las fotos nuevas se guardan en `hotelAdminPhotos/{hotelId}/{uid}/{foto}.jpg`. Las reglas comprueban la asignación por ambos lados. El cliente puede leer las fotos del catálogo con una cuenta activa. Eliminar una foto de la galería retira su referencia del catálogo.
+- Desde Hotel → Datos del hotel → Fotos, admin puede agregar, reemplazar y quitar fotos, con un mínimo de cuatro y un máximo de ocho. Desde el formulario de servicios puede seleccionar o reemplazar una imagen. La app reduce las imágenes a JPEG, las sube al bucket privado de Amazon S3 y guarda las referencias en Firestore.
+- Las fotos nuevas se guardan en `s3://iot-telito-imagenes/hotelPhotos/{hotelId}/{uuid}.jpg`. La API comprueba la asignación del administrador y emite enlaces temporales. El cliente puede leer las fotos del catálogo con una cuenta activa. Eliminar una foto de la galería retira su referencia del catálogo.
 
 ### Cómo probarlo
 
 1. Con el cliente, envía una solicitud de salida con estrellas y comentario. Con admin, abre la tarjeta de alertas del panel, verifica el mismo código de reserva y registra el cierre.
 2. Al volver al panel, la alerta desaparece. Con el huésped, abre Perfil → Notificaciones y comprueba el aviso con el importe. Abre la reserva desde el aviso y comprueba que quede marcado como leído.
-3. Abre la galería del hotel y agrega o reemplaza una foto. Guarda y vuelve a entrar para comprobar que permanece. Haz lo mismo desde un servicio. La subida al Firebase compartido requiere que el equipo habilite su bucket y publique las reglas de fotos.
+3. Abre la galería del hotel y agrega o reemplaza una foto. Guarda y vuelve a entrar para comprobar que permanece. Haz lo mismo desde un servicio. La prueba de subida usa la API desplegada de Amazon S3 y una cuenta Firebase activa. [Configuración de la API](aws/imagenes/README.md)
 
-Para repetir la prueba aislada, inicia Auth, Firestore y Storage con `firebase emulators:start --only auth,firestore,storage --project demo-iotelito-auth --config firebase.local.json`. En el AVD desechable, asigna los puertos `9099`, `8180` y `9199` con `adb reverse` y concede el permiso de notificaciones. Ejecuta `HotelOperationsEmulatorTest` con los argumentos `hotelEmulator=true`, `hotelStorage=true` y `hotelNotifications=true`, usando emuladores con datos vacíos.
+Para repetir la prueba aislada, inicia Auth y Firestore con `firebase emulators:start --only auth,firestore --project demo-iotelito-auth --config firebase.local.json`. En el AVD desechable, asigna los puertos `9099` y `8180` con `adb reverse` y concede el permiso de notificaciones. Ejecuta `HotelOperationsEmulatorTest` con `hotelEmulator=true` y `hotelNotifications=true`, usando emuladores con datos vacíos.
 
-La prueba Android aprobó la alerta del panel, ambas notificaciones de Android, el cierre sin duplicados, el aviso en la bandeja, la descarga de una foto guardada, el alta de un servicio con imagen y el rechazo de Storage para otro hotel. Las reglas Firestore también pasaron 39 comprobaciones de admin más su caso concurrente.
+La prueba aislada comprueba las alertas, el cierre sin duplicados, la bandeja y el guardado de referencias S3 de galería y servicio. También comprueba que Firestore rechaza referencias de otro hotel. La subida y descarga de imágenes se comprueban con el recorrido de la app en AWS real.

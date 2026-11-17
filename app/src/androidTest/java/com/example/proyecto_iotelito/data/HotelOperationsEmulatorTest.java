@@ -18,16 +18,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.*;
 import com.google.firebase.auth.*;
 import com.google.firebase.firestore.*;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
 import org.json.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -93,56 +89,70 @@ public class HotelOperationsEmulatorTest {
         return false;
     }
 
-    private void verifyPhotoUploads(FirebaseStorage storage) throws Exception {
+    private void verifyPhotoReferences() throws Exception {
         List<String> draft = new ArrayList<>();
-        List<File> temporary = new ArrayList<>();
-        android.graphics.Bitmap image = android.graphics.Bitmap.createBitmap(8, 8, android.graphics.Bitmap.Config.ARGB_8888);
-        image.eraseColor(android.graphics.Color.BLUE);
-        try {
-            for (int i = 0; i < 4; i++) {
-                File file = File.createTempFile("qa-photo-", ".jpg", context.getCacheDir());
-                temporary.add(file);
-                try (FileOutputStream output = new FileOutputStream(file)) {
-                    assertTrue(image.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, output));
-                }
-                draft.add(android.net.Uri.fromFile(file).toString());
-            }
-            FirebaseHotelAdminRepository repository = new FirebaseHotelAdminRepository(context);
-            AtomicReference<String> result = new AtomicReference<>("PENDIENTE");
-            ins.runOnMainSync(() -> repository.savePhotos(draft, java.util.Collections.emptyList(), result::set));
-            waitFor(() -> !"PENDIENTE".equals(result.get()));
-            assertNull(result.get(), result.get());
-            @SuppressWarnings("unchecked")
-            List<String> gallery = (List<String>) Tasks.await(db.document("hotels/1").get(Source.SERVER),
-                    20, TimeUnit.SECONDS).get("photos");
-            assertEquals(4, gallery.size());
-            byte[] jpeg = Tasks.await(storage.getReferenceFromUrl(gallery.get(0)).getBytes(100_000),
-                    20, TimeUnit.SECONDS);
-            assertTrue(jpeg.length > 0);
-            try {
-                Tasks.await(storage.getReference().child("hotelAdminPhotos/2/" + adminUid + "/alien.jpg")
-                        .putBytes(jpeg, new StorageMetadata.Builder().setContentType("image/jpeg").build()),
-                        20, TimeUnit.SECONDS);
-                fail("No debe subir archivos de otro hotel");
-            } catch (ExecutionException denied) {
-                assertTrue(denied.getCause() instanceof com.google.firebase.storage.StorageException);
-                assertEquals(com.google.firebase.storage.StorageException.ERROR_NOT_AUTHORIZED,
-                        ((com.google.firebase.storage.StorageException) denied.getCause()).getErrorCode());
-            }
-            result.set("PENDIENTE");
-            com.example.proyecto_iotelito.model.hoteladmin.Servicio service =
-                    new com.example.proyecto_iotelito.model.hoteladmin.Servicio(801, 1, "Desayuno QA", "", 25,
-                            "servicio", R.drawable.superadmin_hotel_sol, true);
-            ins.runOnMainSync(() -> repository.saveServiceWithPhoto(service, true, draft.get(0), result::set));
-            waitFor(() -> !"PENDIENTE".equals(result.get()));
-            assertNull(result.get(), result.get());
-            DocumentSnapshot savedService = Tasks.await(db.document("hotels/1/services/801").get(Source.SERVER),
-                    20, TimeUnit.SECONDS);
-            assertNotNull(savedService.getString("fotoUrl"));
-        } finally {
-            image.recycle();
-            for (File file : temporary) file.delete();
+        for (int i = 1; i <= 4; i++) {
+            draft.add("s3://iot-telito-imagenes/hotelPhotos/1/0000000" + i + "-1234-1234-1234-123456789abc.jpg");
         }
+        FirebaseHotelAdminRepository repository = new FirebaseHotelAdminRepository(context);
+        AtomicReference<String> result = new AtomicReference<>("PENDIENTE");
+        ins.runOnMainSync(() -> repository.savePhotos(draft, java.util.Collections.emptyList(), result::set));
+        waitFor(() -> !"PENDIENTE".equals(result.get()));
+        assertNull(result.get(), result.get());
+        assertEquals(draft, Tasks.await(db.document("hotels/1").get(Source.SERVER), 20, TimeUnit.SECONDS).get("photos"));
+
+        List<String> wrongHotel = new ArrayList<>(draft);
+        wrongHotel.set(0, draft.get(0).replace("/hotelPhotos/1/", "/hotelPhotos/2/"));
+        result.set("PENDIENTE");
+        ins.runOnMainSync(() -> repository.savePhotos(wrongHotel, draft, result::set));
+        waitFor(() -> !"PENDIENTE".equals(result.get()));
+        assertNotNull("La galería debe rechazar referencias de otro hotel", result.get());
+        assertEquals(draft, Tasks.await(db.document("hotels/1").get(Source.SERVER), 20, TimeUnit.SECONDS).get("photos"));
+
+        result.set("PENDIENTE");
+        com.example.proyecto_iotelito.model.hoteladmin.Servicio service =
+                new com.example.proyecto_iotelito.model.hoteladmin.Servicio(801, 1, "Desayuno QA", "", 25,
+                        "servicio", R.drawable.superadmin_hotel_sol, true);
+        ins.runOnMainSync(() -> repository.saveServiceWithPhoto(service, true, draft.get(0), result::set));
+        waitFor(() -> !"PENDIENTE".equals(result.get()));
+        assertNull(result.get(), result.get());
+        DocumentSnapshot savedService = Tasks.await(db.document("hotels/1/services/801").get(Source.SERVER),
+                20, TimeUnit.SECONDS);
+        assertEquals(draft.get(0), savedService.getString("fotoUrl"));
+    }
+    private void verifyBookingAvailability(LocalDate today) throws Exception {
+        LocalDate start = today.plusDays(10), end = start.plusDays(1);
+        java.util.List<com.example.proyecto_iotelito.model.hoteladmin.Habitacion> rooms = new java.util.ArrayList<>();
+        for (int id : new int[]{102, 103}) {
+            seed("hotels/1/rooms/" + id, fields("id", id, "hotelId", 1, "tipo", "Familiar", "nombreCodigo", String.valueOf(id),
+                    "areaM2", 30, "adultos", 2, "ninos", 1, "precioNoche", 100, "descripcion", "QA", "disponible", true, "archived", false));
+            rooms.add(new com.example.proyecto_iotelito.model.hoteladmin.Habitacion(id, 1, "Familiar", String.valueOf(id),
+                    30, 2, 1, 100, "QA", R.drawable.superadmin_hotel_sol, true));
+        }
+        java.util.List<com.example.proyecto_iotelito.model.OpcionHabitaciones> options =
+                GeneradorOpcionesHabitaciones.generar(rooms, 2, 1);
+        assertEquals(2, options.size());
+        assertEquals(2, FirebaseReservaStore.filtrarDisponibles(1, start, end, options).size());
+        seed("roomNights/1_102_" + start, fields("reservationId", "5001"));
+        java.util.List<com.example.proyecto_iotelito.model.OpcionHabitaciones> available =
+                FirebaseReservaStore.filtrarDisponibles(1, start, end, options);
+        assertEquals(1, available.size());
+        assertEquals(103, available.get(0).habitaciones().get(0).id);
+        seed("reservations/4001", fields("id", 4001, "hotelId", 2, "clientUid", clientUid,
+                "roomIds", new int[]{201}, "roomName", "Doble", "roomNumber", "201",
+                "fechaEntrada", start.toString(), "fechaSalida", end.toString(), "precioTotal", 100,
+                "estado", "CONFIRMADA", "codigo", "LOCAL-CRUCE"));
+        seed("clientNights/" + clientUid + "_" + start, fields("clientUid", clientUid, "reservationId", "4001"));
+        IllegalArgumentException searchConflict = assertThrows(IllegalArgumentException.class,
+                () -> FirebaseReservaStore.filtrarDisponibles(1, start, end, options));
+        assertTrue(searchConflict.getMessage().contains("Ya tienes una reserva"));
+        com.example.proyecto_iotelito.model.Hotel hotel = HotelCatalogRepository.buscar(context, 1);
+        TarjetaSimulada tarjeta = TarjetaSimulada.validar("4242424242424242", "12/39", "123", java.time.YearMonth.now());
+        IllegalArgumentException confirmConflict = assertThrows(IllegalArgumentException.class,
+                () -> FirebaseReservaStore.agregar(hotel, start, end, "2 adultos, 1 niño", 100,
+                        "LOCAL-RECHAZADA", "Familiar", "103", java.util.Collections.singletonList(103), tarjeta));
+        assertTrue(confirmConflict.getMessage(), confirmConflict.getMessage().contains("Ya tienes una reserva"));
+        assertEquals(2, FirebaseReservaStore.filtrarDisponibles(1, end, end.plusDays(1), options).size());
     }
     @After public void cleanup()throws Exception{
         if(original==null)return;
@@ -154,13 +164,10 @@ public class HotelOperationsEmulatorTest {
         assumeTrue("true".equals(InstrumentationRegistry.getArguments().getString("hotelEmulator")));
         original=FirebaseApp.getInstance().getOptions();FirebaseApp.getInstance().delete();
         FirebaseApp.initializeApp(context,new FirebaseOptions.Builder().setApiKey("fake-api-key").setApplicationId("1:123456:android:abcdef")
-                .setProjectId("demo-iotelito-auth").setStorageBucket("demo-iotelito-auth.appspot.com").build());
+                .setProjectId("demo-iotelito-auth").build());
         auth=FirebaseAuth.getInstance();auth.useEmulator("127.0.0.1",9099);
         db=FirebaseFirestore.getInstance();db.useEmulator("127.0.0.1",8180);
-        boolean useStorage = "true".equals(InstrumentationRegistry.getArguments().getString("hotelStorage"));
         boolean checkNotifications = "true".equals(InstrumentationRegistry.getArguments().getString("hotelNotifications"));
-        FirebaseStorage storage = useStorage ? FirebaseStorage.getInstance() : null;
-        if (storage != null) storage.useEmulator("127.0.0.1", 9199);
         db.setFirestoreSettings(new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build());
         clientUid=Tasks.await(auth.createUserWithEmailAndPassword("client-hotel@example.test",password),20,TimeUnit.SECONDS).getUser().getUid();
         auth.signOut();adminUid=Tasks.await(auth.createUserWithEmailAndPassword("admin-hotel@example.test",password),20,TimeUnit.SECONDS).getUser().getUid();auth.signOut();
@@ -173,6 +180,8 @@ public class HotelOperationsEmulatorTest {
         seed("reservations/2001",fields("id",2001,"hotelId",1,"clientUid",clientUid,"clientName","Cliente QA","hotelName","Hotel QA","roomIds",new int[]{101},"roomName","Doble","roomNumber","101","fechaEntrada",today.minusDays(1).toString(),"fechaSalida",today.toString(),"precioTotal",100.25,"estado","CONFIRMADA","codigo","LOCAL-2001","cardType","Visa","cardLast4","4242","cardToken","DEMO_local-2001","paymentMode","SIMULATED"));
         seed("reservations/3001",fields("id",3001,"hotelId",2,"clientUid","other-client","roomIds",new int[]{201},"roomName","Simple","roomNumber","201","fechaEntrada",today.toString(),"fechaSalida",today.plusDays(1).toString(),"precioTotal",999.0,"estado","CONFIRMADA","codigo","AJENO"));
         login("client-hotel@example.test",UserRole.CLIENT,clientUid,null);
+        verifyBookingAvailability(today);
+        if ("true".equals(InstrumentationRegistry.getArguments().getString("bookingAvailabilityOnly"))) return;
         Tasks.await(new FirebaseHotelChat(context).send(2001,"Pregunta del huésped"),20,TimeUnit.SECONDS);
         com.example.proyecto_iotelito.data.ReservaRepository.getInstance(context).solicitarCheckout(2001,5,"Estadía de prueba satisfactoria");
         login("admin-hotel@example.test",UserRole.HOTEL_ADMIN,adminUid,1);
@@ -184,7 +193,7 @@ public class HotelOperationsEmulatorTest {
         waitFor(() -> main.findViewById(R.id.card_alerta_checkout) != null
                 && main.findViewById(R.id.card_alerta_checkout).getVisibility() == android.view.View.VISIBLE);
         if (checkNotifications) waitFor(() -> hasNotification("hotel-checkout:" + adminUid + ":1", 2001));
-        if (storage != null) verifyPhotoUploads(storage);
+        verifyPhotoReferences();
         ins.runOnMainSync(()->main.openTab(R.id.nav_hoteladmin_reservas));
         waitFor(()->main.findViewById(R.id.rv_reservas)!=null);
         ins.runOnMainSync(()->main.findViewById(R.id.chip_checkout).performClick());
