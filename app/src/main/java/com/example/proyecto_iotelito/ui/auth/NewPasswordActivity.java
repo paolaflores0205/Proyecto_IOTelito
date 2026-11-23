@@ -40,6 +40,11 @@ public class NewPasswordActivity extends AppCompatActivity {
                 passwordLayout.setError(getString(R.string.login_error_required));
                 return;
             }
+            String errorPassword = com.example.proyecto_iotelito.data.ClientProfileCodec.errorContrasena(password);
+            if (errorPassword != null) {
+                passwordLayout.setError(errorPassword);
+                return;
+            }
             if (!password.equals(confirm)) {
                 confirmLayout.setError(getString(R.string.new_password_error_match));
                 return;

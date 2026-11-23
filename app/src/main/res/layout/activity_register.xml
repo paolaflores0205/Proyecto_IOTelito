@@ -76,6 +76,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/register_names_edit_text"
+                    android:maxLength="80"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="@string/register_names_hint"
@@ -99,6 +100,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/register_lastnames_edit_text"
+                    android:maxLength="79"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="@string/register_lastnames_hint"
@@ -149,6 +151,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/register_document_edit_text"
+                    android:maxLength="8"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="@string/register_document_hint"
@@ -243,10 +246,11 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/register_phone_edit_text"
+                    android:maxLength="9"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="@string/register_phone_hint"
-                    android:inputType="phone"
+                    android:inputType="number"
                     android:textSize="14sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -266,6 +270,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/register_address_edit_text"
+                    android:maxLength="500"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="@string/register_address_hint"

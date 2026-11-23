@@ -50,12 +50,33 @@ public final class ClientProfileCodec {
             return date.toString();
         } catch (RuntimeException error) { throw new IllegalArgumentException("Ingresa una fecha válida de una persona mayor de edad (DD/MM/AAAA)."); }
     }
-    public static Map<String,Object> editables(String first, String last, String phone, String address) {
+    /** Nombres y apellidos: letras (con tildes y ñ), espacios, apóstrofo, punto o guion. */
+    private static final java.util.regex.Pattern NOMBRE = java.util.regex.Pattern.compile("[\\p{L}][\\p{L} '.-]*");
+    /**
+     * Errores de los datos editables, uno por campo ("nombres", "apellidos", "telefono", "domicilio"),
+     * para mostrarlos en rojo debajo de cada uno. Vacío si todo es válido.
+     */
+    public static Map<String,String> erroresEditables(String first, String last, String phone, String address) {
         first = first.trim(); last = last.trim(); phone = phone.replace(" ", "").trim(); address = address.trim();
-        if (first.isEmpty() || last.isEmpty() || first.length() > 80 || last.length() > 79)
-            throw new IllegalArgumentException("Completa nombres y apellidos (máximo 80 y 79 caracteres).");
-        if (!phone.matches("[0-9]{9}")) throw new IllegalArgumentException("El teléfono debe tener 9 dígitos.");
-        if (address.length() < 8 || address.length() > 500) throw new IllegalArgumentException("El domicilio debe tener entre 8 y 500 caracteres.");
+        Map<String,String> errores = new java.util.LinkedHashMap<>();
+        if (first.length() < 2 || first.length() > 80 || !NOMBRE.matcher(first).matches())
+            errores.put("nombres", "Ingresa tus nombres: solo letras, de 2 a 80.");
+        if (last.length() < 2 || last.length() > 79 || !NOMBRE.matcher(last).matches())
+            errores.put("apellidos", "Ingresa tus apellidos: solo letras, de 2 a 79.");
+        if (!phone.matches("[0-9]{9}")) errores.put("telefono", "El teléfono debe tener 9 dígitos.");
+        if (address.length() < 8 || address.length() > 500) errores.put("domicilio", "El domicilio debe tener entre 8 y 500 caracteres.");
+        return errores;
+    }
+    /** Contraseña nueva: al menos 8 caracteres con una letra y un número. Devuelve null si es válida. */
+    public static String errorContrasena(String password) {
+        if (password == null || password.length() < 8 || !password.matches(".*\\p{L}.*") || !password.matches(".*[0-9].*"))
+            return "La contraseña debe tener al menos 8 caracteres, con letras y números.";
+        return null;
+    }
+    public static Map<String,Object> editables(String first, String last, String phone, String address) {
+        Map<String,String> errores = erroresEditables(first, last, phone, address);
+        if (!errores.isEmpty()) throw new IllegalArgumentException(errores.values().iterator().next());
+        first = first.trim(); last = last.trim(); phone = phone.replace(" ", "").trim(); address = address.trim();
         Map<String,Object> data = new HashMap<>(); data.put("name",first + " " + last);
         data.put("firstNames",first);data.put("lastNames",last);data.put("phone",phone);data.put("address",address);
         return data;

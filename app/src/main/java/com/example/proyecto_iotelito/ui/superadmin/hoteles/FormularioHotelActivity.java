@@ -251,7 +251,7 @@ public class FormularioHotelActivity extends AppCompatActivity {
         String[] keys = {"name", "address", "district", "city", "phone", "email", "description"};
         android.view.View firstError = null;
         for (int i = 0; i < fields.length; i++) {
-            if (i > 1) fields[i].setError(errors.get(keys[i]));
+            if (i > 1) com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(fields[i], errors.get(keys[i]));
             if (firstError == null && errors.containsKey(keys[i])) firstError = fields[i];
         }
         boolean valid = errors.isEmpty();

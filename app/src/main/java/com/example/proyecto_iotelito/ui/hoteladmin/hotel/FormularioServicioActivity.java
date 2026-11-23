@@ -88,15 +88,12 @@ public class FormularioServicioActivity extends AppCompatActivity {
         String nombre = binding.etNombre.getText().toString().trim();
         String precioStr = binding.etPrecio.getText().toString().trim();
 
-        boolean valido = true;
-        if (TextUtils.isEmpty(nombre)) {
-            binding.etNombre.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
-        if (TextUtils.isEmpty(precioStr)) {
-            binding.etPrecio.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
+        // Cada error en rojo debajo de su campo; Firestore exige los mismos límites.
+        java.util.Map<String, String> errores = com.example.proyecto_iotelito.data.hoteladmin.InventarioValidacion
+                .servicio(nombre, precioStr, binding.etDescripcion.getText().toString());
+        boolean valido = com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etNombre, errores.get("nombre"));
+        valido &= com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etPrecio, errores.get("precio"));
+        valido &= com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etDescripcion, errores.get("descripcion"));
         if (!valido) {
             return;
         }

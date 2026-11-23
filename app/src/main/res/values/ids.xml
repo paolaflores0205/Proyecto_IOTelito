@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Etiquetas internas de ErrorCampo (texto rojo debajo de un campo). -->
+    <item name="tag_error_campo" type="id" />
+    <item name="tag_error_vigilado" type="id" />
+</resources>

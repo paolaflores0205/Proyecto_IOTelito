@@ -167,24 +167,24 @@ public class CobroCheckoutActivity extends AppCompatActivity {
     private void validarYConfirmar() {
         if (binding.switchDanos.isChecked()) {
             if (montoDano() <= 0) {
-                binding.etMontoDano.setError(getString(R.string.hoteladmin_error_monto_dano));
+                com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(binding.etMontoDano, getString(R.string.hoteladmin_error_monto_dano));
                 binding.etMontoDano.requestFocus();
                 return;
             }
             if (texto(binding.etMotivoDano).isEmpty()) {
-                binding.etMotivoDano.setError(getString(R.string.hoteladmin_campo_obligatorio));
+                com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(binding.etMotivoDano, getString(R.string.hoteladmin_campo_obligatorio));
                 binding.etMotivoDano.requestFocus();
                 return;
             }
             if (texto(binding.etObservacionDano).isEmpty()) {
-                binding.etObservacionDano.setError(getString(R.string.hoteladmin_campo_obligatorio));
+                com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(binding.etObservacionDano, getString(R.string.hoteladmin_campo_obligatorio));
                 binding.etObservacionDano.requestFocus();
                 return;
             }
         }
         if (remote != null) {
             try { com.example.proyecto_iotelito.data.hoteladmin.HotelOperationsCodec.total(reserva.total(), binding.switchDanos.isChecked() ? montoDano() : 0); }
-            catch (IllegalArgumentException error) { binding.etMontoDano.setError(error.getMessage()); return; }
+            catch (IllegalArgumentException error) { com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(binding.etMontoDano, error.getMessage()); return; }
         }
         new MaterialAlertDialogBuilder(this)
                 .setTitle(remote != null ? "¿Confirmar cobro simulado?" : getString(R.string.hoteladmin_confirmar_checkout_titulo))

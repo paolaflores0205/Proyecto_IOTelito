@@ -15,6 +15,7 @@ import com.example.proyecto_iotelito.data.HotelAdminSampleData;
 import com.example.proyecto_iotelito.data.hoteladmin.HotelAdminLocalStore;
 import com.example.proyecto_iotelito.data.superadmin.SuperadminRepository;
 import com.example.proyecto_iotelito.databinding.ActivityHoteladminDatosHotelBinding;
+import com.example.proyecto_iotelito.ui.common.ErrorCampo;
 
 /** Consulta y edición de los datos generales del hotel (adm-datos-hotel). */
 public class DatosHotelActivity extends AppCompatActivity {
@@ -104,30 +105,20 @@ public class DatosHotelActivity extends AppCompatActivity {
         String nombre = valor(binding.etNombre.getText());
         String direccion = valor(binding.etDireccion.getText());
         String email = valor(binding.etEmail.getText());
-        boolean valido = true;
-
-        if (TextUtils.isEmpty(nombre)) {
-            binding.etNombre.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
-        if (TextUtils.isEmpty(direccion)) {
-            binding.etDireccion.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
-        if (TextUtils.isEmpty(email)) {
-            binding.etEmail.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.etEmail.setError(getString(R.string.hoteladmin_email_invalido));
-            valido = false;
-        }
+        // Errores en rojo debajo de cada campo.
+        boolean valido = ErrorCampo.aplicar(binding.etNombre,
+                TextUtils.isEmpty(nombre) ? getString(R.string.error_campo_obligatorio) : null);
+        valido &= ErrorCampo.aplicar(binding.etDireccion,
+                TextUtils.isEmpty(direccion) ? getString(R.string.error_campo_obligatorio) : null);
+        valido &= ErrorCampo.aplicar(binding.etEmail, TextUtils.isEmpty(email) ? getString(R.string.error_campo_obligatorio)
+                : !Patterns.EMAIL_ADDRESS.matcher(email).matches() ? getString(R.string.hoteladmin_email_invalido) : null);
+        valido &= ErrorCampo.aplicar(binding.etTelefono,
+                com.example.proyecto_iotelito.data.hoteladmin.InventarioValidacion.telefono(valor(binding.etTelefono.getText())));
         Double taxiMinimo = null;
         if (remote != null) {
             taxiMinimo = leerMonto(valor(binding.etTaxiMinimo.getText()));
-            if (taxiMinimo == null) {
-                binding.etTaxiMinimo.setError(getString(R.string.hoteladmin_taxi_minimo_invalido));
-                valido = false;
-            }
+            valido &= ErrorCampo.aplicar(binding.etTaxiMinimo,
+                    taxiMinimo == null ? getString(R.string.hoteladmin_taxi_minimo_invalido) : null);
         }
         if (!valido) return;
 

@@ -74,7 +74,7 @@ public class TaxistasAdminActivity extends AppCompatActivity {
         androidx.appcompat.app.AlertDialog dialog=builder.show();
         dialog.getButton(-1).setOnClickListener(v->{
             String why=reason.getText().toString().trim();String error=active?null:SuperadminFormValidation.reason(why);
-            if(error!=null){reason.setError(error);return;}
+            if(error!=null){com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(reason, error);return;}
             dialog.dismiss();busy(true);status.setText("Actualizando taxista…");
             TaxiTasks.run(this,()->TaxiApis.get(this).cambiarActivoTaxista(row.optLong("id"),active,why),updated->{
                 if(!sameSession())return;busy(false);load();

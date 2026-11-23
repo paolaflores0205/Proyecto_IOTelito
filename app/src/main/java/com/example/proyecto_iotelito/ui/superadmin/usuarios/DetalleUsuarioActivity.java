@@ -97,7 +97,7 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
         shown.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
             String error = selected.active ? com.example.proyecto_iotelito.data.superadmin.SuperadminFormValidation
                     .reason(reason.getText().toString()) : null;
-            if (error != null) { reason.setError(error); reason.requestFocus(); return; }
+            if (error != null) { com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(reason, error); reason.requestFocus(); return; }
             model.remoteUserStatus(selected.uid, !selected.active, reason.getText().toString().trim());
             shown.dismiss();
         });

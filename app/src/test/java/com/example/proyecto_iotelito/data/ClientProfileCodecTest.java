@@ -61,4 +61,14 @@ public class ClientProfileCodecTest {
         assertThrows(IllegalArgumentException.class,()->ClientProfileCodec.editables("Ana","Torres","abc","Av. Principal 123"));
         assertThrows(IllegalArgumentException.class,()->ClientProfileCodec.editables("Ana","Torres","999888777","Calle"));
     }
+    @Test public void erroresPorCampoYNombresSoloConLetras() {
+        assertTrue(ClientProfileCodec.erroresEditables("José María","Ñahui O'Neil","012345678","Av. Lima 123").isEmpty());
+        java.util.Map<String,String> e=ClientProfileCodec.erroresEditables("Juan2","X","98765432","Calle");
+        assertEquals(java.util.Arrays.asList("nombres","apellidos","telefono","domicilio"),new java.util.ArrayList<>(e.keySet()));
+    }
+    @Test public void contrasenaDeOchoConLetrasYNumeros() {
+        assertNull(ClientProfileCodec.errorContrasena("hotel2026"));
+        for(String mala:new String[]{"abc123","solamenteletras","12345678",null})
+            assertNotNull(ClientProfileCodec.errorContrasena(mala));
+    }
 }

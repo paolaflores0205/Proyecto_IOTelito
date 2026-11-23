@@ -94,8 +94,14 @@ public class EditarPerfilActivity extends AppCompatActivity {
     private void guardar(){
         if(!cargado||guardando||preparando)return;
         if(!ConexionCliente.disponible(this)){estado(getString(R.string.cliente_sin_conexion));return;}
-        try{ClientProfileCodec.editables(nombres.getText().toString(),apellidos.getText().toString(),telefono.getText().toString(),domicilio.getText().toString());}
-        catch(IllegalArgumentException error){estado(error.getMessage());return;}
+        // Cada error en rojo debajo de su campo (mismas reglas que el registro).
+        java.util.Map<String,String> errores=ClientProfileCodec.erroresEditables(nombres.getText().toString(),
+                apellidos.getText().toString(),telefono.getText().toString(),domicilio.getText().toString());
+        boolean ok=com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(nombres,errores.get("nombres"));
+        ok&=com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(apellidos,errores.get("apellidos"));
+        ok&=com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(telefono,errores.get("telefono"));
+        ok&=com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(domicilio,errores.get("domicilio"));
+        if(!ok){estado("Revisa los campos marcados en rojo.");return;}
         guardando=true;actualizarBotones();estado("Guardando tu perfil…");
         PerfilRepository.guardarRemoto(this,uid,nombres.getText().toString(),apellidos.getText().toString(),telefono.getText().toString(),domicilio.getText().toString(),fotoPreparada)
             .addOnSuccessListener(profile->{if(isFinishing()||isDestroyed())return;guardando=false;Toast.makeText(this,R.string.toast_perfil_actualizado,Toast.LENGTH_SHORT).show();finish();})

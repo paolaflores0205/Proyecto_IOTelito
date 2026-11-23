@@ -63,8 +63,9 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
                             existente -> {
                                 if (existente >= 0) abrirSolicitud(existente);
                             });
-                    maxPasajeros = Math.max(1, obtenerCantidadHuespedes(reserva.huespedes));
-                    maxMaletas = maxPasajeros * 2;
+                    // Un taxi lleva hasta 4 pasajeros y 6 maletas (la API valida lo mismo).
+                    maxPasajeros = Math.min(4, Math.max(1, obtenerCantidadHuespedes(reserva.huespedes)));
+                    maxMaletas = Math.min(6, maxPasajeros * 2);
                     pasajeros = Math.min(pasajeros, maxPasajeros);
                     maletas = Math.min(maletas, maxMaletas);
 

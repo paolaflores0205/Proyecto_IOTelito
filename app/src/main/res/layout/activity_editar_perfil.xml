@@ -161,6 +161,7 @@
 
                     <EditText
                         android:id="@+id/et_nombre"
+                        android:maxLength="80"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="6dp"
@@ -253,11 +254,12 @@
 
                     <EditText
                         android:id="@+id/et_telefono"
+                        android:maxLength="9"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="6dp"
                         android:background="@drawable/bg_input_field"
-                        android:inputType="phone"
+                        android:inputType="number"
                         android:paddingHorizontal="14dp"
                         android:singleLine="true"
                         android:textColor="@color/io_text_primary"
@@ -275,6 +277,7 @@
 
                     <EditText
                         android:id="@+id/et_domicilio"
+                        android:maxLength="500"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="6dp"

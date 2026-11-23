@@ -52,9 +52,9 @@ public class SeleccionarUbicacionActivity extends AppCompatActivity {
     }
     private void search() {
         String query = String.valueOf(binding.etMapSearch.getText()).trim();
-        if (query.isEmpty()) { binding.etMapSearch.setError("Escribe una dirección con distrito y ciudad."); return; }
+        if (query.isEmpty()) { com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(binding.etMapSearch, "Escribe una dirección con distrito y ciudad."); return; }
         if (query.length() < 5 || query.length() > 500) {
-            binding.etMapSearch.setError("Usa entre 5 y 500 caracteres para la dirección."); return;
+            com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(binding.etMapSearch, "Usa entre 5 y 500 caracteres para la dirección."); return;
         }
         int token = ++generation;
         handler.removeCallbacksAndMessages(null);

@@ -235,7 +235,13 @@ public class ConfirmacionReservaActivity extends AppCompatActivity {
                     etNumero.getText().toString(), etVencimiento.getText().toString(),
                     etCvv.getText().toString(), java.time.YearMonth.now(java.time.ZoneId.of("America/Lima")));
         } catch (IllegalArgumentException error) {
-            android.widget.Toast.makeText(this, error.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+            // El error va en rojo debajo del campo que lo causó (número, vencimiento o código).
+            String mensaje = error.getMessage() == null ? "" : error.getMessage();
+            String minusculas = mensaje.toLowerCase(java.util.Locale.ROOT);
+            EditText campo = minusculas.contains("vencimiento") ? etVencimiento
+                    : minusculas.contains("código") ? etCvv : etNumero;
+            com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(campo, mensaje);
+            campo.requestFocus();
             return;
         }
 

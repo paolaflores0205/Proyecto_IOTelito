@@ -99,14 +99,13 @@ public class RegisterActivity extends AppCompatActivity {
         String address = valueOf(addressEditText.getText());
         boolean hasError = false;
 
-        if (names.isEmpty()) {
-            namesLayout.setError(getString(R.string.register_error_name));
-            hasError = true;
-        }
-        if (lastnames.isEmpty()) {
-            lastnamesLayout.setError(getString(R.string.register_error_lastname));
-            hasError = true;
-        }
+        // Mismas reglas que Editar perfil; cada error va en rojo debajo de su campo.
+        java.util.Map<String,String> errores =
+                com.example.proyecto_iotelito.data.ClientProfileCodec.erroresEditables(names, lastnames, phone, address);
+        if (errores.containsKey("nombres")) { namesLayout.setError(errores.get("nombres")); hasError = true; }
+        if (errores.containsKey("apellidos")) { lastnamesLayout.setError(errores.get("apellidos")); hasError = true; }
+        if (errores.containsKey("telefono")) { phoneLayout.setError(errores.get("telefono")); hasError = true; }
+        if (errores.containsKey("domicilio")) { addressLayout.setError(errores.get("domicilio")); hasError = true; }
         try { com.example.proyecto_iotelito.data.ClientProfileCodec.validarDocumento(documentType,document); }
         catch(IllegalArgumentException error){documentLayout.setError(error.getMessage());hasError=true;}
         if (!isAdultBirthdate(birthdate)) {
@@ -117,21 +116,11 @@ public class RegisterActivity extends AppCompatActivity {
             emailLayout.setError(getString(R.string.register_error_email));
             hasError = true;
         }
-        if (password.length() < 6) {
-            passwordLayout.setError(getString(R.string.register_error_password));
+        String errorPassword = com.example.proyecto_iotelito.data.ClientProfileCodec.errorContrasena(password);
+        if (errorPassword != null) {
+            passwordLayout.setError(errorPassword);
             hasError = true;
         }
-        if (!phone.matches("\\d{9}")) {
-            phoneLayout.setError(getString(R.string.register_error_phone));
-            hasError = true;
-        }
-        if (address.length() < 8) {
-            addressLayout.setError(getString(R.string.register_error_address));
-            hasError = true;
-        }
-
-        try {com.example.proyecto_iotelito.data.ClientProfileCodec.editables(names,lastnames,phone,address);}
-        catch(IllegalArgumentException error){Toast.makeText(this,error.getMessage(),Toast.LENGTH_LONG).show();hasError=true;}
         if (hasError) return;
 
         final java.util.Map<String,Object> registration;

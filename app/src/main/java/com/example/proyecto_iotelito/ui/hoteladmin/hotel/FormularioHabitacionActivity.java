@@ -84,19 +84,16 @@ public class FormularioHabitacionActivity extends AppCompatActivity {
         String areaStr = binding.etArea.getText().toString().trim();
         String precioStr = binding.etPrecio.getText().toString().trim();
 
-        boolean valido = true;
-        if (TextUtils.isEmpty(codigo)) {
-            binding.etCodigo.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
-        if (TextUtils.isEmpty(areaStr)) {
-            binding.etArea.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
-        if (TextUtils.isEmpty(precioStr)) {
-            binding.etPrecio.setError(getString(R.string.error_campo_obligatorio));
-            valido = false;
-        }
+        // Cada error en rojo debajo de su campo; Firestore exige los mismos límites.
+        java.util.Map<String, String> errores = com.example.proyecto_iotelito.data.hoteladmin.InventarioValidacion.habitacion(
+                codigo, areaStr, binding.etAdultos.getText().toString(), binding.etNinos.getText().toString(),
+                precioStr, binding.etDescripcion.getText().toString());
+        boolean valido = com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etCodigo, errores.get("codigo"));
+        valido &= com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etArea, errores.get("area"));
+        valido &= com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etAdultos, errores.get("adultos"));
+        valido &= com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etNinos, errores.get("ninos"));
+        valido &= com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etPrecio, errores.get("precio"));
+        valido &= com.example.proyecto_iotelito.ui.common.ErrorCampo.aplicar(binding.etDescripcion, errores.get("descripcion"));
         if (!valido) {
             return;
         }

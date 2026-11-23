@@ -84,7 +84,7 @@ public class FinalizarServicioActivity extends AppCompatActivity {
     private void finalizar(String code) {
         if (sending) return;
         if (code.isEmpty()) {
-            ((EditText) findViewById(R.id.et_codigo_manual)).setError("Ingresa el código del QR");
+            com.example.proyecto_iotelito.ui.common.ErrorCampo.mostrar(((EditText) findViewById(R.id.et_codigo_manual)), "Ingresa el código del QR");
             return;
         }
         sending = true;

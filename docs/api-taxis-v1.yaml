@@ -983,9 +983,11 @@ components:
         pasajeros:
           type: integer
           minimum: 1
+          maximum: 4
         maletas:
           type: integer
           minimum: 0
+          maximum: 6
         clienteNombre:
           type: string
           description: Solo el nombre; el taxista no recibe correo ni teléfono del cliente.
@@ -1075,9 +1077,11 @@ components:
         pasajeros:
           type: integer
           minimum: 1
+          maximum: 4
         maletas:
           type: integer
           minimum: 0
+          maximum: 6
       example:
         reservaId: 1001
         aeropuertoCodigo: LIM
