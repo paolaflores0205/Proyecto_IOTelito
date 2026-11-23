@@ -124,6 +124,44 @@ public final class FakeTaxiApi implements TaxiApi {
     private final Supplier<Caller> identity;
     private final Bookings bookings;
 
+    @Override public JSONObject listarTaxistas(String estado) {
+        synchronized (store) {
+            role("SUPERADMIN");
+            if (estado != null && !Arrays.asList("PENDIENTE", "APROBADO", "RECHAZADO").contains(estado))
+                throw error(400, VALIDACION, "Estado de solicitud no válido.");
+            JSONArray rows = new JSONArray();
+            for (JSONObject driver : store.drivers.values())
+                if (estado == null || estado.equals(driver.optString("estadoSolicitud"))) rows.put(adminView(driver));
+            return json("taxistas", rows);
+        }
+    }
+
+    @Override public JSONObject cambiarActivoTaxista(long id, boolean activo, String motivo) {
+        synchronized (store) {
+            role("SUPERADMIN");
+            if (id <= 0 || motivo != null && motivo.length() > 500) throw error(400, VALIDACION, "Revisa los datos del taxista.");
+            for (JSONObject driver : store.drivers.values()) if (driver.optLong("id") == id) {
+                if (activo && !"APROBADO".equals(driver.optString("estadoSolicitud")))
+                    throw error(409, ESTADO_INVALIDO, "Solo puede activarse un taxista aprobado.");
+                try {
+                    driver.put("activo", activo);
+                    if (!activo) driver.put("disponible", false);
+                } catch (JSONException e) { throw new IllegalStateException(e); }
+                return adminView(driver);
+            }
+            throw error(404, NO_ENCONTRADO, "No se encontró el taxista.");
+        }
+    }
+
+    private JSONObject adminView(JSONObject driver) {
+        JSONObject result=copy(driver);
+        try {
+            result.put("tipoDocumento","DNI"); result.put("numeroDocumento","00000000");
+            result.put("fechaSolicitud",Instant.EPOCH.toString());
+        } catch(JSONException e) { throw new IllegalStateException(e); }
+        return result;
+    }
+
     public FakeTaxiApi(Store store, Supplier<Caller> identity, Bookings bookings) {
         this.store = store;
         this.identity = identity;

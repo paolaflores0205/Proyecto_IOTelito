@@ -8,6 +8,8 @@ import org.json.JSONObject;
  */
 public interface TaxiApi {
     JSONObject health();
+    JSONObject listarTaxistas(String estadoSolicitud);
+    JSONObject cambiarActivoTaxista(long id, boolean activo, String motivo);
 
     JSONObject listarAeropuertos();
 

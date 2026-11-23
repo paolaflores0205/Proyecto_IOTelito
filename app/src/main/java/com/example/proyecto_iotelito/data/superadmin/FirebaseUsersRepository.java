@@ -104,6 +104,8 @@ public final class FirebaseUsersRepository {
             if (!owner.active || owner.role != UserRole.SUPERADMIN)
                 throw new IllegalArgumentException("Esta operación requiere un superadmin activo.");
             RemoteUserProfile target = RemoteUserProfile.parse(uid, targetDoc.getData());
+            if (target.role == UserRole.TAXISTA)
+                throw new IllegalArgumentException("Administra la habilitación del taxista mediante el servicio de taxis.");
             if (uid.equals(actorUid) || target.role == UserRole.SUPERADMIN)
                 throw new IllegalArgumentException("No puedes cambiar desde aquí el estado de un superadmin.");
             Map<String, Object> update = new HashMap<>();

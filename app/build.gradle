@@ -6,8 +6,8 @@ plugins {
 def taxiProperties = new Properties()
 def taxiPropertiesFile = rootProject.file('local.properties')
 if (taxiPropertiesFile.exists()) taxiPropertiesFile.withInputStream { taxiProperties.load(it) }
-def taxiUrl = providers.gradleProperty('taxiApi.url').orElse(taxiProperties.getProperty('taxiApi.url', '')).get().trim()
-def taxiFake = providers.gradleProperty('taxiApi.fake').orElse(taxiProperties.getProperty('taxiApi.fake', 'true')).get().toBoolean()
+def taxiUrl = providers.gradleProperty('taxiApi.url').orElse(taxiProperties.getProperty('taxiApi.url', 'https://bkmx72ue4k.execute-api.us-east-1.amazonaws.com/api/v1')).get().trim()
+def taxiFake = providers.gradleProperty('taxiApi.fake').orElse(taxiProperties.getProperty('taxiApi.fake', 'false')).get().toBoolean()
 
 android {
     namespace 'com.example.proyecto_iotelito'

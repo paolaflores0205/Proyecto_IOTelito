@@ -22,11 +22,11 @@ Contrato: `docs/api-taxis-v1.yaml`, sin modificaciones.
 En `local.properties` (ignorado por Git):
 
 ```properties
-taxiApi.url=https://HOST-DEL-BACKEND/api/v1
+taxiApi.url=https://bkmx72ue4k.execute-api.us-east-1.amazonaws.com/api/v1
 taxiApi.fake=false
 ```
 
-Sin esa configuración, debug usa la API falsa y muestra un aviso permanente de prueba. Release desactiva siempre la API falsa. La URL queda vacía hasta que el compañero comunique la real. Una base vacía o inválida produce el aviso «El servicio de taxis no está disponible», sin cerrar la app.
+La rama superadmin usa por defecto la URL HTTPS pública y taxiApi.fake=false, tanto al ejecutar desde Android Studio como al generar el APK. local.properties y las propiedades -P solo sirven para sobrescribir esa configuración. Para una prueba aislada se debe pasar explícitamente -PtaxiApi.fake=true; ese modo muestra un aviso permanente y no comparte viajes entre celulares. Release desactiva siempre la API falsa. Una base vacía o inválida produce el aviso «El servicio de taxis no está disponible», sin cerrar la app.
 
 Para las comprobaciones automatizadas pueden pasarse `-PtaxiApi.fake=false` y `-PtaxiApi.url=...`; tienen prioridad sobre las propiedades locales. No se incluyen direcciones de despliegue ni credenciales reales en fuentes o commits.
 

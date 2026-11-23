@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/io_surface_variant">
+    <com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize" app:title="Gestión de taxistas" app:navigationIcon="@drawable/ic_arrow_back" android:background="@color/white" />
+    <TextView android:id="@+id/tv_taxi_admin_notice" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:textColor="@color/io_text_secondary" android:text="Consulta las solicitudes y administra la habilitación del conductor. La aprobación de documentos se realiza en el panel web." />
+    <com.google.android.material.textfield.TextInputLayout style="@style/Widget.IoTelito.Input" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginHorizontal="16dp" android:hint="Estado de solicitud" app:endIconMode="dropdown_menu">
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView android:id="@+id/actv_taxi_admin_filter" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="16dp" android:paddingEnd="48dp" android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.button.MaterialButton android:id="@+id/btn_taxi_admin_refresh" style="@style/Widget.IoTelito.Button.Outline" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginHorizontal="16dp" android:text="Actualizar lista" />
+    <TextView android:id="@+id/tv_taxi_admin_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:textColor="@color/io_text_secondary" android:accessibilityLiveRegion="polite" />
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_taxi_admin" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:padding="16dp" android:clipToPadding="false" />
+</LinearLayout>

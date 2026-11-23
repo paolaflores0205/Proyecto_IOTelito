@@ -66,7 +66,7 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
         binding.tvRole.setText(getString(R.string.superadmin_role) + " " + user.role);
         binding.tvRegistered.setText(getString(R.string.superadmin_registration_date) + " " + user.registeredAt);
         binding.tvLastAccess.setText(getString(R.string.superadmin_last_access) + " " + user.lastAccess);
-        binding.btnToggleUser.setText(user.active ? R.string.superadmin_deactivate_user : R.string.superadmin_activate_user);
+        binding.btnToggleUser.setText("Taxista".equals(user.role) ? "Gestionar taxista" : getString(user.active ? R.string.superadmin_deactivate_user : R.string.superadmin_activate_user));
         int color = ContextCompat.getColor(this, user.active ? R.color.io_danger_text : R.color.io_teal);
         binding.btnToggleUser.setTextColor(color);
         binding.btnToggleUser.setStrokeColor(ColorStateList.valueOf(color));
@@ -75,6 +75,10 @@ public class DetalleUsuarioActivity extends AppCompatActivity {
     private void confirmStatusChange() {
         final AdminUser selected = user;
         if (selected == null) return;
+        if ("Taxista".equals(selected.role)) {
+            startActivity(new android.content.Intent(this, TaxistasAdminActivity.class).putExtra(TaxistasAdminActivity.EXTRA_EMAIL, selected.email));
+            return;
+        }
         EditText reason = new EditText(this);
         reason.setHint(R.string.superadmin_reason_hint);
         reason.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);

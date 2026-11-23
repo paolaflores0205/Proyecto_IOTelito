@@ -218,6 +218,7 @@
             android:exported="false" />
 
         <!-- Superadmin -->
+        <activity android:name=".ui.superadmin.usuarios.TaxistasAdminActivity" android:exported="false" android:parentActivityName=".ui.superadmin.SuperadminMainActivity" />
         <activity
             android:name=".ui.superadmin.notificaciones.AvisosSuperadminActivity"
             android:exported="false"

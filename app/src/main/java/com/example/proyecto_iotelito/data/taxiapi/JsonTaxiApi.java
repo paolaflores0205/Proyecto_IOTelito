@@ -22,6 +22,18 @@ public abstract class JsonTaxiApi implements TaxiApi {
         return request("GET", "/health", null, false);
     }
 
+    public JSONObject listarTaxistas(String estado) {
+        if (estado != null && !java.util.Arrays.asList("PENDIENTE", "APROBADO", "RECHAZADO").contains(estado))
+            throw new IllegalArgumentException("Estado de solicitud no válido.");
+        return request("GET", "/taxistas" + (estado == null ? "" : "?estadoSolicitud=" + estado), null, true);
+    }
+
+    public JSONObject cambiarActivoTaxista(long id, boolean activo, String motivo) {
+        if (id <= 0 || motivo != null && motivo.trim().length() > 500)
+            throw new IllegalArgumentException("Revisa el taxista y el motivo (máximo 500 caracteres).");
+        return request("PATCH", "/taxistas/" + id + "/activo", json("activo", activo, "motivo", motivo == null ? null : motivo.trim()), true);
+    }
+
     public JSONObject listarAeropuertos() {
         return request("GET", "/aeropuertos", null, false);
     }

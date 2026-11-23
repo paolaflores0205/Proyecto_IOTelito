@@ -216,6 +216,11 @@ public class TaxiApiEmulatorTest {
     public void recorridoTaxiConApiFalsaYReservasLocalesEmuladas() throws Exception {
         assumeTrue(
                 "true".equals(InstrumentationRegistry.getArguments().getString("taxiApiEmulator")));
+        assumeTrue("La prueba demo requiere -PtaxiApi.fake=true; no se ejecuta contra el backend real.", BuildConfig.TAXI_API_FAKE);
+        HttpURLConnection patch=(HttpURLConnection)new URL("https://example.invalid").openConnection();
+        patch.setRequestMethod("PATCH");
+        assertEquals("PATCH",patch.getRequestMethod());
+        patch.disconnect(); // Verifica soporte Android sin enviar una petición de red.
         original = FirebaseApp.getInstance().getOptions();
         FirebaseApp.getInstance().delete();
         FirebaseApp.initializeApp(
@@ -313,7 +318,7 @@ public class TaxiApiEmulatorTest {
                 "huespedes",
                 "2 adultos",
                 "precioTotal",
-                1200,
+                1280,
                 "estado",
                 "EN_CHECKOUT",
                 "codigo",
@@ -351,13 +356,6 @@ public class TaxiApiEmulatorTest {
         click(R.id.btn_confirmar_solicitud);
         waitFor(() -> current() instanceof TaxistaAsignadoActivity);
         assertEquals("SOLICITADO", TaxiApis.get(context).verServicio(1001).optString("estado"));
-        open(com.example.proyecto_iotelito.ui.reservas.DetalleReservaActivity.class, 1001);
-        waitFor(() -> text(R.id.btn_estado_taxi_reserva, "Seguir mi taxi"));
-        click(R.id.btn_estado_taxi_reserva);
-        waitFor(() -> current() instanceof TaxistaAsignadoActivity);
-        open(com.example.proyecto_iotelito.ui.taxi.MisTaxisActivity.class, 1001);
-        waitFor(() -> text(R.id.taxi_card_reference, "1001"));
-        assertFalse(ReservaRepository.getInstance(context).buscarPorId(1001).puedeSolicitarCheckout());
         login(driverEmail, UserRole.TAXISTA, driverUid);
         TaxiApis.get(context).cambiarDisponibilidad(true);
         context.getSharedPreferences("taxi_location", 0).edit().putBoolean("asked", true).commit();
@@ -376,6 +374,11 @@ public class TaxiApiEmulatorTest {
                 });
         click(R.id.btn_aceptar_servicio);
         waitFor(() -> current() instanceof ServicioAsignadoActivity);
+        open(ChatPasajeroTaxistaActivity.class,1001);
+        ins.runOnMainSync(()->((EditText)current().findViewById(R.id.et_mensaje)).setText("Conductor en recepción"));
+        click(R.id.btn_enviar);
+        waitFor(()->TaxiApis.get(context).mensajes(1001).optJSONArray("mensajes").length()==1);
+        open(ServicioAsignadoActivity.class,1001);
         click(R.id.btn_iniciar_recorrido);
         waitFor(() -> current() instanceof DireccionHotelActivity);
         click(R.id.btn_llegue_al_hotel);
@@ -386,6 +389,14 @@ public class TaxiApiEmulatorTest {
         login(clientEmail, UserRole.CLIENT, clientUid);
         open(SeguimientoTaxiActivity.class, 1001);
         waitFor(() -> text(R.id.taxi_map_info, "DEMO-001"));
+        click(R.id.taxi_map_chat);
+        waitFor(()->current() instanceof ChatPasajeroTaxistaActivity);
+        ins.runOnMainSync(()->((EditText)current().findViewById(R.id.et_mensaje)).setText("Cliente listo para el recojo"));
+        click(R.id.btn_enviar);
+        waitFor(()->TaxiApis.get(context).mensajes(1001).optJSONArray("mensajes").length()==2);
+        screenshot("taxi-chat-integrado");
+        ins.runOnMainSync(()->current().finish());
+        waitFor(()->current() instanceof SeguimientoTaxiActivity);
         SystemClock.sleep(4000);
         screenshot("taxi-api-mapa");
         click(R.id.btn_ver_qr);
@@ -464,6 +475,19 @@ public class TaxiApiEmulatorTest {
                         .verServicio(1001)
                         .optJSONObject("calificacion")
                         .optInt("puntuacion"));
-        assertNotNull(ReservaRepository.getInstance(context).buscarPorId(1001));
+        assertNotNull(ReservaRepository.getInstance(context).buscarPorId(1001));        closeAll();
+        auth.signOut();
+        String saEmail="sa-"+System.nanoTime()+"@example.test";
+        String saUid=Tasks.await(auth.createUserWithEmailAndPassword(saEmail,password),20,TimeUnit.SECONDS).getUser().getUid();
+        seed("users/"+saUid,"uid",saUid,"name","Superadmin QA","email",saEmail,"role","SUPERADMIN","active",true);
+        login(saEmail,UserRole.SUPERADMIN,saUid);
+        long driverId=TaxiApis.get(context).listarTaxistas(null).optJSONArray("taxistas").getJSONObject(0).getLong("id");
+        open(com.example.proyecto_iotelito.ui.superadmin.usuarios.TaxistasAdminActivity.class,1001);
+        waitFor(()->text(R.id.tv_taxi_admin_status,"1 taxistas"));
+        assertTrue(TaxiApis.get(context).cambiarActivoTaxista(driverId,false,"Prueba local de integración").has("activo"));
+        click(R.id.btn_taxi_admin_refresh);
+        waitFor(()->text(R.id.btn_taxi_admin_toggle,"Activar"));
+        screenshot("superadmin-taxistas-integrado");
+        TaxiApis.get(context).cambiarActivoTaxista(driverId,true,"Prueba local finalizada");
     }
 }

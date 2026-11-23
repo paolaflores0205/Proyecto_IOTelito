@@ -40,6 +40,7 @@ public class UsuariosFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        binding.btnManageTaxiApi.setOnClickListener(v -> startActivity(new Intent(requireContext(), TaxistasAdminActivity.class)));
         updateSummary();
         adapter = new UsuariosAdapter(this::openUserDetail);
         binding.rvUsers.setLayoutManager(new LinearLayoutManager(requireContext()));
