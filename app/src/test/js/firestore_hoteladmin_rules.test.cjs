@@ -27,6 +27,8 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
   for (const [field, value] of [['active', false], ['administratorUid', 'admin2'], ['id', 2], ['reservations', 999], ['services', ['Spa']]])
     await expect(await commit([change(1, { [field]: value })], 'admin'), false, `Campo protegido ${field}`);
   await expect(await commit([change(1, { name: '' })], 'admin'), false, 'Nombre vacio');
+  await expect(await commit([change(1, { phone: 'llamar luego' })], 'admin'), false, 'Teléfono del hotel solo con dígitos');
+  await expect(await commit([change(1, { phone: '(01) 610-4000' })], 'admin'), true, 'Teléfono del hotel con formato');
   // Monto mínimo del taxi gratuito: lo define cada hotel.
   await expect(await commit([change(1, { name: 'Hotel editado', taxiMinAmount: 800 })], 'admin'), true, 'Admin fija monto mínimo del taxi');
   await expect(await commit([change(1, { taxiMinAmount: 0 })], 'admin'), true, 'Admin ofrece taxi siempre (monto 0)');
@@ -61,6 +63,9 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
   await expect(await call('GET', '/hotels/1/rooms/201', undefined, 'client'), true, 'Cliente lee inventario compartido');
   await expect(await commit([write('hotels/1/rooms/202', { ...room(202), precioNoche: -1 }), summary(2, 2)], 'admin'), false, 'Precio negativo');
   await expect(await commit([write('hotels/1/rooms/202', { ...room(202), adultos: 0 }), summary(2, 2)], 'admin'), false, 'Capacidad invalida');
+  // Límites de habitación (mismos que InventarioValidacion en la app).
+  for (const [campo, valor] of [['areaM2', 4], ['areaM2', 1001], ['adultos', 11], ['ninos', 11], ['precioNoche', 0], ['precioNoche', 100000.5]])
+    await expect(await commit([write('hotels/1/rooms/202', { ...room(202), [campo]: valor }), summary(2, 2)], 'admin'), false, `Habitación fuera de rango: ${campo}=${valor}`);
   await expect(await commit([write('hotels/1/rooms/202', room(202, 2)), summary(2, 2)], 'admin'), false, 'Hotel del registro inmutable');
   await expect(await commit([write('hotels/1/rooms/201', { ...room(), precioNoche: 180.75 }), summary(2)], 'admin'), true, 'Editar precio conserva ID');
   await expect(await commit([write('hotels/1/rooms/201', { ...room(), archived: true, disponible: true }), summary(3)], 'admin'), false, 'Retirada no puede seguir disponible');
@@ -74,6 +79,8 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
     'Dos dispositivos no pueden confirmar resumen con la misma revision');
   await expect(await commit([write('hotels/1/services/301', service())], 'admin'), true, 'Alta servicio propio');
   await expect(await commit([write('hotels/1/services/301', { ...service(), precio: 50.75 })], 'admin'), true, 'Editar servicio');
+  await expect(await commit([write('hotels/1/services/301', { ...service(), precio: 10000.5 })], 'admin'), false, 'Servicio hasta S/ 10 000');
+  await expect(await commit([write('hotels/1/services/301', { ...service(), precio: 0 })], 'admin'), true, 'Servicio gratuito');
   await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: photo(6) })], 'admin'), true, 'Servicio admite imagen de su hotel');
   await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: photo(6, 2) })], 'admin'), false, 'Servicio rechaza imagen de otro hotel');
   await expect(await commit([write('hotels/1/services/301', { ...service(), fotoUrl: s3(6) })], 'admin'), true, 'Servicio admite imagen S3 de su hotel');

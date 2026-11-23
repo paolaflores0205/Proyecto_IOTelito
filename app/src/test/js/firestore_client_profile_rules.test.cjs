@@ -12,6 +12,8 @@ const update=(uid,data)=>write(`users/${uid}`,data,[...Object.keys(data),'update
    await expect(await commit([update('profile',data)],'profile'),false,'Identidad, rol y estado inmutables');
  await expect(await commit([update('profile',{firstNames:'Ana Maria',lastNames:'Torres Diaz',name:'Ana Maria Torres Diaz',phone:'988777666',address:'Av. Nueva 456'})],'profile'),true,'Edita datos permitidos');
  await expect(await commit([update('profile',{name:'Nombre inconsistente'})],'profile'),false,'Nombre coherente con nombres y apellidos');
+ await expect(await commit([update('profile',{firstNames:'Ana2',lastNames:'Torres',name:'Ana2 Torres'})],'profile'),false,'Nombres solo con letras');
+ await expect(await commit([update('profile',{firstNames:'José Ñ.',lastNames:"O'Neil-Ruiz",name:"José Ñ. O'Neil-Ruiz"})],'profile'),true,'Nombres con tildes, ñ, apóstrofo y guion');
  await expect(await commit([update('profile',{phone:'abc'})],'profile'),false,'Telefono validado');
  await expect(await commit([update('profile',{photoUrl:'gs://bucket/profilePhotos/profile/abc-123.jpg'})],'profile'),true,'Ruta de foto propia');
  const s3='s3://iot-telito-imagenes/profilePhotos/profile/12345678-1234-1234-1234-123456789abc.jpg';
