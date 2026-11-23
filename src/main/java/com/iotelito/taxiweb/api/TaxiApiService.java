@@ -298,8 +298,9 @@ public class TaxiApiService {
         if (cuerpo.hora() == null || !HORA.matcher(cuerpo.hora()).matches()) {
             throw ApiException.validacion("La hora debe tener el formato HH:mm.");
         }
-        if (cuerpo.pasajeros() == null || cuerpo.pasajeros() < 1 || cuerpo.maletas() == null || cuerpo.maletas() < 0) {
-            throw ApiException.validacion("Revisa la cantidad de pasajeros y maletas.");
+        if (cuerpo.pasajeros() == null || cuerpo.pasajeros() < 1 || cuerpo.pasajeros() > 4
+                || cuerpo.maletas() == null || cuerpo.maletas() < 0 || cuerpo.maletas() > 6) {
+            throw ApiException.validacion("Revisa la cantidad de pasajeros (1 a 4) y maletas (0 a 6).");
         }
 
         Optional<SolicitudTaxi> existente = solicitudes.findByReservaId(cuerpo.reservaId());

@@ -391,6 +391,10 @@ class TaxiApiTest {
         llamar(post(API + "/servicios"), CLIENTE,
                 "{\"reservaId\":777,\"aeropuertoCodigo\":\"LIM\",\"hora\":\"25:00\",\"pasajeros\":2,\"maletas\":1}")
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.codigo").value("VALIDACION"));
+        for (String fuera : new String[]{"\"pasajeros\":5,\"maletas\":1", "\"pasajeros\":0,\"maletas\":1", "\"pasajeros\":2,\"maletas\":7"})
+            llamar(post(API + "/servicios"), CLIENTE,
+                    "{\"reservaId\":777,\"aeropuertoCodigo\":\"LIM\",\"hora\":\"14:30\"," + fuera + "}")
+                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.codigo").value("VALIDACION"));
         llamar(post(API + "/servicios"), CLIENTE, "{no es json")
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.codigo").value("VALIDACION"));
         llamar(get(API + "/servicios/abc"), CLIENTE, null)
