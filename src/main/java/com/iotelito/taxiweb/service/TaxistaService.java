@@ -57,30 +57,36 @@ public class TaxistaService {
         String placa = recortar(form.getPlacaVehiculo()).toUpperCase(Locale.ROOT);
         String licencia = recortar(form.getNumeroLicencia()).toUpperCase(Locale.ROOT);
 
+        // Reglas de formato campo por campo; el controlador las muestra debajo de cada campo.
+        var errores = RegistroTaxistaValidador.validar(form, java.time.LocalDate.now(java.time.ZoneId.of("America/Lima")));
+        if (!errores.isEmpty()) {
+            var primero = errores.entrySet().iterator().next();
+            throw new CampoInvalidoException(primero.getKey(), primero.getValue());
+        }
         if (tipo == null) {
-            throw new RuntimeException("Elige el tipo de documento de identidad");
+            throw new CampoInvalidoException("tipoDocumento", "Elige el tipo de documento de identidad");
         }
         if (!tipo.valida(numero)) {
-            throw new RuntimeException(switch (tipo) {
+            throw new CampoInvalidoException("numeroDocumento", switch (tipo) {
                 case DNI -> "El DNI debe tener 8 dígitos";
                 case PASAPORTE -> "El pasaporte debe tener de 6 a 12 letras o números";
                 case CARNET_EXTRANJERIA -> "El carné de extranjería debe tener de 9 a 12 letras o números";
             });
         }
         if (!Boolean.TRUE.equals(form.getAceptaTerminos())) {
-            throw new RuntimeException("Debes aceptar los términos para registrarte");
+            throw new CampoInvalidoException("aceptaTerminos", "Debes aceptar los términos para registrarte");
         }
         if (usuarioRepository.existsByCorreo(correo)) {
-            throw new RuntimeException("Ya existe un usuario registrado con ese correo");
+            throw new CampoInvalidoException("correo", "Ya existe un usuario registrado con ese correo");
         }
         if (taxistaRepository.existsByTipoDocumentoAndNumeroDocumento(tipo, numero)) {
-            throw new RuntimeException("Ya existe una solicitud con ese documento");
+            throw new CampoInvalidoException("numeroDocumento", "Ya existe una solicitud con ese documento");
         }
         if (taxistaRepository.existsByNumeroLicencia(licencia)) {
-            throw new RuntimeException("Ya existe una solicitud con esa licencia");
+            throw new CampoInvalidoException("numeroLicencia", "Ya existe una solicitud con esa licencia");
         }
         if (taxistaRepository.existsByPlacaVehiculo(placa)) {
-            throw new RuntimeException("Ya existe un vehículo registrado con esa placa");
+            throw new CampoInvalidoException("placaVehiculo", "Ya existe un vehículo registrado con esa placa");
         }
 
         var archivos = documentos.validar(form);

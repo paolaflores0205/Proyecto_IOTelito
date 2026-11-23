@@ -25,6 +25,11 @@
 
     <link rel="stylesheet"
           th:href="@{/css/inicio.css}">
+    <style>
+        .field-error { display: none; margin: 6px 0 0; color: #d32f2f; font-size: 13px; }
+        .field-error.visible { display: block; }
+        .input-shell.campo-invalido { border-color: #d32f2f !important; }
+    </style>
 </head>
 
 <body>
@@ -143,7 +148,9 @@
             </div>
 
             <form th:action="@{/login}"
-                  method="post">
+                  method="post"
+                  id="form-login"
+                  novalidate>
 
                 <div class="field">
 
@@ -163,6 +170,7 @@
                                 placeholder="admin@iotelito.com"
                                 required>
                     </div>
+                    <p class="field-error" data-error-for="correo"></p>
 
                 </div>
 
@@ -183,7 +191,7 @@
                                 id="password"
                                 name="password"
                                 type="password"
-                                placeholder="admin123"
+                                placeholder="Tu contraseña"
                                 required>
 
                         <button class="password-toggle"
@@ -196,6 +204,7 @@
                         </button>
 
                     </div>
+                    <p class="field-error" data-error-for="password"></p>
 
                 </div>
 
@@ -294,6 +303,34 @@
         input.type = showPassword ? "text" : "password";
         icon.textContent = showPassword ? "visibility_off" : "visibility";
     }
+
+    // Errores en rojo debajo del campo en lugar de los globos del navegador.
+    (function () {
+        const form = document.getElementById("form-login");
+        if (!form) return;
+        const reglas = {
+            correo: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? "" : (v ? "Ingresa un correo válido." : "Ingresa tu correo."),
+            password: (v) => v ? "" : "Ingresa tu contraseña."
+        };
+        function validar(campo) {
+            const texto = reglas[campo.name](campo.value.trim());
+            const error = form.querySelector('.field-error[data-error-for="' + campo.name + '"]');
+            error.textContent = texto;
+            error.classList.toggle("visible", texto !== "");
+            campo.closest(".input-shell").classList.toggle("campo-invalido", texto !== "");
+            return texto === "";
+        }
+        Object.keys(reglas).forEach(function (nombre) {
+            const campo = form.elements[nombre];
+            campo.addEventListener("input", function () {
+                if (campo.closest(".input-shell").classList.contains("campo-invalido")) validar(campo);
+            });
+        });
+        form.addEventListener("submit", function (evento) {
+            const resultados = Object.keys(reglas).map(function (nombre) { return validar(form.elements[nombre]); });
+            if (resultados.includes(false)) evento.preventDefault();
+        });
+    })();
 </script>
 
 </body>

@@ -75,7 +75,7 @@ class RegistroTaxistaTest {
         RuntimeException carne = assertThrows(RuntimeException.class,
                 () -> taxistaService.registrarTaxista(formulario(TipoDocumento.CARNET_EXTRANJERIA, "12345")));
 
-        assertThat(dni.getMessage()).isEqualTo("El DNI debe tener 8 dígitos");
+        assertThat(dni.getMessage()).isEqualTo("El DNI debe tener exactamente 8 dígitos.");
         assertThat(carne.getMessage()).contains("carné de extranjería");
     }
 

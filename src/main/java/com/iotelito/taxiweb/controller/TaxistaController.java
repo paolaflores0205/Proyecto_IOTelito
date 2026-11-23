@@ -45,6 +45,15 @@ public class TaxistaController {
             Model model
     ) {
 
+        // Errores de formato: se muestran todos a la vez, en rojo debajo de cada campo.
+        java.util.Map<String, String> errores = com.iotelito.taxiweb.service.RegistroTaxistaValidador.validar(
+                form, java.time.LocalDate.now(java.time.ZoneId.of("America/Lima")));
+        if (!errores.isEmpty()) {
+            model.addAttribute("errores", errores);
+            model.addAttribute("error", "Revisa los campos marcados en rojo.");
+            return "registro-taxista";
+        }
+
         try {
 
             Taxista taxista =
@@ -59,6 +68,10 @@ public class TaxistaController {
 
         } catch (DataAccessException | TransactionException e) {
             model.addAttribute("error", "No pudimos guardar la solicitud. Revisa los datos e intenta de nuevo.");
+            return "registro-taxista";
+        } catch (com.iotelito.taxiweb.service.CampoInvalidoException e) {
+            model.addAttribute("errores", java.util.Map.of(e.getCampo(), e.getMessage()));
+            model.addAttribute("error", "Revisa los campos marcados en rojo.");
             return "registro-taxista";
         } catch (RuntimeException e) {
 

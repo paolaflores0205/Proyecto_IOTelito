@@ -27,6 +27,12 @@
 
     <link rel="stylesheet"
           th:href="@{/css/registro-taxista.css}">
+    <style>
+        .field-error { display: none; margin: 6px 0 0; color: #d32f2f; font-size: 13px; line-height: 1.35; }
+        .field-error.visible { display: block; }
+        .field input.campo-invalido, .field select.campo-invalido { border-color: #d32f2f !important; }
+        .terms .terms-error { flex-basis: 100%; }
+    </style>
 </head>
 
 <body>
@@ -184,6 +190,7 @@
         <form
                 th:action="@{/taxistas/registro}"
                 th:object="${form}"                method="post"
+                novalidate
                 enctype="multipart/form-data">
 
 
@@ -210,8 +217,10 @@
                                 id="nombres"
                                 type="text"
                                 th:field="*{nombres}"
+                                maxlength="100"
                                 placeholder="Ej. Carlos Alberto"
                                 required>
+                        <p class="field-error" data-error-for="nombres" th:classappend="${errores != null and errores.containsKey('nombres')} ? 'visible'" th:text="${errores != null ? errores.get('nombres') : ''}"></p>
 
                     </div>
 
@@ -226,8 +235,10 @@
                                 id="apellidos"
                                 type="text"
                                 th:field="*{apellidos}"
+                                maxlength="100"
                                 placeholder="Ej. Mendoza Quispe"
                                 required>
+                        <p class="field-error" data-error-for="apellidos" th:classappend="${errores != null and errores.containsKey('apellidos')} ? 'visible'" th:text="${errores != null ? errores.get('apellidos') : ''}"></p>
 
                     </div>
 
@@ -250,6 +261,7 @@
                                     th:value="${tipo}"
                                     th:text="${tipo.etiqueta}">DNI</option>
                         </select>
+                        <p class="field-error" data-error-for="tipoDocumento" th:classappend="${errores != null and errores.containsKey('tipoDocumento')} ? 'visible'" th:text="${errores != null ? errores.get('tipoDocumento') : ''}"></p>
 
                     </div>
 
@@ -265,9 +277,10 @@
                                 type="text"
                                 th:field="*{numeroDocumento}"
                                 placeholder="DNI: 8 dígitos (Ej. 71234567)"
-                                maxlength="12"
-                                pattern="[A-Za-z0-9]{6,12}"
+                                maxlength="8"
+                                inputmode="numeric"
                                 required>
+                        <p class="field-error" data-error-for="numeroDocumento" th:classappend="${errores != null and errores.containsKey('numeroDocumento')} ? 'visible'" th:text="${errores != null ? errores.get('numeroDocumento') : ''}"></p>
 
                     </div>
 
@@ -283,6 +296,7 @@
                                 type="date"
                                 th:field="*{fechaNacimiento}"
                                 required>
+                        <p class="field-error" data-error-for="fechaNacimiento" th:classappend="${errores != null and errores.containsKey('fechaNacimiento')} ? 'visible'" th:text="${errores != null ? errores.get('fechaNacimiento') : ''}"></p>
 
                     </div>
 
@@ -301,8 +315,10 @@
                                 id="telefono"
                                 type="tel"
                                 th:field="*{telefono}"
+                                maxlength="9" inputmode="numeric"
                                 placeholder="+51 987 654 321"
                                 required>
+                        <p class="field-error" data-error-for="telefono" th:classappend="${errores != null and errores.containsKey('telefono')} ? 'visible'" th:text="${errores != null ? errores.get('telefono') : ''}"></p>
 
                     </div>
 
@@ -319,6 +335,7 @@
                                 th:field="*{correo}"
                                 placeholder="carlos.mendoza@gmail.com"
                                 required>
+                        <p class="field-error" data-error-for="correo" th:classappend="${errores != null and errores.containsKey('correo')} ? 'visible'" th:text="${errores != null ? errores.get('correo') : ''}"></p>
 
                     </div>
 
@@ -335,8 +352,10 @@
                             id="domicilio"
                             type="text"
                             th:field="*{domicilio}"
+                                maxlength="255"
                             placeholder="Av. Larco 123, Miraflores, Lima"
                             required>
+                    <p class="field-error" data-error-for="domicilio" th:classappend="${errores != null and errores.containsKey('domicilio')} ? 'visible'" th:text="${errores != null ? errores.get('domicilio') : ''}"></p>
 
                 </div>
 
@@ -366,8 +385,10 @@
                                 id="numeroLicencia"
                                 type="text"
                                 th:field="*{numeroLicencia}"
+                                maxlength="9"
                                 placeholder="Q71234567"
                                 required>
+                        <p class="field-error" data-error-for="numeroLicencia" th:classappend="${errores != null and errores.containsKey('numeroLicencia')} ? 'visible'" th:text="${errores != null ? errores.get('numeroLicencia') : ''}"></p>
 
                     </div>
 
@@ -378,12 +399,15 @@
                             Categoría *
                         </label>
 
-                        <input
+                        <select
                                 id="categoriaLicencia"
-                                type="text"
                                 th:field="*{categoriaLicencia}"
-                                placeholder="Ej. A-IIb (A-IIb, A-IIIa, etc.)"
                                 required>
+                            <option value="">Elige la categoría</option>
+                            <option th:each="cat : ${T(com.iotelito.taxiweb.service.RegistroTaxistaValidador).CATEGORIAS_LICENCIA}"
+                                    th:value="${cat}" th:text="${cat}">A-IIb</option>
+                        </select>
+                        <p class="field-error" data-error-for="categoriaLicencia" th:classappend="${errores != null and errores.containsKey('categoriaLicencia')} ? 'visible'" th:text="${errores != null ? errores.get('categoriaLicencia') : ''}"></p>
 
                     </div>
 
@@ -399,6 +423,7 @@
                                 type="date"
                                 th:field="*{fechaVencimientoLicencia}"
                                 required>
+                        <p class="field-error" data-error-for="fechaVencimientoLicencia" th:classappend="${errores != null and errores.containsKey('fechaVencimientoLicencia')} ? 'visible'" th:text="${errores != null ? errores.get('fechaVencimientoLicencia') : ''}"></p>
 
                     </div>
 
@@ -430,8 +455,10 @@
                                 id="marcaVehiculo"
                                 type="text"
                                 th:field="*{marcaVehiculo}"
+                                maxlength="60"
                                 placeholder="Ej. Toyota"
                                 required>
+                        <p class="field-error" data-error-for="marcaVehiculo" th:classappend="${errores != null and errores.containsKey('marcaVehiculo')} ? 'visible'" th:text="${errores != null ? errores.get('marcaVehiculo') : ''}"></p>
 
                     </div>
 
@@ -446,8 +473,10 @@
                                 id="modeloVehiculo"
                                 type="text"
                                 th:field="*{modeloVehiculo}"
+                                maxlength="60"
                                 placeholder="Ej. Corolla"
                                 required>
+                        <p class="field-error" data-error-for="modeloVehiculo" th:classappend="${errores != null and errores.containsKey('modeloVehiculo')} ? 'visible'" th:text="${errores != null ? errores.get('modeloVehiculo') : ''}"></p>
 
                     </div>
 
@@ -464,6 +493,7 @@
                                 th:field="*{anioVehiculo}"
                                 placeholder="Ej. 2022"
                                 required>
+                        <p class="field-error" data-error-for="anioVehiculo" th:classappend="${errores != null and errores.containsKey('anioVehiculo')} ? 'visible'" th:text="${errores != null ? errores.get('anioVehiculo') : ''}"></p>
 
                     </div>
 
@@ -482,8 +512,10 @@
                                 id="colorVehiculo"
                                 type="text"
                                 th:field="*{colorVehiculo}"
+                                maxlength="60"
                                 placeholder="Ej. Gris Plateado"
                                 required>
+                        <p class="field-error" data-error-for="colorVehiculo" th:classappend="${errores != null and errores.containsKey('colorVehiculo')} ? 'visible'" th:text="${errores != null ? errores.get('colorVehiculo') : ''}"></p>
 
                     </div>
 
@@ -498,8 +530,10 @@
                                 id="placaVehiculo"
                                 type="text"
                                 th:field="*{placaVehiculo}"
+                                maxlength="7"
                                 placeholder="ABC-123"
                                 required>
+                        <p class="field-error" data-error-for="placaVehiculo" th:classappend="${errores != null and errores.containsKey('placaVehiculo')} ? 'visible'" th:text="${errores != null ? errores.get('placaVehiculo') : ''}"></p>
 
                     </div>
 
@@ -703,6 +737,7 @@
             <!-- ================================================= -->
 
             <div class="terms">
+                <p class="field-error terms-error" data-error-for="aceptaTerminos" th:classappend="${errores != null and errores.containsKey('aceptaTerminos')} ? 'visible'" th:text="${errores != null ? errores.get('aceptaTerminos') : ''}"></p>
 
                 <label class="material-checkbox">
 
@@ -816,39 +851,153 @@
             resumen.setAttribute("aria-live", "polite");
             tarjeta.after(resumen);
 
+            const errorArchivo = document.createElement("p");
+            errorArchivo.className = "field-error";
+            errorArchivo.dataset.errorFor = campo.name;
+            resumen.after(errorArchivo);
+
             campo.addEventListener("change", function () {
                 const archivo = campo.files[0];
                 resumen.textContent = archivo ? archivo.name : "";
-                const total = archivos.reduce((suma, input) => suma + (input.files[0]?.size || 0), 0);
-                archivos.forEach(function (input) {
-                    const maximo = Number(input.dataset.maxMb || 5);
-                    const peso = input.files[0]?.size || 0;
-                    const error = peso > maximo * mib ? "El archivo debe pesar " + maximo + " MB o menos." : "";
-                    input.setCustomValidity(error);
-                });
-                if (!campo.validationMessage && total > 8 * mib) {
-                    campo.setCustomValidity("El total de los archivos debe pesar 8 MB o menos.");
-                }
-                campo.reportValidity();
+                validar(campo);
+            });
+        });
+
+        // ===== Reglas: las mismas que valida el servidor (RegistroTaxistaValidador). =====
+        const hoy = new Date();
+        const iso = function (fecha) { return fecha.toISOString().slice(0, 10); };
+        const haceAnios = function (anios) { const f = new Date(hoy); f.setFullYear(f.getFullYear() - anios); return f; };
+        const nombre = /^[\p{L}][\p{L} '.-]{1,99}$/u;
+        const textoVehiculo = /^[\p{L}0-9][\p{L}0-9 .-]{1,59}$/u;
+        const reglasDocumento = {
+            DNI: { regex: /^[0-9]{8}$/, max: 8, modo: "numeric", mensaje: "El DNI debe tener exactamente 8 dígitos." },
+            PASAPORTE: { regex: /^[A-Za-z0-9]{6,12}$/, max: 12, modo: "text", mensaje: "El pasaporte debe tener de 6 a 12 letras o números." },
+            CARNET_EXTRANJERIA: { regex: /^[A-Za-z0-9]{9,12}$/, max: 12, modo: "text", mensaje: "El carné de extranjería debe tener de 9 a 12 letras o números." }
+        };
+        const anioMaximo = hoy.getFullYear() + 1;
+
+        const reglas = {
+            nombres: (v) => nombre.test(v) ? "" : "Ingresa tus nombres (solo letras, de 2 a 100).",
+            apellidos: (v) => nombre.test(v) ? "" : "Ingresa tus apellidos (solo letras, de 2 a 100).",
+            numeroDocumento: (v) => {
+                const regla = reglasDocumento[form.elements.tipoDocumento.value] || reglasDocumento.DNI;
+                return regla.regex.test(v) ? "" : regla.mensaje;
+            },
+            fechaNacimiento: (v) => {
+                if (!v) return "Ingresa tu fecha de nacimiento.";
+                if (v > iso(hoy)) return "La fecha de nacimiento no puede ser futura.";
+                if (v > iso(haceAnios(18))) return "Debes ser mayor de 18 años.";
+                if (v < iso(haceAnios(100))) return "Revisa el año de nacimiento.";
+                return "";
+            },
+            telefono: (v) => /^[0-9]{9}$/.test(v) ? "" : "El teléfono debe tener 9 dígitos.",
+            correo: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) && v.length <= 150 ? "" : "Ingresa un correo válido, por ejemplo nombre@gmail.com.",
+            domicilio: (v) => v.length >= 8 && v.length <= 255 ? "" : "El domicilio debe tener entre 8 y 255 caracteres.",
+            numeroLicencia: (v) => /^[A-Z][0-9]{8}$/.test(v.toUpperCase()) ? "" : "La licencia debe tener una letra y 8 dígitos, por ejemplo Q12345678.",
+            categoriaLicencia: (v) => v ? "" : "Elige la categoría de tu licencia.",
+            fechaVencimientoLicencia: (v) => {
+                if (!v) return "Ingresa la fecha de vencimiento de la licencia.";
+                if (v < iso(hoy)) return "La licencia está vencida: la fecha debe ser hoy o posterior.";
+                return "";
+            },
+            marcaVehiculo: (v) => textoVehiculo.test(v) ? "" : "Ingresa la marca (de 2 a 60 caracteres).",
+            modeloVehiculo: (v) => textoVehiculo.test(v) ? "" : "Ingresa el modelo (de 2 a 60 caracteres).",
+            colorVehiculo: (v) => textoVehiculo.test(v) ? "" : "Ingresa el color (de 2 a 60 caracteres).",
+            anioVehiculo: (v) => {
+                const anio = Number(v);
+                return v && Number.isInteger(anio) && anio >= 1950 && anio <= anioMaximo ? "" : "Ingresa un año entre 1950 y " + anioMaximo + ".";
+            },
+            placaVehiculo: (v) => /^[A-Z0-9]{3}-[0-9]{3}$/.test(v.toUpperCase()) ? "" : "La placa debe tener el formato ABC-123.",
+            aceptaTerminos: (_v, campo) => campo.checked ? "" : "Debes aceptar los términos para registrarte."
+        };
+
+        function mensajeArchivo(campo) {
+            const maximo = Number(campo.dataset.maxMb || 5);
+            const peso = campo.files[0]?.size || 0;
+            if (!peso) return campo.required ? "Adjunta este archivo." : "";
+            if (peso > maximo * mib) return "El archivo debe pesar " + maximo + " MB o menos.";
+            const total = archivos.reduce((suma, input) => suma + (input.files[0]?.size || 0), 0);
+            return total > 8 * mib ? "El total de los archivos debe pesar 8 MB o menos." : "";
+        }
+
+        function mensaje(campo) {
+            if (campo.type === "file") return mensajeArchivo(campo);
+            const regla = reglas[campo.name];
+            const valor = (campo.value || "").trim();
+            if (regla) return regla(valor, campo);
+            return campo.required && !valor ? "Completa este campo." : "";
+        }
+
+        function errorDe(campo) {
+            return form.querySelector('.field-error[data-error-for="' + campo.name + '"]');
+        }
+
+        // Muestra (o limpia) el texto rojo debajo del campo. Devuelve true si el campo es válido.
+        function validar(campo) {
+            if (!campo.name || campo.type === "hidden") return true;
+            const texto = mensaje(campo);
+            campo.setCustomValidity(texto);
+            campo.classList.toggle("campo-invalido", texto !== "");
+            const error = errorDe(campo);
+            if (error) {
+                error.textContent = texto;
+                error.classList.toggle("visible", texto !== "");
+            }
+            return texto === "";
+        }
+
+        // Ajusta el campo del documento al tipo elegido (DNI: 8 dígitos y teclado numérico).
+        function ajustarDocumento() {
+            const regla = reglasDocumento[form.elements.tipoDocumento.value] || reglasDocumento.DNI;
+            const campo = form.elements.numeroDocumento;
+            campo.maxLength = regla.max;
+            campo.inputMode = regla.modo;
+            if (campo.value.length > regla.max) campo.value = campo.value.slice(0, regla.max);
+        }
+        form.elements.tipoDocumento.addEventListener("change", function () {
+            ajustarDocumento();
+            if (form.elements.numeroDocumento.value) validar(form.elements.numeroDocumento);
+        });
+        ajustarDocumento();
+
+        // El calendario no deja elegir fechas imposibles.
+        form.elements.fechaNacimiento.max = iso(haceAnios(18));
+        form.elements.fechaVencimientoLicencia.min = iso(hoy);
+        form.elements.anioVehiculo.min = 1950;
+        form.elements.anioVehiculo.max = anioMaximo;
+
+        // Mayúsculas en placa y licencia; solo dígitos en teléfono.
+        ["placaVehiculo", "numeroLicencia"].forEach(function (nombreCampo) {
+            form.elements[nombreCampo].addEventListener("input", function (evento) {
+                evento.target.value = evento.target.value.toUpperCase();
+            });
+        });
+        form.elements.telefono.addEventListener("input", function (evento) {
+            evento.target.value = evento.target.value.replace(/[^0-9]/g, "");
+        });
+
+        // Revalida al salir del campo y, si ya tenía error, mientras se corrige.
+        Array.from(form.querySelectorAll("input, select, textarea")).forEach(function (campo) {
+            if (campo.type === "file") return;
+            campo.addEventListener("blur", function () { validar(campo); });
+            campo.addEventListener(campo.type === "checkbox" || campo.tagName === "SELECT" ? "change" : "input", function () {
+                if (campo.classList.contains("campo-invalido")) validar(campo);
             });
         });
 
         function fieldsForStep(index) {
-            return Array.from(sections[index].querySelectorAll("input, select, textarea"));
+            return Array.from(sections[index].querySelectorAll("input, select, textarea"))
+                .filter(function (campo) { return campo.name && campo.type !== "hidden"; });
         }
 
         function validateStep(index) {
             const fields = fieldsForStep(index);
-            const invalid = fields.find(function (field) {
-                return !field.checkValidity();
-            });
-
-            if (invalid) {
-                invalid.reportValidity();
-                invalid.focus({ preventScroll: false });
+            const resultados = fields.map(validar);
+            const primero = fields[resultados.indexOf(false)];
+            if (primero) {
+                primero.focus({ preventScroll: false });
                 return false;
             }
-
             return true;
         }
 
@@ -900,9 +1049,7 @@
 
         form.addEventListener("submit", function (event) {
             const firstInvalidStep = sections.findIndex(function (_section, index) {
-                return !fieldsForStep(index).every(function (field) {
-                    return field.checkValidity();
-                });
+                return !fieldsForStep(index).map(validar).every(Boolean);
             });
 
             if (firstInvalidStep !== -1) {
@@ -912,7 +1059,14 @@
             }
         });
 
-        showStep(0);
+        // Si el servidor devolvió errores, abrir el primer paso que tiene uno.
+        const errorServidor = form.querySelector(".field-error.visible");
+        const pasoConError = errorServidor ? sections.indexOf(errorServidor.closest(".form-section")) : -1;
+        if (errorServidor) {
+            const campo = form.elements[errorServidor.dataset.errorFor];
+            if (campo && campo.classList) campo.classList.add("campo-invalido");
+        }
+        showStep(pasoConError > 0 ? pasoConError : 0);
     })();
 </script>
 
