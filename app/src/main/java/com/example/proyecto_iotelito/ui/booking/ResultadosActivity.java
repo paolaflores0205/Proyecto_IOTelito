@@ -153,14 +153,16 @@ public class ResultadosActivity extends AppCompatActivity {
         estadoBusqueda.setVisibility(View.VISIBLE);
         estadoBusqueda.setText(R.string.consultando_disponibilidad);
         estadoBusqueda.setOnClickListener(null);
-        com.example.proyecto_iotelito.data.ClientLocalTasks.run(this, this,
+        com.example.proyecto_iotelito.data.ClientLocalTasks.runWithError(this, this,
                 () -> com.example.proyecto_iotelito.data.ReservaRepository.getInstance(this)
                         .hotelesDisponibles(this, candidatos, bookingSelection.fechaEntrada(),
                                 bookingSelection.fechaSalida(), bookingSelection.adultos, bookingSelection.ninos),
                 hoteles -> { if (version == consultaVersion) recibirHoteles(hoteles); },
-                () -> {
+                error -> {
                     if (version != consultaVersion) return;
-                    estadoBusqueda.setText(R.string.error_disponibilidad_reintentar);
+                    // Si la causa es de negocio (p. ej. fechas que se cruzan con otra reserva tuya), se muestra tal cual.
+                    estadoBusqueda.setText(error instanceof IllegalArgumentException
+                            ? error.getMessage() : getString(R.string.error_disponibilidad_reintentar));
                     estadoBusqueda.setOnClickListener(v -> consultarDisponibilidad());
                 });
     }
