@@ -45,9 +45,10 @@ public final class InventarioValidacion {
         return errores;
     }
 
-    /** Teléfono del hotel: de 7 a 15 dígitos; admite espacios, +, guiones y paréntesis. Null si es válido. */
+    /** Teléfono del hotel (opcional): de 7 a 15 dígitos; admite espacios, +, guiones y paréntesis. Null si es válido. */
     public static String telefono(String telefono) {
         String t = texto(telefono);
+        if (t.isEmpty()) return null;
         String digitos = t.replaceAll("[^0-9]", "");
         if (!t.matches("[0-9 +()-]*") || digitos.length() < 7 || digitos.length() > 15)
             return "Ingresa un teléfono de 7 a 15 dígitos.";

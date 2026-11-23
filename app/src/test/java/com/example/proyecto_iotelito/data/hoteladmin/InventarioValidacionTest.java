@@ -31,6 +31,7 @@ public class InventarioValidacionTest {
 
     @Test public void telefonoDelHotel() {
         assertNull(InventarioValidacion.telefono("(01) 610-4000"));
+        assertNull(InventarioValidacion.telefono(""));
         assertNull(InventarioValidacion.telefono("+51 987 654 321"));
         assertNotNull(InventarioValidacion.telefono("123456"));
         assertNotNull(InventarioValidacion.telefono("987abc654"));
