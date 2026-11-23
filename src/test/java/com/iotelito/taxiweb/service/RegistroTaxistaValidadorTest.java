@@ -87,6 +87,10 @@ class RegistroTaxistaValidadorTest {
         assertThat(errores(f)).containsKeys("telefono", "placaVehiculo", "numeroLicencia", "categoriaLicencia");
         f.setTelefono("012345678");
         assertThat(errores(f)).doesNotContainKey("telefono");
+        f.setTelefono("+51 987 654 321");
+        assertThat(errores(f)).doesNotContainKey("telefono");
+        assertThat(RegistroTaxistaValidador.normalizarTelefono("+51 987-654-321")).isEqualTo("987654321");
+        assertThat(RegistroTaxistaValidador.normalizarTelefono("987 654 321")).isEqualTo("987654321");
     }
 
     @Test

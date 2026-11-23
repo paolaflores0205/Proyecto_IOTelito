@@ -94,7 +94,7 @@ public class TaxistaService {
         usuario.setNombres(recortar(form.getNombres()));
         usuario.setApellidos(recortar(form.getApellidos()));
         usuario.setCorreo(correo);
-        usuario.setTelefono(recortar(form.getTelefono()));
+        usuario.setTelefono(RegistroTaxistaValidador.normalizarTelefono(form.getTelefono()));
         usuario.setRol(Rol.TAXISTA);
         usuario.setActivo(false);
 

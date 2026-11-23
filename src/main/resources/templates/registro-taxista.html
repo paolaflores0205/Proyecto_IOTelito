@@ -32,6 +32,10 @@
         .field-error.visible { display: block; }
         .field input.campo-invalido, .field select.campo-invalido { border-color: #d32f2f !important; }
         .terms .terms-error { flex-basis: 100%; }
+        .telefono-peru { position: relative; }
+        .telefono-peru .telefono-prefijo { position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: #4a5d74; font-weight: 500; pointer-events: none; }
+        .field .telefono-peru input { padding-left: 52px; width: 100%; }
     </style>
 </head>
 
@@ -311,13 +315,17 @@
                             Teléfono Celular *
                         </label>
 
-                        <input
-                                id="telefono"
-                                type="tel"
-                                th:field="*{telefono}"
-                                maxlength="9" inputmode="numeric"
-                                placeholder="+51 987 654 321"
-                                required>
+                        <!-- +51 fijo: el taxista solo escribe los 9 dígitos del celular. -->
+                        <div class="telefono-peru">
+                            <span class="telefono-prefijo">+51</span>
+                            <input
+                                    id="telefono"
+                                    type="tel"
+                                    th:field="*{telefono}"
+                                    maxlength="16" inputmode="numeric"
+                                    placeholder="987 654 321"
+                                    required>
+                        </div>
                         <p class="field-error" data-error-for="telefono" th:classappend="${errores != null and errores.containsKey('telefono')} ? 'visible'" th:text="${errores != null ? errores.get('telefono') : ''}"></p>
 
                     </div>
@@ -972,8 +980,11 @@
                 evento.target.value = evento.target.value.toUpperCase();
             });
         });
+        // Solo dígitos; si pegan "+51 987 654 321" se quita el 51 del país y quedan los 9 dígitos.
         form.elements.telefono.addEventListener("input", function (evento) {
-            evento.target.value = evento.target.value.replace(/[^0-9]/g, "");
+            let digitos = evento.target.value.replace(/[^0-9]/g, "");
+            if (digitos.length === 11 && digitos.startsWith("51")) digitos = digitos.slice(2);
+            evento.target.value = digitos.slice(0, 9);
         });
 
         // Revalida al salir del campo y, si ya tenía error, mientras se corrige.

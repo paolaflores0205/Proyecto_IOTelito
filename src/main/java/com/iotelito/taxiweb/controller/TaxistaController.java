@@ -45,6 +45,7 @@ public class TaxistaController {
             Model model
     ) {
 
+        form.setTelefono(com.iotelito.taxiweb.service.RegistroTaxistaValidador.normalizarTelefono(form.getTelefono()));
         // Errores de formato: se muestran todos a la vez, en rojo debajo de cada campo.
         java.util.Map<String, String> errores = com.iotelito.taxiweb.service.RegistroTaxistaValidador.validar(
                 form, java.time.LocalDate.now(java.time.ZoneId.of("America/Lima")));

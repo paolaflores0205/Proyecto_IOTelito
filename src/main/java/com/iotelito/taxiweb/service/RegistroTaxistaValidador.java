@@ -61,7 +61,7 @@ public final class RegistroTaxistaValidador {
             errores.put("fechaNacimiento", "Revisa el año de nacimiento.");
         }
 
-        if (!TELEFONO.matcher(texto(form.getTelefono())).matches()) {
+        if (!TELEFONO.matcher(normalizarTelefono(form.getTelefono())).matches()) {
             errores.put("telefono", "El teléfono debe tener 9 dígitos.");
         }
         String correo = texto(form.getCorreo());
@@ -104,6 +104,12 @@ public final class RegistroTaxistaValidador {
             errores.put("aceptaTerminos", "Debes aceptar los términos para registrarte.");
         }
         return errores;
+    }
+
+    /** Deja solo los 9 dígitos del celular: quita espacios, guiones y el código de país +51. */
+    public static String normalizarTelefono(String telefono) {
+        String digitos = telefono == null ? "" : telefono.replaceAll("[^0-9]", "");
+        return digitos.length() == 11 && digitos.startsWith("51") ? digitos.substring(2) : digitos;
     }
 
     private static void nombre(Map<String, String> errores, String campo, String valor, String mensaje) {
