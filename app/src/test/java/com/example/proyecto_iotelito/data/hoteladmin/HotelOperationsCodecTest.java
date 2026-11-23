@@ -57,6 +57,34 @@ public class HotelOperationsCodecTest {
         HotelOperationsCodec.Report r=HotelOperationsCodec.report(Collections.singletonList(decode(data)),Collections.emptyList(),2,today,"MONTH");
         assertEquals(0,r.bookings);assertEquals(100.0*2/60,r.occupancy,0.001);
     }
+    private static HotelOperationsCodec.ServiceLine line(int id,String name,double price,int qty){
+        return new HotelOperationsCodec.ServiceLine(id,name,price,qty);
+    }
+    @Test public void ingresosPorServicioDeMenorAMayorYSoloDelPeriodo(){
+        List<HotelOperationsCodec.Receipt> receipts=Arrays.asList(
+                new HotelOperationsCodec.Receipt(LocalDateTime.of(2026,11,5,10,0),300,Arrays.asList(line(1,"Spa",80,1),line(2,"Desayuno",42.5,2))),
+                new HotelOperationsCodec.Receipt(LocalDateTime.of(2026,11,20,9,0),150,Arrays.asList(line(2,"Desayuno",42.5,1),line(3,"Lavandería",15,1))),
+                new HotelOperationsCodec.Receipt(LocalDateTime.of(2026,12,2,9,0),999,Collections.singletonList(line(1,"Spa",500,1))));
+        HotelOperationsCodec.Report r=HotelOperationsCodec.report(Collections.emptyList(),receipts,0,today,"MONTH");
+        assertEquals(3,r.serviceIncome.size());
+        assertEquals("Lavandería",r.serviceIncome.get(0).concepto);assertEquals(15,r.serviceIncome.get(0).monto,0.001);
+        assertEquals("Spa",r.serviceIncome.get(1).concepto);assertEquals(80,r.serviceIncome.get(1).monto,0.001);
+        assertEquals("Desayuno",r.serviceIncome.get(2).concepto);assertEquals(127.5,r.serviceIncome.get(2).monto,0.001);
+        assertEquals(5,r.servicesSold);
+    }
+    @Test public void lineasDeServicioValidanYSeLeenDeFirestore(){
+        HotelOperationsCodec.ServiceLine l=line(7,"Desayuno",19.9,3);
+        assertEquals(19.9*3,l.amount(),0);
+        HotelOperationsCodec.ServiceLine back=HotelOperationsCodec.ServiceLine.from(l.toMap());
+        assertNotNull(back);assertEquals(3,back.quantity);assertEquals("Desayuno",back.name);
+        assertNull(HotelOperationsCodec.ServiceLine.from("texto"));
+        assertEquals(1,HotelOperationsCodec.ServiceLine.list(Arrays.asList(l.toMap(),Collections.singletonMap("name","x"))).size());
+        for(int qty:new int[]{0,100})
+            assertThrows(IllegalArgumentException.class,()->line(1,"Spa",10,qty));
+        assertThrows(IllegalArgumentException.class,()->line(1," ",10,1));
+        assertThrows(IllegalArgumentException.class,()->line(1,"Spa",-1,1));
+        assertEquals(19.9*3+80,HotelOperationsCodec.servicesTotal(Arrays.asList(l,line(1,"Spa",80,1))),0);
+    }
     @Test public void ingresosSeAgrupanPorFechaDeRegistroNoDeReserva(){
         List<HotelOperationsCodec.Receipt> receipts=Arrays.asList(
                 new HotelOperationsCodec.Receipt(LocalDateTime.of(2026,11,1,0,0),100.25),

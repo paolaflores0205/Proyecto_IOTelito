@@ -110,7 +110,7 @@ public class AdminReportesFragment extends Fragment {
         android.widget.TextView info = new android.widget.TextView(requireContext());
         String error = bookingsError != null ? bookingsError : receiptsError != null ? receiptsError : roomsError;
         boolean ready = bookingsReady && receiptsReady && roomsReady;
-        info.setText(error != null ? error : !ready ? "Consultando datos del hotel…" : "Sin consumos registrados. Los servicios del catálogo no representan ventas.");
+        info.setText(error != null ? error : !ready ? "Consultando datos del hotel…" : "Sin servicios consumidos en este período.");
         binding.llServicios.addView(info);
         binding.tvServicios.setText("—");
         if (!ready) {
@@ -123,6 +123,9 @@ public class AdminReportesFragment extends Fragment {
         binding.tvReservas.setText(String.valueOf(r.bookings));
         binding.tvOcupacion.setText(r.occupancy == null ? "—" : String.format(Locale.US,"%.1f%%",r.occupancy));
         pintarRemoteBarras(r.buckets);
+        // Ingresos por servicio adicional registrados en los cierres, ordenados de menor a mayor.
+        binding.tvServicios.setText(String.valueOf(r.servicesSold));
+        if (!r.serviceIncome.isEmpty()) pintarServicios(r.serviceIncome);
     }
     private void pintarRemoteBarras(double[] values) {
         View[] bars = {binding.barSem1,binding.barSem2,binding.barSem3,binding.barSem4};

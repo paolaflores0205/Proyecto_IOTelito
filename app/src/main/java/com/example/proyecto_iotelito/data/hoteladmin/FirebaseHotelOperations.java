@@ -46,7 +46,19 @@ public final class FirebaseHotelOperations {
     public LiveData<State<HotelOperationsCodec.Receipt>> receipts(){return observe(db.collection("hotelCheckouts").whereEqualTo("hotelId",hotelId),doc->{
         com.google.firebase.Timestamp timestamp=doc.getTimestamp("createdAt");
         if(timestamp==null)return null;
-        return new HotelOperationsCodec.Receipt(timestamp.toDate().toInstant().atZone(ZONE).toLocalDateTime(),doc.getDouble("total"));});}
+        return new HotelOperationsCodec.Receipt(timestamp.toDate().toInstant().atZone(ZONE).toLocalDateTime(),doc.getDouble("total"),
+                HotelOperationsCodec.ServiceLine.list(doc.get("services")));});}
+    /** Servicios activos del catálogo del hotel, para marcar lo que consumió el huésped al cerrar. */
+    public void servicios(Consumer<List<com.example.proyecto_iotelito.model.hoteladmin.Servicio>> success,Consumer<String> error){
+        db.collection("hotels").document(String.valueOf(hotelId)).collection("services").whereEqualTo("activo",true).get(Source.SERVER)
+            .addOnSuccessListener(snapshot->{
+                try{verify();List<com.example.proyecto_iotelito.model.hoteladmin.Servicio> rows=new ArrayList<>();
+                    for(DocumentSnapshot doc:snapshot){if(Boolean.TRUE.equals(doc.getBoolean("archived")))continue;
+                        try{rows.add(HotelAdminFirestoreCodec.service(doc.getId(),hotelId,doc.getData(),com.example.proyecto_iotelito.R.drawable.superadmin_hotel_sol));}
+                        catch(IllegalArgumentException malformed){/* servicio con datos incompletos: se omite */}}
+                    rows.sort(Comparator.comparing(row->row.nombre.toLowerCase(Locale.ROOT)));success.accept(rows);
+                }catch(RuntimeException failure){error.accept("No se pudieron cargar los servicios del hotel.");}
+            }).addOnFailureListener(failure->error.accept("No se pudieron cargar los servicios del hotel. Revisa la conexión."));}
     public void load(int id,Consumer<ReservaAdmin> success,Consumer<String> error){
         db.collection("reservations").document(String.valueOf(id)).get(Source.SERVER).addOnSuccessListener(doc->{
             try{verify();if(!doc.exists())throw new IllegalArgumentException();ReservaAdmin row=HotelOperationsCodec.decode(doc.getId(),doc.getData(),hotelId,LocalDate.now(ZONE));
@@ -58,6 +70,8 @@ public final class FirebaseHotelOperations {
                         if(receipt.exists()) {
                             double extra=receipt.getDouble("extra");
                             row.tieneComprobante=true;
+                            for(HotelOperationsCodec.ServiceLine line:HotelOperationsCodec.ServiceLine.list(receipt.get("services")))
+                                row.consumos.add(new com.example.proyecto_iotelito.model.hoteladmin.ItemConsumo(line.name+" × "+line.quantity,line.amount()));
                             if(extra>0) row.consumos.add(new com.example.proyecto_iotelito.model.hoteladmin.ItemConsumo(
                                     "Cargo adicional del cierre",extra,receipt.getString("reason"),receipt.getString("observation")));
                         }
@@ -67,7 +81,10 @@ public final class FirebaseHotelOperations {
             }catch(RuntimeException failure){error.accept("No se encontró una reserva válida de tu hotel.");}
         }).addOnFailureListener(e->error.accept("No se pudo consultar la reserva en el servidor."));}
     public Task<Void> checkout(int id,double extra,String reason,String observation){
-        verify();if(extra>0&&(reason.trim().isEmpty()||observation.trim().isEmpty()))throw new IllegalArgumentException("Completa el motivo y observación.");
+        return checkout(id,extra,reason,observation,Collections.emptyList());}
+    public Task<Void> checkout(int id,double extra,String reason,String observation,List<HotelOperationsCodec.ServiceLine> services){
+        verify();if(services.size()>HotelOperationsCodec.MAX_SERVICIOS)throw new IllegalArgumentException("Máximo "+HotelOperationsCodec.MAX_SERVICIOS+" servicios por cierre.");
+        final List<HotelOperationsCodec.ServiceLine> lines=new ArrayList<>(services);if(extra>0&&(reason.trim().isEmpty()||observation.trim().isEmpty()))throw new IllegalArgumentException("Completa el motivo y observación.");
         DocumentReference booking=db.collection("reservations").document(String.valueOf(id)),receipt=db.collection("hotelCheckouts").document(String.valueOf(id));
         return db.runTransaction(tx->{verify();DocumentSnapshot before=tx.get(booking),existing=tx.get(receipt);
             if(!before.exists())throw new IllegalArgumentException("Reserva inexistente");
@@ -85,7 +102,11 @@ public final class FirebaseHotelOperations {
             com.example.proyecto_iotelito.data.TarjetaSimulada tarjeta = com.example.proyecto_iotelito.data.TarjetaSimulada.leer(before.getData());
             if (tarjeta == null) throw new IllegalArgumentException("La reserva no tiene una tarjeta de prueba registrada.");
             data.put("cardType", tarjeta.tipo); data.put("cardLast4", tarjeta.ultimos4); data.put("paymentMode", "SIMULATED");
-            data.put("total",HotelOperationsCodec.total(row.precioAlojamiento,extra));data.put("reason",extra>0?reason.trim():"");
+            double servicesTotal=HotelOperationsCodec.servicesTotal(lines);
+            if(!lines.isEmpty()){List<Map<String,Object>> maps=new ArrayList<>();for(HotelOperationsCodec.ServiceLine line:lines)maps.add(line.toMap());
+                data.put("services",maps);data.put("servicesTotal",servicesTotal);}
+            // Mismo orden que la regla: (base + extra) + servicesTotal.
+            data.put("total",HotelOperationsCodec.total(row.precioAlojamiento,extra)+servicesTotal);data.put("reason",extra>0?reason.trim():"");
             data.put("observation",extra>0?observation.trim():"");data.put("createdAt",FieldValue.serverTimestamp());data.put("createdByUid",uid);
             tx.set(receipt,data);tx.update(booking,"estado","FINALIZADA");return null;});
     }

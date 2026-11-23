@@ -15,6 +15,7 @@ function field(value) {
   if (typeof value === 'boolean') return { booleanValue: value };
   if (typeof value === 'number') return Number.isInteger(value) ? { integerValue: String(value) } : { doubleValue: value };
   if (Array.isArray(value)) return { arrayValue: { values: value.map(field) } };
+  if (typeof value === 'object') return { mapValue: { fields: Object.fromEntries(Object.entries(value).map(([k, v]) => [k, field(v)])) } };
   return { stringValue: value };
 }
 const fields = data => Object.fromEntries(Object.entries(data).map(([k, v]) => [k, field(v)]));

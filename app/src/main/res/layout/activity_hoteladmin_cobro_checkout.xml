@@ -41,6 +41,13 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Servicios adicionales que consumió el huésped (solo con Firebase). -->
+            <LinearLayout android:id="@+id/ll_seccion_servicios" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <TextView style="@style/TextAppearance.IoTelito.FieldLabel" android:layout_marginTop="12dp" android:text="@string/hoteladmin_servicios_marcar" />
+                <TextView android:id="@+id/tv_servicios_ayuda" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/hoteladmin_servicios_consumidos_ayuda" android:textColor="@color/io_text_secondary" android:textSize="12sp" />
+                <LinearLayout android:id="@+id/ll_servicios_consumidos" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:orientation="vertical" />
+            </LinearLayout>
+
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/switch_danos"
                 android:layout_width="match_parent"

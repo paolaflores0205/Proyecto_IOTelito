@@ -42,17 +42,47 @@ public final class HotelOperationsCodec {
             throw new IllegalArgumentException("El importe debe ser válido y tener como máximo dos decimales.");
         return base+extra;
     }
+    /** Máximo de servicios distintos por cierre (límite de evaluación de las reglas de Firestore). */
+    public static final int MAX_SERVICIOS=5;
+    /** Un servicio adicional consumido en la estadía, guardado en hotelCheckouts.services. */
+    public static final class ServiceLine {
+        public final int serviceId;public final String name;public final double unitPrice;public final int quantity;
+        public ServiceLine(int serviceId,String name,double unitPrice,int quantity){
+            if(serviceId<=0||name==null||name.trim().isEmpty()||name.length()>160||!Double.isFinite(unitPrice)||unitPrice<0
+                    ||unitPrice>100000||quantity<1||quantity>99)throw new IllegalArgumentException("Servicio consumido inválido.");
+            this.serviceId=serviceId;this.name=name.trim();this.unitPrice=unitPrice;this.quantity=quantity;}
+        public double amount(){return unitPrice*quantity;}
+        public java.util.Map<String,Object> toMap(){java.util.Map<String,Object> m=new java.util.HashMap<>();
+            m.put("serviceId",(long)serviceId);m.put("name",name);m.put("unitPrice",unitPrice);m.put("quantity",(long)quantity);m.put("amount",amount());return m;}
+        /** Lee una línea guardada; null si no tiene el formato esperado. */
+        public static ServiceLine from(Object raw){
+            if(!(raw instanceof java.util.Map))return null;java.util.Map<?,?> m=(java.util.Map<?,?>)raw;
+            try{return new ServiceLine(((Number)m.get("serviceId")).intValue(),(String)m.get("name"),
+                    ((Number)m.get("unitPrice")).doubleValue(),((Number)m.get("quantity")).intValue());}
+            catch(RuntimeException invalid){return null;}}
+        public static List<ServiceLine> list(Object raw){List<ServiceLine> out=new java.util.ArrayList<>();
+            if(raw instanceof List)for(Object item:(List<?>)raw){ServiceLine line=from(item);if(line!=null)out.add(line);}
+            return out;}
+    }
+    /** Suma en el mismo orden que la regla de Firestore (servicesTotal debe coincidir exactamente). */
+    public static double servicesTotal(List<ServiceLine> lines){double total=0;for(ServiceLine line:lines)total+=line.amount();return total;}
     public static final class Receipt {
-        public final LocalDateTime time;public final double total;
-        public Receipt(LocalDateTime time,double total){if(!Double.isFinite(total)||total<0)throw new IllegalArgumentException();this.time=time;this.total=total;}
+        public final LocalDateTime time;public final double total;public final List<ServiceLine> services;
+        public Receipt(LocalDateTime time,double total){this(time,total,java.util.Collections.emptyList());}
+        public Receipt(LocalDateTime time,double total,List<ServiceLine> services){if(!Double.isFinite(total)||total<0)throw new IllegalArgumentException();
+            this.time=time;this.total=total;this.services=java.util.Collections.unmodifiableList(new java.util.ArrayList<>(services));}
     }
     public static final class Report {
         public int bookings;public double income;public Double occupancy;public final double[] buckets=new double[4];
+        /** Ingresos por servicio adicional del período, de menor a mayor (enunciado). */
+        public final List<com.example.proyecto_iotelito.model.hoteladmin.ItemConsumo> serviceIncome=new java.util.ArrayList<>();
+        public int servicesSold;
     }
     public static Report report(List<ReservaAdmin> reservas,List<Receipt> receipts,int rooms,LocalDate date,String period) {
         LocalDate start="DAY".equals(period)?date:"YEAR".equals(period)?date.withDayOfYear(1):date.withDayOfMonth(1);
         LocalDate end="DAY".equals(period)?start.plusDays(1):"YEAR".equals(period)?start.plusYears(1):start.plusMonths(1);
         long days=ChronoUnit.DAYS.between(start,end),nights=0;Report out=new Report();
+        java.util.Map<String,Double> byService=new java.util.HashMap<>();
         for(ReservaAdmin row:reservas){
             if(row.fechaEntrada==null||row.fechaSalida==null)continue;
             if(!row.fechaEntrada.isBefore(start)&&row.fechaEntrada.isBefore(end))out.bookings++;
@@ -64,7 +94,10 @@ public final class HotelOperationsCodec {
             out.income+=receipt.total;
             int bucket="DAY".equals(period)?receipt.time.getHour()/6:(int)(ChronoUnit.DAYS.between(start,d)*4/days);
             out.buckets[Math.min(3,bucket)]+=receipt.total;
+            for(ServiceLine line:receipt.services){byService.merge(line.name,line.amount(),Double::sum);out.servicesSold+=line.quantity;}
         }
+        byService.entrySet().stream().sorted(java.util.Map.Entry.comparingByValue())
+                .forEach(e->out.serviceIncome.add(new com.example.proyecto_iotelito.model.hoteladmin.ItemConsumo(e.getKey(),e.getValue())));
         return out;
     }
 }

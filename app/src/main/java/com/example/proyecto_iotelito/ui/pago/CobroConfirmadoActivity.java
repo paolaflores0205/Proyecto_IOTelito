@@ -80,8 +80,8 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
             text(R.id.tv_titulo_cobro, "Cobro simulado confirmado");
             text(R.id.tv_estado_cobro, "El administrador registró el cobro de demostración. No se debitó dinero.");
             text(R.id.tv_monto_total, money(receipt.total));
-            text(R.id.tv_cargos_adicionales, money(receipt.extra));
-            text(R.id.tv_motivo_cobro, receipt.extra > 0 ? "Motivo: " + receipt.motivo + "\nObservación: " + receipt.observacion : "Sin cargos adicionales.");
+            text(R.id.tv_cargos_adicionales, money(receipt.adicionales()));
+            text(R.id.tv_motivo_cobro, receipt.detalleAdicionales());
             bind(R.id.row_tarjeta, "Tarjeta de prueba", receipt.tarjeta);
             String fecha = java.time.Instant.ofEpochMilli(receipt.fecha).atZone(java.time.ZoneId.of("America/Lima"))
                     .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));

@@ -28,6 +28,9 @@ public class CobroCheckoutActivity extends AppCompatActivity {
     private ActivityHoteladminCobroCheckoutBinding binding;
     private ReservaAdmin reserva;
     private com.example.proyecto_iotelito.data.hoteladmin.FirebaseHotelOperations remote;
+    /** Catálogo activo del hotel y cuántas veces consumió el huésped cada servicio (id → cantidad). */
+    private final java.util.List<com.example.proyecto_iotelito.model.hoteladmin.Servicio> catalogo = new java.util.ArrayList<>();
+    private final java.util.Map<Integer, Integer> cantidades = new java.util.HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class CobroCheckoutActivity extends AppCompatActivity {
             remote.load(getIntent().getIntExtra(EXTRA_RESERVA_ID, -1), row -> {
                 if (isFinishing() || isDestroyed()) return;
                 reserva = row; mostrarReserva(); binding.btnConfirmar.setEnabled(true);
+                if (reserva.estado == ReservaAdmin.EstadoCheckout.CHECKOUT_PENDIENTE) cargarServicios();
             }, error -> { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); finish(); });
         } else { mostrarReserva(); binding.btnConfirmar.setEnabled(true); }
     }
@@ -86,9 +90,76 @@ public class CobroCheckoutActivity extends AppCompatActivity {
         actualizarTotal();
     }
 
+    private void cargarServicios() {
+        binding.llSeccionServicios.setVisibility(View.VISIBLE);
+        remote.servicios(lista -> {
+            if (isFinishing() || isDestroyed()) return;
+            catalogo.clear(); catalogo.addAll(lista);
+            if (catalogo.isEmpty()) binding.tvServiciosAyuda.setText(R.string.hoteladmin_servicios_sin_catalogo);
+            pintarServiciosConsumibles();
+        }, error -> { if (!isFinishing()) binding.tvServiciosAyuda.setText(error); });
+    }
+
+    /** Una fila por servicio del catálogo: nombre y precio, con botones − / + para la cantidad. */
+    private void pintarServiciosConsumibles() {
+        binding.llServiciosConsumidos.removeAllViews();
+        int pad = Math.round(4 * getResources().getDisplayMetrics().density);
+        for (com.example.proyecto_iotelito.model.hoteladmin.Servicio servicio : catalogo) {
+            android.widget.LinearLayout fila = new android.widget.LinearLayout(this);
+            fila.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            fila.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            fila.setPadding(0, pad, 0, pad);
+            android.widget.TextView info = new android.widget.TextView(this);
+            info.setText(servicio.nombre + System.lineSeparator()
+                    + getString(R.string.hoteladmin_servicio_precio, moneda(servicio.precio), servicio.unidad));
+            info.setTextColor(getColor(R.color.io_text_primary));
+            fila.addView(info, new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            android.widget.TextView cantidad = new android.widget.TextView(this);
+            cantidad.setGravity(android.view.Gravity.CENTER);
+            cantidad.setTextColor(getColor(R.color.io_text_primary));
+            cantidad.setText(String.valueOf(cantidades.getOrDefault(servicio.id, 0)));
+            fila.addView(boton("−", v -> cambiarCantidad(servicio, -1, cantidad)));
+            fila.addView(cantidad, new android.widget.LinearLayout.LayoutParams(pad * 9, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+            fila.addView(boton("+", v -> cambiarCantidad(servicio, 1, cantidad)));
+            binding.llServiciosConsumidos.addView(fila);
+        }
+    }
+
+    private View boton(String texto, View.OnClickListener click) {
+        com.google.android.material.button.MaterialButton b = new com.google.android.material.button.MaterialButton(
+                this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        b.setText(texto); b.setMinWidth(0); b.setMinimumWidth(0); b.setInsetTop(0); b.setInsetBottom(0);
+        b.setOnClickListener(click);
+        return b;
+    }
+
+    private void cambiarCantidad(com.example.proyecto_iotelito.model.hoteladmin.Servicio servicio, int delta,
+                                 android.widget.TextView vista) {
+        int actual = cantidades.getOrDefault(servicio.id, 0), nueva = Math.max(0, Math.min(99, actual + delta));
+        if (actual == 0 && nueva > 0 && cantidades.size() >= com.example.proyecto_iotelito.data.hoteladmin.HotelOperationsCodec.MAX_SERVICIOS) {
+            Toast.makeText(this, R.string.hoteladmin_servicios_maximo, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (nueva == 0) cantidades.remove(servicio.id); else cantidades.put(servicio.id, nueva);
+        vista.setText(String.valueOf(nueva));
+        actualizarTotal();
+    }
+
+    /** Servicios marcados, en el orden del catálogo. */
+    private java.util.List<com.example.proyecto_iotelito.data.hoteladmin.HotelOperationsCodec.ServiceLine> lineasServicios() {
+        java.util.List<com.example.proyecto_iotelito.data.hoteladmin.HotelOperationsCodec.ServiceLine> lineas = new java.util.ArrayList<>();
+        for (com.example.proyecto_iotelito.model.hoteladmin.Servicio servicio : catalogo) {
+            Integer cantidad = cantidades.get(servicio.id);
+            if (cantidad != null && cantidad > 0) lineas.add(new com.example.proyecto_iotelito.data.hoteladmin.HotelOperationsCodec.ServiceLine(
+                    servicio.id, servicio.nombre, servicio.precio, cantidad));
+        }
+        return lineas;
+    }
+
     private void actualizarTotal() {
         if (reserva == null) return;
         double total = reserva.total();
+        if (remote != null) total += com.example.proyecto_iotelito.data.hoteladmin.HotelOperationsCodec.servicesTotal(lineasServicios());
         if (binding.switchDanos.isChecked()) total += montoDano();
         binding.tvTotal.setText(moneda(total));
     }
@@ -129,7 +200,7 @@ public class CobroCheckoutActivity extends AppCompatActivity {
             binding.btnConfirmar.setEnabled(false);
             try {
                 remote.checkout(reserva.id, binding.switchDanos.isChecked() ? montoDano() : 0,
-                        texto(binding.etMotivoDano), texto(binding.etObservacionDano))
+                        texto(binding.etMotivoDano), texto(binding.etObservacionDano), lineasServicios())
                     .addOnSuccessListener(done -> { HotelAdminNotifications.cancelCheckout(this, reserva.id); Toast.makeText(this, "Cobro simulado registrado. Sin cargo bancario.", Toast.LENGTH_LONG).show(); finish(); })
                     .addOnFailureListener(error -> { binding.btnConfirmar.setEnabled(true); Toast.makeText(this, "No se pudo registrar. Revisa conexión, permisos y estado de la reserva.", Toast.LENGTH_LONG).show(); });
             } catch (RuntimeException error) { binding.btnConfirmar.setEnabled(true); Toast.makeText(this, error.getMessage(), Toast.LENGTH_LONG).show(); }

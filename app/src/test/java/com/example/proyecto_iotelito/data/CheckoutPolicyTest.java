@@ -63,4 +63,17 @@ public class CheckoutPolicyTest {
         assertEquals(640,receipt.total,0);assertEquals("Daño",receipt.motivo);assertTrue(receipt.tarjeta.contains("4242"));
         data.put("total",600.0);assertThrows(IllegalArgumentException.class,()->new ComprobanteCheckout(data,123));
     }
+    @Test public void comprobanteSumaServiciosConsumidosYLosDetalla() {
+        Map<String,Object> data = new HashMap<>();
+        data.put("base",600.0);data.put("extra",0.0);data.put("servicesTotal",85.0);data.put("total",685.0);
+        data.put("services",java.util.Collections.singletonList(
+                new com.example.proyecto_iotelito.data.hoteladmin.HotelOperationsCodec.ServiceLine(301,"Desayuno",42.5,2).toMap()));
+        ComprobanteCheckout receipt = new ComprobanteCheckout(data,123);
+        assertEquals(85,receipt.adicionales(),0);
+        assertTrue(receipt.detalleAdicionales().startsWith("Desayuno × 2: S/ 85.00"));
+        data.put("total",600.0);assertThrows(IllegalArgumentException.class,()->new ComprobanteCheckout(data,123));
+        Map<String,Object> anterior = new HashMap<>();
+        anterior.put("base",600.0);anterior.put("extra",0.0);anterior.put("total",600.0);
+        assertEquals("Sin cargos adicionales.",new ComprobanteCheckout(anterior,123).detalleAdicionales());
+    }
 }

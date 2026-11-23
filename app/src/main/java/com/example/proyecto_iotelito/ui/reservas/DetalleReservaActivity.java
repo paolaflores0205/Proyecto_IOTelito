@@ -143,12 +143,12 @@ public class DetalleReservaActivity extends AppCompatActivity {
         TextView note=findViewById(R.id.tv_motivo_adicional_detalle);
         extras.setVisibility(receipt!=null||finalized||reserva.estado==Reserva.Estado.EN_CHECKOUT?View.VISIBLE:View.GONE);
         bindRow(R.id.row_adicionales_detalle,R.string.label_adicionales_reserva,
-                receipt!=null?formatMoney(receipt.extra):"Por confirmar");
+                receipt!=null?formatMoney(receipt.adicionales()):"Por confirmar");
         ((TextView)findViewById(R.id.tv_label_monto_total)).setText(receipt!=null?"Total cobrado (simulado)":finalized?"Total del cobro":"Total de alojamiento");
         ((TextView)findViewById(R.id.tv_monto_total)).setText(finalized&&receipt==null?"Por consultar":formatMoney(reserva.importeMostrado()));
         note.setVisibility(finalized||receipt!=null?View.VISIBLE:View.GONE);
         note.setText(receipt==null?"No se pudo confirmar el comprobante. Vuelve a consultar con conexión."
-                :receipt.extra>0?"Motivo: "+receipt.motivo+"\nObservación: "+receipt.observacion:"Sin cargos adicionales.");
+                :receipt.detalleAdicionales());
     }
 
     private String mensajeEstado(Reserva reserva) {

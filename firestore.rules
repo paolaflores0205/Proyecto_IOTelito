@@ -356,6 +356,25 @@ service cloud.firestore {
         let parts = booking().fechaSalida.split('-');
         return timestamp.date(int(parts[0]), int(parts[1]), int(parts[2])) + duration.value(5, 'h') <= request.time;
       }
+      // Servicios adicionales consumidos (desayuno, spa…): hasta 5 líneas (límite de evaluación de reglas); cada importe es
+      // precio × cantidad y servicesTotal es su suma. Comprobantes anteriores no los tienen.
+      function serviceLine(line) {
+        return line.keys().hasOnly(['serviceId', 'name', 'unitPrice', 'quantity', 'amount'])
+          && line.name is string && line.quantity is int && line.quantity >= 1 && line.quantity <= 99
+          && line.unitPrice >= 0 && line.amount == line.unitPrice * line.quantity;
+      }
+      function lineAmount(lines, i) { return lines.size() > i ? lines[i].amount : 0; }
+      function validServices(data) {
+        let lines = data.get('services', []);
+        let total = data.get('servicesTotal', 0);
+        return lines is list && lines.size() <= 5
+          && (lines.size() < 1 || serviceLine(lines[0])) && (lines.size() < 2 || serviceLine(lines[1]))
+          && (lines.size() < 3 || serviceLine(lines[2])) && (lines.size() < 4 || serviceLine(lines[3]))
+          && (lines.size() < 5 || serviceLine(lines[4]))
+          && total is number && total >= 0 && total <= 1000000
+          && total == lineAmount(lines, 0) + lineAmount(lines, 1) + lineAmount(lines, 2) + lineAmount(lines, 3)
+            + lineAmount(lines, 4);
+      }
       // get permite comprobar que el comprobante aún no existe dentro de la transacción.
       allow get: if activeUser() && (superadmin() || booking().clientUid == request.auth.uid
         || hotelAdmin(string(booking().hotelId)));
@@ -364,14 +383,15 @@ service cloud.firestore {
       allow create: if hotelAdmin(string(booking().hotelId)) && departureReached()
         && booking().estado == 'EN_CHECKOUT'
         && getAfter(/databases/$(database)/documents/reservations/$(reservationId)).data.estado == 'FINALIZADA'
-        && request.resource.data.keys().hasOnly(['reservationId','hotelId','clientUid','base','extra','total','reason','observation','createdAt','createdByUid','cardType','cardLast4','paymentMode'])
+        && request.resource.data.keys().hasOnly(['reservationId','hotelId','clientUid','base','extra','total','reason','observation','createdAt','createdByUid','cardType','cardLast4','paymentMode','services','servicesTotal'])
         && request.resource.data.reservationId == reservationId
         && request.resource.data.hotelId == booking().hotelId && request.resource.data.clientUid == booking().clientUid
         && request.resource.data.cardType == booking().cardType && request.resource.data.cardLast4 == booking().cardLast4
         && request.resource.data.paymentMode == 'SIMULATED'
         && request.resource.data.base == booking().precioTotal && request.resource.data.base is number && request.resource.data.base >= 0
         && request.resource.data.extra is number && request.resource.data.extra >= 0 && request.resource.data.extra <= 1000000
-        && request.resource.data.total == request.resource.data.base + request.resource.data.extra
+        && validServices(request.resource.data)
+        && request.resource.data.total == request.resource.data.base + request.resource.data.extra + request.resource.data.get('servicesTotal', 0)
         && request.resource.data.reason is string && request.resource.data.reason.size() <= 1000
         && request.resource.data.observation is string && request.resource.data.observation.size() <= 4000
         && (request.resource.data.extra == 0 || (request.resource.data.reason.size() > 0 && request.resource.data.observation.size() > 0))

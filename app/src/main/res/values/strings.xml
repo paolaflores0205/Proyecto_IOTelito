@@ -870,6 +870,11 @@
     <string name="hoteladmin_email_invalido">Ingresa un correo válido</string>
     <string name="hoteladmin_guardar_cambios">Guardar cambios</string>
     <string name="hoteladmin_datos_guardados">Datos del hotel actualizados</string>
+    <string name="hoteladmin_servicios_marcar">¿Qué servicios consumió el huésped?</string>
+    <string name="hoteladmin_servicios_consumidos_ayuda">Indica cuántas veces usó el huésped cada servicio (máximo 5 servicios distintos). Se suman al cobro.</string>
+    <string name="hoteladmin_servicios_sin_catalogo">Tu hotel no tiene servicios activos registrados.</string>
+    <string name="hoteladmin_servicios_maximo">Máximo 5 servicios distintos por cierre.</string>
+    <string name="hoteladmin_servicio_precio">%1$s · %2$s</string>
     <string name="hoteladmin_taxi_minimo">Monto mínimo para el taxi gratuito (S/)</string>
     <string name="hoteladmin_taxi_minimo_hint">1000</string>
     <string name="hoteladmin_taxi_minimo_ayuda">Los clientes cuyo alojamiento alcance este monto podrán pedir el taxi gratis al aeropuerto al hacer checkout. Usa 0 para ofrecerlo siempre.</string>

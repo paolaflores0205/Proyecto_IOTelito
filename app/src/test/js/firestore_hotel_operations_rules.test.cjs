@@ -49,6 +49,19 @@ async function query(collection,field,value,uid){return call('POST',':runQuery',
  await expect(await commit([bill(2001,0,{createdByUid:'admin2'}),close()], 'admin'),false,'Autor autenticado');
  await expect(await commit([bill(2001,0,{cardLast4:'1234'}),close()], 'admin'),false,'Comprobante conserva la tarjeta simulada');
  await expect(await commit([bill(2001,12.50),close()], 'admin'),true,'Cierre atomico con extra');
+ // Servicios adicionales consumidos en el cierre.
+ const line=(serviceId,name,unitPrice,quantity,amount=unitPrice*quantity)=>({serviceId,name,unitPrice,quantity,amount});
+ const withServices=(id,lines,changes={})=>{const st=lines.reduce((a,l)=>a+l.amount,0);
+   return bill(id,0,{services:lines,servicesTotal:st,total:100+st,...changes});};
+ const lines=[line(301,'Desayuno',42.5,2),line(302,'Spa',80,1)];
+ await expect(await commit([withServices(2006,[line(301,'Desayuno',42.5,2,99)]),close(2006)],'admin'),false,'Importe = precio x cantidad');
+ await expect(await commit([withServices(2006,lines,{servicesTotal:10,total:110}),close(2006)],'admin'),false,'servicesTotal es la suma');
+ await expect(await commit([withServices(2006,lines,{total:100}),close(2006)],'admin'),false,'Total incluye los servicios');
+ await expect(await commit([withServices(2006,[line(301,'Desayuno',42.5,0)]),close(2006)],'admin'),false,'Cantidad mínima 1');
+ await expect(await commit([withServices(2006,[{...line(301,'Desayuno',42.5,1),extraField:1}]),close(2006)],'admin'),false,'Línea sin campos extra');
+ await expect(await commit([withServices(2006,Array.from({length:6},(_,i)=>line(300+i,'S'+i,1,1))),close(2006)],'admin'),false,'Máximo 5 servicios');
+ await expect(await commit([withServices(2005,lines),close(2005)],'admin'),true,'Cierre con servicios consumidos');
+ await expect(await commit([withServices(2007,Array.from({length:5},(_,i)=>line(300+i,'S'+i,19.9,3))),close(2007)],'admin'),true,'Cinco servicios con decimales');
  await expect(await commit([bill(2001),close()], 'admin'),false,'No duplica ni reemplaza cierre');
  await expect(await call('DELETE','/hotelCheckouts/2001',undefined,'admin'),false,'Comprobante no se borra');
  await expect(await call('GET','/hotelCheckouts/2001',undefined,'client'),true,'Cliente lee comprobante propio');
