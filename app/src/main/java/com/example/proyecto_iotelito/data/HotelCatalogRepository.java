@@ -88,6 +88,7 @@ public final class HotelCatalogRepository {
             remote.latitude = row.latitude; remote.longitude = row.longitude;
             remote.contactPhone = row.phone; remote.contactEmail = row.email;
             remote.photos = new ArrayList<>(row.photos);
+            remote.taxiMinimo = row.taxiMinAmount;
             return remote;
         }
         Hotel base = null;
@@ -109,6 +110,7 @@ public final class HotelCatalogRepository {
         hotel.contactPhone = row.phone;
         hotel.contactEmail = row.email;
         hotel.photos = new ArrayList<>(row.photos);
+        hotel.taxiMinimo = row.taxiMinAmount;
         return hotel;
     }
 

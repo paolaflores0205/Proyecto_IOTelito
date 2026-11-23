@@ -51,6 +51,8 @@ public final class HotelFirestoreCodec {
         result.remote = true; result.administratorUid = uid.isEmpty() ? null : uid;
         result.city = text(data.get("city")); result.phone = text(data.get("phone")); result.email = text(data.get("email"));
         result.description = text(data.get("description")); result.attractions = text(data.get("attractions"));
+        Object taxiMin = data.get("taxiMinAmount");
+        result.taxiMinAmount = taxiMin instanceof Number ? ((Number) taxiMin).doubleValue() : null;
         Object lat = data.get("latitude"), lon = data.get("longitude");
         if (lat != null || lon != null) {
             if (!(lat instanceof Number) || !(lon instanceof Number)) throw new IllegalArgumentException("Ubicación incompleta.");

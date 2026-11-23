@@ -235,7 +235,10 @@ service cloud.firestore {
       }
       allow update: if hotelAdmin(hotelId) && auditUpdate(request.resource.data) && (
         (request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'name', 'address', 'description', 'attractions', 'phone', 'email', 'updatedAt', 'updatedByUid'])
+            'name', 'address', 'description', 'attractions', 'phone', 'email', 'taxiMinAmount', 'updatedAt', 'updatedByUid'])
+          // Monto mínimo de alojamiento para el taxi gratuito, definido por cada hotel (opcional).
+          && (!('taxiMinAmount' in request.resource.data) || (request.resource.data.taxiMinAmount is number
+            && request.resource.data.taxiMinAmount >= 0 && request.resource.data.taxiMinAmount <= 100000))
           && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 160
           && request.resource.data.address is string && request.resource.data.address.size() > 0 && request.resource.data.address.size() <= 500
           && request.resource.data.description is string && request.resource.data.description.size() <= 5000

@@ -147,9 +147,20 @@ public final class FirebaseHotelAdminRepository {
         fields.put("updatedAt", FieldValue.serverTimestamp()); fields.put("updatedByUid", uid); return fields;
     }
     public void saveDetails(SuperadminRepository.HotelDetails details, Consumer<String> callback) {
+        saveDetails(details, null, callback);
+    }
+    /** Guarda los datos del hotel y, si se indica, su monto mínimo para el taxi gratuito (taxiMinAmount). */
+    public void saveDetails(SuperadminRepository.HotelDetails details, Double taxiMinimo, Consumer<String> callback) {
         Map<String,Object> fields = new HashMap<>();
         fields.put("name", details.name); fields.put("address", details.address); fields.put("description", details.description);
         fields.put("attractions", details.attractions); fields.put("phone", details.phone); fields.put("email", details.email);
+        if (taxiMinimo != null) {
+            if (!com.example.proyecto_iotelito.data.TaxiBenefitPolicy.valido(taxiMinimo)) {
+                callback.accept("El monto mínimo para el taxi debe estar entre 0 y 100000.");
+                return;
+            }
+            fields.put("taxiMinAmount", taxiMinimo);
+        }
         complete(db.runTransaction(tx -> { DocumentSnapshot doc = tx.get(hotel); assigned(tx, doc); tx.update(hotel, audit(fields)); return null; }), callback);
     }
     public void saveService(Servicio service, boolean creating, Consumer<String> callback) {

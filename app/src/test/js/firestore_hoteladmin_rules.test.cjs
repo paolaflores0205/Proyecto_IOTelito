@@ -27,6 +27,13 @@ const service = (id = 301, hotelId = 1) => ({ id, hotelId, nombre: 'Desayuno', d
   for (const [field, value] of [['active', false], ['administratorUid', 'admin2'], ['id', 2], ['reservations', 999], ['services', ['Spa']]])
     await expect(await commit([change(1, { [field]: value })], 'admin'), false, `Campo protegido ${field}`);
   await expect(await commit([change(1, { name: '' })], 'admin'), false, 'Nombre vacio');
+  // Monto mínimo del taxi gratuito: lo define cada hotel.
+  await expect(await commit([change(1, { name: 'Hotel editado', taxiMinAmount: 800 })], 'admin'), true, 'Admin fija monto mínimo del taxi');
+  await expect(await commit([change(1, { taxiMinAmount: 0 })], 'admin'), true, 'Admin ofrece taxi siempre (monto 0)');
+  for (const value of [-5, 200000, 'mil'])
+    await expect(await commit([change(1, { taxiMinAmount: value })], 'admin'), false, `Monto mínimo inválido ${value}`);
+  await expect(await commit([change(2, { taxiMinAmount: 100 })], 'admin'), false, 'Admin no fija monto de otro hotel');
+  await expect(await commit([change(1, { taxiMinAmount: 1 }, 'client')], 'client'), false, 'Cliente no fija monto del taxi');
   const photo = (n, hotelId = 1) => `gs://demo-iotelito-auth.appspot.com/hotelAdminPhotos/${hotelId}/admin/photo-${n}.jpg`;
   const photos = [1, 2, 3, 4].map(n => photo(n));
   await expect(await commit([change(1, { photos: photos.slice(0, 3) })], 'admin'), false, 'Galería requiere cuatro fotos');

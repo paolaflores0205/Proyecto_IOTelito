@@ -93,6 +93,35 @@
                 android:inputType="textCapSentences"
                 android:maxLines="2" />
 
+            <!-- Monto mínimo de alojamiento para ofrecer el taxi gratuito (lo define cada hotel). -->
+            <LinearLayout
+                android:id="@+id/grupo_taxi_minimo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TextAppearance.IoTelito.FieldLabel"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/hoteladmin_taxi_minimo" />
+
+                <EditText
+                    android:id="@+id/et_taxi_minimo"
+                    style="@style/Widget.IoTelito.FieldInput"
+                    android:layout_marginTop="6dp"
+                    android:hint="@string/hoteladmin_taxi_minimo_hint"
+                    android:inputType="numberDecimal"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/hoteladmin_taxi_minimo_ayuda"
+                    android:textColor="@color/io_text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

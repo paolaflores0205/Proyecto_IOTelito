@@ -48,11 +48,15 @@ public class DatosHotelActivity extends AppCompatActivity {
                     binding.etAtracciones.setText(state.data.attractions);
                     binding.etTelefono.setText(state.data.phone);
                     binding.etEmail.setText(state.data.email);
+                    binding.etTaxiMinimo.setText(montoTexto(
+                            com.example.proyecto_iotelito.data.TaxiBenefitPolicy.minimo(state.data.taxiMinAmount)));
                     formLoaded = true;
                 }
             });
             return;
         }
+        // El modo local de demostración no guarda el monto del taxi: solo se configura con Firebase.
+        binding.grupoTaxiMinimo.setVisibility(android.view.View.GONE);
         HotelAdminLocalStore.get(this).load(error -> {
             if (isFinishing() || isDestroyed()) return;
             if (error != null) {
@@ -70,6 +74,21 @@ public class DatosHotelActivity extends AppCompatActivity {
                         }
                     });
         });
+    }
+
+    /** Monto escrito por el admin (acepta coma o punto decimal); null si no es válido. */
+    private static Double leerMonto(String texto) {
+        try {
+            double monto = Double.parseDouble(texto.trim().replace(',', '.'));
+            return com.example.proyecto_iotelito.data.TaxiBenefitPolicy.valido(monto) ? monto : null;
+        } catch (NumberFormatException vacio) {
+            return null;
+        }
+    }
+
+    private static String montoTexto(double monto) {
+        return monto == Math.rint(monto) ? String.valueOf((long) monto)
+                : String.format(java.util.Locale.ROOT, "%.2f", monto);
     }
 
     private void cargarDatos() {
@@ -102,6 +121,14 @@ public class DatosHotelActivity extends AppCompatActivity {
             binding.etEmail.setError(getString(R.string.hoteladmin_email_invalido));
             valido = false;
         }
+        Double taxiMinimo = null;
+        if (remote != null) {
+            taxiMinimo = leerMonto(valor(binding.etTaxiMinimo.getText()));
+            if (taxiMinimo == null) {
+                binding.etTaxiMinimo.setError(getString(R.string.hoteladmin_taxi_minimo_invalido));
+                valido = false;
+            }
+        }
         if (!valido) return;
 
         SuperadminRepository.HotelDetails details = new SuperadminRepository.HotelDetails(
@@ -109,7 +136,7 @@ public class DatosHotelActivity extends AppCompatActivity {
                 valor(binding.etAtracciones.getText()), valor(binding.etTelefono.getText()), email);
         binding.btnGuardar.setEnabled(false);
         if (remote != null) {
-            remote.saveDetails(details, error -> {
+            remote.saveDetails(details, taxiMinimo, error -> {
                 if (isFinishing() || isDestroyed()) return;
                 binding.btnGuardar.setEnabled(true);
                 if (error != null) { Toast.makeText(this, error, Toast.LENGTH_LONG).show(); return; }

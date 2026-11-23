@@ -38,15 +38,15 @@ public class BeneficioTaxiActivity extends AppCompatActivity {
                 (value, loadedHotel) -> {
                     reserva = value;
                     hotel = loadedHotel;
-                    if (!TaxiBenefitPolicy.puedeSolicitar(reserva)) {
-                        Toast.makeText(this, R.string.taxi_requisito_estadia, Toast.LENGTH_LONG).show();
+                    if (!TaxiBenefitPolicy.puedeSolicitar(reserva, hotel)) {
+                        Toast.makeText(this, getString(R.string.taxi_requisito_estadia, TaxiBenefitPolicy.texto(hotel)), Toast.LENGTH_LONG).show();
                         finish();
                         return;
                     }
 
                     TextView tvDescripcion = findViewById(R.id.tv_desc_taxi_gratuito);
                     tvDescripcion.setText(
-                            getString(R.string.desc_taxi_gratuito_dinamico, hotel.name));
+                            getString(R.string.desc_taxi_gratuito_dinamico, hotel.name, TaxiBenefitPolicy.texto(hotel)));
 
                     setupBeneficiosList();
                     MaterialButton btnSolicitar = findViewById(R.id.btn_solicitar_taxi);

@@ -66,7 +66,9 @@ public class CheckoutActivity extends AppCompatActivity {
         bindRow(R.id.row_consumos_adicionales, R.string.label_consumos_adicionales, formatMoney(0));
         ((TextView) findViewById(R.id.tv_total_liquidar)).setText(formatMoney(reserva.precioTotal));
 
-        elegibleTaxi = com.example.proyecto_iotelito.data.TaxiBenefitPolicy.cumpleMonto(reserva);
+        elegibleTaxi = com.example.proyecto_iotelito.data.TaxiBenefitPolicy.cumpleMonto(reserva, hotel);
+        ((TextView) findViewById(R.id.tv_desc_taxi_cortesia)).setText(
+                getString(R.string.desc_taxi_cortesia, com.example.proyecto_iotelito.data.TaxiBenefitPolicy.texto(hotel)));
         MaterialCheckBox checkTaxi = findViewById(R.id.check_taxi);
         checkTaxi.setChecked(elegibleTaxi);
         checkTaxi.setEnabled(false);

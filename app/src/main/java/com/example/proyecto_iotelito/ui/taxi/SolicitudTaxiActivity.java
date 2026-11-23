@@ -51,8 +51,8 @@ public class SolicitudTaxiActivity extends AppCompatActivity {
                 (value, loadedHotel) -> {
                     reserva = value;
                     hotel = loadedHotel;
-                    if (!TaxiBenefitPolicy.puedeSolicitar(reserva)) {
-                        Toast.makeText(this, R.string.taxi_requisito_estadia, Toast.LENGTH_LONG).show();
+                    if (!TaxiBenefitPolicy.puedeSolicitar(reserva, hotel)) {
+                        Toast.makeText(this, getString(R.string.taxi_requisito_estadia, TaxiBenefitPolicy.texto(hotel)), Toast.LENGTH_LONG).show();
                         finish();
                         return;
                     }

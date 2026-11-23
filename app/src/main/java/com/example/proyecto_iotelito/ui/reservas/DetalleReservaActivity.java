@@ -42,7 +42,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
         findViewById(R.id.btn_estado_taxi_reserva).setVisibility(View.VISIBLE);
         findViewById(R.id.btn_estado_taxi_reserva).setOnClickListener(v->{
             Intent intent=solicitudTaxi>=0?new Intent(this,TaxistaAsignadoActivity.class).putExtra(TaxiRepository.EXTRA_ID,solicitudTaxi)
-                :reservaMostrada!=null&&com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reservaMostrada)
+                :reservaMostrada!=null&&com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reservaMostrada,hotelMostrado)
                 ?new Intent(this,com.example.proyecto_iotelito.ui.taxi.BeneficioTaxiActivity.class).putExtra(com.example.proyecto_iotelito.ui.taxi.BeneficioTaxiActivity.EXTRA_RESERVA_ID,reservaId)
                 :new Intent(this,com.example.proyecto_iotelito.ui.taxi.MisTaxisActivity.class);
             startActivity(intent);
@@ -132,7 +132,7 @@ public class DetalleReservaActivity extends AppCompatActivity {
     }
 
     private void actualizarTaxi(){
-        ((TextView)findViewById(R.id.btn_estado_taxi_reserva)).setText(solicitudTaxi>=0?"Seguir mi taxi":reservaMostrada!=null&&com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reservaMostrada)?"Solicitar taxi de cortesía":"Mis solicitudes de taxi");
+        ((TextView)findViewById(R.id.btn_estado_taxi_reserva)).setText(solicitudTaxi>=0?"Seguir mi taxi":reservaMostrada!=null&&com.example.proyecto_iotelito.data.TaxiBenefitPolicy.puedeSolicitar(reservaMostrada,hotelMostrado)?"Solicitar taxi de cortesía":"Mis solicitudes de taxi");
     }
 
     private void pintarImportes(Reserva reserva){

@@ -17,6 +17,8 @@ public class Hotel implements Serializable {
     public java.util.List<com.example.proyecto_iotelito.model.hoteladmin.Habitacion> inventory = new java.util.ArrayList<>();
     public Double latitude, longitude;
     public String contactPhone = "", contactEmail = "";
+    /** Monto mínimo de alojamiento para el taxi gratuito; null = el hotel no lo configuró (S/ 1000). */
+    public Double taxiMinimo;
 
     public final int id;
     public final String city;

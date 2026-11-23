@@ -49,7 +49,7 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
             com.example.proyecto_iotelito.model.Hotel hotel = HotelCatalogRepository.buscar(this, row.hotelId);
             if (hotel == null) throw new IllegalArgumentException("No se encontró el hotel.");
             ComprobanteCheckout receipt = row.comprobante;
-            return new Object[]{row, hotel.name, receipt};
+            return new Object[]{row, hotel.name, receipt, hotel};
         }, data -> {
             if (request != version) return;
             reserva = (Reserva)data[0];
@@ -64,7 +64,7 @@ public class CobroConfirmadoActivity extends AppCompatActivity {
             bind(R.id.row_observaciones_checkout, "Tus observaciones", reserva.observaciones == null ? "No registradas" : reserva.observaciones);
             bind(R.id.row_tarjeta, "Tarjeta de prueba", reserva.tarjeta == null ? "No registrada · Reserva anterior" : reserva.tarjeta.etiqueta());
             boolean pending = reserva.estado == Reserva.Estado.EN_CHECKOUT;
-            findViewById(R.id.btn_taxi_checkout).setVisibility(TaxiBenefitPolicy.puedeSolicitar(reserva)?View.VISIBLE:View.GONE);
+            findViewById(R.id.btn_taxi_checkout).setVisibility(TaxiBenefitPolicy.puedeSolicitar(reserva,(com.example.proyecto_iotelito.model.Hotel)data[3])?View.VISIBLE:View.GONE);
             if (receipt == null) {
                 findViewById(R.id.btn_reintentar_cobro).setVisibility(pending?View.GONE:View.VISIBLE);
                 text(R.id.tv_titulo_cobro, pending ? "Checkout solicitado" : "Sin comprobante de cobro");

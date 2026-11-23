@@ -25,6 +25,8 @@ public class ManagedHotel {
     public double pricePerNight, rating;
     public int reviews;
     public boolean hasInventory;
+    /** Campo taxiMinAmount de Firestore; null si el hotel aún no lo configuró. */
+    public Double taxiMinAmount;
     public java.util.List<String> services = new java.util.ArrayList<>();
 
     public boolean hasAdministrator() {

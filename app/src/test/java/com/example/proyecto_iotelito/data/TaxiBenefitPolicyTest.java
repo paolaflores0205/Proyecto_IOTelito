@@ -21,6 +21,26 @@ public class TaxiBenefitPolicyTest {
         assertTrue(TaxiBenefitPolicy.puedeSolicitar(booking(1,1000,Reserva.Estado.EN_CHECKOUT)));
         assertTrue(TaxiBenefitPolicy.puedeSolicitar(booking(4,1000,Reserva.Estado.FINALIZADA)));
     }
+    private com.example.proyecto_iotelito.model.Hotel hotel(Double minimo){
+        com.example.proyecto_iotelito.model.Hotel hotel=new com.example.proyecto_iotelito.model.Hotel(1,"Lima","Hotel","Av. 1",0,0,"",100,
+                new String[0],new com.example.proyecto_iotelito.model.Attraction[0],"","","",new String[0]);
+        hotel.taxiMinimo=minimo;
+        return hotel;
+    }
+    @Test public void cadaHotelDefineSuMontoMinimo(){
+        assertTrue(TaxiBenefitPolicy.puedeSolicitar(booking(2,600,Reserva.Estado.EN_CHECKOUT),hotel(500.0)));
+        assertFalse(TaxiBenefitPolicy.puedeSolicitar(booking(2,600,Reserva.Estado.EN_CHECKOUT),hotel(1500.0)));
+        assertTrue(TaxiBenefitPolicy.puedeSolicitar(booking(1,50,Reserva.Estado.FINALIZADA),hotel(0.0)));
+        assertFalse(TaxiBenefitPolicy.puedeSolicitar(booking(2,600,Reserva.Estado.CONFIRMADA),hotel(500.0)));
+    }
+    @Test public void sinMontoConfiguradoOInvalidoUsaMilSoles(){
+        assertEquals(1000.0,TaxiBenefitPolicy.minimo(hotel(null)),0);
+        assertEquals(1000.0,TaxiBenefitPolicy.minimo(hotel(-1.0)),0);
+        assertEquals(1000.0,TaxiBenefitPolicy.minimo((com.example.proyecto_iotelito.model.Hotel)null),0);
+        assertFalse(TaxiBenefitPolicy.puedeSolicitar(booking(2,999,Reserva.Estado.EN_CHECKOUT),hotel(null)));
+        assertEquals("S/ 750",TaxiBenefitPolicy.texto(hotel(750.0)));
+        assertEquals("S/ 1000",TaxiBenefitPolicy.texto(null));
+    }
     @Test public void solicitaConMontoSuficienteYCheckoutPendienteOFinalizado(){
         assertFalse(TaxiBenefitPolicy.puedeSolicitar(booking(4,1200,Reserva.Estado.CONFIRMADA)));
         assertFalse(TaxiBenefitPolicy.puedeSolicitar(booking(4,1200,Reserva.Estado.CANCELADA)));

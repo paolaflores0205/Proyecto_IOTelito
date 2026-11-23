@@ -303,8 +303,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:textColor="@color/io_text_secondary"
+                        android:id="@+id/tv_desc_taxi_cortesia"
                         android:textSize="11sp"
-                        android:text="@string/desc_taxi_cortesia" />
+                        android:text="@string/desc_taxi_cortesia_generico" />
                 </LinearLayout>
 
                 <com.google.android.material.checkbox.MaterialCheckBox

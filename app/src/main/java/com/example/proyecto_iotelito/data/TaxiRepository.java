@@ -196,9 +196,18 @@ public final class TaxiRepository {
             String hora,
             int pasajeros,
             int maletas) {
-        if (!TaxiBenefitPolicy.puedeSolicitar(reserva))
+        // El monto mínimo lo define cada hotel; se relee del servidor por si el admin lo cambió.
+        com.example.proyecto_iotelito.model.Hotel hotelReserva = null;
+        try {
+            hotelReserva = HotelCatalogRepository.buscar(context, reserva.hotelId);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+        } catch (RuntimeException sinHotel) {
+            Log.w("TaxiRepository", "No se pudo leer el hotel; se usa el monto mínimo por defecto.");
+        }
+        if (!TaxiBenefitPolicy.puedeSolicitar(reserva, hotelReserva))
             throw new TaxiApiException(409, TaxiApiException.Codigo.ESTADO_INVALIDO,
-                    context.getString(R.string.taxi_requisito_estadia));
+                    context.getString(R.string.taxi_requisito_estadia, TaxiBenefitPolicy.texto(hotelReserva)));
         AuthenticatedUser user = SessionRepository.obtener(context);
         if (user == null || user.getRole() != UserRole.CLIENT) return -1;
         JSONObject service =
