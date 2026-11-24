@@ -15,8 +15,13 @@
     <string name="taxista_local_sin_dato">No disponible</string>
     <string name="taxista_local_sin_tarifa">Tarifa no informada</string>
     <string name="taxista_local_ruta_simulada">Ruta de demostración · sin medición GPS</string>
-    <string name="taxista_local_mapa_demo">Tu ubicación en vivo. Dirígete a la dirección indicada arriba.</string>
+    <string name="taxista_local_mapa_demo">Sigue la ruta marcada en el mapa hasta el hotel.</string>
     <string name="taxista_mapa_tu_ubicacion">Tu ubicación</string>
+    <string name="mapa_ruta_hotel">Hotel · punto de recojo</string>
+    <string name="mapa_ruta_aeropuerto">Aeropuerto · destino</string>
+    <string name="mapa_ruta_al_hotel">Al hotel: %1$s</string>
+    <string name="mapa_ruta_al_aeropuerto">Al aeropuerto: %1$s</string>
+    <string name="mapa_ruta_calculando">Calculando ruta…</string>
     <string name="taxista_local_codigo">Demostración: %1$s</string>
     <string name="taxista_local_codigo_error">Para esta demostración ingresa %1$s</string>
     <string name="taxista_local_validacion_demo">Finalización de demostración</string>

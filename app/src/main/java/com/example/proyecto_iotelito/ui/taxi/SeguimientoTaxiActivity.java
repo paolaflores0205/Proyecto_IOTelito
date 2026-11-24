@@ -8,6 +8,7 @@ import com.example.proyecto_iotelito.R;
 import com.example.proyecto_iotelito.data.SessionRepository;
 import com.example.proyecto_iotelito.data.TaxiRepository;
 import com.example.proyecto_iotelito.model.auth.UserRole;
+import com.example.proyecto_iotelito.ui.common.MapaRuta;
 import com.example.proyecto_iotelito.ui.taxista.ChatPasajeroTaxistaActivity;
 
 import org.json.JSONObject;
@@ -19,7 +20,10 @@ import org.osmdroid.views.overlay.Marker;
 public class SeguimientoTaxiActivity extends TaxiServiceScreen {
     private MapView map;
     private Marker driver;
-    private boolean centered;
+    private boolean centered, lugares;
+    private MapaRuta ruta;
+    private String infoBase = "", resumenRuta;
+    private int formatoRuta = R.string.mapa_ruta_al_hotel;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -46,6 +50,11 @@ public class SeguimientoTaxiActivity extends TaxiServiceScreen {
                         getString(R.string.taxi_api_attribution)));
         map.setMultiTouchControls(true);
         map.getController().setZoom(15.0);
+        ruta = new MapaRuta(this, map);
+        ruta.alResumen(texto -> {
+            resumenRuta = texto;
+            pintarInfo();
+        });
         findViewById(R.id.iv_back).setOnClickListener(v -> finish());
         findViewById(R.id.btn_ver_qr)
                 .setOnClickListener(v -> startActivity(intent(CodigoQrTaxiActivity.class)));
@@ -73,6 +82,21 @@ public class SeguimientoTaxiActivity extends TaxiServiceScreen {
                             + "\nValoración: "
                             + p.optDouble("calificacion");
         }
+        String estado = s.optString("estado");
+        boolean activo = !"FINALIZADO".equals(estado) && !"CANCELADO".equals(estado);
+        if (activo && !lugares) {
+            // El taxi va al hotel; en el traslado, al aeropuerto. Sin taxi asignado se ve hotel → aeropuerto.
+            JSONObject hotel = s.optJSONObject("hotel"), aeropuerto = s.optJSONObject("aeropuerto");
+            ruta.lugares(hotel == null ? 0 : hotel.optInt("id"),
+                    aeropuerto == null ? null : aeropuerto.optString("codigo", null),
+                    aeropuerto == null ? null : aeropuerto.optString("nombre", null));
+            lugares = true;
+        }
+        boolean alHotel = p != null && ("ASIGNADO".equals(estado) || "EN_CAMINO".equals(estado));
+        int formato = alHotel ? R.string.mapa_ruta_al_hotel : R.string.mapa_ruta_al_aeropuerto;
+        if (formato != formatoRuta || !activo) resumenRuta = null;
+        formatoRuta = formato;
+        ruta.haciaHotel(alHotel);
         if (u == null) info += "\n" + getString(R.string.taxi_api_wait_location);
         else {
             GeoPoint point = new GeoPoint(u.optDouble("lat"), u.optDouble("lng"));
@@ -87,6 +111,7 @@ public class SeguimientoTaxiActivity extends TaxiServiceScreen {
                 map.getOverlays().add(driver);
             }
             driver.setPosition(point);
+            if (activo) ruta.taxi(point.getLatitude(), point.getLongitude());
             if (!centered) {
                 map.getController().setCenter(point);
                 centered = true;
@@ -104,7 +129,8 @@ public class SeguimientoTaxiActivity extends TaxiServiceScreen {
                 info += "\nUbicación recibida";
             }
         }
-        ((TextView) findViewById(R.id.taxi_map_info)).setText(info);
+        infoBase = info;
+        pintarInfo();
         boolean done = "FINALIZADO".equals(s.optString("estado"));
         findViewById(R.id.taxi_map_rate).setVisibility(done ? View.VISIBLE : View.GONE);
         findViewById(R.id.btn_ver_qr).setEnabled(p != null && !done);
@@ -117,6 +143,12 @@ public class SeguimientoTaxiActivity extends TaxiServiceScreen {
             chat.setOnClickListener(v -> startActivity(ChatPasajeroTaxistaActivity.createIntent(this, nombre, null)
                     .putExtra(TaxiRepository.EXTRA_ID, serviceId)));
         }
+    }
+
+    private void pintarInfo() {
+        String texto = infoBase;
+        if (resumenRuta != null) texto += "\n" + getString(formatoRuta, resumenRuta);
+        ((TextView) findViewById(R.id.taxi_map_info)).setText(texto);
     }
 
     @Override
@@ -133,6 +165,7 @@ public class SeguimientoTaxiActivity extends TaxiServiceScreen {
 
     @Override
     protected void onDestroy() {
+        if (ruta != null) ruta.cerrar();
         if (map != null) map.onDetach();
         super.onDestroy();
     }

@@ -241,6 +241,9 @@ public final class ConductorRepository {
         row.origen = pedido.optString("origen", row.hotel);
         row.estado = pedido.optString("estado");
         row.finalizado = pedido.optLong("finalizado");
+        JSONObject hotel = service.optJSONObject("hotel"), aeropuerto = service.optJSONObject("aeropuerto");
+        row.hotelId = hotel == null ? 0 : hotel.optInt("id");
+        row.aeropuertoCodigo = aeropuerto == null ? null : aeropuerto.optString("codigo", null);
         return row;
     }
 

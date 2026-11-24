@@ -5,7 +5,10 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Looper;
 
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
@@ -13,6 +16,8 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.example.proyecto_iotelito.BuildConfig;
 import com.example.proyecto_iotelito.R;
+import com.example.proyecto_iotelito.data.taxista.local.ServicioConductorEntity;
+import com.example.proyecto_iotelito.ui.common.MapaRuta;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -29,8 +34,9 @@ import org.osmdroid.views.overlay.Marker;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Mapa real (OpenStreetMap) para las pantallas del taxista: muestra su ubicación actual y la
- * sigue mientras la pantalla está visible. Si no hay permiso de ubicación, queda centrado en Lima.
+ * Mapa real (OpenStreetMap) para las pantallas del taxista: muestra su ubicación actual, la
+ * sigue mientras la pantalla está visible y traza la ruta por calles hasta el hotel o el
+ * aeropuerto. Si no hay permiso de ubicación, queda centrado en Lima.
  */
 final class TaxistaMapa implements DefaultLifecycleObserver {
 
@@ -40,6 +46,7 @@ final class TaxistaMapa implements DefaultLifecycleObserver {
     private final AppCompatActivity activity;
     private final MapView mapa;
     private final FusedLocationProviderClient ubicacion;
+    private final MapaRuta ruta;
     private Marker taxi;
     private boolean centrado;
 
@@ -55,10 +62,29 @@ final class TaxistaMapa implements DefaultLifecycleObserver {
      * Monta el mapa con id {@code mapa_taxista} del layout ya inflado. Con {@code interactivo}
      * en false el mapa es solo una vista previa (no roba los gestos al scroll de la pantalla).
      */
-    static void montar(AppCompatActivity activity, boolean interactivo) {
+    @Nullable
+    static TaxistaMapa montar(AppCompatActivity activity, boolean interactivo) {
         MapView mapa = activity.findViewById(R.id.mapa_taxista);
+        if (mapa == null) return null;
+        TaxistaMapa montado = new TaxistaMapa(activity, mapa, interactivo);
+        activity.getLifecycle().addObserver(montado);
+        return montado;
+    }
+
+    /**
+     * Traza la ruta del viaje: hacia el hotel (recojo) o hacia el aeropuerto (traslado). Si se
+     * pasa {@code resumen}, ahí se escribe la distancia y el tiempo reales de la ruta.
+     */
+    static void ruta(@Nullable TaxistaMapa mapa, ServicioConductorEntity viaje, boolean alHotel,
+                     @Nullable TextView resumen) {
         if (mapa == null) return;
-        activity.getLifecycle().addObserver(new TaxistaMapa(activity, mapa, interactivo));
+        if (resumen != null) {
+            resumen.setText(R.string.mapa_ruta_calculando);
+            int formato = alHotel ? R.string.mapa_ruta_al_hotel : R.string.mapa_ruta_al_aeropuerto;
+            mapa.ruta.alResumen(texto -> resumen.setText(mapa.activity.getString(formato, texto)));
+        }
+        mapa.ruta.haciaHotel(alHotel);
+        mapa.ruta.lugares(viaje.hotelId, viaje.aeropuertoCodigo, viaje.destino);
     }
 
     private TaxistaMapa(AppCompatActivity activity, MapView mapa, boolean interactivo) {
@@ -77,6 +103,7 @@ final class TaxistaMapa implements DefaultLifecycleObserver {
         if (!interactivo) mapa.setOnTouchListener((v, evento) -> true);
         mapa.getController().setZoom(16.0);
         mapa.getController().setCenter(LIMA);
+        ruta = new MapaRuta(activity, mapa);
     }
 
     @SuppressLint("MissingPermission")
@@ -100,6 +127,7 @@ final class TaxistaMapa implements DefaultLifecycleObserver {
 
     @Override
     public void onDestroy(@NonNull LifecycleOwner owner) {
+        ruta.cerrar();
         mapa.onDetach();
     }
 
@@ -118,6 +146,7 @@ final class TaxistaMapa implements DefaultLifecycleObserver {
             mapa.getOverlays().add(taxi);
         }
         taxi.setPosition(punto);
+        ruta.taxi(punto.getLatitude(), punto.getLongitude());
         if (!centrado) {
             mapa.getController().setCenter(punto);
             centrado = true;

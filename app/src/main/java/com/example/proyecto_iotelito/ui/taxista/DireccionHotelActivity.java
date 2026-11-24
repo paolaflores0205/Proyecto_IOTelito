@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.proyecto_iotelito.R;
 public class DireccionHotelActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle state){
-        super.onCreate(state);if(!TaxistaFlujo.sesion(this))return;setContentView(R.layout.activity_direccion_hotel);TaxistaMapa.montar(this,true);
+        super.onCreate(state);if(!TaxistaFlujo.sesion(this))return;setContentView(R.layout.activity_direccion_hotel);TaxistaMapa mapa=TaxistaMapa.montar(this,true);
         TaxistaViewModel vm=TaxistaFlujo.model(this);
         TaxistaFlujo.cargar(this,vm,e->{
             if(!"EN_CAMINO".equals(e.estado)){TaxistaFlujo.abrir(this,e);finish();return;}
@@ -13,6 +13,7 @@ public class DireccionHotelActivity extends AppCompatActivity {
             ((TextView)findViewById(R.id.tv_direccion)).setText(e.origen);
             ((TextView)findViewById(R.id.tv_instruccion)).setText(R.string.taxista_local_mapa_demo);
             ((TextView)findViewById(R.id.tv_tiempo_distancia)).setText(e.detalle);
+            TaxistaMapa.ruta(mapa,e,true,findViewById(R.id.tv_tiempo_distancia));
             TaxistaFlujo.pasajero(this,e);
             TaxistaFlujo.avanzar(this,vm,R.id.btn_llegue_al_hotel,e.id,EstadoServicio.EN_TRASLADO,DireccionAeropuertoActivity.class);
         });

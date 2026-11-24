@@ -1,5 +1,6 @@
 package com.example.proyecto_iotelito.data.taxista.local;
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import com.example.proyecto_iotelito.model.taxista.SolicitudServicio;
 import com.example.proyecto_iotelito.model.taxista.ServicioHistorial;
@@ -18,6 +19,9 @@ public class ServicioConductorEntity {
     public int minutos;
     public double tarifa;
     public long finalizado;
+    /** Para dibujar la ruta: id del hotel en Firestore y código del aeropuerto (LIM, CUZ...). */
+    @ColumnInfo(defaultValue="0") public int hotelId;
+    public String aeropuertoCodigo;
     public static ServicioConductorEntity from(String cuenta, SolicitudServicio s, boolean cliente) {
         ServicioConductorEntity e=new ServicioConductorEntity();
         e.cuenta=cuenta; e.id=s.id; e.cliente=cliente; e.hotel=s.hotel; e.origen=s.hotel;

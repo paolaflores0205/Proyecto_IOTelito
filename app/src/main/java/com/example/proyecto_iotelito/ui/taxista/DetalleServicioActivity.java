@@ -9,12 +9,13 @@ public class DetalleServicioActivity extends AppCompatActivity {
     public static Intent createIntent(Context c,int id){return TaxistaFlujo.intent(c,DetalleServicioActivity.class,id);}
     @Override protected void onCreate(Bundle state){
         super.onCreate(state); if(!TaxistaFlujo.sesion(this))return;
-        setContentView(R.layout.activity_detalle_servicio);TaxistaMapa.montar(this,false);
+        setContentView(R.layout.activity_detalle_servicio);TaxistaMapa mapa=TaxistaMapa.montar(this,false);
         TaxistaViewModel vm=TaxistaFlujo.model(this);
         TaxistaFlujo.cargar(this,vm,e->{
             if(!"SOLICITADO".equals(e.estado)){TaxistaFlujo.abrir(this,e);finish();return;}
             TaxistaFlujo.titulo(this,R.string.taxi_detalle_servicio_titulo,EstadoServicio.SOLICITADO);
             TaxistaFlujo.pasajero(this,e);
+            TaxistaMapa.ruta(mapa,e,true,null);
             ((TextView)findViewById(R.id.tv_origen)).setText(e.origen);
             ((TextView)findViewById(R.id.tv_destino)).setText(e.destino);
             ((TextView)findViewById(R.id.tv_distancia_tiempo)).setText(e.detalle);
